@@ -33,8 +33,7 @@ public class DevelopersController {
             Person p=null;
             developers=model.getDevelopers();                                            
         } catch (IOException | XmlPullParserException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            
         }
         
     }
