@@ -1,7 +1,7 @@
 import React from 'react';
 import '../App.css';
 import '../static/css/home/home.css'; 
-import logo from '../static/images/Upstream_Logo2.jpg'
+import logo from '../static/images/Upstream_Logo.jpg'
 
 export default function Home(){
     return(
