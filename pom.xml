@@ -41,6 +41,11 @@
 			<email>japarejo@gmail.com</email>
 			<url>http://www.isa.us.es</url>
 		</developer>
+		<developer>
+			<name>CarlosCerdaMorales</name>
+			<email>carcermor@alum.us.es</email>
+			<url>http://www.youtube.com</url>
+		</developer>
 	</developers>
 
 	<dependencies>
