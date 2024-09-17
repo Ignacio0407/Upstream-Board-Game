@@ -57,6 +57,7 @@ public class SecurityConfiguration {
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
+			.requestMatchers("/api/v1/developers").permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/resources/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/webjars/**")).permitAll() 
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/static/**")).permitAll() 
