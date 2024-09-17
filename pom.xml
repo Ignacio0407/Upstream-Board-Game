@@ -11,7 +11,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.3.3</version>
 	</parent>
-	<name>DP1 Game Template</name>
+	<name>DP1 Game Template L4-01</name>
 
 	<properties>
 
@@ -37,9 +37,23 @@
 
 	<developers>
 		<developer>
+			<id>Joselu</id>
+			<name>JoseLuisMorazaVergara</name>
+			<email>josmorver@alum.us.es</email>
+			<url>joselu.es</url>
+			<roles></roles>
+			<properties>
+			</properties>
+		</developer>
+		<developer>
 			<name>JAParejo</name>
 			<email>japarejo@gmail.com</email>
 			<url>http://www.isa.us.es</url>
+		</developer>
+		<developer>
+			<name>CarlosCerdaMorales</name>
+			<email>carcermor@alum.us.es</email>
+			<url>http://www.youtube.com</url>
 		</developer>
 	</developers>
 
