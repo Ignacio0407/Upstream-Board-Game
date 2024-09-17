@@ -55,6 +55,10 @@
 			<email>carcermor@alum.us.es</email>
 			<url>http://www.youtube.com</url>
 		</developer>
+		<developer>
+			<name>Ignacio0407</name>
+			<email>igngutser@alum.us.es</email>
+		</developer>
 	</developers>
 
 	<dependencies>
