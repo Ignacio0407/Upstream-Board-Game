@@ -37,6 +37,15 @@
 
 	<developers>
 		<developer>
+			<id>Joselu</id>
+			<name>JoseLuisMorazaVergara</name>
+			<email>josmorver@alum.us.es</email>
+			<url>joselu.es</url>
+			<roles></roles>
+			<properties>
+			</properties>
+		</developer>
+		<developer>
 			<name>JAParejo</name>
 			<email>japarejo@gmail.com</email>
 			<url>http://www.isa.us.es</url>
