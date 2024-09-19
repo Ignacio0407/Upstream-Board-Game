@@ -9,6 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Autowired
 	GenericIdToEntityConverter idToEntityConverter;
 	
+    @SuppressWarnings("null")
     @Override
     public void addFormatters(FormatterRegistry registry) {
     	

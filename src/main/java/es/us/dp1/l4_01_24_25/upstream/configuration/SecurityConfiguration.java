@@ -1,7 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.configuration;
 
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,23 +18,17 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.AuthEntryPointJwt;
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.AuthTokenFilter;
-import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-	@Autowired
-	UserDetailsServiceImpl userDetailsService;
 
 	@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
 
-	@Autowired
-	DataSource dataSource;
 
 	private static final String ADMIN = "ADMIN";
-	private static final String CLINIC_OWNER = "CLINIC_OWNER";
 	
 
 	@Bean
