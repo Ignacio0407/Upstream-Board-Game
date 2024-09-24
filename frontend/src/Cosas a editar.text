@@ -1,0 +1,5 @@
+frontend/src/home -> pantalla inicial. cambiar por botones de empezar partida, ver estadísticas
+Empezar partida -> selectplayerscreen,  selectExpansion, (si da tiempo) selectGuideMode...
+Estadísticas -> partidas jugadas, quién ha ganado qué partidas. Se hace en backend, 
+                si da tiempo gráficos con JFreeChart
+E
