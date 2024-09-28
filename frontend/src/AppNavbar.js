@@ -3,6 +3,7 @@ import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, 
 import { Link } from 'react-router-dom';
 import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
+import logoSalmon from '../src/static/images/logoSalmon.jpg'
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -32,9 +33,21 @@ function AppNavbar() {
                     <NavItem>
                         <NavLink style={{ color: "white" }} tag={Link} to="/users">Users</NavLink>
                     </NavItem>
+                    <NavItem> 
+                        <NavLink style={{ color: "white" }} tag={Link} to="/developers">Developers</NavLink>
+                    </NavItem>
                 </>
             )
-        }        
+        }
+        if (role === "PLAYER") { 
+            ownerLinks = ( 
+                <> 
+                    <NavItem> 
+                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink> 
+                    </NavItem> 
+                </> 
+            ) 
+        }         
     })
 
     if (!jwt) {
@@ -83,8 +96,8 @@ function AppNavbar() {
         <div>
             <Navbar expand="md" dark color="dark">
                 <NavbarBrand href="/">
-                    <img alt="logo" src="/logo1-recortado.png" style={{ height: 40, width: 40 }} />
-                    Your Game
+                    <img src={logoSalmon} style={{ height: 40, width: 40, marginRight: 5 }}/>
+                    Upstream
                 </NavbarBrand>
                 <NavbarToggler onClick={toggleNavbar} className="ms-2" />
                 <Collapse isOpen={!collapsed} navbar>

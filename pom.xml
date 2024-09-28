@@ -3,7 +3,7 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.us.dp1</groupId>
-	<artifactId>Upstream L4-1</artifactId>
+	<artifactId>l4-01-2425-l4-01</artifactId>
 	<version>0.1.0.BUILD-SNAPSHOT</version>
 
 	<parent>
@@ -16,7 +16,7 @@
 	<properties>
 
 		<!-- Generic properties -->
-		<java.version>17</java.version>
+		<java.version>22</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,9 +37,27 @@
 
 	<developers>
 		<developer>
+			<id>Joselu</id>
+			<name>JoseLuisMorazaVergara</name>
+			<email>josmorver@alum.us.es</email>
+			<url>joselu.es</url>
+			<roles></roles>
+			<properties>
+			</properties>
+		</developer>
+		<developer>
 			<name>JAParejo</name>
 			<email>japarejo@gmail.com</email>
 			<url>http://www.isa.us.es</url>
+		</developer>
+		<developer>
+			<name>CarlosCerdaMorales</name>
+			<email>carcermor@alum.us.es</email>
+			<url>http://www.youtube.com</url>
+		</developer>
+		<developer>
+			<name>Ignacio0407</name>
+			<email>igngutser@alum.us.es</email>
 		</developer>
 	</developers>
 
