@@ -23,6 +23,7 @@ export default function DeveloperList() {
     return ( 
         <> 
          <div className="admin-page-container"> 
+            <h1></h1>
            <h1 className="text-center">Developers</h1>
            <div> 
                 <Table aria-label="developers" className="mt-4"> 
