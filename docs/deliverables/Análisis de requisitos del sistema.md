@@ -10,8 +10,7 @@ _En esta sección debes describir de manera general cual es la funcionalidad del
 
 ## Tipos de Usuarios / Roles
 
-Jugador : Una vez registrados y logueados, los jugadores podrán unirse, crear, jugar y observar partidas dentro del juego,
-además, podrán listar sus logros.
+Jugador : Una vez registrados y logueados, los jugadores podrán unirse, crear, jugar y observar partidas dentro del juego. Además, podrán listar tanto sus logros como los globales (los de todos los jugadores).
 
 Desarrolladores: Los desarrolladores, tras registrarse y loguearse, podrán realizar las mismas acciones que los jugadores además de tener la capacidad de crear logros, listar jugadores, listar las partidas jugadas y visualizar los desarrolladores del proyecto. 
 
