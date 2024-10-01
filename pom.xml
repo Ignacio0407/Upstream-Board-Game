@@ -59,6 +59,10 @@
 			<name>Ignacio0407</name>
 			<email>igngutser@alum.us.es</email>
 		</developer>
+		<developer>
+			<name>JuanPrietoFernández</name>
+			<email>juaprifer@alum.us.es</email>
+		</developer>
 	</developers>
 
 	<dependencies>
