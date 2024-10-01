@@ -13,8 +13,9 @@ import tokenService from "./services/token.service";
 import UserListAdmin from "./admin/users/UserListAdmin";
 import UserEditAdmin from "./admin/users/UserEditAdmin";
 import SwaggerDocs from "./public/swagger";
-import DeveloperList from "./developers/index.js";
-import AchievementList from "./achievements/achievementList"; 
+import DeveloperList from "./developers";
+import AchievementList from "./achievements/achievementList";
+import AchievementEdit from "./achievements/achievementEdit";
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -49,14 +50,19 @@ function App() {
         <>
           <Route path="/users" exact={true} element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
           <Route path="/developers" element={<DeveloperList />} /> 
-          <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />          
+          <Route path="/users/:username" exact={true} element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
+          <Route path="/developers" element={<DeveloperList />} />  
+          <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList
+            /></PrivateRoute>} />
+          <Route path="/achievements/:achievementId" exact={true} element={<PrivateRoute><AchievementEdit
+            /></PrivateRoute>} />        
         </>)
     }
     if (role === "PLAYER") {
       ownerRoutes = (
         <>
-         <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList 
-          /></PrivateRoute>} />  
+          <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList
+            /></PrivateRoute>} />
         </>)
     }    
   })
