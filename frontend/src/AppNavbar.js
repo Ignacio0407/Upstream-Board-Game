@@ -36,6 +36,9 @@ function AppNavbar() {
                     <NavItem> 
                         <NavLink style={{ color: "white" }} tag={Link} to="/developers">Developers</NavLink>
                     </NavItem>
+                    <NavItem> 
+                        <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink> 
+                    </NavItem>
                 </>
             )
         }
