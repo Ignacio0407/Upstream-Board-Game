@@ -37,31 +37,44 @@
 
 	<developers>
 		<developer>
-			<id>Joselu</id>
-			<name>JoseLuisMorazaVergara</name>
+			<name>Jose Luis Moraza Vergara</name>
 			<email>josmorver@alum.us.es</email>
-			<url>joselu.es</url>
-			<roles></roles>
+			<url>https://github.com/Joselu2121</url>
 			<properties>
+				<picUrl>https://media.makeameme.org/created/jose-luis.jpg</picUrl>
 			</properties>
 		</developer>
 		<developer>
-			<name>JAParejo</name>
-			<email>japarejo@gmail.com</email>
-			<url>http://www.isa.us.es</url>
-		</developer>
-		<developer>
-			<name>CarlosCerdaMorales</name>
+			<name>Carlos Cerda Morales</name>
 			<email>carcermor@alum.us.es</email>
-			<url>http://www.youtube.com</url>
+			<url>https://github.com/CarlosCerdaMorales</url>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/114420286?v=4</picUrl>
+			</properties>
 		</developer>
 		<developer>
-			<name>Ignacio0407</name>
+			<name>Ignacio Gutierrez Serrera</name>
 			<email>igngutser@alum.us.es</email>
+			<url>https://github.com/Ignacio0407</url>
+			<properties>
+				<picUrl>https://cdn.hobbyconsolas.com/sites/navi.axelspringer.es/public/media/image/2022/11/pikachu-pokemon-escarlata-purpura-2888180.jpg?tf=1200x1200</picUrl>
+			</properties>
 		</developer>
 		<developer>
-			<name>Miguel García Vizcaíno</name>
+			<name>Miguel Garcia Vizcaino</name>
 			<email>miggarviz@alum.us.es</email>
+			<url>https://github.com/Miguelgarviz</url>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/115218790?v=4</picUrl>
+			</properties>
+		</developer>
+		<developer>
+			<name>Juan Prieto Fernandez</name>
+			<email>juaprifer@alum.us.es</email>
+			<url>https://github.com/JuanPrietoFernandez</url>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/114418131?v=4</picUrl>
+			</properties>
 		</developer>
 	</developers>
 
