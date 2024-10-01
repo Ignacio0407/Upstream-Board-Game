@@ -4,31 +4,45 @@ _Esta es una plantilla que sirve como guía para realizar este entregable. Por f
 
 ## Introducción
 
-_En esta sección debes describir de manera general cual es la funcionalidad del proyecto a rasgos generales. ¿Qué valor puede aportar? ¿Qué objetivos pretendemos alcanzar con su implementación? ¿Cuántos jugadores pueden intervenir en una partida como máximo y como mínimo? ¿Cómo se desarrolla normalmente una partida?¿Cuánto suelen durar?¿Cuando termina la partida?¿Cuantos puntos gana cada jugador o cual es el criterio para elegir al vencedor?_
+_En esta sección debes describir de manera general cual es la funcionalidad del proyecto a rasgos generales. ¿Qué valor puede aportar?
+Valor a aportar: un entretenido y ágil juego de mesa de 2 a 5 jugadores.
+¿Qué objetivos pretendemos alcanzar con su implementación? ¿Cuántos jugadores pueden intervenir en una partida como máximo y como mínimo? ¿Cómo se desarrolla normalmente una partida?¿Cuánto suelen durar?¿Cuando termina la partida?¿Cuantos puntos gana cada jugador o cual es el criterio para elegir al vencedor?_
 
-[Enlace al vídeo de explicación de las reglas del juego / partida jugada por el grupo](http://youtube.com)
+[Enlace al vídeo de explicación de las reglas del juego / partida jugada por el grupo] No aplica, está subido en EV.
+
 
 ## Tipos de Usuarios / Roles
 
-< Nombre Rol >: < Breve descripción del rol >
+Jugador: persona que puede jugar partidas y listar logros tanto personales (ganar un número determinado de partidas) como globales (jugar tantas partidas)
 
-_Ej1: Propietario: Dueño de una o varias mascota que viene a la clínica para mantenerla sana y cuidar de su salud._
-
-_Ej2: Veterinario: Profesional de la salud animal con titulación universitaria homologada, está registrado en la clínica y se encarga de realizar diagnósticos y recetar tratamientos. Además mantiene actualizado el vademécum._
-
-_Ej3: Administrador: Dueño de la clínica que se encarga de dar de alta veterinarios y gestionar la información registrada en la aplicación de la clínica._
+Administrador: persona encargada de 
 
 
+## Historias de Usuario -> Visual, lo que puede hacer el usuario.
 
-## Historias de Usuario
-
-A continuación se definen  todas las historias de usuario a implementar:
-_Os recomentamos usar la siguiente plantilla de contenidos que usa un formato tabular:_
  ### HU-(ISSUE#ID): Nombre ([Enlace a la Issue asociada a la historia de usuario]()
 |Descripción de la historia siguiendo el esquema:  "Como <rol> quiero que el sistema <funcionalidad>  para poder <objetivo/beneficio>."| 
 |-----|
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|Decripción de las interacciones concretas a realizar con la interfaz de usuario del sistema para lleva a cabo la historia. |
+|Decripción de las interacciones concretas a realizar con la interfaz de usuario del sistema para lleva a cabo la historia.
+
+ ### HU-(ISSUE#ID): Iniciar sesión ([Enlace a la Issue asociada a la historia de usuario]()
+Como jugador quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+Interacciones con sistema: en la barra de navegación de la pantalla inicial hay un botón Logout/Login que se encarga del inicio de sesiones
+
+ ### HU-(ISSUE#ID): Jugar partidas ([Enlace a la Issue asociada a la historia de usuario]()
+Como jugador quiero que el sistema me permita jugar partidas, bien sea creándolas o uniéndome a ellas.
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+Interacciones con sistema: en la pantalla inicial hay un botón Jugar partida que te permite escoger entre crear una partida o unirte a una.
+
+ ### HU-(ISSUE#ID): Listar y crear logros ([Enlace a la Issue asociada a la historia de usuario]()
+Como jugador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
+|-----|
+|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
+Interacciones con sistema: en la barra de navegación de la pantalla inicial hay un botón achievements que lleva a una pantalla que muestra los logros y que te permite crear un nuevo logro.
 
 
 
@@ -64,7 +78,7 @@ _Puede usar la herramienta de modelado que desee para generar sus diagramas de c
 
 _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta herramienta os proporcionamos un [enlace a la documentación oficial de la sintaxis de diagramas de clases de _ermaid](https://mermaid.js.org/syntax/classDiagram.html)_
 
-## Reglas de Negocio
+## Reglas de Negocio -> Normas del juego
 ### R-< X > < Nombre Regla de negocio >
 _< Descripción de la restricción a imponer >_
 
