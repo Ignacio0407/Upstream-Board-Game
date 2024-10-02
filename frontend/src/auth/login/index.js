@@ -4,25 +4,12 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import tokenService from "../../services/token.service";
 import "../../static/css/auth/authButton.css";
 import { loginFormInputs } from "./form/loginFormInputs";
-import { Button } from "reactstrap";
-import { Link } from "react-router-dom";
+import botonPlay from "../../util/botonplay";
 
 export default function Login() {
   const [message, setMessage] = useState(null)
   const loginFormRef = React.createRef();      
   
-  let botonPlay= <></>
-  botonPlay = (
-    <>
-    <Button color="important" > 
-  
-    <Link 
-      to={"/register"} className="btn sm"                
-      style={{ textDecoration: "none" }}>Registrate
-    </Link> 
-  </Button> 
-  </>
-  )
   async function handleSubmit({ values }) {
 
     const reqBody = values;
@@ -70,7 +57,7 @@ export default function Login() {
         </div>
             <div className="hero-div">
               <h4>¿No tienes cuenta?</h4>                
-              {botonPlay}
+              {botonPlay("important", "/register", 'Regístrate')}
             </div>
       </div>
       
