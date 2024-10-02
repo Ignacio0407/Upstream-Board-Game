@@ -6,12 +6,26 @@ import { registerFormOwnerInputs } from "./form/registerFormOwnerInputs";
 import { registerFormVetInputs } from "./form/registerFormVetInputs";
 import { registerFormClinicOwnerInputs } from "./form/registerFormClinicOwnerInputs";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "reactstrap";
+import { Link } from "react-router-dom";
 
 export default function Register() {
   let [type, setType] = useState(null);
   let [authority, setAuthority] = useState(null);
   let [clinics, setClinics] = useState([]);
 
+  let botonPlay= <></>
+  botonPlay = (
+    <>
+    <Button color="important" > 
+  
+    <Link 
+      to={"/login"} className="btn sm"                
+      style={{ textDecoration: "none" }}>Iniciar Sesión
+    </Link> 
+  </Button> 
+  </>
+  )
   const registerFormRef = useRef();
 
   function handleButtonClick(event) {
@@ -119,6 +133,10 @@ export default function Register() {
             </button>            
           </div>
         </div>
+        <div className="hero-div">
+              <h4>¿Ya tienes cuenta?</h4>                
+              {botonPlay}
+            </div>
       </div>
     );
   }
