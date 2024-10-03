@@ -4,7 +4,7 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import tokenService from "../../services/token.service";
 import "../../static/css/auth/authButton.css";
 import { loginFormInputs } from "./form/loginFormInputs";
-import BotonPlay from "../../util/botonplay";
+import BotonLink from "../../util/BotonLink";
 
 export default function Login() {
   const [message, setMessage] = useState(null)
@@ -57,7 +57,7 @@ export default function Login() {
         </div>
             <div className="hero-div">
               <h4>¿No tienes cuenta?</h4>                
-              <BotonPlay color={"success"} direction={"/register"} text={"Regístrate"}></BotonPlay>
+              <BotonLink color={"success"} direction={"/register"} text={"Regístrate"}></BotonLink>
             </div>
       </div>
       

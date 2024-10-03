@@ -5,7 +5,7 @@ import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormOwnerInputs } from "./form/registerFormOwnerInputs";
 import { registerFormClinicOwnerInputs } from "./form/registerFormClinicOwnerInputs";
 import { useRef, useState } from "react";
-import botonPlay from "../../util/botonplay";
+import BotonLink from "../../util/BotonLink";
 
 export default function Register() {
   let [type, setType] = useState(null);

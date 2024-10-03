@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
  * @param {string} direction - dirección a la que redirecciona.
  * @param {string} text - texto del botón.
  */
-export default function BotonPlay({color, direction, text}) {
+export default function BotonLink({color, direction, text}) {
     return (
       <>
         <Button color={color}> 
