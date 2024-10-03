@@ -120,7 +120,7 @@ export default function Register() {
         </div>
         <div className="hero-div">
               <h4>¿Ya tienes cuenta?</h4>                
-              {botonPlay("important", "/login", 'Iniciar sesión')}
+              <BotonLink color={"success"} direction={"/login"} text={"Inicia Sesión"}/>
             </div>
       </div>
     );
