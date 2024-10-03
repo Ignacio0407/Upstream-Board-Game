@@ -6,7 +6,7 @@ import { registerFormOwnerInputs } from "./form/registerFormOwnerInputs";
 import { registerFormVetInputs } from "./form/registerFormVetInputs";
 import { registerFormClinicOwnerInputs } from "./form/registerFormClinicOwnerInputs";
 import { useEffect, useRef, useState } from "react";
-import botonPlay from "../../util/botonplay";
+import BotonPlay from "../../util/botonplay";
 
 export default function Register() {
   let [type, setType] = useState(null);
@@ -121,7 +121,7 @@ export default function Register() {
         </div>
         <div className="hero-div">
               <h4>¿Ya tienes cuenta?</h4>                
-              {botonPlay("important", "/login", 'Iniciar sesión')}
+              <BotonPlay color={"success"} direction={"/login"} text={"Inicia sesión"}></BotonPlay>
             </div>
       </div>
     );

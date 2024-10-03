@@ -3,7 +3,7 @@ import '../App.css';
 import '../static/css/home/home.css'; 
 import logo from '../static/images/logoCentralUPS.jpg'
 import tokenService from '../services/token.service';
-import botonPlay from '../util/botonplay';
+import BotonPlay from '../util/botonplay';
  
 export default function Home(){
 
@@ -14,11 +14,9 @@ export default function Home(){
 
     return(
         <div className="home-page-container">
-            <div className="hero-div">
-                <h1></h1>
-                <img src={logo}/>
-                <h1></h1>                
-                {!jwt ? botonPlay("success", "/login", 'Play') : botonPlay("success", "/dashboard", 'Play')}
+            <div className="pantallaInicio">
+                <img  className="imagenInicio"  src={logo}/>
+                {!jwt ? <BotonPlay color={"info"} direction={"/login"} text={"Play"} /> : <BotonPlay color={"info"} direction={"/dashboard"} text={"Play"} />}
             </div>
         </div> // Línea 18 y 20 son un espacio en la pantalla
     );
