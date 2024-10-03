@@ -34,3 +34,14 @@
 .hero-div h3{
     text-align: center;
 }
+
+.pantallaInicio{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.imagenInicio{
+    border-radius: 25px;
+}
