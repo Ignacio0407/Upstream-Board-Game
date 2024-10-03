@@ -16,6 +16,7 @@ import SwaggerDocs from "./public/swagger";
 import DeveloperList from "./developers";
 import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
+import Dashboard from "./dashboard"
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -76,7 +77,7 @@ function App() {
   } else {
     userRoutes = (
       <>
-        {/* <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}        
+        { <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> }        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
       </>
