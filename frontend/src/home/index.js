@@ -14,7 +14,7 @@ export default function Home(){
 
     return(
         <div className="home-page-container">
-            <div className="hero-div">
+            <div className="div">
                 <h1></h1>
                 <img src={logo}/>
                 <h1></h1>                
