@@ -20,6 +20,6 @@ export default function Home(){
                 <h1></h1>                
                 {!jwt ? botonPlay("success", "/login", 'Play') : botonPlay("success", "/dashboard", 'Play')}
             </div>
-        </div> // Línea 12 es un espacio en la pantalla
+        </div> // Línea 18 y 20 son un espacio en la pantalla
     );
 }
