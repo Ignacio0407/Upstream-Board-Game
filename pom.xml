@@ -76,6 +76,14 @@
 				<picUrl>https://avatars.githubusercontent.com/u/114418131?v=4</picUrl>
 			</properties>
 		</developer>
+        <developer>
+			<name>Antonio José López Cubiles</name>
+			<email>antlopcub@alum.us.es</email>
+			<url>https://github.com/antlopcub</url>
+			<properties>
+				<picUrl>https://avatars.githubusercontent.com/u/61249792?v=4</picUrl>
+			</properties>
+		</developer>
 	</developers>
 
     <dependencies>
