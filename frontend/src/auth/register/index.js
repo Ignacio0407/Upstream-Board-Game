@@ -3,10 +3,9 @@ import "../../static/css/auth/authPage.css";
 import tokenService from "../../services/token.service";
 import FormGenerator from "../../components/formGenerator/formGenerator";
 import { registerFormOwnerInputs } from "./form/registerFormOwnerInputs";
-import { registerFormVetInputs } from "./form/registerFormVetInputs";
 import { registerFormClinicOwnerInputs } from "./form/registerFormClinicOwnerInputs";
-import { useEffect, useRef, useState } from "react";
-import BotonPlay from "../../util/botonplay";
+import { useRef, useState } from "react";
+import BotonLink from "../../util/BotonLink";
 
 export default function Register() {
   let [type, setType] = useState(null);
@@ -121,7 +120,7 @@ export default function Register() {
         </div>
         <div className="hero-div">
               <h4>¿Ya tienes cuenta?</h4>                
-              <BotonPlay color={"success"} direction={"/login"} text={"Inicia sesión"}></BotonPlay>
+              {botonPlay("important", "/login", 'Iniciar sesión')}
             </div>
       </div>
     );

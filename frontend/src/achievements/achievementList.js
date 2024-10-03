@@ -3,7 +3,7 @@ import tokenService from "../services/token.service";
 import useFetchState from "../util/useFetchState";
 import { Link } from "react-router-dom";
 import deleteFromList from "./../util/deleteFromList";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import jwt_decode from "jwt-decode";
 import getErrorModal from "./../util/getErrorModal";
 
