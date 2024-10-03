@@ -48,7 +48,7 @@ _En esta sección debe proporcionar un diagrama UML de clases que describa el mo
 _Recuerde que este es un diagrama conceptual, y por tanto no se incluyen los tipos de los atributos, ni clases específicas de librerías o frameworks, solamente los conceptos del dominio/juego que pretendemos implementar_
 Ej:
 
-![holi]()
+![Descomposición en componentes](https://raw.githubusercontent.com/CarlosCerdaMorales/Examen-Online-Y-Offline/a6fc7acb74c1e66318c3459183d2988c6d55ed9f/image.png)
 
 _Si vuestro diagrama se vuelve demasiado complejo, siempre podéis crear varios diagramas para ilustrar todos los conceptos del dominio. Por ejemplo podríais crear un diagrama para cada uno de los módulos que quereis abordar. La única limitación es que hay que ser coherente entre unos diagramas y otros si nos referimos a las mismas clases_
 
