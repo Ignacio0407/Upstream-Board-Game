@@ -1,4 +1,4 @@
-import { Table } from "reactstrap";
+import { Table, Button } from "reactstrap";
 import useFetchState from "../util/useFetchState";   
    
 export default function Dashboard() { 

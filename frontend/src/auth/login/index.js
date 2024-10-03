@@ -57,7 +57,7 @@ export default function Login() {
         </div>
             <div className="hero-div">
               <h4>¿No tienes cuenta?</h4>                
-              <BotonLink color={"success"} direction={"/register"} text={"Regístrate"}></BotonLink>
+              <BotonLink color={"success"} direction={"/register"} text={"Regístrate"}/>
             </div>
       </div>
       

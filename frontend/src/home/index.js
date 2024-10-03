@@ -19,6 +19,6 @@ export default function Home(){
                 {!jwt ? <BotonLink color={"info"} direction={"/login"} text={"Play"} /> : 
                 <BotonLink color={"info"} direction={"/dashboard"} text={"Play"} />}
             </div>
-        </div> // Línea 18 y 20 son un espacio en la pantalla
+        </div>
     );
 }
