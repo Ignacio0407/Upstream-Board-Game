@@ -1,0 +1,11 @@
+.prueba{
+    display: flex;               
+    justify-content: center;     
+    align-items: center;          
+    padding: 20px;              
+    border-radius: 5px;   
+    border: 2px solid black;
+    margin-top: 10px;       
+    margin-left: 10px; 
+    margin-right: 10px;       
+}
