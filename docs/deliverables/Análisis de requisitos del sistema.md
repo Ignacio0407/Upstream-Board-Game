@@ -2,8 +2,6 @@
 
 ## Introducción
 
-¿Qué valor puede aportar? ¿Qué objetivos pretendemos alcanzar con su implementación?
-
 Upstream es un juego de mesa con una temática basada en el deshielo en el paso del frío invierno a primavera. Este deshielo abre el camino de vuelta a casa para los salmones, banco que cada jugador debe controlar con el objetivo de remontar el río y así dejar sus huevos en el lugar en el que nacieron, tras una larga vida en alta mar. Por el camino, deben evitar obstáculos diversos, además de depredadores como osos, garzas o águilas.
 
 En una partida de Upstream pueden jugar de 2 a 5 jugadores, esta suele terminar o bien cuando todos los salmones perecen o todos llegan a la zona de desove.
@@ -134,15 +132,75 @@ _Puede usar la herramienta de modelado que desee para generar sus diagramas de c
 _Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta herramienta os proporcionamos un [enlace a la documentación oficial de la sintaxis de diagramas de clases de _ermaid](https://mermaid.js.org/syntax/classDiagram.html)_
 
 ## Reglas de Negocio -> Normas del juego
-### R-< X > < Nombre Regla de negocio >
-_< Descripción de la restricción a imponer >_
 
-_Ej:_ 
-### R1 – Diagnósticos imposibles
-El diagnóstico debe estar asociado a una enfermedad que es compatible con el tipo de mascota de su visita relacionada. Por ejemplo, no podemos establecer como enfermedad diagnosticada una otitis cuando la visita está asociada a una mascota que es un pez, porque éstos no tienen orejas ni oídos (y por tanto no será uno de los tipos de mascota asociados a la enfermedad otitis en el vademecum).
+### R1 - Orden de partida.
+El jugador inicial de la partida será el último en haber comido salmón. Desde ahí, se irá rotando en el sentido de las agujas del reloj.
 
-…
+### R2 - Movimiento obligatorio.
+Todos los jugadores deberán gastar sus 5 movimientos en su turno. No podrán moverse hacia atrás.
 
-_Muchas de las reglas del juego se transformarán en nuestro caso en reglas de negocio, por ejemplo, “la carta X solo podrá jugarse en la ronda Y si en la ronda anterior se jugó la carta Z”, o “en caso de que un jugador quede eliminado el turno cambia de sentido”_
+### R3 - Número de losetas.
+Se deberá jugar con el número de losetas que viene especificado en las normas, que en total deberán sumar 29 sin contar Mar ni Desove. (7 loseta de agua + 4 loseta salto de agua + 5 loseta águila + 3 loseta oso + 5 garza azul + 5 loseta de roca)
 
+### R4 - Inicio de partida.
+La colocación de las losetas en la primera ronda deberá respetar el orden de partida, y no superar los tres espacios de ancho ni los cuatro de largo.
 
+### R5 - Retirada de losetas.
+Al final de cada ronda se deberán quitar las tres losetas que hay en la última fila, haya o no salmones. Solo hay una excepción, al final de la primera ronda no se debe retirar nada, al final de la segunda se retirará el mar. A partir de ese momento, se retiran las tres losetas finales al término de cada ronda.
+
+### R6 - Adición de losetas.
+Al final de cada ronda se deberán colocar tres losetas nuevas en la parte superior. Solo hay una excepción, que se dará si se llega a la última ronda, y sólo quedarán dos losetas si todo se ha hecho correctamente. Estas dos losetas deben colocarse en los lados, dejando el centro libre para encajar el Desove.
+
+### R7 - Movimiento.
+Los jugadores están obligados a gastar sus cinco puntos de movimiento de forma obligatoria en cada ronda. Pueden gastarse todos en la misma ficha de salmón, o repartirlas como quiera.
+
+### R8 - Nadar. 
+Un salmón podrá nadar, gastando un punto de movimiento por cada loseta que nade. 
+
+### R9 - Saltar.
+Un jugador podrá saltar, gastando un punto por cada loseta que se mueva, y otro por cada obstáculo saltado. 
+
+### R10 - Capacidad de losetas.
+Un jugador podrá situarse en una loseta mientras que el número total de salmones en esa loseta sea igual al número de jugadores. Esto es una excepción en la loseta de roca, cuya capacidad es igual a la del número de jugadores menos uno.
+
+### R11 - Loseta llena.
+Si un salmón trata de nadar por una loseta llena, deberá saltarla, gastando así un movimiento extra. 
+
+### R12 - Águila.
+Un Águila se comerá un salmón si una ficha termina su salto en su loseta o entra en esta nadando. Si salta la loseta por encima, sin caer en ella, el Águila no se come al salmón. Cuando un Águila se come un salmón, voltea su loseta, y esta pasa a ser una loseta de agua normal.
+
+### R13 - Oso.
+Un Oso se comerá un salmón cuando una ficha salte sobre, desde o hasta la loseta. Si llega o pasa nadando, el Oso no se comerá al salmón.
+
+### R14 - Garza azul.
+Una Garza azul se comerá un salmón si, al final de tu turno, tienes alguna ficha en estas losetas.
+
+### R15 - Colocación final.
+Las dos últimas losetas de la pila deberán colocarse a los extremos del río, dejando el centro libre para el Desove.
+
+### R16 - Desove.
+Cuando una ficha de salmón de un jugador llega al Desove, esta se moverá a través de las distintas losetas de Desove avanzando una posición por cada final de ronda.
+
+### R17 - Ficha de Salmón.
+Todos los jugadores comenzarán con cuatro fichas de Salmón. Estas fichas tienen dos caras: una cara con dos salmones, y otra con un único salmón. Todos los jugadores comenzarán con sus cuatro fichas en la cara de los dos salmones.
+
+### R18 - Mar.
+Todos los jugadores comenzarán en el mar. Cada una de sus cuatro fichas de salmón se colocarán en cada loseta del Mar.
+
+### R19 - Eliminación de Salmón.
+Cuando una ficha de salmón que esté por la cara de los dos salmones sea comida, se dará la vuelta a la cara que contiene solo un salmón. Cuando está por la cara de un salmón y es comida, la ficha se retirará de la partida.
+
+### R20 - Unión de Desove al Río.
+Cuando el Desove se ha unido al río, no se deben añadir nuevas losetas al río, pues ya no quedarán más en la pila. Además, cada vez que un salmón entre al desove, se moverá como se especifica en la R16. Sin embargo, se seguirán retirando las losetas del final del río.
+
+### R21 - Capacidad máxima Desove.
+El Desove no tiene una capacidad máxima en ninguna de sus casillas.
+
+### R22 - Final de partida.
+La partida se considera como finalizada si no quedan salmones vivos, o bien todos se encuentran en el Desove.
+
+### R23 - Ganador.
+Ganará el jugador que acumule más puntos al final de la partida.
+
+### R24 - Puntuación.
+Para puntuar se hará de dos formas: la primera, que será sumar un punto por cada salmón (QUE NO FICHA DE SALMÓN) que tenga el jugador. Es decir, si tiene una ficha con dos salmones, serán dos puntos. La segunda, que se suma a los puntos anteriores, consiste en sumar el número de fichas de salmón que tengas por cada huevo que haya en la casilla de Desove que se encuentre. Ejemplo a continuación: ![Puntuación](/docs/rules/puntuation.jpg)
