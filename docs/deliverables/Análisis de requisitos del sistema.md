@@ -60,17 +60,16 @@ Desarrolladores: Los desarrolladores, tras registrarse y loguearse, podrán real
 
 ## Historias de Usuario -> Visual, lo que puede hacer el usuario.
 
- ### HU-(ISSUE#ID): Nombre ([Enlace a la Issue asociada a la historia de usuario]()
-|Descripción de la historia siguiendo el esquema:  "Como <rol> quiero que el sistema <funcionalidad>  para poder <objetivo/beneficio>."| 
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-|Decripción de las interacciones concretas a realizar con la interfaz de usuario del sistema para lleva a cabo la historia.
-
- ### HU-(ISSUE#ID): Iniciar sesión ([Enlace a la Issue asociada a la historia de usuario]()
+ ### HU-(ISSUE#65): Iniciar sesión ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/65])
 Como jugador quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-Interacciones con sistema: en la barra de navegación de la pantalla inicial hay un botón Logout/Login que se encarga del inicio de sesiones
+
+![](/docs/mockups/Mockup%20Inicio%20de%20Sesion.png)
+
+ ### HU-(ISSUE#70): Registrarse ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/70])
+Como jugador quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión
+posteriormente.
+
+![](/docs/mockups/Mockup%20Registrarse.png)
 
  ### HU-(ISSUE#ID): Jugar partidas ([Enlace a la Issue asociada a la historia de usuario]()
 Como jugador quiero que el sistema me permita jugar partidas, bien sea creándolas o uniéndome a ellas.
@@ -78,13 +77,47 @@ Como jugador quiero que el sistema me permita jugar partidas, bien sea creándol
 |Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
 Interacciones con sistema: en la pantalla inicial hay un botón Jugar partida que te permite escoger entre crear una partida o unirte a una.
 
- ### HU-(ISSUE#ID): Listar y crear logros ([Enlace a la Issue asociada a la historia de usuario]()
+ ### HU-(ISSUE#66): Listar logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/66])
 Como jugador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-Interacciones con sistema: en la barra de navegación de la pantalla inicial hay un botón achievements que lleva a una pantalla que muestra los logros y que te permite crear un nuevo logro.
+![](/docs/mockups//Mockup%20Listar%20Logros.png)
 
+ ### HU-(ISSUE#37): Listar y crear logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/37])
+Como administrador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales, y crear logros, añadiendo los valores que quiera a cada campo, estando así 
+disponible para todos los jugadores y administradores.
+![](/docs/mockups/Mockup%20Admin%20Logros.png)
 
+ ### HU-(ISSUE#37): Modificar y eliminar logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/37])
+Como administrador quiero que el sistema me permita modificar logros, ajustando cada parámetro del logro a mi gusto, y 
+eliminar logros, borrándolos de la base de datos, haciendo así que el logro deje de estar disponible para el resto de 
+jugadores y administradores.
+![](/docs/mockups/Mockup%20Admin%20Logros.png)
+
+ ### HU-(ISSUE#67): Listar usuarios ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/67])
+Como administrador quiero que el sistema me permita listar todos los usuarios del juego registrados además de ver 
+sus nombres y sus roles.
+![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
+
+ ### HU-(ISSUE#68): Crear un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
+Como administrador quiero que el sistema me permita crear un nuevo usuario, especificando su nombre, contraseña
+y rol, eligiendo entre jugador o administrador.
+![](/docs/mockups/Mockup%20Crear%20Usuarios.png)
+
+ ### HU-(ISSUE#68): Modificar y eliminar un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
+Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol, y eliminar usuarios, borrándolos de la base de datos.
+![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
+
+ ### HU-(ISSUE#69): Listar desarrolladores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/69])
+Como administrador y jugador quiero que el sistema me permita listar todas las personas que han participado en el desarrollo
+del juego, junto con información básica de cada uno de ellos.
+![](/docs/mockups/Mockup%20Listar%20Desarrolladores.png)
+
+ ### HU-(ISSUE#71): Crear una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/71])
+Como jugador y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
+![]()
+
+ ### HU-(ISSUE#72): Listar y unirse a partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/72])
+Como jugador y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
+![]()
 
 ## Diagrama conceptual del sistema
 _En esta sección debe proporcionar un diagrama UML de clases que describa el modelo de datos a implementar en la aplicación. Este diagrama estará anotado con las restricciones simples (de formato/patrón, unicidad, obligatoriedad, o valores máximos y mínimos) de los datos a gestionar por la aplicación. _
