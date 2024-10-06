@@ -8,6 +8,9 @@ import '../static/css/dashboard/dashb.css'
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
+    const [numberOfPlayers, setNumberOfPlayers] = useState(2);
+    const [nombrePartida, setNombrePartida] = useState("");
+    const [crearPartida, setCrearPartida] = useState(2)
 
     useEffect(() => {
         if (jwt) {
@@ -20,6 +23,9 @@ export default function Dashboard() {
         <div>
             <div className="prueba"> 
                 <h1>Welcome {username}!</h1>
+                <Button color="success" onClick={() => setNumberOfPlayers(numberOfPlayers+1)}>+</Button>
+                <Button color="danger" onClick={() => setNumberOfPlayers(numberOfPlayers-1)}>-</Button>
+                
             </div>
         </div> 
         </> 
