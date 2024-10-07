@@ -75,7 +75,11 @@ export default function Dashboard() {
     return ( 
         <> 
         <div className="dashboard-page-container">
-            <h1 className='welcome'>Game Listing for {username}</h1>
+            <h1 className='welcome'>
+            Game Listing for {username}
+            <div>
+          </div>
+            </h1>
             <div>
                 <div className="game-table">
                 <thead>
