@@ -13,7 +13,7 @@ export default function BotonLink({color, direction, text}) {
         <Button color={color}> 
         <Link 
           to={direction} className="btn sm"                
-          style={{ textDecoration: "none"}}>{text}
+          style={{ textDecoration: "none", color: "white"}}>{text}
         </Link> 
         </Button>
       </>
