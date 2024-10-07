@@ -20,7 +20,7 @@ export default function Home(){
                 {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Game List"} /> : 
                 <BotonLink color={"success"} direction={"/dashboard"} text={"Game List"} />}
                 {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Create Game"} /> : 
-                <BotonLink color={"success"} direction={"/dashboard"} text={"Create Game"} />}
+                <BotonLink color={"success"} direction={"/creategame/"} text={"Create Game"} />}
                 </div>
             </div>
         </div>
