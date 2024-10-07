@@ -54,7 +54,7 @@ El jugador con mayor puntuación será el ganador. En caso de empate ganará el 
 
 Jugador : Una vez registrados y logueados, los jugadores podrán unirse, crear, jugar y observar partidas dentro del juego. Además, podrán listar tanto sus logros como los globales (los de todos los jugadores).
 
-Desarrolladores: Los desarrolladores, tras registrarse y loguearse, podrán realizar las mismas acciones que los jugadores además de tener la capacidad de crear logros, listar jugadores, listar las partidas jugadas y visualizar los desarrolladores del proyecto. 
+Administradores: Los administradores, tras registrarse y loguearse, podrán realizar las mismas acciones que los jugadores además de tener la capacidad de crear logros, listar jugadores, listar las partidas jugadas y visualizar los desarrolladores del proyecto. 
 
 ## Historias de Usuario -> Visual, lo que puede hacer el usuario.
 
