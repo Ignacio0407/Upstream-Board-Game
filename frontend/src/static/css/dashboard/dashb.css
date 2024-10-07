@@ -9,3 +9,32 @@
     margin-left: 10px; 
     margin-right: 10px;       
 }
+
+.game-options {
+    margin-top: 20px;
+}
+
+.game-mode, .player-count {
+    margin-bottom: 20px;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+.game-button, .player-button, .create-game {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.game-button:hover, .player-button:hover, .create-game:hover {
+    background-color: #0056b3;
+}
