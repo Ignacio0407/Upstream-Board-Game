@@ -71,9 +71,7 @@ posteriormente.
 
  ### HU-(ISSUE#ID): Jugar partidas ([Enlace a la Issue asociada a la historia de usuario]()
 Como jugador quiero que el sistema me permita jugar partidas, bien sea creándolas o uniéndome a ellas.
-|-----|
-|Mockups (prototipos en formato imagen de baja fidelidad) de la interfaz de usuario del sistema|
-Interacciones con sistema: en la pantalla inicial hay un botón Jugar partida que te permite escoger entre crear una partida o unirte a una.
+![](/docs/mockups/Mockup%20Pantalla%20Inicial.png)
 
  ### HU-(ISSUE#66): Listar logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/66])
 Como jugador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
@@ -111,11 +109,11 @@ del juego, junto con información básica de cada uno de ellos.
 
  ### HU-(ISSUE#71): Crear una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/71])
 Como jugador y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
-![]()
+![](/docs/mockups/Mockup%20Crear%20Partida.png)
 
  ### HU-(ISSUE#72): Listar y unirse a partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/72])
-Como jugador y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
-![]()
+Como jugador y administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
 ## Diagrama conceptual del sistema
 _En esta sección debe proporcionar un diagrama UML de clases que describa el modelo de datos a implementar en la aplicación. Este diagrama estará anotado con las restricciones simples (de formato/patrón, unicidad, obligatoriedad, o valores máximos y mínimos) de los datos a gestionar por la aplicación. _

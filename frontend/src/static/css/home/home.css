@@ -42,6 +42,14 @@
     gap: 1rem;
 }
 
+.botonesPantallaInicio{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 1rem;
+}
+
 .imagenInicio{
     border-radius: 25px;
 }
