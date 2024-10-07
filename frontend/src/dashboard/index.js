@@ -4,13 +4,11 @@ import useFetchState from "../util/useFetchState";
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 import '../static/css/dashboard/dashb.css'
+import BotonLink from '../util/BotonLink';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
-    const [numberOfPlayers, setNumberOfPlayers] = useState(2);
-    const [nombrePartida, setNombrePartida] = useState("");
-    const [crearPartida, setCrearPartida] = useState(2)
 
     useEffect(() => {
         if (jwt) {
@@ -18,14 +16,77 @@ export default function Dashboard() {
         }
     }, [jwt])
 
+    const games = [
+        {
+          nombre: "Partida 1",
+          jugadores: 2,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 2",
+          jugadores: 4,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 3",
+          jugadores: 3,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 4",
+          jugadores: 5,
+          unirse: <BotonLink color={"success"} direction={""} text={"Game Full!"}></BotonLink>
+        },
+        {
+          nombre: "Partida 5",
+          jugadores: 1,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 6",
+          jugadores: 4,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 7",
+          jugadores: 2,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+        {
+          nombre: "Partida 8",
+          jugadores: 3,
+          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+        },
+      ];
+
+      const nJugadores = 5
+
+      const gamesList = 
+      games.map((d) => {
+        return (
+            <tr key={d.nombre} className='tr'>
+                <td className='td'>{d.nombre}</td>
+                <td className='td'>{d.jugadores}/{nJugadores}</td>
+                <td className='td'>{d.unirse}</td>
+            </tr>
+        );
+      })
+
     return ( 
         <> 
-        <div>
-            <div className="prueba"> 
-                <h1>Welcome {username}!</h1>
-                <Button color="success" onClick={() => setNumberOfPlayers(numberOfPlayers+1)}>+</Button>
-                <Button color="danger" onClick={() => setNumberOfPlayers(numberOfPlayers-1)}>-</Button>
-                
+        <div className="dashboard-page-container">
+            <h1 className='welcome'>Game Listing for {username}</h1>
+            <div>
+                <div className="game-table">
+                <thead>
+                    <tr className='tr'>
+                        <th className='th'>Game</th>
+                        <th className='th'>Players</th>
+                        <th className='th'>Join</th>
+                    </tr>
+                </thead>
+                <tbody>{gamesList}</tbody>
+                </div>
             </div>
         </div> 
         </> 

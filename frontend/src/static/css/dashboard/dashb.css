@@ -1,11 +1,59 @@
-.prueba{
+.dashboard-page-container{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/upStreamFondo.jpg');
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+}
+
+.welcome{
     display: flex;               
-    justify-content: center;     
-    align-items: center;          
-    padding: 20px;              
+    justify-content: center;             
+    padding: 20px;  
+    margin-top: 90px;            
     border-radius: 5px;   
-    border: 2px solid black;
-    margin-top: 10px;       
+    border: 2px solid black;      
     margin-left: 10px; 
-    margin-right: 10px;       
+    margin-right: 10px;  
+    color: white;     
+}
+
+.game-table {
+    width: 90%;
+    margin: 20px auto;
+    border-collapse:collapse;
+    background-color: #33678A; 
+    color: white;
+    align-items: center;
+    justify-content: center;
+    display:table;
+    table-layout: fixed;
+}
+
+.th {
+    padding: 10px;
+    font-size: 1.2em;
+    text-align: left;
+    background-color: #33678A;
+    color: white;
+}
+
+.td {
+    padding: 10px;
+    text-align: left;
+    border-top: 1px solid #517A94;
+}
+
+.tr {
+    border-bottom: 1px solid #517A94;
+    align-items: center;
+    justify-content: center;
 }

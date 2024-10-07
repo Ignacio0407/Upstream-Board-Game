@@ -16,8 +16,12 @@ export default function Home(){
         <div className="home-page-container">
             <div className="pantallaInicio">
                 <img  className="imagenInicio"  src={logo}/>
-                {!jwt ? <BotonLink color={"info"} direction={"/login"} text={"Play"} /> : 
-                <BotonLink color={"info"} direction={"/dashboard"} text={"Play"} />}
+                <div className='botonesPantallaInicio'>
+                {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Game List"} /> : 
+                <BotonLink color={"success"} direction={"/dashboard"} text={"Game List"} />}
+                {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Create Game"} /> : 
+                <BotonLink color={"success"} direction={"/dashboard"} text={"Create Game"} />}
+                </div>
             </div>
         </div>
     );
