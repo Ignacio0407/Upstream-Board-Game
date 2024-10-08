@@ -3,7 +3,7 @@ import { Navbar, NavbarBrand, NavLink, NavItem, Nav, NavbarText, NavbarToggler, 
 import { Link } from 'react-router-dom';
 import tokenService from './services/token.service';
 import jwt_decode from "jwt-decode";
-import logoSalmon from '../src/static/images/logoSalmon.jpg'
+import logoSalmon from '../src/static/images/logoSalmon.png'
 
 function AppNavbar() {
     const [roles, setRoles] = useState([]);
@@ -97,7 +97,7 @@ function AppNavbar() {
 
     return (
         <div>
-            <Navbar expand="md" dark color="dark">
+            <Navbar expand="md" dark color="success">
                 <NavbarBrand href="/">
                     <img src={logoSalmon} style={{ height: 40, width: 40, marginRight: 5 }}/>
                     Upstream
