@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button } from "reactstrap";
-import useFetchState from "../util/useFetchState"; 
+import { Button } from "reactstrap"; 
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 import '../static/css/createGame/createGame.css'
-import BotonLink from '../util/BotonLink';
 import { Link } from "react-router-dom";
 
 export default function CreateGame() { 
@@ -17,9 +15,6 @@ export default function CreateGame() {
         }
     }, [jwt])
 
-    
-
-
     return ( 
         <> 
         <div className='createGame-page-container'>
@@ -31,7 +26,7 @@ export default function CreateGame() {
             <td className='td2'>
                 Game's name: 
             </td>   
-            <td><input type= 'text' className='input' placeholder={`Sala de ${username}`} ></input></td>
+            <td><input type= 'text' className='input' defaultValue={`Sala de ${username}`} ></input></td>
             <tr>
                 <td className='td2'>
                 Password: 
