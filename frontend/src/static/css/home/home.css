@@ -53,3 +53,13 @@
 .imagenInicio{
     border-radius: 25px;
 }
+
+.botones-juntos {
+    display: flex;
+    gap: 30px; /* Espacio entre los botones */
+  }
+  
+  .botones-juntos > * {
+    flex-shrink: 0; /* Evita que los botones se reduzcan */
+  }
+  

@@ -18,58 +18,74 @@ export default function Dashboard() {
         {
           nombre: "Partida 1",
           jugadores: 2,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "Esperando",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "Esperando"
         },
         {
           nombre: "Partida 2",
           jugadores: 4,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "En curso",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "En curso"
         },
         {
           nombre: "Partida 3",
           jugadores: 3,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "En curso",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "En curso"
         },
         {
           nombre: "Partida 4",
           jugadores: 5,
-          unirse: <BotonLink color={"success"} direction={""} text={"Game Full!"}></BotonLink>,
-          estado: "En curso",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "En curso"
         },
         {
           nombre: "Partida 5",
           jugadores: 1,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "Esperando",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "Esperando"
         },
         {
           nombre: "Partida 6",
           jugadores: 4,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "Esperando",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+            <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+            <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+            </td>,
+          estado: "Esperando"
         },
         {
           nombre: "Partida 7",
           jugadores: 2,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "En curso",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "En curso"
         },
         {
           nombre: "Partida 8",
           jugadores: 3,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>,
-          estado: "Esperando",
-          espectador: <BotonLink color={"success"} direction={""} text={"Spectate"}></BotonLink>
+          unirse: <td className='botones-juntos'>
+          <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
+          <BotonLink color={"danger"} direction={""} text={"Spectate"}></BotonLink>
+          </td>,
+          estado: "Esperando"
         }
       ];
 
@@ -85,7 +101,6 @@ export default function Dashboard() {
                 <td className='celda'>{d.jugadores}/{nJugadores}</td>
                 <td className='celda'>{d.estado}</td>
                 <td className='celda'>{d.unirse}</td>
-                <td className='celda'>{d.espectador}</td>
             </tr>
         );
       })
@@ -105,7 +120,6 @@ export default function Dashboard() {
                         <th className='cabeza'>Game</th>
                         <th className='cabeza'>Players</th>
                         <th className='cabeza'>State</th>
-                        <th className='cabeza'></th>
                         <th className='cabeza'></th>
                     </tr>
                 </thead>
