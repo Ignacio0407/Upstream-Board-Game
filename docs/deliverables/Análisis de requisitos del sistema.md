@@ -116,18 +116,8 @@ Como jugador y administrador quiero que el sistema me permita listar las diferen
 ![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
 ## Diagrama conceptual del sistema
-_En esta sección debe proporcionar un diagrama UML de clases que describa el modelo de datos a implementar en la aplicación. Este diagrama estará anotado con las restricciones simples (de formato/patrón, unicidad, obligatoriedad, o valores máximos y mínimos) de los datos a gestionar por la aplicación. _
 
-_Recuerde que este es un diagrama conceptual, y por tanto no se incluyen los tipos de los atributos, ni clases específicas de librerías o frameworks, solamente los conceptos del dominio/juego que pretendemos implementar_
-Ej:
-
-![Descomposición en componentes](https://raw.githubusercontent.com/CarlosCerdaMorales/Examen-Online-Y-Offline/a6fc7acb74c1e66318c3459183d2988c6d55ed9f/image.png)
-
-_Si vuestro diagrama se vuelve demasiado complejo, siempre podéis crear varios diagramas para ilustrar todos los conceptos del dominio. Por ejemplo podríais crear un diagrama para cada uno de los módulos que quereis abordar. La única limitación es que hay que ser coherente entre unos diagramas y otros si nos referimos a las mismas clases_
-
-_Puede usar la herramienta de modelado que desee para generar sus diagramas de clases. Para crear el diagrama anterior nosotros hemos usado un lenguaje textual y librería para la generación de diagramas llamada Mermaid_
-
-_Si deseais usar esta herramienta para generar vuestro(s) diagramas con esta herramienta os proporcionamos un [enlace a la documentación oficial de la sintaxis de diagramas de clases de _ermaid](https://mermaid.js.org/syntax/classDiagram.html)_
+![Descomposición en componentes](/docs/diagrams/Modelo%20DP1%20v2-Page-1.jpg)
 
 ## Reglas de Negocio -> Normas del juego
 
