@@ -48,6 +48,9 @@ function AppNavbar() {
                     <NavItem> 
                         <NavLink style={{ color: "white" }} tag={Link} to="/achievements">Achievements</NavLink> 
                     </NavItem> 
+                    <NavItem> 
+                        <NavLink style={{ color: "white" }} tag={Link} to="/developers">Developers</NavLink>
+                    </NavItem>
                 </> 
             ) 
         }         
@@ -56,6 +59,9 @@ function AppNavbar() {
     if (!jwt) {
         publicLinks = (
             <>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} id="rules" tag={Link} to="/rules">Rules</NavLink>
+                </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="docs" tag={Link} to="/docs">Docs</NavLink>
                 </NavItem>
@@ -80,6 +86,9 @@ function AppNavbar() {
         )
         userLogout = (
             <>
+                <NavItem>
+                    <NavLink style={{ color: "white" }} id="rules" tag={Link} to="/rules">Rules</NavLink>
+                </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="docs" tag={Link} to="/docs">Docs</NavLink>
                 </NavItem>

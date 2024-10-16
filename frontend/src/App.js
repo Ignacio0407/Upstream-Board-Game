@@ -18,6 +18,7 @@ import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
 import Dashboard from "./dashboard"
 import CreateGame from "./createGame";
+import Rules from "./rules";
 
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -69,7 +70,7 @@ function App() {
           <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList
             /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />  
-
+          <Route path="/developers" element={<DeveloperList />} />
         </>)
     }    
   })
@@ -78,6 +79,7 @@ function App() {
       <>        
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/rules" element={<Rules />} />
       </>
     )
   } else {
@@ -86,6 +88,7 @@ function App() {
         { <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> }        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/rules" element={<Rules />} />
       </>
     )
   }
