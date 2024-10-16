@@ -3,6 +3,8 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "appusers")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User extends BaseEntity {
 
 	@Column(unique = true)
