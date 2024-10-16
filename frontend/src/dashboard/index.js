@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button } from "reactstrap";
-import useFetchState from "../util/useFetchState"; 
+import React, { useState, useEffect } from 'react'; 
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 import '../static/css/dashboard/dashb.css'
@@ -64,10 +62,10 @@ export default function Dashboard() {
       const gamesList = 
       games.map((d) => {
         return (
-            <tr key={d.nombre} className='tr'>
-                <td className='td'>{d.nombre}</td>
-                <td className='td'>{d.jugadores}/{nJugadores}</td>
-                <td className='td'>{d.unirse}</td>
+            <tr key={d.nombre} className='fila'>
+                <td className='celda'>{d.nombre}</td>
+                <td className='celda'>{d.jugadores}/{nJugadores}</td>
+                <td className='celda'>{d.unirse}</td>
             </tr>
         );
       })
@@ -83,10 +81,10 @@ export default function Dashboard() {
             <div>
                 <div className="game-table">
                 <thead>
-                    <tr className='tr'>
-                        <th className='th'>Game</th>
-                        <th className='th'>Players</th>
-                        <th className='th'>Join</th>
+                    <tr className='fila'>
+                        <th className='cabeza'>Game</th>
+                        <th className='cabeza'>Players</th>
+                        <th className='cabeza'>Join</th>
                     </tr>
                 </thead>
                 <tbody>{gamesList}</tbody>
