@@ -3,10 +3,10 @@ import tokenService from "../services/token.service";
 import useFetchState from "../util/useFetchState";
 import { Link } from "react-router-dom";
 import deleteFromList from "./../util/deleteFromList";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import getErrorModal from "./../util/getErrorModal";
-
+import '../static/css/achievement/achievement.css'
 const imgnotfound = "https://cdn-icons-png.flaticon.com/512/5778/5778223.png";
 
 export default function AchievementList() {
@@ -16,11 +16,16 @@ export default function AchievementList() {
     const [visible, setVisible] = useState(false);
     const [alerts, setAlerts] = useState([]);
     const [achievements, setAchievements] = useFetchState([],`/api/v1/achievements`,jwt);
+    const user = tokenService.getUser()
+    const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
+
   
     let roles = []
     if (jwt) {
       roles = getRolesFromJWT(jwt);
     }
+
+
   
     function getRolesFromJWT(jwt) {
       return jwt_decode(jwt).authorities;
@@ -62,6 +67,26 @@ export default function AchievementList() {
         const modal = getErrorModal(setVisible, visible, message);
             return (
             <div>
+                <div className="playercard-container">
+                        <Table>
+                            <tr> 
+                                <strong>
+                                    {finalUser.username}
+                                </strong>
+                            </tr>
+                            <tr>
+                                Victorias totales: {finalUser.victorias}
+                            </tr>
+                            <tr>
+                                Partidas totales: {finalUser.partidasjugadas}
+                            </tr>
+                            <tr>
+                                Puntos totales: {finalUser.puntostotales}
+                            </tr>
+
+                        </Table>
+
+                </div>
                 <div className="admin-page-container">
                 <h2></h2>
                 <h1 className="text-center">Achievements</h1>
@@ -78,6 +103,7 @@ export default function AchievementList() {
                         </tr>
                     </thead>
                     <tbody>{achievementList}</tbody>
+
                     {roles[0] === "ADMIN" && <Button outline color="success" >
                         <Link
                             to={`/achievements/new`} className="btn sm"
