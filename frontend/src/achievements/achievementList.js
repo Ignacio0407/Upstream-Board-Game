@@ -66,29 +66,26 @@ export default function AchievementList() {
     });
         const modal = getErrorModal(setVisible, visible, message);
             return (
-            <div>
-                <div className="playercard-container">
+            <body className="achievement-container">
+                <div className="playercard-container" >
                         <Table>
-                            <tr> 
-                                <strong>
+                                <h2 className="title-playercard">
                                     {finalUser.username}
-                                </strong>
-                            </tr>
-                            <tr>
+                                </h2>
+                            <tr className="text-playercard">
                                 Victorias totales: {finalUser.victorias}
                             </tr>
-                            <tr>
+                            <tr className="text-playercard">
                                 Partidas totales: {finalUser.partidasjugadas}
                             </tr>
-                            <tr>
+                            <tr className="text-playercard">
                                 Puntos totales: {finalUser.puntostotales}
                             </tr>
 
                         </Table>
 
                 </div>
-                <div className="admin-page-container">
-                <h2></h2>
+                <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
                     <div>
                     <Table aria-label="achievements" className="mt-4">
@@ -112,6 +109,6 @@ export default function AchievementList() {
                     </Table>
                     </div>
                 </div>
-            </div>
+            </body>
             );
 }
