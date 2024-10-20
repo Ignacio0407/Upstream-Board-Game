@@ -49,7 +49,7 @@ class UserServiceTests {
 	@Test
 	void shouldFindAllUsers() {
 		List<User> users = (List<User>) this.userService.findAll();
-		assertEquals(11, users.size());
+		assertEquals(17, users.size());
 	}
 
 	@Test
@@ -61,7 +61,7 @@ class UserServiceTests {
 	@Test
 	void shouldFindUsersByAuthority() {
 		List<User> owners = (List<User>) this.userService.findAllByAuthority("PLAYER");
-		assertEquals(10, owners.size());
+		assertEquals(16, owners.size());
 
 		List<User> admins = (List<User>) this.userService.findAllByAuthority("ADMIN");
 		assertEquals(1, admins.size());
