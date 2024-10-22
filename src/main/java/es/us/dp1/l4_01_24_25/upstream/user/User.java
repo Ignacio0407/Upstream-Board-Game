@@ -1,12 +1,20 @@
 package es.us.dp1.l4_01_24_25.upstream.user;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
+import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -25,6 +33,11 @@ public class User extends BaseEntity {
 	Integer victorias;
 	Integer partidasjugadas;
 	Integer puntostotales;
+
+	
+	@ManyToMany
+	@JsonManagedReference
+	List<Achievement> logros;
 
 	@NotNull
 	@ManyToOne(optional = false)

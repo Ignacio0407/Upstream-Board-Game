@@ -15,6 +15,9 @@
  */
 package es.us.dp1.l4_01_24_25.upstream.user;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import jakarta.validation.Valid;
 
 @Service
@@ -94,5 +98,10 @@ public class UserService {
 		this.userRepository.delete(toDelete);
 	}
 	
+	@Transactional
+	public List<Achievement> getUserAchievements(Integer userId) {
+		Optional<User> u = userRepository.findById(userId);
+		return u.get().getLogros();
+	}
 
 }
