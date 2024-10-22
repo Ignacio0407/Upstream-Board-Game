@@ -26,4 +26,10 @@ INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES
 INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto','Si ganas 20 partidas o mas',20.0 ,'VICTORIES');
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (4,'Curioso','Consulta las reglas',11.0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGX5UO6OsMsjDLmXv_q7qwndH59iXU_B-o20u_D3rYDC3Wknxkezh3tbKYF9aqpelKV4o&usqp=CAU', 'EXPLORER');
 
-INSERT INTO matches(id,nombre,contraseña,estado,numJugadores,ronda,fase,jugadorInicial,jugadorActual) VALUES (1,'Prueba','Pikachu','EN_CURSO',4,2,'MOVIENDO', 2, 4);
+--ALTER TABLE matches ALTER COLUMN estado SET DATA TYPE VARCHAR(255);
+--ALTER TABLE matches ALTER COLUMN fase SET DATA TYPE VARCHAR(255);
+
+INSERT INTO jugador(id, name) VALUES (2, 'Jugador2');
+INSERT INTO jugador(id, name) VALUES (4, 'Jugador4');
+
+INSERT INTO matches(id,name,contrasena,estado,num_jugadores,ronda,fase,jugador_inicial,jugador_actual) VALUES (1,'Prueba','Pikachu','en_curso',4,2,'moviendo', 2, 4);

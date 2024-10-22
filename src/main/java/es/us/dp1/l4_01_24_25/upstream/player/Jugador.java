@@ -11,6 +11,7 @@ import lombok.Setter;
 // @Table(name = "players") -> Esto solo tiene la clase padre
 public class Jugador extends User{
     
+    String name;
     Color color;
     Integer orden;
     Boolean vivo;
