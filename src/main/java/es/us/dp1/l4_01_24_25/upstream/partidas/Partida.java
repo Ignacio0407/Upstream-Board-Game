@@ -19,7 +19,6 @@ public class Partida extends NamedEntity {
 	// Esto para unirse
 	String contraseña;
 	Estado estado;
-
 	// Esto para jugar en sí
     Integer ronda;
 	@Min(2)
