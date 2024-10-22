@@ -26,8 +26,12 @@ INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES
 INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto','Si ganas 20 partidas o mas',20.0 ,'VICTORIES');
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (4,'Curioso','Consulta las reglas',11.0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGX5UO6OsMsjDLmXv_q7qwndH59iXU_B-o20u_D3rYDC3Wknxkezh3tbKYF9aqpelKV4o&usqp=CAU', 'EXPLORER');
 
+INSERT INTO matches(id,name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (1,'Partida1', 2, '1234', 'Esperando', 1, 1, 1, 1);
+
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (1,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (2,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (3,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (1,4);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (2,4);
+
+
