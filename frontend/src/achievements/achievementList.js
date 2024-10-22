@@ -91,7 +91,7 @@ export default function AchievementList() {
                 </div>
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
-                <h2 className="text-center">You will see a green Achievement if you have completed it!</h2>
+                <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
                     <div>
                     
                     <thead>
