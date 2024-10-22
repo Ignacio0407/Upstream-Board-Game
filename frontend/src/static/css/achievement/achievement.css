@@ -1,0 +1,42 @@
+.playercard-container {
+    justify-content: center;
+    left: 200px;
+    background-color: rgb(25, 135, 84);
+    border-radius: 20px;
+    margin-top: 200px;
+    margin-left: 100px;
+    height:max-content;
+    width: 400px;
+
+}
+
+.text-playercard {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 25px;
+    color: #ffffff;
+    
+}
+
+.title-playercard {
+    text-align: center;
+    font-size: 35px;
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+.achievement-container {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.achievement-card {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 80px;
+}

@@ -21,8 +21,10 @@ public class User extends BaseEntity {
 
 	@Column(unique = true)
 	String username;
-
 	String password;
+	Integer victorias;
+	Integer partidasjugadas;
+	Integer puntostotales;
 
 	@NotNull
 	@ManyToOne(optional = false)
