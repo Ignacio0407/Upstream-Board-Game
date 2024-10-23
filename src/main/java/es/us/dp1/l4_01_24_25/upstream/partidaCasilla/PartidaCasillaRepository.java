@@ -3,13 +3,10 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
 public interface PartidaCasillaRepository extends CrudRepository<PartidaCasilla,Integer> {
-
-
-    
     @SuppressWarnings("null")
     @Override
 	Optional<PartidaCasilla> findById(Integer id);
- 
+    
 
     
 }

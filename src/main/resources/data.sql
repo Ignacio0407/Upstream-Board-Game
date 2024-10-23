@@ -28,7 +28,6 @@ INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES
 
 /** INSERT INTO matches(id,name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (1,'Partida1', 2, '1234', 'Esperando', 1, 1, 1, 1); */
 
-
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (1,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (2,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (3,1);
