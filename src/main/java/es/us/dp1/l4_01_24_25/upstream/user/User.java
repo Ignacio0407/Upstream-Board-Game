@@ -57,4 +57,8 @@ public class User extends BaseEntity {
 		return cond;
 	}
 
+	public void addAchievement(Achievement a) {
+		if(!logros.contains(a)) logros.add(a);
+	}
+
 }
