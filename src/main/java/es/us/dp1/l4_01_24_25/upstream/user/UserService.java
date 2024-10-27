@@ -28,17 +28,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
+import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementRepository;
+import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
+/*
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
+*/
 import jakarta.validation.Valid;
 
 @Service
 public class UserService {
 
-	private final UserRepository userRepository;	
+	private final UserRepository userRepository;
 
 	@Autowired
 	public UserService(UserRepository userRepository) {
 		this.userRepository = userRepository;
-		
 	}
 
 	@Transactional
