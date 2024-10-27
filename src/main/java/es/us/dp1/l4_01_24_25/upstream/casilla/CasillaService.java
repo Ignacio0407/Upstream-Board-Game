@@ -25,4 +25,9 @@ public class CasillaService {
     public Optional<Casilla> findById(int id) {
         return cr.findById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<TipoCasilla> findAllType() {
+        return cr.findAllType();
+    }
 }
