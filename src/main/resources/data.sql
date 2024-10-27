@@ -33,5 +33,14 @@ INSERT INTO appusers_logros(logros_id, users_id) VALUES (3,1);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (1,4);
 INSERT INTO appusers_logros(logros_id, users_id) VALUES (2,4);
 
+INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (2, 'PIEDRA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (3, 'GARZA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (4, 'OSO');
+INSERT INTO tipo_casilla(id, tipo) VALUES (5, 'AGUILA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (6, 'SALTO');
+INSERT INTO tipo_casilla(id, tipo) VALUES (7, 'MAR');
+INSERT INTO tipo_casilla(id, tipo) VALUES (8, 'DESOVE');
 
+INSERT INTO casilla (id,imagen, tipo) VALUES (1,'Hola', 1);
 
