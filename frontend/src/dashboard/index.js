@@ -6,6 +6,7 @@ import BotonLink from '../util/BotonLink';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
+    const [matches, setMatches] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
 
     useEffect(() => {
@@ -75,10 +76,11 @@ export default function Dashboard() {
         <div className="dashboard-page-container">
             <h1 className='welcome'>
             Game Listing for {username}
-            <div>
-          </div>
             </h1>
             <div>
+            <div className='crear-partida'>
+              <BotonLink color={"success"} direction={"/creategame"} text={"Create Game"}></BotonLink>
+              </div>
                 <div className="game-table">
                 <thead>
                     <tr className='fila'>
