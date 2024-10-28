@@ -68,7 +68,7 @@ export default function AchievementList() {
             </tr>
         );
     });
-        
+
             return (
             <body className="achievement-container">
                 <div className="playercard-container" >
