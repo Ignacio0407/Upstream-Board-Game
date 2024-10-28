@@ -1,9 +1,17 @@
 package es.us.dp1.l4_01_24_25.upstream.statistic;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -14,12 +22,16 @@ import lombok.Setter;
 @Setter
 public class Achievement extends NamedEntity {
     
-    private String nombre;
+    private String name;
     private String description;
     private String badgeImage;
     @Min(0)
     private double threshold;
-    
+     
+    @ManyToMany(mappedBy = "logros")
+    @JsonBackReference
+    List<User> users;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     Metric metric;

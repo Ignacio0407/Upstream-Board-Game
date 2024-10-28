@@ -24,7 +24,6 @@ public class Partida extends NamedEntity {
 	String contrasena;
 	@Enumerated(EnumType.STRING)
 	Estado estado;
-
 	// Esto para jugar en sí
 	@Min(2)
 	@Max(5)

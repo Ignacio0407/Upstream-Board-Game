@@ -18,32 +18,36 @@ export default function AchievementList() {
     const [achievements, setAchievements] = useFetchState([],`/api/v1/achievements`,jwt);
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
-
+    const [userAchievements,setUserAchievements] = useFetchState([],`/api/v1/users/${user.id}/achievements`,jwt)
   
     let roles = []
     if (jwt) {
       roles = getRolesFromJWT(jwt);
     }
 
-
+    const modal = getErrorModal(setVisible, visible, message);
   
     function getRolesFromJWT(jwt) {
       return jwt_decode(jwt).authorities;
     }
 
+    function isAchievedByUser(achievementId) {
+        return userAchievements.some(userAchievement => userAchievement.id === achievementId);
+    }
+
     const achievementList =
     achievements.map((a) => {
         return (
-            <tr key={a.id}>
-            <td className="text-center">{a.name}</td>
-            <td className="text-center"> {a.description} </td>
-            <td className="text-center">
+            <tr key={a.id} className="table-row">
+            <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.name}</td>
+            <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}> {a.description} </td>
+            <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>
             <img src={a.badgeImage ? a.badgeImage : imgnotfound } alt={a.name}
             width="50px"/>
             </td>
-            <td className="text-center"> {a.threshold} </td>
-            <td className="text-center"> {a.metric} </td>
-            <td className="text-center">
+            <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}> {a.threshold} </td>
+            <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}> {a.metric} </td>
+            <td className="table-cell">
             {roles[0] === "ADMIN" && <Button outline color="warning" >
                     <Link
                         to={`/achievements/`+a.id} className="btn sm"
@@ -64,7 +68,7 @@ export default function AchievementList() {
             </tr>
         );
     });
-        const modal = getErrorModal(setVisible, visible, message);
+
             return (
             <body className="achievement-container">
                 <div className="playercard-container" >
@@ -87,16 +91,17 @@ export default function AchievementList() {
                 </div>
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
+                <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
                     <div>
-                    <Table aria-label="achievements" className="mt-4">
+                    
                     <thead>
                         <tr>
-                        <th className="text-center">Name</th>
-                        <th className="text-center">Description</th>
-                        <th className="text-center">Image</th>
-                        <th className="text-center">Threshold</th>
-                        <th className="text-center">Metric</th>
-                        {roles[0] === "ADMIN" &&<th className="text-center">Actions</th>}
+                        <th className="text-center table-row">Name</th>
+                        <th className="text-center table-row">Description</th>
+                        <th className="text-center table-row">Image</th>
+                        <th className="text-center table-row">Threshold</th>
+                        <th className="text-center table-row">Metric</th>
+                        {roles[0] === "ADMIN" &&<th className="text-center table-row">Actions</th>}
                         </tr>
                     </thead>
                     <tbody>{achievementList}</tbody>
@@ -106,7 +111,7 @@ export default function AchievementList() {
                             to={`/achievements/new`} className="btn sm"
                             style={{ textDecoration: "none" }}>Create achievement</Link>
                     </Button>}
-                    </Table>
+
                     </div>
                 </div>
             </body>

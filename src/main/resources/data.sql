@@ -19,17 +19,28 @@ INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,pu
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (16,'NHD9927','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,10,15,200);
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (17,'NBL3749','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,1,5,10);
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (18,'SDL0654','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,2,10,20);
-INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (19,'antlopcub','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,0,2,20);
 
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (1,'Experiencia basica','Si juegas 10 partidas o mas',10.0,'https://cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED');
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (2,'Explorador','Si juegas 25 partidas o mas',25.0,'https://cdn-icons-png.flaticon.com/512/603/603855.png','GAMES_PLAYED');
 INSERT INTO achievement(id,name,description,threshold,metric) VALUES (3,'Experto','Si ganas 20 partidas o mas',20.0 ,'VICTORIES');
-INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (4,'Curioso','Consulta las reglas',11.0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGX5UO6OsMsjDLmXv_q7qwndH59iXU_B-o20u_D3rYDC3Wknxkezh3tbKYF9aqpelKV4o&usqp=CAU', 'EXPLORER');
+INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (4,'Curioso','Consulta las reglas',1, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGX5UO6OsMsjDLmXv_q7qwndH59iXU_B-o20u_D3rYDC3Wknxkezh3tbKYF9aqpelKV4o&usqp=CAU', 'EXPLORER');
+INSERT INTO achievement(id,name,description,threshold,metric) VALUES (5,'Jugon','Si consigues 100 puntos o mas',100.0 ,'TOTAL_POINTS');
 
---ALTER TABLE matches ALTER COLUMN estado SET DATA TYPE VARCHAR(255);
---ALTER TABLE matches ALTER COLUMN fase SET DATA TYPE VARCHAR(255);
+INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 1);
+INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 2);
+INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 3);
 
-INSERT INTO jugador(id, name, color, orden, vivo, puntos) VALUES (2, 'Jugador2', 'ROJO', 3, false, 7);
-INSERT INTO jugador(id, name, color, orden, vivo, puntos) VALUES (4, 'Jugador4', 'AMARILLO', 1, true, 14);
+/** INSERT INTO matches(id,name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (1,'Partida1', 2, '1234', 'Esperando', 1, 1, 1, 1); */
 
-INSERT INTO matches(id,name,contrasena,estado,num_jugadores,ronda,fase,jugador_inicial,jugador_actual) VALUES (1,'Prueba','Pikachu','EN_CURSO',4,2,'MOVIENDO', 2, 4);
+
+INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (2, 'PIEDRA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (3, 'GARZA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (4, 'OSO');
+INSERT INTO tipo_casilla(id, tipo) VALUES (5, 'AGUILA');
+INSERT INTO tipo_casilla(id, tipo) VALUES (6, 'SALTO');
+INSERT INTO tipo_casilla(id, tipo) VALUES (7, 'MAR');
+INSERT INTO tipo_casilla(id, tipo) VALUES (8, 'DESOVE');
+
+INSERT INTO casilla (id,imagen, tipo) VALUES (1,'Hola', 1);
+

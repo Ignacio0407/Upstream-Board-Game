@@ -41,7 +41,7 @@ public class AuthService {
 		Authorities role;
 
 		switch (strRoles.toLowerCase()) {
-		case "admin" -> {
+		case "vet" -> {
                     role = authoritiesService.findByAuthority("ADMIN");
                     user.setAuthority(role);
                     userService.saveUser(user);

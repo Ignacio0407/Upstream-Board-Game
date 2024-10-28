@@ -40,3 +40,23 @@
     align-items: center;
     margin-top: 80px;
 }
+
+.table-row {
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-cell {
+    background-color: white;
+    padding: 10px;
+    text-align: left;
+    border-top: 1px solid black;
+}
+
+.achieved {
+    background-color: rgba(48, 218, 48, 0.356);
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid black;
+}

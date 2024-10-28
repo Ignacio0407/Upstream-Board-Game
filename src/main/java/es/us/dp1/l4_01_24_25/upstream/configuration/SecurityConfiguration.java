@@ -42,7 +42,6 @@ public class SecurityConfiguration {
 			.exceptionHandling((exepciontHandling) -> exepciontHandling.authenticationEntryPoint(unauthorizedHandler))			
 			
 			.authorizeHttpRequests(authorizeRequests ->	authorizeRequests
-			.requestMatchers("/api/v1/developers").permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/resources/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/webjars/**")).permitAll() 
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/static/**")).permitAll() 
@@ -53,9 +52,11 @@ public class SecurityConfiguration {
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/v3/api-docs/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()												
-			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/developers")).permitAll()												
+			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/developers")).permitAll()
+			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements")).permitAll()												
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/plan")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/users/**")).permitAll()
+			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/usersachievements/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).permitAll()
 			.anyRequest().authenticated())					

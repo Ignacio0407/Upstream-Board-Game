@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
+import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
@@ -66,6 +67,12 @@ class UserRestController {
 	public ResponseEntity<List<Authorities>> findAllAuths() {
 		List<Authorities> res = (List<Authorities>) authService.findAll();
 		return new ResponseEntity<>(res, HttpStatus.OK);
+	}
+
+	@GetMapping("/{userId}/achievements")
+	public ResponseEntity<List<Achievement>> findUserAchievements(@PathVariable("userId") int userId) {
+		List<Achievement> l = userService.getUserAchievements(userId);
+		return new ResponseEntity<>(l, HttpStatus.OK);
 	}
 
 	@GetMapping(value = "{id}")
