@@ -18,6 +18,7 @@ export default function Register() {
     let value = target.value;
     if (value === "Back") value = null;
     else setAuthority(value);
+    console.log(value);
     setType(value);
   }
 
