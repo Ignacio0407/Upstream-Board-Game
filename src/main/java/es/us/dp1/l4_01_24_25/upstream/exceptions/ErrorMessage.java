@@ -5,7 +5,7 @@ import java.util.Date;
 import lombok.Getter;
 
 @Getter
-public class ErrorMessage {
+public class ErrorMessage extends Throwable{
 	
 	private int statusCode;
 	private Date timestamp;

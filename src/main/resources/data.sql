@@ -29,7 +29,7 @@ INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES
 --ALTER TABLE matches ALTER COLUMN estado SET DATA TYPE VARCHAR(255);
 --ALTER TABLE matches ALTER COLUMN fase SET DATA TYPE VARCHAR(255);
 
-INSERT INTO jugador(id, name) VALUES (2, 'Jugador2');
-INSERT INTO jugador(id, name) VALUES (4, 'Jugador4');
+INSERT INTO jugador(id, name, color, orden, vivo, puntos) VALUES (2, 'Jugador2', 'ROJO', 3, false, 7);
+INSERT INTO jugador(id, name, color, orden, vivo, puntos) VALUES (4, 'Jugador4', 'AMARILLO', 1, true, 14);
 
-INSERT INTO matches(id,name,contrasena,estado,num_jugadores,ronda,fase,jugador_inicial,jugador_actual) VALUES (1,'Prueba','Pikachu','en_curso',4,2,'moviendo', 2, 4);
+INSERT INTO matches(id,name,contrasena,estado,num_jugadores,ronda,fase,jugador_inicial,jugador_actual) VALUES (1,'Prueba','Pikachu','EN_CURSO',4,2,'MOVIENDO', 2, 4);
