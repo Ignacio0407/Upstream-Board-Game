@@ -8,5 +8,4 @@ import org.springframework.data.repository.CrudRepository;
 public interface CasillaRepository extends CrudRepository<Casilla, Integer> {
     List<Casilla> findAll();
     Optional<Casilla> findById(int id);
-    List<TipoCasilla> findAllType();
 }

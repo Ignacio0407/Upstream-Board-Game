@@ -26,8 +26,4 @@ public class CasillaService {
         return cr.findById(id);
     }
 
-    @Transactional(readOnly = true)
-    public List<TipoCasilla> findAllType() {
-        return cr.findAllType();
-    }
 }

@@ -40,9 +40,4 @@ public class CasillaController {
         return c.get();
     }
 
-    @GetMapping("/type)")
-    public ResponseEntity<List<TipoCasilla>> findAllType() {
-        List<TipoCasilla> res = (List<TipoCasilla>) cs.findAllType();
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
 }

@@ -19,7 +19,6 @@ INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,pu
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (16,'NHD9927','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,10,15,200);
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (17,'NBL3749','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,1,5,10);
 INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (18,'SDL0654','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,2,10,20);
-INSERT INTO appusers(id,username,password,authority,victorias,partidasjugadas,puntostotales) VALUES (19,'antlopcub','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,0,2,20);
 
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (1,'Experiencia basica','Si juegas 10 partidas o mas',10.0,'https://cdn-icons-png.flaticon.com/512/5243/5243423.png','GAMES_PLAYED');
 INSERT INTO achievement(id,name,description,threshold,badge_image,metric) VALUES (2,'Explorador','Si juegas 25 partidas o mas',25.0,'https://cdn-icons-png.flaticon.com/512/603/603855.png','GAMES_PLAYED');
