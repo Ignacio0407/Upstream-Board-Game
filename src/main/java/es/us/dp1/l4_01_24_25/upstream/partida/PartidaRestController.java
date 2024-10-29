@@ -38,11 +38,6 @@ public class PartidaRestController {
         return new ResponseEntity<>(partidaService.getPartidas(), HttpStatus.OK);
     }
 
-    @GetMapping("/ids/{ids}")
-    public ResponseEntity<List<Partida>> findSomePartidasById(@PathVariable("ids") List<Integer> ids) throws ResourceNotFoundException {
-        return new ResponseEntity<>(partidaService.getSomePartidasById(ids), HttpStatus.OK);
-    }
-
     @GetMapping("/names/{names}")
     public ResponseEntity<List<Partida>> findSomePartidasByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
         return new ResponseEntity<>(partidaService.getSomePartidasByName(names), HttpStatus.OK);
@@ -50,25 +45,32 @@ public class PartidaRestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Partida> findPartidaById(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
-        return new ResponseEntity<>(partidaService.getPartidaById(id), HttpStatus.OK);
+        Partida p = partidaService.getPartidaById(id);
+        if (p == null)
+            return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
+        else
+            return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Partida> findPartidaByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
-        return new ResponseEntity<>(partidaService.getPartidaByName(name), HttpStatus.OK);
+        Partida p = partidaService.getPartidaByName(name);
+        if (p == null)
+            return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
+        else
+            return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
-    // PREGUNTAR
+
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     public void deleteAllPartidas() {
         partidaService.deleteAllPartidas();
     }
 
-    // PREGUNTAR
     @DeleteMapping(value = "/ids/{ids}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<MessageResponse> deleteSomePartidasById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
+	public ResponseEntity<Object> deleteSomePartidasById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
 		List<Integer> idsPartidasNoBorradas = new LinkedList<>();
         Integer numPartidasEncontradas = 0;
         for (Integer id : ids) {
@@ -83,37 +85,22 @@ public class PartidaRestController {
             return new ResponseEntity<>(new MessageResponse("Partidas borradas"), HttpStatus.OK);
         }
         else {
-            throw new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese");
-            // Devolver reponseEntity
+            return new ResponseEntity<>(idsPartidasNoBorradas, HttpStatus.NOT_FOUND);
+            // new ErrorMessage(422, new Date(), "La Partida no pudo ser borrada", "Probablemente no existiese")
         }
         
 	}
 
-    // DELETE SOME BY NAME
-
     @DeleteMapping(value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<MessageResponse> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
+	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
 		RestPreconditions.checkNotNull(partidaService.getPartidaById(id), "Partida", "ID", id);
 		if (partidaService.getPartidaById(id) != null) {
 			partidaService.deletePartidaById(id);
 			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.OK);
 		} else
-			throw new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese");
-	}
-
-    @DeleteMapping("/name/{name}")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<MessageResponse> deletePartidaByName(@PathVariable("name") String name) throws ErrorMessage {
-		RestPreconditions.checkNotNull(partidaService.getPartidaByName(name), "Partida", "name", name);
-		if (partidaService.getPartidaByName(name) != null) {
-			partidaService.deletePartidaByName(name);
-			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.OK);
-		} else
-			throw new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese");
+			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
+            "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
 	}
 
 
@@ -124,18 +111,13 @@ public class PartidaRestController {
         return new ResponseEntity<>(partidaService.updatePartidaById(partidaNueva,idToUpdate), HttpStatus.OK);
     }
 
-    @PutMapping("/name/{name}")
-    public ResponseEntity<Partida> updatePartidaByName(@PathVariable("name") String nameToUpdate, 
-    @RequestBody @Valid Partida partidaNueva) {
-        RestPreconditions.checkNotNull(partidaService.getPartidaByName(nameToUpdate), "Partida", "name", nameToUpdate);
-        return new ResponseEntity<>(partidaService.updatePartidaByName(partidaNueva,nameToUpdate), HttpStatus.OK);
-    }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Partida> createPartida(@RequestBody @Valid Partida partida) throws DataAccessException{
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
+
+    // Copy partida
 
 }

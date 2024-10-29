@@ -4,7 +4,7 @@ import jwt_decode from "jwt-decode";
 import '../static/css/dashboard/dashb.css'
 import BotonLink from '../util/BotonLink';
    
-export default function Dashboard() { 
+export default function GameListing() { 
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
 
