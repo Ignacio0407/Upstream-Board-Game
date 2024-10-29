@@ -30,7 +30,20 @@ INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 1);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 2);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 3);
 
-/** INSERT INTO matches(id,name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (1,'Partida1', 2, '1234', 'Esperando', 1, 1, 1, 1); */
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (1, 'Juan', 'ROJO', 1, TRUE, 10);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (2, 'María', 'AZUL', 2, TRUE, 20);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (3, 'Carlos', 'VERDE', 3, FALSE, 15);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (4, 'Ana', 'AMARILLO', 4, TRUE, 25);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (5, 'Luis', 'NARANJA', 5, FALSE, 30);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (6, 'Elena', 'MORADO', 6, TRUE, 5);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (7, 'Pedro', 'NEGRO', 7, TRUE, 12);
+
+INSERT INTO matches(id,name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (1,'Partida1', 2, '1234', 'Esperando', 1, 1, 1, 1);
+INSERT INTO matches(id, name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (2, 'Partida2', 3, 'abcd', 'En curso', 2, 1, 2, 2);
+INSERT INTO matches(id, name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (3, 'Partida3', 4, '5678', 'Finalizada', 3, 2, 3, 3);
+INSERT INTO matches(id, name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (4, 'Partida4', 5, 'efgh', 'Esperando', 1, 1, 4, 4);
+INSERT INTO matches(id, name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (5, 'Partida5', 6, 'ijkl', 'En curso', 2, 1, 5, 5);
+INSERT INTO matches(id, name, numPlayers, password, estado, ronda, fase, jugadorActual, jugadorInicial) VALUES (6, 'Partida6', 7, 'mnop', 'Finalizada', 3, 2, 6, 6);
 
 
 INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
