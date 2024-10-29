@@ -3,8 +3,10 @@ package es.us.dp1.l4_01_24_25.upstream.salmon;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class SalmonService {
 
     SalmonRepository rs;
