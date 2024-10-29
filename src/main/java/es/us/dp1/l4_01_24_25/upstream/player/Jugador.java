@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "jugador") // -> Esto solo tiene la clase padre
+@Table(name = "player") // -> Esto solo tiene la clase padre
 public class Jugador extends BaseEntity{
     
     String name;
