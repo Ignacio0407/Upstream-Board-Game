@@ -19,7 +19,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "matches")
 public class Partida extends NamedEntity {
-
+	
 	// Esto para unirse
 	String contrasena;
 	@Enumerated(EnumType.STRING)
