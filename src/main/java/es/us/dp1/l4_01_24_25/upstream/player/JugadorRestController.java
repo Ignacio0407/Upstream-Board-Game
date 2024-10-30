@@ -24,7 +24,7 @@ import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/v1/matches")
+@RequestMapping("api/v1/players")
 public class JugadorRestController {
     
     private final JugadorService jugadorService;
