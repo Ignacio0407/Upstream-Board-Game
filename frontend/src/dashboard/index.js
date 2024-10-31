@@ -19,12 +19,12 @@ export default function Dashboard() {
     }, [jwt])
 
     const matchesList = 
-      matches.map((d) => {
+      matches.map((match) => {
         return (
-            <tr key={d.nombre} className='fila'>
-                <td className='celda'>{d.nombre}</td>
-                <td className='celda'>{d.jugadores}/{nJugadores}</td>
-                <td className='celda'>{d.unirse}</td>
+            <tr key={match.nombre} className='fila'>
+                <td className='celda'>{match.nombre}</td>
+                <td className='celda'>{match.jugadores}/{nJugadores}</td>
+                <td className='celda'>{match.unirse}</td>
             </tr>
         );
       })
@@ -32,7 +32,6 @@ export default function Dashboard() {
       const nJugadores = 5
 
       
-
     return ( 
         <> 
         <div className="dashboard-page-container">
