@@ -74,13 +74,13 @@ export default function AchievementList() {
                                     {finalUser.username}
                                 </h2>
                             <tr className="text-playercard">
-                                Victorias totales: {finalUser.victorias}
+                                Total wins: {finalUser.victories}
                             </tr>
                             <tr className="text-playercard">
-                                Partidas totales: {finalUser.partidasjugadas}
+                                Total games: {finalUser.playedgames}
                             </tr>
                             <tr className="text-playercard">
-                                Puntos totales: {finalUser.puntostotales}
+                                Total points: {finalUser.totalpoints}
                             </tr>
 
                         </Table>
@@ -89,6 +89,7 @@ export default function AchievementList() {
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
                 <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
+                {<h1></h1>/*Espacio en blanco*/} 
                     <div>
                     
                     <thead>

@@ -24,11 +24,11 @@ public class UserAchievement {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="users_id", nullable = false)
+    @JoinColumn(name="user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name="logros_id", nullable = false)
+    @JoinColumn(name="achievement_id", nullable = false)
     private Achievement achievement;
 
     public UserAchievement() {}

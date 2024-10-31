@@ -15,8 +15,8 @@
  */
 package es.us.dp1.l4_01_24_25.upstream.user;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
-import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementRepository;
-import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
 /*
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
@@ -40,10 +40,12 @@ import jakarta.validation.Valid;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final UserAchievementRepository userAchievementRepository;
 
 	@Autowired
-	public UserService(UserRepository userRepository) {
+	public UserService(UserRepository userRepository, UserAchievementRepository userAchievementRepository) {
 		this.userRepository = userRepository;
+		this.userAchievementRepository = userAchievementRepository;
 	}
 
 	@Transactional
@@ -105,8 +107,11 @@ public class UserService {
 	
 	@Transactional
 	public List<Achievement> getUserAchievements(Integer userId) {
-		Optional<User> u = userRepository.findById(userId);
-		return u.get().getLogros();
+		return userAchievementRepository
+			.findByUserId(userId)
+			.stream()
+			.map(userAchivement -> userAchivement.getAchievement())
+			.toList();
 	}
 
 }

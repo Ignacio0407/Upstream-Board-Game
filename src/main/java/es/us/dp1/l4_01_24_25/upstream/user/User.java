@@ -30,14 +30,9 @@ public class User extends BaseEntity {
 	@Column(unique = true)
 	String username;
 	String password;
-	Integer victorias;
-	Integer partidasjugadas;
-	Integer puntostotales;
-
-	
-	@ManyToMany
-	@JsonManagedReference
-	List<Achievement> logros;
+	Integer victories;
+	Integer playedgames;
+	Integer totalpoints;
 
 	@NotNull
 	@ManyToOne(optional = false)
@@ -55,10 +50,6 @@ public class User extends BaseEntity {
 				cond = true;
 		}
 		return cond;
-	}
-
-	public void addAchievement(Achievement a) {
-		if(!logros.contains(a)) logros.add(a);
 	}
 
 }
