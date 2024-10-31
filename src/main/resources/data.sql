@@ -30,21 +30,6 @@ INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 1);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 2);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 3);
 
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (1, 'Juan', 'ROJO', 1, TRUE, 10);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (2, 'María', 'MORADO', 2, TRUE, 20);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (3, 'Carlos', 'VERDE', 3, FALSE, 15);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (4, 'Ana', 'AMARILLO', 4, TRUE, 25);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (5, 'Luis', 'ROJO', 5, FALSE, 30);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (6, 'Elena', 'MORADO', 6, TRUE, 5);
-INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (7, 'Pedro', 'AMARILLO', 7, TRUE, 12);
-
-INSERT INTO matches(id,name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (1,'Unete que es gratis', 2, '1234', 'ESPERANDO', 1, 1, 1, 1);
-INSERT INTO matches(id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (2, 'Aqui perderas!', 3, 'abcd', 'EN_CURSO', 2, 1, 2, 2);
-INSERT INTO matches(id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (3, 'No tengo amigos pa jugar', 4, '5678', 'FINALIZADA', 3, 2, 3, 3);
-INSERT INTO matches(id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (4, 'Que pasa monada', 5, 'efgh', 'ESPERANDO', 1, 1, 4, 4);
-INSERT INTO matches(id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (5, 'Nombre de partida', 4, 'ijkl', 'EN_CURSO', 2, 1, 5, 5);
-INSERT INTO matches(id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_actual, jugador_inicial) VALUES (6, 'Holi', 3, 'mnop', 'FINALIZADA', 3, 2, 6, 6);
-
 
 INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
 INSERT INTO tipo_casilla(id, tipo) VALUES (2, 'PIEDRA');

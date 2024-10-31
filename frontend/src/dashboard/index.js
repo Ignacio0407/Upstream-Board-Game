@@ -21,7 +21,7 @@ export default function Dashboard() {
     const nJugadores = 5
 
     const matchesList = 
-      matches.map((d) => {
+      matches.map((match) => {
         return (
             <tr key={d.nombre} className='fila'>
                 <td className='celda'>{d.name}</td>
