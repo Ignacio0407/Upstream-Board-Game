@@ -115,6 +115,7 @@ public class PartidaRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Partida> createPartida(@RequestBody @Valid Partida partida) throws DataAccessException{
+        System.out.println(partida);
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
 

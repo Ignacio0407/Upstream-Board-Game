@@ -30,6 +30,7 @@ INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 1);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 2);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 3);
 
+
 INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
 INSERT INTO tipo_casilla(id, tipo) VALUES (2, 'PIEDRA');
 INSERT INTO tipo_casilla(id, tipo) VALUES (3, 'GARZA');
