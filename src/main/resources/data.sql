@@ -30,6 +30,19 @@ INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 1);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 2);
 INSERT INTO appusers_logros(users_id, logros_id) VALUES (4, 3);
 
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (1, 'Juan', 'ROJO', 1, TRUE, 10);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (2, 'Maria', 'ROJO', 2, TRUE, 20);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (3, 'Carlos', 'VERDE', 3, FALSE, 15);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (4, 'Ana', 'AMARILLO', 4, TRUE, 25);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (5, 'Luis', 'VERDE', 5, FALSE, 30);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (6, 'Elena', 'MORADO', 6, TRUE, 5);
+INSERT INTO player (id, name, color, orden, vivo, puntos) VALUES (7, 'Pedro', 'BLANCO', 7, TRUE, 12);
+
+INSERT INTO matches (id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (1, 'Partida1', 2, '1234', 'ESPERANDO', 1, 'MOVIENDO', 1, 1);
+INSERT INTO matches (id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (2, 'Partida2', 3, 'abcd', 'EN_CURSO', 2, 'CASILLAS', 2, 2);
+INSERT INTO matches (id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (3, 'Partida3', 4, '5678', 'FINALIZADA', 3, 'MOVIENDO', 3, 3);
+INSERT INTO matches (id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (4, 'Partida4', 5, 'efgh', 'ESPERANDO', 1, 'CASILLAS', 4, 4);
+INSERT INTO matches (id, name, num_jugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (5, 'Partida5', 2, 'ijkl', 'EN_CURSO', 2, 'MOVIENDO', 5, 5);
 
 INSERT INTO tipo_casilla(id, tipo) VALUES (1, 'AGUA');
 INSERT INTO tipo_casilla(id, tipo) VALUES (2, 'PIEDRA');
