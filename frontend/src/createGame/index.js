@@ -13,6 +13,7 @@ export default function CreateGame() {
     const emptyMatch = {
         name: "",
         contrasena: "",
+        estado: "ESPERANDO",
         num_jugadores: 1,
         ronda: 0,
         fase: "CASILLAS",
