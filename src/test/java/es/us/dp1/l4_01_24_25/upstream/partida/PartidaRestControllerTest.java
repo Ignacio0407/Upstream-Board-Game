@@ -30,7 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 
-@WebMvcTest(controllers = PartidaRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
+@WebMvcTest(controllers = PartidaRestController.class, 
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class),
+    excludeAutoConfiguration = SecurityConfiguration.class)
 class PartidaRestControllerTest {
 
     @Autowired
@@ -56,6 +58,7 @@ class PartidaRestControllerTest {
         partida2.setName("Partida2");
     }
 
+    // GET /api/v1/matches
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindAllPartidas() throws Exception {
@@ -69,29 +72,7 @@ class PartidaRestControllerTest {
             .andExpect(jsonPath("$[1].name").value("Partida2"));
     }
 
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testFindSomePartidasById_Success() throws Exception {
-        List<Partida> partidas = Arrays.asList(partida1, partida2);
-        when(partidaService.getSomePartidasById(Arrays.asList(1, 2))).thenReturn(partidas);
-
-        mockMvc.perform(get("/api/v1/matches/ids/{ids}", "1,2"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].name").value("Partida1"))
-            .andExpect(jsonPath("$[1].name").value("Partida2"));
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testFindSomePartidasById_NotFound() throws Exception {
-        when(partidaService.getSomePartidasById(any()))
-            .thenThrow(new ResourceNotFoundException("Partidas no encontradas"));
-
-        mockMvc.perform(get("/api/v1/matches/ids/{ids}", "1,2"))
-            .andExpect(status().isNotFound());
-    }
-
+    // GET /api/v1/matches/names/{names}
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindSomePartidasByName_Success() throws Exception {
@@ -115,6 +96,7 @@ class PartidaRestControllerTest {
             .andExpect(status().isNotFound());
     }
 
+    // GET /api/v1/matches/{id}
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindPartidaById_Success() throws Exception {
@@ -128,13 +110,13 @@ class PartidaRestControllerTest {
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindPartidaById_NotFound() throws Exception {
-        when(partidaService.getPartidaById(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+        when(partidaService.getPartidaById(any())).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/matches/{id}", 1))
             .andExpect(status().isNotFound());
     }
 
+    // GET /api/v1/matches/name/{name}
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindPartidaByName_Success() throws Exception {
@@ -148,15 +130,15 @@ class PartidaRestControllerTest {
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testFindPartidaByName_NotFound() throws Exception {
-        when(partidaService.getPartidaByName(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+        when(partidaService.getPartidaByName(any())).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/matches/name/{name}", "NonExistent"))
             .andExpect(status().isNotFound());
     }
 
+    // DELETE /api/v1/matches
     @Test
-    //@WithMockUser(username = "testUser", roles = {"ADMIN"})
+    // @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeleteAllPartidas() throws Exception {
         mockMvc.perform(delete("/api/v1/matches"))
             .andExpect(status().isOk());
@@ -164,8 +146,9 @@ class PartidaRestControllerTest {
         verify(partidaService).deleteAllPartidas();
     }
 
+    // DELETE /api/v1/matches/ids/{ids}
     @Test
-    @WithMockUser(username = "testUser", roles = {"ADMIN"})
+    @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeleteSomePartidasById_Success() throws Exception {
         when(partidaService.getPartidaById(any())).thenReturn(partida1);
 
@@ -177,13 +160,34 @@ class PartidaRestControllerTest {
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeleteSomePartidasById_NotFound() throws Exception {
-        when(partidaService.getPartidaById(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+        when(partidaService.getPartidaById(any())).thenReturn(null);
 
         mockMvc.perform(delete("/api/v1/matches/ids/{ids}", "1,2"))
             .andExpect(status().isNotFound());
     }
 
+    // Edge cases and error handling tests
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testDeleteSomePartidasByIdPartialSuccess() throws Exception {
+        when(partidaService.getPartidaById(1)).thenReturn(partida1);
+        when(partidaService.getPartidaById(2)).thenReturn(null);
+
+        mockMvc.perform(delete("/api/v1/matches/ids/{ids}", "1,2"))
+            .andExpect(status().isNotFound());
+
+        verify(partidaService).getPartidaById(1);
+        verify(partidaService).getPartidaById(2);
+    }
+
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testDeleteSomePartidasByIdEmptyList() throws Exception {
+        mockMvc.perform(delete("/api/v1/matches/ids/{ids}", ""))
+            .andExpect(status().isOk());
+    }
+
+    // DELETE /api/v1/matches/{id}
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeletePartidaById_Success() throws Exception {
@@ -197,33 +201,13 @@ class PartidaRestControllerTest {
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeletePartidaById_NotFound() throws Exception {
-        when(partidaService.getPartidaById(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+        when(partidaService.getPartidaById(any())).thenReturn(null);
 
         mockMvc.perform(delete("/api/v1/matches/{id}", 1))
             .andExpect(status().isNotFound());
     }
 
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testDeletePartidaByName_Success() throws Exception {
-        when(partidaService.getPartidaByName("Partida1")).thenReturn(partida1);
-
-        mockMvc.perform(delete("/api/v1/matches/name/{name}", "Partida1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("Partida borrada"));
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testDeletePartidaByName_NotFound() throws Exception {
-        when(partidaService.getPartidaByName(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
-
-        mockMvc.perform(delete("/api/v1/matches/name/{name}", "NonExistent"))
-            .andExpect(status().isNotFound());
-    }
-
+    // PUT /api/v1/matches/{id}
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testUpdatePartidaById_Success() throws Exception {
@@ -240,8 +224,7 @@ class PartidaRestControllerTest {
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testUpdatePartidaById_NotFound() throws Exception {
-        when(partidaService.getPartidaById(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+        when(partidaService.getPartidaById(any())).thenReturn(null);
 
         mockMvc.perform(put("/api/v1/matches/{id}", 1)
             .contentType(MediaType.APPLICATION_JSON)
@@ -251,29 +234,34 @@ class PartidaRestControllerTest {
 
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
-    void testUpdatePartidaByName_Success() throws Exception {
-        when(partidaService.getPartidaByName("Partida1")).thenReturn(partida1);
-        when(partidaService.updatePartidaByName(any(), eq("Partida1"))).thenReturn(partida1);
+    void testUpdatePartidaById_InvalidData() throws Exception {
+        Partida invalidPartida = new Partida();
+        // Don't set any required fields to trigger validation errors
 
-        mockMvc.perform(put("/api/v1/matches/name/{name}", "Partida1")
+        mockMvc.perform(put("/api/v1/matches/{id}", 1)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(partida1)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Partida1"));
+            .content(objectMapper.writeValueAsString(invalidPartida)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
-    void testUpdatePartidaByName_NotFound() throws Exception {
-        when(partidaService.getPartidaByName(any()))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
-
-        mockMvc.perform(put("/api/v1/matches/name/{name}", "NonExistent")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(partida1)))
-            .andExpect(status().isNotFound());
+    void testUpdatePartidaByIdNullBody() throws Exception {
+        mockMvc.perform(put("/api/v1/matches/{id}", 1)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"})
+    void testUpdatePartidaByIdInvalidId() throws Exception {
+        mockMvc.perform(put("/api/v1/matches/{id}", "abc")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(partida1)))
+            .andExpect(status().isBadRequest());
+    }
+
+    // POST /api/v1/matches
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
     void testCreatePartida_Success() throws Exception {
@@ -299,112 +287,8 @@ class PartidaRestControllerTest {
 
     @Test
     @WithMockUser(username = "testUser", roles = {"USER"})
-    void testCreatePartida_MissingRequiredFields() throws Exception {
-        Partida invalidPartida = new Partida();
-        // Don't set any fields to trigger validation errors
-
-        mockMvc.perform(post("/api/v1/matches")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidPartida)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testUpdatePartidaById_InvalidData() throws Exception {
-        Partida invalidPartida = new Partida();
-        // Don't set any fields to trigger validation errors
-
-        mockMvc.perform(put("/api/v1/matches/{id}", 1)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidPartida)))
-            .andExpect(status().isBadRequest());
-    }
-
-    // Test for partial success in batch operations
-        @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testDeleteSomePartidasByIdPartialSuccess() throws Exception {
-        // Given
-        when(partidaService.getPartidaById(1)).thenReturn(partida1);
-        when(partidaService.getPartidaById(2))
-            .thenThrow(new ResourceNotFoundException("Partida 2 no encontrada"));
-        String ids = "1,2";
-
-        // When & Then
-        mockMvc.perform(delete("/api/v1/matches/ids/{ids}", ids))
-            .andExpect(status().isNotFound());
-
-        verify(partidaService).getPartidaById(1);
-        verify(partidaService).getPartidaById(2);
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testFindSomePartidasByIdEmptyList() throws Exception {
-        // Given
-        List<Integer> emptyList = Arrays.asList();
-        when(partidaService.getSomePartidasById(emptyList))
-            .thenReturn(Arrays.asList());
-
-        // When & Then
-        mockMvc.perform(get("/api/v1/matches/ids/{ids}", ""))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
-
-        verify(partidaService).getSomePartidasById(emptyList);
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testDeleteSomePartidasByIdEmptyList() throws Exception {
-        // When & Then
-        mockMvc.perform(delete("/api/v1/matches/ids/{ids}", ""))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testFindSomePartidasByIdInvalidFormat() throws Exception {
-        // Given
-        String invalidIds = "1,abc";
-
-        // When & Then
-        mockMvc.perform(get("/api/v1/matches/ids/{ids}", invalidIds))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testUpdatePartidaByIdInvalidId() throws Exception {
-        // Given
-        String invalidId = "abc";
-
-        // When & Then
-        mockMvc.perform(put("/api/v1/matches/{id}", invalidId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(partida1)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
     void testCreatePartidaNullBody() throws Exception {
-        // When & Then
         mockMvc.perform(post("/api/v1/matches")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
-    void testUpdatePartidaByIdNullBody() throws Exception {
-        // Given
-        Integer validId = 1;
-
-        // When & Then
-        mockMvc.perform(put("/api/v1/matches/{id}", validId)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest());
     }

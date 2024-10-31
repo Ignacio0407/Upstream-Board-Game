@@ -2,71 +2,38 @@ import React, { useState, useEffect } from 'react';
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 import '../static/css/dashboard/dashb.css'
-import BotonLink from '../util/BotonLink';
+import BotonLink, { BotonLinkOutline } from "../util/BotonLink";
+import useFetchState from '../util/useFetchState';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
     const [matches, setMatches] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
+    const [matches, setMatches] = useFetchState([],`/api/v1/matches`,jwt);
+    const user = tokenService.getUser()
 
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
         }
+        console.log(matches)
     }, [jwt])
 
-    const games = [
-        {
-          nombre: "Partida 1",
-          jugadores: 2,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 2",
-          jugadores: 4,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 3",
-          jugadores: 3,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 4",
-          jugadores: 5,
-          unirse: <BotonLink color={"success"} direction={""} text={"Game Full!"}></BotonLink>
-        },
-        {
-          nombre: "Partida 5",
-          jugadores: 1,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 6",
-          jugadores: 4,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 7",
-          jugadores: 2,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-        {
-          nombre: "Partida 8",
-          jugadores: 3,
-          unirse: <BotonLink color={"success"} direction={""} text={"Join"}></BotonLink>
-        },
-      ];
+    const nJugadores = 5
 
-      const nJugadores = 5
-
-      const gamesList = 
-      games.map((d) => {
+    const matchesList = 
+      matches.map((match) => {
         return (
             <tr key={d.nombre} className='fila'>
-                <td className='celda'>{d.nombre}</td>
-                <td className='celda'>{d.jugadores}/{nJugadores}</td>
-                <td className='celda'>{d.unirse}</td>
+                <td className='celda'>{d.name}</td>
+                <td className='celda'>{d.numJugadores}/{nJugadores}</td>
+                <td className='celda'>{d.estado}</td>
+                <td className='celda'>{d.estado === 'ESPERANDO' &&
+                <BotonLink color={"success"} direction={'/matches/'+d.id} text={"Join game"}
+                />}</td>
+                <td className='celda'>{(d.estado === 'EN_CURSO' || d.estado === 'ESPERANDO') &&
+                <BotonLink color={"warning"} direction={'/matches/'+d.id} text={"Spectate game"}
+                />}</td>
             </tr>
         );
       })
@@ -86,10 +53,12 @@ export default function Dashboard() {
                     <tr className='fila'>
                         <th className='cabeza'>Game</th>
                         <th className='cabeza'>Players</th>
+                        <th className='cabeza'>State</th>
                         <th className='cabeza'>Join</th>
+                        <th className='cabeza'>Spectate</th>
                     </tr>
                 </thead>
-                <tbody>{gamesList}</tbody>
+                <tbody>{matchesList}</tbody>
                 </div>
             </div>
         </div> 
