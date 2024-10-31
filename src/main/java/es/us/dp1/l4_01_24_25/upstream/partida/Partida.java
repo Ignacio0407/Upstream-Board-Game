@@ -1,5 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.partida;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
 import jakarta.persistence.Column;
@@ -35,9 +38,11 @@ public class Partida extends NamedEntity {
 	
 	@OneToOne
 	@JoinColumn(name="jugador_inicial")
+	@JsonManagedReference
 	Jugador jugadorInicial;
 	@OneToOne
 	@JoinColumn(name="jugador_actual")
+	@JsonManagedReference
 	Jugador jugadorActual;
 
 }
