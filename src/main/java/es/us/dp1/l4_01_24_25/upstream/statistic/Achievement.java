@@ -27,10 +27,6 @@ public class Achievement extends NamedEntity {
     private String badgeImage;
     @Min(0)
     private double threshold;
-     
-    @ManyToMany(mappedBy = "logros")
-    @JsonBackReference
-    List<User> users;
 
     @Enumerated(EnumType.STRING)
     @NotNull

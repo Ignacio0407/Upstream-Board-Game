@@ -6,7 +6,7 @@ public class AUTotalPoints implements AchievementStrategy{
 
     @Override
     public boolean isUnlockedByUser(User user, Achievement achievement) {
-        return user.getPuntostotales() >= achievement.getThreshold();
+        return user.getTotalpoints() >= achievement.getThreshold();
     }
     
 }
