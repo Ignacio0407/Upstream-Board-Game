@@ -28,6 +28,7 @@ public class JugadorService {
         return jugadorRepository.findAll();
     }
 
+
     // COMPLETAR MANEJO ERRORES
     @Transactional(readOnly = true)
     public List<Jugador> getSomeJugadoresById(List<Integer> ids) {
@@ -112,9 +113,9 @@ public class JugadorService {
 
 
     @Transactional
-	public Jugador saveJugador(Jugador Jugador) throws DataAccessException {
-		jugadorRepository.save(Jugador);
-		return Jugador;
+	public Jugador saveJugador(Jugador jugador) throws DataAccessException {
+		jugadorRepository.save(jugador);
+		return jugador;
 	}
 
     @Transactional

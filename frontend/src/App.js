@@ -19,6 +19,7 @@ import AchievementEdit from "./achievements/achievementEdit";
 import Dashboard from "./dashboard"
 import CreateGame from "./createGame";
 import Rules from "./rules";
+import Match from "./match"
 
 
 function ErrorFallback({ error, resetErrorBoundary }) {
@@ -60,6 +61,7 @@ function App() {
             /></PrivateRoute>} />
           <Route path="/achievements/:achievementId" exact={true} element={<PrivateRoute><AchievementEdit
             /></PrivateRoute>} />     
+          <Route path="/matches/:matchId" exact={true} element={<PrivateRoute><Match/></PrivateRoute>}></Route>
 
           <Route path="/creategame/" element={<CreateGame />} />   
           
@@ -69,6 +71,7 @@ function App() {
     if (role === "PLAYER") {
       ownerRoutes = (
         <>
+          <Route path="/matches/:matchId" exact={true} element={<PrivateRoute><Match/></PrivateRoute>}></Route>
           <Route path="/achievements/" exact={true} element={<PrivateRoute><AchievementList
             /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />  

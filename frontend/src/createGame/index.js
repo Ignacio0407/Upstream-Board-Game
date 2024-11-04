@@ -8,27 +8,23 @@ import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
 
 export default function CreateGame() { 
+    
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
+    const user = tokenService.getUser()
+    const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const emptyMatch = {
         name: "",
         contrasena: "",
         estado: "ESPERANDO",
-        num_jugadores: 1,
+        numjugadores: 1,
         ronda: 0,
         fase: "CASILLAS",
         jugador_inicial: 1,
         jugador_actual: 1,
     }
-    /**
-    const [match,setMatch] = useFetchState(
-        emptyMatch,
-        `/api/v1/matches`,
-        jwt,
-    )
-    */
    const [match,setMatch] = useState(emptyMatch)    
-    const navigate = useNavigate();
+   const navigate = useNavigate();
 
     useEffect(() => {
         if (jwt) {
@@ -36,6 +32,7 @@ export default function CreateGame() {
         }
     }, [jwt])
 
+    let matchId;
     function handleSubmit(event){
         event.preventDefault();
         console.log(match);
@@ -49,47 +46,42 @@ export default function CreateGame() {
               },
               body: JSON.stringify(match),
         }).then((response) => response.text())
-    }
-
-    /**
-    return ( 
-        <> 
-        <div className='createGame-page-container'>
-            <h1 className='title-creategame'>
-                Create a Game
-            </h1>
-
-        <div className='inputs-table'>
-            <td className='td2'>
-                Game's name: 
-            </td>   
-            <td><input type= 'text' className='input' defaultValue={`Sala de ${username}`} ></input></td>
-            <tr>
-                <td className='td2'>
-                Password: 
-               
-                </td>
-                <td>
-                <input className='input' type='password'></input>
-                </td>
-            </tr>
-        </div>
-        <div className='botonCreate'>
-            
-        <Button color={'success'}> 
-        <Link 
-          to={""} className="btn sm"                
-          style={{ textDecoration: "none", color: "white", width: 300,height:50, fontSize:20, textAlign:'center'}}>
-            {"Create"}
-        </Link> 
-        </Button>
-
-        </div>
-        </div> 
-        </> 
+        .then(
+        data => {
+          const matchCreada = JSON.parse(data)
+          matchId = matchCreada.id;
+          
+          
+          const emptyPlayer = {
+              name: finalUser.username,
+              color: "ROJO",
+              orden: 0,
+              vivo: true,
+              puntos: 0,
+              usuario: finalUser,
+              partida: matchCreada,
+          };
+          console.log(JSON.stringify(emptyPlayer))
          
+          return fetch("/api/v1/players", {
+              method: "POST",
+              headers: {
+                  Authorization: `Bearer ${jwt}`,
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(emptyPlayer),
+          });
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log("Jugador creado:", data);
+          navigate(`/matches/${matchId}`)
 
-); */
+      })
+      .catch(error => console.error("Error:", error));
+  }
+        
 
 function handleChange(event) {
     const target = event.target;
