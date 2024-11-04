@@ -62,4 +62,9 @@
   .botones-juntos > * {
     flex-shrink: 0; /* Evita que los botones se reduzcan */
   }
+
   
+.crear-partida {
+    display: flex;
+    justify-content: center;
+  }

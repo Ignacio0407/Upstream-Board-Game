@@ -9,6 +9,7 @@ import { fetchById, fetchByName, fetchByNames } from '../util/fetchers';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
+    const [matches, setMatches] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);
     const user = tokenService.getUser()
@@ -42,15 +43,11 @@ export default function Dashboard() {
         <div className="dashboard-page-container">
             <h1 className='welcome'>
             Game Listing for {username}
-            <div>
-            <SearchBar
-            fetchById={(id) => fetchById(`/partidas/${id}`)}
-            fetchByName={(name) => fetchByName(`/partidas/name/${name}`)}
-            fetchByNames={(names) => fetchByNames(`/partidas/names/${names.join(",")}`)}
-            />
-          </div>
             </h1>
             <div>
+            <div className='crear-partida'>
+              <BotonLink color={"success"} direction={"/creategame"} text={"Create Game"}></BotonLink>
+              </div>
                 <div className="game-table">
                 <thead>
                     <tr className='fila'>

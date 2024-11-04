@@ -61,7 +61,9 @@ function App() {
           <Route path="/achievements/:achievementId" exact={true} element={<PrivateRoute><AchievementEdit
             /></PrivateRoute>} />     
 
-          <Route path="/creategame/" element={<CreateGame />} />     
+          <Route path="/creategame/" element={<CreateGame />} />   
+          
+          <Route path="/docs" element={<SwaggerDocs />} />  
         </>)
     }
     if (role === "PLAYER") {
@@ -100,7 +102,6 @@ function App() {
         <Routes>
           <Route path="/" exact={true} element={<Home />} />
           <Route path="/plans" element={<PlanList />} />
-          <Route path="/docs" element={<SwaggerDocs />} />
           {publicRoutes}
           {userRoutes}
           {adminRoutes}
