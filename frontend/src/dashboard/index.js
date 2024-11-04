@@ -20,6 +20,32 @@ export default function Dashboard() {
         console.log(matches)
     }, [jwt])
 
+
+    useEffect(() => {
+        // Función para obtener los partidos desde la API
+        const fetchMatches = async () => {
+            const response = await fetch('/api/v1/matches', {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setMatches(data); // Actualiza el estado con los nuevos partidos
+        };
+
+        // Inicializa el fetch de partidos
+        fetchMatches();
+
+        // Establece un intervalo para actualizar los partidos cada 10 segundos
+        const intervalId = setInterval(fetchMatches, 10000); // Actualiza cada 10 segundos
+
+        // Limpia el intervalo cuando el componente se desmonta
+        return () => clearInterval(intervalId);
+    }, [jwt]); // Solo se ejecuta cuando jwt cambia
+
     const matchesList = 
       matches.map((match) => {
         return (
