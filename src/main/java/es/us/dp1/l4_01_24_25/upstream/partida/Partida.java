@@ -9,6 +9,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -21,6 +23,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "matches")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Partida extends NamedEntity {
 	
 	// Esto para unirse
@@ -28,21 +31,18 @@ public class Partida extends NamedEntity {
 	@Enumerated(EnumType.STRING)
 	Estado estado;
 	// Esto para jugar en sí
-	@Min(2)
+	@Min(1)
 	@Max(5)
-	@Column(name = "num_jugadores")
-	Integer numJugadores;
+	Integer numjugadores;
     Integer ronda;
     @Enumerated(EnumType.STRING)
 	Fase fase;
 	
 	@OneToOne
 	@JoinColumn(name="jugador_inicial")
-	@JsonManagedReference
-	Jugador jugadorInicial;
+	Jugador jugadorinicial;
 	@OneToOne
 	@JoinColumn(name="jugador_actual")
-	@JsonManagedReference
-	Jugador jugadorActual;
+	Jugador jugadoractual;
 
 }

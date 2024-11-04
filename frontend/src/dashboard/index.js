@@ -25,7 +25,7 @@ export default function Dashboard() {
         return (
             <tr key={match.nombre} className='fila'>
                 <td className='celda'>{match.name}</td>
-                <td className='celda'>{match.numJugadores}</td>
+                <td className='celda'>{match.numjugadores}</td>
                 <td className='celda'>{match.estado}</td>
                 <td className='celda'>{match.estado === 'ESPERANDO' &&
                 <BotonLink color={"success"} direction={'/matches/'+match.id} text={"Join game"}
