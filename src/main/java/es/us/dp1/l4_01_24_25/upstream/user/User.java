@@ -2,7 +2,9 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
@@ -29,6 +31,7 @@ public class User extends BaseEntity {
 
 	@Column(unique = true)
 	String username;
+	@JsonIgnore
 	String password;
 	Integer victories;
 	Integer playedgames;
@@ -37,6 +40,7 @@ public class User extends BaseEntity {
 	@NotNull
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "authority")
+	@JsonSerialize(using = AuthoritySerializer.class)
 	Authorities authority;
 
 	public Boolean hasAuthority(String auth) {
