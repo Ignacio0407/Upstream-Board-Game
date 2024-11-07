@@ -1,5 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -23,7 +25,7 @@ import lombok.Setter;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "player") // -> Esto solo tiene la clase padre
-public class Jugador extends BaseEntity{
+public class Jugador extends BaseEntity implements Serializable{
     
     String name;
     @Enumerated(EnumType.STRING)

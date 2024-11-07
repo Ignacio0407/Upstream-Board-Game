@@ -9,7 +9,6 @@ import { fetchById, fetchByName, fetchByNames } from '../util/fetchers';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
-    const [matches, setMatches] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);
     const user = tokenService.getUser()

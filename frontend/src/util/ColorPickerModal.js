@@ -1,26 +1,33 @@
 // ColorPickerModal.js
 import React, { useState } from 'react';
+import {RgbToColor} from './ColorParser';
 
-function ColorPickerModal({ onColorSelect }) {
+function ColorPickerModal({ onColorSelect , takenColors}) {
     // Estado para el color seleccionado y para la visibilidad del modal
     const [isVisible, setIsVisible] = useState(true);
     const [selectedColor, setSelectedColor] = useState(null);
+    
 
     // Array de colores disponibles
     const colors = ['#FFFF00', '#FF0000', '#008F39', '#572364', '#FFFFFF'];
 
     // Maneja la selección de color cuando se hace clic en un botón
     const handleColorClick = (color) => {
-        if(color === '#FFFFFF') {
-            setSelectedColor('BLANCO')
+        
+        if (!takenColors.includes(color)) {
+            setSelectedColor(color); // Guarda el color seleccionado si está disponible
+            console.log(`Color seleccionado: ${color}`); // Muestra el color seleccionado en consola
+            console.log(takenColors);
         }
+          
         setSelectedColor(color); // Guarda el color seleccionado
     };
 
     // Maneja el botón "Aceptar"
     const handleAccept = () => {
         if (selectedColor) {
-            onColorSelect(selectedColor);  // Llama a la función del componente padre con el color seleccionado
+            const colorTransformed = RgbToColor(selectedColor); // Transforma el color RGB a texto
+            onColorSelect(colorTransformed);  // Llama a la función del componente padre con el color seleccionado
             setIsVisible(false);           // Oculta el modal
         }
     };
@@ -39,9 +46,17 @@ function ColorPickerModal({ onColorSelect }) {
                                 ...styles.colorButton,
                                 backgroundColor: color,
                                 border: color === selectedColor ? '3px solid black' : '1px solid #ccc',
+                                cursor: takenColors.includes(color) ? 'not-allowed' : 'pointer',
+                                position: 'relative', // Para superponer la cruz
                             }}
                             onClick={() => handleColorClick(color)}
-                        />
+                            disabled={takenColors.includes(color)} // Deshabilita el botón si el color está tomado
+                        >
+                            {/* Si el color está tomado, muestra una cruz */}
+                            {takenColors.includes(color) && (
+                                <div style={styles.crossOverlay}>✖</div>
+                            )}
+                        </button>
                     ))}
                 </div>
                 <button onClick={handleAccept} style={styles.acceptButton}>
@@ -52,7 +67,6 @@ function ColorPickerModal({ onColorSelect }) {
     );
 }
 
-// Estilos en línea para el modal y botones
 const styles = {
     modalOverlay: {
         position: 'fixed',
@@ -94,6 +108,20 @@ const styles = {
         border: 'none',
         borderRadius: '5px',
         cursor: 'pointer',
+    },
+    crossOverlay: {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: '24px',
+        color: 'red',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        borderRadius: '5px',
     },
 };
 

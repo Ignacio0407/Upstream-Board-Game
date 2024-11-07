@@ -6,6 +6,8 @@ import jwt_decode from "jwt-decode";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
+import '../static/css/createGame/createGame.css'
+import '../static/css/admin/adminPage.css'
 
 export default function CreateGame() { 
     
@@ -47,6 +49,8 @@ export default function CreateGame() {
               body: JSON.stringify(match),
         }).then((response) => response.text())
         .then(
+          navigate(`/matches/${matchId}`))
+        .then(
         data => {
           const matchCreada = JSON.parse(data)
           matchId = matchCreada.id;
@@ -54,7 +58,7 @@ export default function CreateGame() {
           
           const emptyPlayer = {
               name: finalUser.username,
-              color: "ROJO",
+              color: null,
               orden: 0,
               vivo: true,
               puntos: 0,
@@ -92,7 +96,7 @@ function handleChange(event) {
 
     return(
         <div className='createGame-page-container'>
-            <h2 className="text-center">
+            <h2 className="title-creategame">
                 Create Game
             </h2>
 
@@ -110,7 +114,7 @@ function handleChange(event) {
               id="name"
               value={match.name || ""}
               onChange={handleChange}
-              className="custom-input"
+              className="input-table"
             />
             </div>
             
@@ -125,7 +129,7 @@ function handleChange(event) {
               id="contrasena"
               value={match.contrasena || ""}
               onChange={handleChange}
-              className="custom-input"
+              className="input-table"
             />
           </div>
          
