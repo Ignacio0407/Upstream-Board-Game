@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -34,6 +36,11 @@ public class UserAchievementRestController {
         List<UserAchievement> res;
         res = (List<UserAchievement>) userAchievementService.findAll();
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public UserAchievement findById(@PathVariable("id") Integer id) throws ResourceNotFoundException{
+    return userAchievementService.findById(id).orElseThrow(() -> new ResourceNotFoundException("UserAchievement", "id", id));
     }
 
     @PostMapping
