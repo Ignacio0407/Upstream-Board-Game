@@ -22,7 +22,7 @@ function RgbToColor(color) {
     if(color === "#FFFFFF")
     {
         colorReturn = 'BLANCO';
-    }else if(color === "FFFF00"){
+    }else if(color === "#FFFF00"){
         colorReturn = 'AMARILLO';
     }else if(color === "#FF0000"){
         colorReturn = 'ROJO';

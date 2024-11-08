@@ -58,4 +58,12 @@ INSERT INTO tipo_casilla(id, tipo) VALUES (7, 'MAR');
 INSERT INTO tipo_casilla(id, tipo) VALUES (8, 'DESOVE');
 
 INSERT INTO casilla (id,imagen, tipo) VALUES (1,'Hola', 1);
+INSERT INTO casilla (id,imagen, tipo) VALUES (2,'Hola', 2);
+INSERT INTO casilla (id,imagen, tipo) VALUES (3,'Hola', 3);
+INSERT INTO casilla (id,imagen, tipo) VALUES (4,'Hola', 4);
+INSERT INTO casilla (id,imagen, tipo) VALUES (5,'Hola', 5);
+INSERT INTO casilla (id,imagen, tipo) VALUES (6,'Hola', 6);
+INSERT INTO casilla (id,imagen, tipo) VALUES (7,'Hola', 7);
+INSERT INTO casilla (id,imagen, tipo) VALUES (8,'Hola', 8);
+
 
