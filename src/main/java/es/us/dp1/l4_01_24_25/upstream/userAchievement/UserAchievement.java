@@ -1,5 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.userAchievement;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.annotation.Generated;

@@ -15,7 +15,7 @@ export default function Dashboard() {
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);
-    const user = tokenService.getUser()
+    
     const [alerts, setAlerts] = useState([]);
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);

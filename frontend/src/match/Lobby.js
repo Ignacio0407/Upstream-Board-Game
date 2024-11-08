@@ -3,9 +3,10 @@ import tokenService from '../services/token.service'
 import useFetchState from "../util/useFetchState";
 import '../static/css/game/lobby.css'
 import PlayerCard from './PlayerCard';
-import { Button } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import { useNavigate } from "react-router-dom";
 import ColorPickerModal from '../util/ColorPickerModal';
+import { ColorToRgb } from '../util/ColorParser';
 
 function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -16,13 +17,16 @@ function Lobby({match}){
     const [userPlayer,setUserPlayer] = useState(null);
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
-
+    const [takenColors, setTakenColors] = useState([]);
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const userPlayer = playersFiltered.find(player => player.usuario.id === user.id);
         console.log(filteredPlayers);
         setUserPlayer(userPlayer);
         setFilteredPlayers(playersFiltered);
+        const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
+        console.log(colorsUsed);
+        setTakenColors(colorsUsed);
         
     }, [players, match.id,user.id]);
 
@@ -114,7 +118,7 @@ function Lobby({match}){
     function handleColorChange(color) {
         const emptyPlayer = {
             name: finalUser.username,
-            color: 'BLANCO',
+            color: color,
             orden: 0,
             vivo: true,
             puntos: 0,
@@ -144,17 +148,21 @@ function Lobby({match}){
     return(
         <div className='lobbyContainer'>
         {showColorPicker &&
-        <ColorPickerModal onColorSelect={handleColorChange} />
+        <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
         }
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
         <div className='lobbyMainContainer'>
         
-        <div className='lobbyPlayerContainer'>
-        <h2> Jugadores </h2>
+        <Table className='lobbyPlayerContainer'>
+        <thead> 
+            <h2>
+            Jugadores 
+            </h2>
+        </thead>
         {playerList}
-        </div>
+        </Table>
         <div className='lobbyUtilContainer'>
         </div>
         <Button color='success' onClick={startGame}>
