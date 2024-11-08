@@ -6,6 +6,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import org.springframework.validation.BindingResult;
@@ -49,6 +51,7 @@ public class AchievementRestController {
 	}
 
 	@PostMapping
+	@PreAuthorize("ADMIN")
 	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br){ 
 		Achievement result=null;
 		if(!br.hasErrors())
@@ -59,6 +62,7 @@ public class AchievementRestController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("ADMIN")
 	public ResponseEntity<Void> modifyAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br,@PathVariable("id") int id) {
 		Achievement achievementToUpdate=this.findAchievement(id).getBody();
 		if(br.hasErrors())
@@ -73,6 +77,7 @@ public class AchievementRestController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("ADMIN")
 	public ResponseEntity<Void> deleteAchievement(@PathVariable("id") int id){
 		findAchievement(id);
 		achievementService.deleteAchievementById(id);

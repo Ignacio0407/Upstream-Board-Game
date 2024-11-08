@@ -5,47 +5,30 @@ import '../static/css/dashboard/dashb.css'
 import BotonLink from "../util/BotonLink";
 import useFetchState from '../util/useFetchState';
 import SearchBar from '../util/SearchBar';
-import { fetchById, fetchByName, fetchByNames } from '../util/fetchers';
+import '@fortawesome/fontawesome-free/css/all.min.css'
+import { Button } from 'reactstrap';
+import deleteFromList from '../util/deleteFromList';
+import getErrorModal from '../util/getErrorModal';
+import WhiteSpace from '../util/WhiteSpace';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
-    const [matches, setMatches] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);
     const user = tokenService.getUser()
+    const [alerts, setAlerts] = useState([]);
+    const [message, setMessage] = useState(null);
+    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
         }
-        console.log(matches)
+        console.log("Matches" + matches)
+        console.log(user.roles[0])
     }, [jwt])
 
-
-    useEffect(() => {
-        // Función para obtener los partidos desde la API
-        const fetchMatches = async () => {
-            const response = await fetch('/api/v1/matches', {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            setMatches(data); // Actualiza el estado con los nuevos partidos
-        };
-
-        // Inicializa el fetch de partidos
-        fetchMatches();
-
-        // Establece un intervalo para actualizar los partidos cada 10 segundos
-        const intervalId = setInterval(fetchMatches, 10000); // Actualiza cada 10 segundos
-
-        // Limpia el intervalo cuando el componente se desmonta
-        return () => clearInterval(intervalId);
-    }, [jwt]); // Solo se ejecuta cuando jwt cambia
+    const modal = getErrorModal(setVisible, visible, message);
 
     const matchesList = 
       matches.map((match) => {
@@ -54,12 +37,26 @@ export default function Dashboard() {
                 <td className='celda'>{match.name}</td>
                 <td className='celda'>{match.numjugadores}</td>
                 <td className='celda'>{match.estado}</td>
+                <td className='celda'>{match.contrasena != "" && <i className="fa fa-lock"></i>}</td>
                 <td className='celda'>{match.estado === 'ESPERANDO' &&
                 <BotonLink color={"success"} direction={'/matches/'+match.id} text={"Join game"}
                 />}</td>
                 <td className='celda'>{(match.estado === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
                 <BotonLink color={"warning"} direction={'/matches/'+match.id} text={"Spectate game"}
                 />}</td>
+                {user.roles[0] == "ADMIN" && <Button color="danger"
+                    onClick={() =>
+                    deleteFromList(
+                    `/api/v1/matches/${match.id}`,
+                    match.id,
+                    [matches, setMatches],
+                    [alerts, setAlerts],
+                    setMessage,
+                    setVisible,
+                    console.log(match))}>
+                    {<i className="fa fa-trash"></i>}
+                    Delete
+                </Button>}
             </tr>
         );
       })
@@ -70,6 +67,8 @@ export default function Dashboard() {
             <h1 className='welcome'>
             Game Listing for {username}
             </h1>
+            <SearchBar setMatches={setMatches} />
+            <WhiteSpace />
             <div>
             <div className='crear-partida'>
               <BotonLink color={"success"} direction={"/creategame"} text={"Create Game"}></BotonLink>
@@ -80,6 +79,7 @@ export default function Dashboard() {
                         <th className='cabeza'>Game</th>
                         <th className='cabeza'>Players</th>
                         <th className='cabeza'>State</th>
+                        <th className='cabeza'>Private</th>
                         <th className='cabeza'>Join</th>
                         <th className='cabeza'>Spectate</th>
                     </tr>

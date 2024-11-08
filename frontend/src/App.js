@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { ErrorBoundary } from "react-error-boundary";
 import AppNavbar from "./AppNavbar";
-import Home from "./home";
+import Home from "./home/home";
 import PrivateRoute from "./privateRoute";
 import Register from "./auth/register";
 import Login from "./auth/login";
@@ -13,12 +13,12 @@ import tokenService from "./services/token.service";
 import UserListAdmin from "./admin/users/UserListAdmin";
 import UserEditAdmin from "./admin/users/UserEditAdmin";
 import SwaggerDocs from "./public/swagger";
-import DeveloperList from "./developers";
+import DeveloperList from "./developers/developers";
 import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
-import Dashboard from "./dashboard"
-import CreateGame from "./createGame";
-import Rules from "./rules";
+import Dashboard from "./dashboard/dashboard"
+import CreateGame from "./createGame/createGame";
+import Rules from "./rules/rules";
 import Match from "./match"
 
 

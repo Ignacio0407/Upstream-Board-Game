@@ -15,7 +15,6 @@
  */
 package es.us.dp1.l4_01_24_25.upstream.user;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -28,12 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
-/*
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
-*/
 import jakarta.validation.Valid;
 
 @Service

@@ -4,8 +4,9 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public interface UserRepository extends  CrudRepository<User, Integer>{			
 
 
@@ -23,7 +24,5 @@ public interface UserRepository extends  CrudRepository<User, Integer>{
 	//@Query("DELETE FROM Player o WHERE o.user.id = :userId")
 	//@Modifying
 	//void deletePlayerRelation(int userId);
-	
-	
-	
+
 }
