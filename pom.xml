@@ -84,6 +84,10 @@
 				<picUrl>https://avatars.githubusercontent.com/u/61249792?v=4</picUrl>
 			</properties>
 		</developer>
+		<developer>
+			<name>JuanPrietoFernández</name>
+			<email>juaprifer@alum.us.es</email>
+		</developer>
 	</developers>
 
     <dependencies>
