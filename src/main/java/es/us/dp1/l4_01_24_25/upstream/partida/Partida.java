@@ -1,11 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.partida;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

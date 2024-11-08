@@ -99,7 +99,7 @@ export default function AchievementList() {
                         <th className="text-center table-row">Image</th>
                         <th className="text-center table-row">Threshold</th>
                         <th className="text-center table-row">Metric</th>
-                        {roles[0] === "ADMIN" &&<th className="text-center table-row">Actions</th>}
+                        {roles[0] === "ADMIN" && <th className="text-center table-row">Actions</th>}
                         </tr>
                     </thead>
                     <tbody>{achievementList}</tbody>

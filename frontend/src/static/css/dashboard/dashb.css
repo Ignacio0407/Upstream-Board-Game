@@ -58,4 +58,6 @@
     justify-content: center;
 }
 
-
+.fa-lock {
+    color: rgb(189, 189, 35);
+}

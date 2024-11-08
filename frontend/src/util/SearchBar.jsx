@@ -1,29 +1,46 @@
 import React, { useState } from 'react';
+import { fetchById, fetchByName, fetchByNames } from '../util/fetchers'; // Cambia a la ruta 
+import '../static/css/others/SearchBar.css'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
-export default function SearchBar ({ fetchById, fetchByName, fetchByNames }) { 
-  // 1. Crear el estado para almacenar el valor del input
+export default function SearchBar( { setMatches } ) {
   const [input, setInput] = useState("");
 
-  // 2. Definir la lógica de identificación de métodos y validación del input
   const handleSearch = () => {
-    if (/^\d+$/.test(input)) { // Si es solo un número
-      fetchById(input); 
-    } else if (input.includes(",")) { // Si hay comas, busca múltiples nombres
-      fetchByNames(input.split(","));
-    } else { // De lo contrario, asume que es un nombre
-      fetchByName(input);
+    if (/^\d+$/.test(input)) {
+      fetchById(input)
+        .then(response => setMatches([response.data]))
+        .catch(error => console.error(error));
+    } else if (input.includes(",") || input.includes(" ")) {
+      var namesArray = []
+      if (input.includes(" ")) {
+        namesArray = input.split(",").map(name => name.trim());
+      }
+      if (input.includes(" ")) {
+        namesArray = input.split(" ").map(name => name.trim());
+      }
+      fetchByNames(namesArray)
+        .then(response => setMatches(response.data))
+        .catch(error => console.error(error));
+    } else {
+      fetchByName(input)
+        .then(response => setMatches([response.data]))
+        .catch(error => console.error(error));
     }
   };
 
-    return (
-        <div>
-          <input 
-            type="text" 
-            value={input} 
-            onChange={(e) => setInput(e.target.value)} 
-            placeholder="Buscar partida" 
-          />
-          <button onClick={handleSearch}>Buscar</button>
-        </div>
-      );
-};
+  return (
+    <div class="search-container">
+      <input
+        className="search-bar"
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Buscar partida"
+      />
+      <button className="search-button" onClick={handleSearch}>
+      <i className="fa fa-search"></i>
+      </button>
+    </div>
+  );
+}

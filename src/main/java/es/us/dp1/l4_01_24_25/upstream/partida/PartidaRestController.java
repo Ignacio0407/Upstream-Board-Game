@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +39,12 @@ public class PartidaRestController {
         return new ResponseEntity<>(partidaService.getPartidas(), HttpStatus.OK);
     }
 
+    // TODO
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Partida>> findPartidasFromUser() {
+        return null;
+    }
+
     @GetMapping("/names/{names}")
     public ResponseEntity<List<Partida>> findSomePartidasByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
         return new ResponseEntity<>(partidaService.getSomePartidasByName(names), HttpStatus.OK);
@@ -64,12 +71,14 @@ public class PartidaRestController {
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("ADMIN")
     public void deleteAllPartidas() {
         partidaService.deleteAllPartidas();
     }
 
     @DeleteMapping(value = "/ids/{ids}")
 	@ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("ADMIN")
 	public ResponseEntity<Object> deleteSomePartidasById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
 		List<Integer> idsPartidasNoBorradas = new LinkedList<>();
         Integer numPartidasEncontradas = 0;
@@ -93,11 +102,13 @@ public class PartidaRestController {
 
     @DeleteMapping(value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("ADMIN")
 	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
-		RestPreconditions.checkNotNull(partidaService.getPartidaById(id), "Partida", "ID", id);
-		if (partidaService.getPartidaById(id) != null) {
+		Partida p = partidaService.getPartidaById(id);
+        RestPreconditions.checkNotNull(p, "Partida", "id", id);
+		if (p != null) {
 			partidaService.deletePartidaById(id);
-			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.OK);
+			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
 		} else
 			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
             "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
@@ -118,7 +129,5 @@ public class PartidaRestController {
         System.out.println(partida);
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
-
-    // Copy partida
 
 }
