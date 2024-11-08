@@ -18,6 +18,8 @@ function Lobby({match}){
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
+    
+
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const userPlayer = playersFiltered.find(player => player.usuario.id === user.id);
@@ -171,8 +173,8 @@ function Lobby({match}){
         </Button>
 
         <Button color='danger' onClick={endGame}>
-            Cancelar Partida
-        </Button>
+            Salir de la Partida
+            </Button>
         </div>
         </div>
     )

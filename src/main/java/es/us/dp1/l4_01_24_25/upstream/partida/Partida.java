@@ -41,4 +41,5 @@ public class Partida extends NamedEntity {
 	@JoinColumn(name="jugador_actual")
 	Jugador jugadoractual;
 
+	Integer creadorPartida;
 }
