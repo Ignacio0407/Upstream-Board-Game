@@ -142,10 +142,6 @@ function Lobby({match}){
 
     }
     
-
-
-    
-           
     return(
         <div className='lobbyContainer'>
         {showColorPicker &&

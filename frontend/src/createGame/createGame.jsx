@@ -49,39 +49,10 @@ export default function CreateGame() {
               body: JSON.stringify(match),
         }).then((response) => response.text())
         .then(
-          navigate(`/matches/${matchId}`))
-        .then(
         data => {
           const matchCreada = JSON.parse(data)
           matchId = matchCreada.id;
-          
-          
-          const emptyPlayer = {
-              name: finalUser.username,
-              color: null,
-              orden: 0,
-              vivo: true,
-              puntos: 0,
-              usuario: finalUser,
-              partida: matchCreada,
-          };
-          console.log(JSON.stringify(emptyPlayer))
-         
-          return fetch("/api/v1/players", {
-              method: "POST",
-              headers: {
-                  Authorization: `Bearer ${jwt}`,
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify(emptyPlayer),
-          });
-      })
-      .then(response => response.json())
-      .then(data => {
-          console.log("Jugador creado:", data);
           navigate(`/matches/${matchId}`)
-
       })
       .catch(error => console.error("Error:", error));
   }
