@@ -83,6 +83,8 @@ public class PartidaService {
         Partida partidaToUpdate = getPartidaById(idtoUpdate);
         if (partidaToUpdate == null) 
             return null;
+        if (partidaToUpdate.numjugadores==0) 
+            partidaToUpdate.setEstado(Estado.FINALIZADA);
         return updatePartida(partidaNueva, partidaToUpdate);
     }
 
@@ -100,5 +102,5 @@ public class PartidaService {
         BeanUtils.copyProperties(partidaOriginal, partidaCopia, "id");
         return partidaCopia;
     }
-
+    
 }
