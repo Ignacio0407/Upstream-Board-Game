@@ -88,13 +88,14 @@ function Lobby({match}){
         const putData =  {
             name: match.name,
             contrasena: match.contrasena,
-            estado: "FINALIZADA",
-            numjugadores: match.numjugadores,
+            estado: "ESPERANDO",
+            numjugadores: match.numjugadores - 1,
             ronda: match.ronda,
             fase: "CASILLAS",
             jugador_inicial: 1,
             jugador_actual: 1,
         }
+        console.log(match)
         fetch("/api/v1/matches/"+ match.id, {
 
             method: "PUT",
