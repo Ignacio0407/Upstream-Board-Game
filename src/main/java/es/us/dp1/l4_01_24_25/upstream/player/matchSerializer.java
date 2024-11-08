@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import es.us.dp1.l4_01_24_25.upstream.partida.Partida;
 
 @Component
-public class matchSerializer extends JsonSerializer<Partida>{
+public class MatchSerializer extends JsonSerializer<Partida>{
 
     @Override
     public void serialize(Partida value, JsonGenerator gen, SerializerProvider serializers)

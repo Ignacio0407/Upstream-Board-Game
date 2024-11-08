@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
@@ -32,12 +33,15 @@ public class Jugador extends BaseEntity implements Serializable{
     Boolean vivo;
     Integer puntos;
 
+    @JsonSerialize(using = UserSerializer.class)
+    @JsonDeserialize(using = UserDeserializer.class)
     @ManyToOne
     @JoinColumn(name="usuario")
     User usuario;
 
     
-    @JsonSerialize(using = matchSerializer.class)
+    @JsonSerialize(using = MatchSerializer.class)
+    @JsonDeserialize(using = MatchDeserializer.class)
     @ManyToOne
     @JoinColumn(name="partida")
     Partida partida;
