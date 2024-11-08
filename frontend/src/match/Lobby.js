@@ -51,7 +51,7 @@ function Lobby({match}){
         fetchPlayers();
 
         // Establece un intervalo para actualizar los jugadores cada 10 segundos
-        const intervalId = setInterval(fetchPlayers, 2000); // Actualiza cada 10 segundos
+        const intervalId = setInterval(fetchPlayers, 3000); // Actualiza cada 10 segundos
 
         // Limpia el intervalo cuando el componente se desmonta
         return () => clearInterval(intervalId);
@@ -122,12 +122,13 @@ function Lobby({match}){
             orden: 0,
             vivo: true,
             puntos: 0,
-            usuario: finalUser,
-            partida: match,
+            usuario: finalUser.id,
+            partida: match.id,
         }
-        console.log(JSON.stringify(emptyPlayer)) // Para depuración, muestra el objeto en consola)
-        fetch(`/api/v1/players/${userPlayer.id}`, {  // Usa el ID del usuario actual
-            method: "PUT",
+        console.log(JSON.stringify(emptyPlayer))
+        console.log("color " + color) // Para depuración, muestra el objeto en consola)
+        fetch(`/api/v1/players`, {  // Usa el ID del usuario actual
+            method: "POST",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 Accept: "application/json",
