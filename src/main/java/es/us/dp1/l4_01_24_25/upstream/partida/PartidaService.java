@@ -91,11 +91,15 @@ public class PartidaService {
     @Transactional
     public Partida updatePartidaById(Partida partidaNueva, Integer idtoUpdate) {
         Partida partidaToUpdate = getPartidaById(idtoUpdate);
-        System.out.println(partidaToUpdate);
-        if (partidaToUpdate == null) 
+        System.out.println("ñññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññ");
+        System.out.println("Partida a actualizar: " + partidaToUpdate.getNumjugadores());
+        System.out.println("##########################################################################################################################################################");
+        if (partidaToUpdate == null){
             return null;
-        if (partidaToUpdate.numjugadores==0) 
+        }
+        if (partidaToUpdate.getNumjugadores().equals(0)){ 
             partidaToUpdate.setEstado(Estado.FINALIZADA);
+        }
         return updatePartida(partidaNueva, partidaToUpdate);
     }
 
