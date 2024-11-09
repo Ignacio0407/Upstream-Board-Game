@@ -25,9 +25,9 @@ function Lobby({match}){
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
-        const userPlayer = playersFiltered.find(player => player.usuario.id === user.id);
+        const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
         console.log("userPlayer", user);
-        setUserPlayer(userPlayer);
+        setUserPlayer(playerUser);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
@@ -184,7 +184,9 @@ const fetchPlayers = async () => {
 
     function endGame(){
         const numJugadores = numjug-1;
-        console.log("num",numJugadores)
+        console.log("numjugadores",filteredPlayers.find(p => p.usuario === user.id).id)
+        const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
+        console.log("playerId",playerId);
         const putData =  {
             name: match.name,
             contrasena: match.contrasena,
@@ -196,6 +198,14 @@ const fetchPlayers = async () => {
             jugador_actual: 1,
         }
         console.log("match",match)
+        fetch("/api/v1/players/"+ playerId, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        }).then(
         fetch("/api/v1/matches/"+ match.id, {
 
             method: "PUT",
@@ -205,7 +215,7 @@ const fetchPlayers = async () => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(putData),
-        }).then(navigate("/dashboard"))
+        }).then(navigate("/dashboard")))
     }
     
     const playerList = filteredPlayers.map((p) =>{
