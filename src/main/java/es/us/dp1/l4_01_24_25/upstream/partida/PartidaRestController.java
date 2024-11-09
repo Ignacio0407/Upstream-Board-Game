@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
@@ -57,6 +58,14 @@ public class PartidaRestController {
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(p, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/players")
+    public ResponseEntity<List<Jugador>> findPlayersFromGame(@PathVariable("id") Integer id) throws ResourceNotFoundException {
+        List<Jugador> l = partidaService.getPlayersFromGame(id);
+        if(l == null) {
+            return new ResponseEntity<>(l, HttpStatus.NOT_FOUND);
+        } else return new ResponseEntity<>(l, HttpStatus.OK);
     }
 
     @GetMapping("/name/{name}")
