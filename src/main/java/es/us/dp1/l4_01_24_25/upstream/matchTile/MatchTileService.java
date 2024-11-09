@@ -39,5 +39,11 @@ public class MatchTileService {
         return matchTileRepository.findByMatchId(matchId);
     }
 
+    @Transactional
+    public void deleteMatchTile(Integer id) {
+        MatchTile toDelete = findById(id);
+        this.matchTileRepository.delete(toDelete);
+    }
+
 
 }

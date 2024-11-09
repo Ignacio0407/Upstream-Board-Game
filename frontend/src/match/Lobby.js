@@ -19,6 +19,9 @@ function Lobby({match}){
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
     const [numjug, Setnumjug] = useState(match.numjugadores);
+    const [loading, setLoading] = useState(false);
+    
+
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
@@ -110,6 +113,7 @@ const fetchPlayers = async () => {
     }
 */
     const startGame = async () => {
+        setLoading(true);
         const tileConfigs = [
             { tile: 1, count: 7, capacity: 5 },
             { tile: 2, count: 5, capacity: 4 },
@@ -173,7 +177,7 @@ const fetchPlayers = async () => {
         } catch (error) {
             console.error("Error al crear algunas MatchTiles:", error);
         }
-
+        setLoading(false);
         (window.location.reload(true))
     };
     
@@ -264,6 +268,7 @@ const fetchPlayers = async () => {
         <Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>
+        {loading && <div>Loading tiles...</div>}
 
         <Button color='danger' onClick={endGame}>
             Salir de la Partida
