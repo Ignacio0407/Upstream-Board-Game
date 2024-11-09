@@ -34,5 +34,10 @@ public class MatchTileService {
         return matchTileRepository.findById(id).orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public List<MatchTile> findByMatchId(Integer matchId) {
+        return matchTileRepository.findByMatchId(matchId);
+    }
+
 
 }

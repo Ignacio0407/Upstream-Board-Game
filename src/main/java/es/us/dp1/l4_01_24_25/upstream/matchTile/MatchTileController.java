@@ -6,12 +6,14 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -27,6 +29,11 @@ public class MatchTileController {
     @GetMapping
     public List<MatchTile> getAllMatchTiles() {
         return matchTileService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public List<MatchTile> getMatchTileById(@PathVariable("id") Integer id) {
+        return matchTileService.findByMatchId(id);
     }
 
     @PostMapping
