@@ -57,6 +57,7 @@ INSERT INTO tipo_casilla(id, tipo) VALUES (6, 'SALTO');
 INSERT INTO tipo_casilla(id, tipo) VALUES (7, 'MAR');
 INSERT INTO tipo_casilla(id, tipo) VALUES (8, 'DESOVE');
 
+
 INSERT INTO casilla (id,imagen, tipo) VALUES (1,'src\main\resources\static\resources\images\Casilla_MarUnidad.png', 1);
 INSERT INTO casilla (id,imagen, tipo) VALUES (2,'src\main\resources\static\resources\images\Casilla_roca.png', 2);
 INSERT INTO casilla (id,imagen, tipo) VALUES (3,'src\main\resources\static\resources\images\Casilla_Garza.png', 3);
