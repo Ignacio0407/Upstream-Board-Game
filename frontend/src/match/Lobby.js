@@ -18,48 +18,60 @@ function Lobby({match}){
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
+    const [numjug, Setnumjug] = useState(match.numjugadores);
     const [loading, setLoading] = useState(false);
     
+
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const userPlayer = playersFiltered.find(player => player.usuario.id === user.id);
-        console.log(filteredPlayers);
+        console.log("userPlayer", user);
         setUserPlayer(userPlayer);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
-        console.log(colorsUsed);
         setTakenColors(colorsUsed);
+        Setnumjug(playersFiltered.length);
+        console.log("Numero jugadores", numjug);
+        const intervalId = setInterval(fetchPlayers, 1000);
+        return () => clearInterval(intervalId);
         
     }, [players, match.id,user.id]);
 
-
+/*
     useEffect(() => {
         // Función para obtener los jugadores desde la API
-        const fetchPlayers = async () => {
-            const response = await fetch(`/api/v1/players`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            setPlayers([])
-            setPlayers(data); // Actualiza el estado con los nuevos jugadores
-        };
-
+        if(jwt){
+            fetchPlayers();
+        }
+        else{
+            setPlayers(null);
+        }
         // Inicializa el fetch de jugadores
-        fetchPlayers();
+    
 
         // Establece un intervalo para actualizar los jugadores cada 10 segundos
         const intervalId = setInterval(fetchPlayers, 3000); // Actualiza cada 10 segundos
 
         // Limpia el intervalo cuando el componente se desmonta
         return () => clearInterval(intervalId);
-    }, [jwt]);
+    },[jwt]); // Solo se ejecuta cuando el JWT cambia
 
+    */
+
+const fetchPlayers = async () => {
+        const response = await fetch(`/api/v1/players`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        setPlayers([])
+        setPlayers(data); // Actualiza el estado con los nuevos jugadores
+    };
 /*
     function startGame(){
         const putData =  {
@@ -171,17 +183,19 @@ function Lobby({match}){
     
 
     function endGame(){
+        const numJugadores = numjug-1;
+        console.log("num",numJugadores)
         const putData =  {
             name: match.name,
             contrasena: match.contrasena,
             estado: "ESPERANDO",
-            numjugadores: match.numjugadores - 1,
+            numjugadores: numJugadores,
             ronda: match.ronda,
             fase: "CASILLAS",
             jugador_inicial: 1,
             jugador_actual: 1,
         }
-        console.log(match)
+        console.log("match",match)
         fetch("/api/v1/matches/"+ match.id, {
 
             method: "PUT",
@@ -233,9 +247,9 @@ function Lobby({match}){
     
     return(
         <div className='lobbyContainer'>
-        {showColorPicker &&
+        {filteredPlayers.find(p => p.usuario === user.id)===undefined? (showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
-        }
+        ):<h1>Ya estas en la partida</h1>}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
