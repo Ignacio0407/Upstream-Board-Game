@@ -67,3 +67,4 @@ INSERT INTO casilla (id,imagen, tipo) VALUES (7,'src/main/resources/images/seaTi
 INSERT INTO casilla (id,imagen, tipo) VALUES (8,'src/main/resources/images/spawningTile.png', 8);
 
 
+

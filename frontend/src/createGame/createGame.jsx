@@ -37,7 +37,9 @@ export default function CreateGame() {
     let matchId;
     function handleSubmit(event){
         event.preventDefault();
+        console.log("Match", match);
         console.log(match);
+        console.log(user.id);
         fetch("/api/v1/matches", {
 
             method: "POST",
@@ -95,7 +97,6 @@ function handleChange(event) {
             </Label>
             <Input
               type="text"
-              required
               name="contrasena"
               id="contrasena"
               value={match.contrasena || ""}
