@@ -14,15 +14,14 @@
 
     function Game({match}){
         const jwt = tokenService.getLocalAccessToken();
-        /*const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt) // Tenemos los jugadores de la partida
-        const [filteredPlayers,setFilteredPlayers] = useState([])*/
+        const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt) // Tenemos los jugadores de la partida
         const [tilesList,setTilesList] = useFetchState([], '/api/v1/casilla',jwt)
         const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt)
-        //const playerList = players.map(player => <div color= {ColorToRgb(player.color)}> </div>)
+        //const playerList = players.map(player => <div color= {ColorToRgb(player.color)}></div>)
         const matchTilesWithoutSeaOrSpawn = matchTiles.filter(mT => tilesList[mT.tile-1].tipo !== 'MAR' && tilesList[mT.tile-1].tipo !== 'DESOVE') // Quitar las casillas de mar y desove;  
         matchTilesWithoutSeaOrSpawn.sort(() => Math.random() - 0.5)
         const [selectedTile, setSelectedTile] = useState(null);
-        const [grid, setGrid] = useState(Array(20   ).fill(null));
+        const [grid, setGrid] = useState(Array(20).fill(null));
         const [matchTilesWithImages, setTilesWithImages] = useState([]);
         const [isReady, setIsReady] = useState(false);
 
@@ -30,7 +29,19 @@
         console.log("MATCH TILES ", matchTiles);
         console.log("MATCH TILES WITHOUT SEA OR SPAWN ", matchTilesWithoutSeaOrSpawn);
         console.log("MATCH", match);
+        console.log("PLAYERS", players);
         
+        const playerList =
+        players.map((p) => {
+            return (
+                <tr key = {p.id} className="table-row">
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.puntos}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.vivo? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+                </tr>
+            );
+        })
 
         const handleTileClick = (tile) => {
             setSelectedTile(tile);
@@ -43,11 +54,13 @@
         }
 
         const handleGridClick = (index) => {
-            if (selectedTile) {
-                const newGrid = [...grid];
-                newGrid[index] = selectedTile;
-                setGrid(newGrid);
-                setSelectedTile(null);
+            if(index !== 18 && index !== 19) {
+                if (selectedTile) {
+                    const newGrid = [...grid];
+                    newGrid[index] = selectedTile;
+                    setGrid(newGrid);
+                    setSelectedTile(null);
+                }
             }
         }
 
@@ -103,9 +116,34 @@
                     position: 'absolute',
                     marginBottom: '10px',
                     marginTop: '10px',
-                    marginLeft: '552px',
+                    marginLeft: '1208px',
                     fontSize: '30px',
                     }}>Game: {match.name}</h1>
+                <h1 style={{
+                    position: 'absolute',
+                    marginBottom: '10px',
+                    marginTop: '10px',
+                    marginLeft: '552px',
+                    fontSize: '30px',
+                    }}>Round: {match.ronda}</h1>
+                <h1 style={{
+                    position: 'absolute',
+                    marginBottom: '10px',
+                    marginTop: '10px',
+                    marginLeft: '830px',
+                    fontSize: '30px',
+                    }}>Phase: {match.fase}</h1>
+                <div className="users-table">
+                    <thead>
+                        <tr>
+                            <th className="table-row" style={{position: 'relative', padding: '20px'}}>Name</th>
+                            <th className="table-row" style={{position: 'relative', padding: '20px'}}>Color</th>
+                            <th className="table-row" style={{position: 'relative', padding: '20px'}}>Points</th>
+                            <th className="table-row" style={{position: 'relative', padding: '20px'}}>Alive</th>
+                        </tr>
+                    </thead>
+                    <tbody>{playerList}</tbody>
+                </div>
                 {matchTilesWithImages.length > 0 &&
                 <div key={matchTilesWithImages[0]}
                     style={{
@@ -123,8 +161,8 @@
                 }
                 <div className="game-container">
                     {grid.map((tile, index) => (
-                        <div key={index} className="grid-item" onClick={() => handleGridClick(index)}>
-                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'600px'} : { width: '150px' }} /> : null}
+                        <div key={index} onClick={() => handleGridClick(index)} className={index !== 18 ? "grid-item":"grid-item18"}> 
+                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'400px'} : { width: '150px' }} /> : null}
                         </div>
                     ))}
                 </div>
