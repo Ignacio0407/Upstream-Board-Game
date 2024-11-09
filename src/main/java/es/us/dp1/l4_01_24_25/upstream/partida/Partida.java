@@ -27,7 +27,7 @@ public class Partida extends NamedEntity {
 	@Enumerated(EnumType.STRING)
 	Estado estado;
 	// Esto para jugar en sí
-	@Min(1)
+	@Min(0)
 	@Max(5)
 	Integer numjugadores;
     Integer ronda;

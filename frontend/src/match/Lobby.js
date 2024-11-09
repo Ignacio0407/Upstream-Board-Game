@@ -26,13 +26,13 @@ function Lobby({match}){
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
-        console.log("userPlayer", user);
+        
         setUserPlayer(playerUser);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        console.log("Numero jugadores", numjug);
+        
         const intervalId = setInterval(fetchPlayers, 1000);
         return () => clearInterval(intervalId);
         
@@ -184,10 +184,21 @@ const fetchPlayers = async () => {
 
     function endGame(){
         const numJugadores = numjug-1;
-        console.log("numjugadores",filteredPlayers.find(p => p.usuario === user.id).id)
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
-        console.log("playerId",playerId);
-        const putData =  {
+        let putData = {}
+        if(numJugadores === 0){
+            putData =  {
+                name: match.name,
+                contrasena: match.contrasena,
+                estado: "FINALIZADA",
+                numjugadores: 0,
+                ronda: match.ronda,
+                fase: "CASILLAS",
+                jugador_inicial: 1,
+                jugador_actual: 1,   
+        }}
+        else{
+        putData =  {
             name: match.name,
             contrasena: match.contrasena,
             estado: "ESPERANDO",
@@ -196,7 +207,7 @@ const fetchPlayers = async () => {
             fase: "CASILLAS",
             jugador_inicial: 1,
             jugador_actual: 1,
-        }
+        }}
         console.log("match",match)
         fetch("/api/v1/players/"+ playerId, {
             method: "DELETE",
