@@ -57,16 +57,14 @@ INSERT INTO tipo_casilla(id, tipo) VALUES (6, 'SALTO');
 INSERT INTO tipo_casilla(id, tipo) VALUES (7, 'MAR');
 INSERT INTO tipo_casilla(id, tipo) VALUES (8, 'DESOVE');
 
-
-
-INSERT INTO casilla (id,imagen, tipo) VALUES (1,'src\main\resources\static\resources\images\Casilla_MarUnidad.png', 1);
-INSERT INTO casilla (id,imagen, tipo) VALUES (2,'src\main\resources\static\resources\images\Casilla_roca.png', 2);
-INSERT INTO casilla (id,imagen, tipo) VALUES (3,'src\main\resources\static\resources\images\Casilla_Garza.png', 3);
-INSERT INTO casilla (id,imagen, tipo) VALUES (4,'src\main\resources\static\resources\images\Casilla_Oso.png', 4);
-INSERT INTO casilla (id,imagen, tipo) VALUES (5,'src\main\resources\static\resources\images\Casilla_aguila.png', 5);
-INSERT INTO casilla (id,imagen, tipo) VALUES (6,'src\main\resources\static\resources\images\Casilla_Salto.png', 6);
-INSERT INTO casilla (id,imagen, tipo) VALUES (7,'src\main\resources\static\resources\images\Casilla_Mar.png', 7);
-INSERT INTO casilla (id,imagen, tipo) VALUES (8,'src\main\resources\static\resources\images\Casilla_Desove.png', 8);
+INSERT INTO casilla (id,imagen, tipo) VALUES (1,'src/main/resources/images/waterTile.png', 1);
+INSERT INTO casilla (id,imagen, tipo) VALUES (2,'src/main/resources/images/rockTile.png', 2);
+INSERT INTO casilla (id,imagen, tipo) VALUES (3,'src/main/resources/images/heronTile.png', 3);
+INSERT INTO casilla (id,imagen, tipo) VALUES (4,'src/main/resources/images/bearTile.png', 4);
+INSERT INTO casilla (id,imagen, tipo) VALUES (5,'src/main/resources/images/eagleTile.png', 5);
+INSERT INTO casilla (id,imagen, tipo) VALUES (6,'src/main/resources/images/jumpTile.png', 6);
+INSERT INTO casilla (id,imagen, tipo) VALUES (7,'src/main/resources/images/seaTile.png', 7);
+INSERT INTO casilla (id,imagen, tipo) VALUES (8,'src/main/resources/images/spawningTile.png', 8);
 
 
 

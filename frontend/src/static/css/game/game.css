@@ -1,32 +1,81 @@
 .rotarFicha {
     transform: rotate(60deg);
 }
-
-.gameContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/gameBackground.jpg');
-    background-size: cover;
+/*
+.gamePage-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-
 }
 
+.tiles-container {
+    display: flex;
+    padding: 10px;
+    align-items: flex-end;
+}
+
+.text {
+    color: black;
+}
+*/
+
+.gamePage-container {
+    position: relative;
+    text-align: center;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/upStreamFondo.jpg');
+    background-size: cover;
+  }
+
+.tiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centra las casillas en el contenedor */
+  }
+
+  .tile-image {
+    position: absolute;
+    bottom: -850px; /* Ajusta la distancia desde la parte inferior de la página */
+    right: 20px; /* Ajusta la distancia desde el lado derecho de la página */
+    width: 150px; /* Tamaño de la imagen */
+  }
+
+
+
+/**//**//**//**//**//**//**/
 .game-container {
+    position: absolute;
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
-    grid-template-rows: 1fr auto;
-    width: 90vw;
-    height: 90vh;
-    background-color: #1c1c1c;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr;
+    margin-left: 550px;
+    margin-top: 50px;
+    width: 780px;
+    height: 800px;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/backgroundGameContainer.png');
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+
+.grid-item {
+    background-color: #4caf50;
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 5px;
+  }
+
+  .grid-item:nth-child(3n + 1) {
+    transform: translateY(30px);
+  }
+  .grid-item:nth-child(3n + 3) {
+    transform: translateY(30px);
+  }
 
 .game-board {
     grid-column: 2 / 3;
@@ -102,3 +151,7 @@
     background-color: #3d3d3d;
     color: #e1e1e1;
 }
+
+
+
+
