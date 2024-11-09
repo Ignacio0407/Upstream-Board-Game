@@ -52,6 +52,11 @@ public class JugadorRestController {
             return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
+    @GetMapping("/match/{id}")
+    public ResponseEntity<List<Jugador>> findJugadoresByPartidaId(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(jugadorService.getPlayersByMatch(id), HttpStatus.OK);
+    }
+
     @GetMapping("/name/{name}")
     public ResponseEntity<Jugador> findJugadorByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
         Jugador p = jugadorService.getJugadorByName(name);

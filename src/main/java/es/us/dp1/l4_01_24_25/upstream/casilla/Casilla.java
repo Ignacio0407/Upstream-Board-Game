@@ -1,5 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.casilla;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -21,5 +24,7 @@ public class Casilla extends BaseEntity {
     @NotNull
     @ManyToOne(optional = false)
     @JoinColumn(name = "tipo")
+    @JsonSerialize(using = TileTypeSerializer.class)
+    @JsonDeserialize(using = TileTypeDeserializer.class)
     TipoCasilla tipo;
 }

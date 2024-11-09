@@ -59,7 +59,7 @@ function Lobby({match}){
         return () => clearInterval(intervalId);
     }, [jwt]);
 
-
+/*
     function startGame(){
         const putData =  {
             name: match.name,
@@ -71,6 +71,13 @@ function Lobby({match}){
             jugador_inicial: 1,
             jugador_actual: 1,
         }
+        const matchTiles = {
+            match: match.id,
+            tile: 1,
+            coordinate: {x: 0, y: 0},
+            orientation: 0,
+            capacity: 5
+        }
         fetch("/api/v1/matches/"+ match.id, {
 
             method: "PUT",
@@ -80,9 +87,86 @@ function Lobby({match}){
                 "Content-Type": "application/json",
               },
               body: JSON.stringify(putData),
-        }).then( 
+        }).then(fetch("/api/v1/matchTiles", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(matchTiles),
+        })).then( 
             window.location.reload(true))
     }
+*/
+    const startGame = async () => {
+        const tileConfigs = [
+            { tile: 1, count: 7, capacity: 5 },
+            { tile: 2, count: 5, capacity: 4 },
+            { tile: 3, count: 5, capacity: 5 },
+            { tile: 4, count: 3, capacity: 5 },
+            { tile: 5, count: 5, capacity: 5 },
+            { tile: 6, count: 4, capacity: 5 },
+            { tile: 7, count: 1, capacity: 99 },
+            { tile: 8, count: 1, capacity: 99 }
+        ];
+
+        const putData =  {
+            name: match.name,
+            contrasena: match.contrasena,
+            estado: "EN_CURSO",
+            numjugadores: match.numjugadores,
+            ronda: match.ronda,
+            fase: "CASILLAS",
+            jugador_inicial: 1,
+            jugador_actual: 1,
+        }
+    
+        let x = 0;
+        let y = 0;
+        let orientation = 0;
+    
+        const requests = tileConfigs.flatMap(({ tile, count, capacity }) =>
+            Array.from({ length: count }, () => {
+                const matchTile = {
+                    match: match.id,
+                    tile: tile,
+                    coordinate: { x, y },
+                    orientation: orientation,
+                    capacity: capacity
+                };
+    
+                return fetch("/api/v1/matches/"+ match.id, {
+
+                    method: "PUT",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(putData),
+                }).then(fetch("/api/v1/matchTiles", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                        Accept: "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(matchTile)
+                }));
+            })
+        );
+    
+        try {
+            await Promise.all(requests);
+            console.log("Todas las MatchTiles han sido creadas.");
+        } catch (error) {
+            console.error("Error al crear algunas MatchTiles:", error);
+        }
+
+        (window.location.reload(true))
+    };
+    
 
     function endGame(){
         const putData =  {
@@ -145,10 +229,6 @@ function Lobby({match}){
 
     }
     
-
-
-    
-           
     return(
         <div className='lobbyContainer'>
         {showColorPicker &&

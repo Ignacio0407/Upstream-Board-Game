@@ -8,10 +8,12 @@ import java.util.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.partida.Partida;
 
 @Service
 public class JugadorService {
@@ -45,6 +47,13 @@ public class JugadorService {
         return new ArrayList<>(Jugadores);
     }
 
+    @Transactional(readOnly = true)
+    public List<Jugador> getPlayersByMatch(Integer id) {
+        List<Jugador> jugadores = jugadorRepository.findPlayersByMatch(id);
+
+        return jugadores.isEmpty()? new ArrayList<>() : jugadores;
+
+    }
     private Jugador optionalToValueWithNotFoundException(Optional<Jugador> op) {
         if (!op.isPresent()) {
             throw new ResourceNotFoundException("No existe la Jugador indicada");
@@ -117,6 +126,8 @@ public class JugadorService {
 		jugadorRepository.save(jugador);
 		return jugador;
 	}
+
+
 
     @Transactional
 	public List<Jugador> saveJugadores(List<Jugador> Jugadores) throws DataAccessException {

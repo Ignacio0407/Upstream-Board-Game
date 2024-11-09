@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
+
 @Service
 public class PartidaService {
         
@@ -31,6 +34,13 @@ public class PartidaService {
         List<Partida> partidas = new LinkedList<>();
         names.stream().forEach(name -> partidas.add(getPartidaByName(name)));
         return new ArrayList<>(partidas);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Jugador> getPlayersFromGame(Integer id) throws ResourceNotFoundException{
+        List<Jugador> p = partidaRepository.findPlayersFromGame(id);
+        if(!p.isEmpty()) return p;
+        else throw new ResourceNotFoundException("No players in game " + id);
     }
 
     /* Aunque el manejo de errores de operaciones CRUD se realice en el controller, pongo solamente este
@@ -83,6 +93,8 @@ public class PartidaService {
         Partida partidaToUpdate = getPartidaById(idtoUpdate);
         if (partidaToUpdate == null) 
             return null;
+        if (partidaToUpdate.numjugadores==0) 
+            partidaToUpdate.setEstado(Estado.FINALIZADA);
         return updatePartida(partidaNueva, partidaToUpdate);
     }
 
@@ -100,5 +112,5 @@ public class PartidaService {
         BeanUtils.copyProperties(partidaOriginal, partidaCopia, "id");
         return partidaCopia;
     }
-
+    
 }
