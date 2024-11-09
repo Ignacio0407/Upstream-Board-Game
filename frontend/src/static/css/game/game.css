@@ -49,32 +49,34 @@
 .game-container {
     position: absolute;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr;
+    grid-template-columns: 1fr 0.7fr 1fr;
+    grid-template-rows: 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr;
     margin-left: 550px;
     margin-top: 50px;
-    width: 780px;
-    height: 800px;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/backgroundGameContainer.png');
+    width: 800px;
+    height: 1200px;
     border-radius: 10px;
+    background-color: rgba(4, 149, 47, 0.432);
+    border: solid;
 }
 
 .grid-item {
-    background-color: #4caf50;
     color: white;
-    padding: 20px;
+    padding: 0px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     border-radius: 5px;
+    margin-top: 10px;
+    border: solid #2b2b2b;
   }
 
   .grid-item:nth-child(3n + 1) {
-    transform: translateY(30px);
+    transform: translateY(88px);
   }
   .grid-item:nth-child(3n + 3) {
-    transform: translateY(30px);
+    transform: translateY(88px);
   }
 
 .game-board {

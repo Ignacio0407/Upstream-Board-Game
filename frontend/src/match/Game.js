@@ -22,7 +22,7 @@
         const matchTilesWithoutSeaOrSpawn = matchTiles.filter(mT => tilesList[mT.tile-1].tipo !== 'MAR' && tilesList[mT.tile-1].tipo !== 'DESOVE') // Quitar las casillas de mar y desove;  
         matchTilesWithoutSeaOrSpawn.sort(() => Math.random() - 0.5)
         const [selectedTile, setSelectedTile] = useState(null);
-        const [grid, setGrid] = useState(Array(12).fill(null));
+        const [grid, setGrid] = useState(Array(20   ).fill(null));
         const [matchTilesWithImages, setTilesWithImages] = useState([]);
         const [isReady, setIsReady] = useState(false);
 
@@ -86,9 +86,15 @@
             setTilesWithImages(
                 matchTilesWithoutSeaOrSpawn.map((tile) => [tile, getImage(tile)])
             );
+            const newGrid = [...grid];
+        const gridWidth = 5; // Suponiendo una cuadrícula de 5 columnas
+        const centerIndex = newGrid.length - Math.ceil(gridWidth / 2); // Calcula el centro de la fila inferior
+        newGrid[19] = [null, seaTile]; // Usamos `bearTile` o cualquier otra imagen
+        setGrid(newGrid);
+            console.log("TILES WITH IMAGES ", matchTilesWithImages);
             // Limpiar el temporizador cuando el componente se desmonte
             return () => clearTimeout(timer);
-        }, []);
+        }, [matchTiles]);
         
 
         return(
@@ -118,7 +124,7 @@
                 <div className="game-container">
                     {grid.map((tile, index) => (
                         <div key={index} className="grid-item" onClick={() => handleGridClick(index)}>
-                            {tile ? <img src={tile[1]} alt="Grid Tile" style={{ width: '80px' }} /> : null}
+                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'600px'} : { width: '150px' }} /> : null}
                         </div>
                     ))}
                 </div>
