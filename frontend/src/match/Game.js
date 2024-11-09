@@ -10,7 +10,10 @@ function Game({match}){
     const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt) // Tenemos los jugadores de la partida
     const [filteredPlayers,setFilteredPlayers] = useState([])
     const [tiles,setTiles] = useFetchState([], '/api/v1/casilla',jwt)
-    console.log(players)
+    const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt)
+    console.log(players);
+    console.log(tiles);
+    console.log(matchTiles);
     const playerList = players.map(player => 
     <div color= {ColorToRgb(player.color)}>
         
