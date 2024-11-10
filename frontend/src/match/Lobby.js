@@ -20,23 +20,41 @@ function Lobby({match}){
     const [takenColors, setTakenColors] = useState([]);
     const [numjug, Setnumjug] = useState(match.numjugadores);
     const [loading, setLoading] = useState(false);
+    const [ordenPartida, setOrdenPartida] = useState(0);
     
+    const putData = {
+        name: match.name,
+        contrasena: match.contrasena,
+        creadorpartida: match.creadorpartida,
+        estado: "EN_CURSO",
+        numjugadores: 1,
+        ronda: match.ronda,
+        fase: "CASILLAS",
+        jugadorinicial: 1,
+        jugadoractual: 1,
+    };
+
+    const [reData, setReData] = useState(putData);
 
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
-        
+        setOrdenPartida(0);
         setUserPlayer(playerUser);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        
+        console.log("playersfiltered",playersFiltered)
+        if(playersFiltered.length > 0) {
+            const jugInicial = playersFiltered.filter(p => p.orden === 0);            
+            setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
+        }
         const intervalId = setInterval(fetchPlayers, 1000);
         return () => clearInterval(intervalId);
         
-    }, [players, match.id,user.id]);
+    }, [players, match.id, user.id]);
 
 /*
     useEffect(() => {
@@ -122,18 +140,7 @@ const startGame = async () => {
         { tile: 4, count: 3, capacity: 5 },
         { tile: 5, count: 5, capacity: 5 },
         { tile: 6, count: 4, capacity: 5 }
-    ];
-
-    const putData = {
-        name: match.name,
-        contrasena: match.contrasena,
-        estado: "EN_CURSO",
-        numjugadores: match.numjugadores,
-        ronda: match.ronda,
-        fase: "CASILLAS",
-        jugador_inicial: 1,
-        jugador_actual: 1,
-    };
+    ];    
 
     let x = null;
     let y = null;
@@ -162,7 +169,7 @@ const startGame = async () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(putData),
+            body: JSON.stringify(reData),
         }).then(() => fetch("/api/v1/matchTiles", {
             method: "POST",
             headers: {
@@ -186,30 +193,32 @@ const startGame = async () => {
     
 
     function endGame(){
-        const numJugadores = numjug-1;
+        const numJugadores = numjug;
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
         let putData = {}
         if(numJugadores === 0){
             putData =  {
                 name: match.name,
                 contrasena: match.contrasena,
+                creadorpartida: match.creadorpartida,
                 estado: "FINALIZADA",
                 numjugadores: 0,
                 ronda: match.ronda,
                 fase: "CASILLAS",
-                jugador_inicial: 1,
-                jugador_actual: 1,   
+                jugadorinicial: 1,
+                jugadoractual: 1,   
         }}
         else{
         putData =  {
             name: match.name,
             contrasena: match.contrasena,
+            creadorpartida: match.creadorpartida,
             estado: "ESPERANDO",
             numjugadores: numJugadores,
             ronda: match.ronda,
             fase: "CASILLAS",
-            jugador_inicial: 1,
-            jugador_actual: 1,
+            jugadorinicial: 1,
+            jugadoractual: 1,
         }}
         console.log("match",match)
         fetch("/api/v1/players/"+ playerId, {
@@ -243,10 +252,11 @@ const startGame = async () => {
 
     
     function handleColorChange(color) {
+        const order = filteredPlayers.length + 1 - 1;
         const emptyPlayer = {
             name: finalUser.username,
             color: color,
-            orden: 0,
+            orden: order,
             vivo: true,
             puntos: 0,
             usuario: finalUser.id,
@@ -263,8 +273,7 @@ const startGame = async () => {
             },
             body: JSON.stringify(emptyPlayer),
         }).then(() => {
-            setShowColorPicker(false); // Oculta el modal después de seleccionar el color
-            
+            setShowColorPicker(false); // Oculta el modal después de seleccionar el color // Incrementa el número de orden para los jugadores  
         });
 
     }

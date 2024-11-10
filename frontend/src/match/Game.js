@@ -13,7 +13,8 @@
 
     function Game({match}){
         const jwt = tokenService.getLocalAccessToken();
-        const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt); // Siempre igual
+        const user = tokenService.getUser();
+        const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
         const [tilesList,setTilesList] = useFetchState([], '/api/v1/casilla',jwt); // Siempre igual
         const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
         const [allDataLoaded, setAllDataLoaded] = useState(false);
@@ -21,13 +22,7 @@
         const [gridTiles, setGridTiles] = useState([]);
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
-
-        console.log("Players: ", players)
-        console.log("Tiles: ", tilesList)
-        console.log("MatchTiles: ", matchTiles)
-        console.log("TilesAndImages: ", tilesAndImages)
-        console.log("gridTiles: ", gridTiles)
-        console.log(grid[0])
+        const myPlayer = players.filter(p => p.usuario === user.id)[0];
 
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -80,7 +75,7 @@
                 .then(data => setMatchTiles(data))
                 .catch(error => console.error('Error fetching tiles:', error));
             }, 1000); // Cada 5 segundos
-        
+            
             return () => clearInterval(interval);
         }, [match.id, jwt]);
 
@@ -91,6 +86,8 @@
                 const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
                 setTilesAndImages(matchTilesCopy)
                 setGridTiles(matchTilesCopy2)
+                const orderedPlayers = [...players].sort(p => p.orden)
+                setPlayers(orderedPlayers) // Siempre igual
             }
         }, [players, tilesList, matchTiles]);
 
@@ -120,10 +117,12 @@
         }*/
 
         const handleTileClick = (tile) => {
-                setSelectedTile(tile);
-                // Aquí actualizas el estado de tilesAndImages para que se muestre la siguiente imagen
-                const updatedTilesAndImages = tilesAndImages.slice(1); // Elimina el primer elemento de la lista
-                setTilesAndImages(updatedTilesAndImages); // Actualiza la lista
+                if (myPlayer.id === match.jugadoractual) {
+                    setSelectedTile(tile);
+                    // Aquí actualizas el estado de tilesAndImages para que se muestre la siguiente imagen
+                    const updatedTilesAndImages = tilesAndImages.slice(1); // Elimina el primer elemento de la lista
+                    setTilesAndImages(updatedTilesAndImages); // Actualiza la lista
+                }
         }
 
         const updateTilePosition = (tile, x, y) => {
@@ -165,6 +164,14 @@
     
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
+                const nextPlayer = players[myPlayer.orden+1];
+                fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                })
             }    
         };
 
@@ -211,6 +218,7 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
+                        {myPlayer.id === match.jugadoractual && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
