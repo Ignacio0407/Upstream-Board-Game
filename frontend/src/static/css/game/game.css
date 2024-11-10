@@ -48,9 +48,8 @@
 /**//**//**//**//**//**//**/
 .game-container {
     position: absolute;
-    display: grid;
-    grid-template-columns: 1fr 0.7fr 1fr;
-    grid-template-rows: 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 0.8fr 1.2fr;
+    display: flex;
+    flex-direction: column;
     margin-left: 550px;
     margin-top: 50px;
     width: 800px;
@@ -58,6 +57,23 @@
     border-radius: 10px;
     background-color:  #1e95a2;
     border: solid;
+}
+
+.grid1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    height: 75%;
+    background-color:  #3A6B76;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    height: 25%;
+    justify-self: flex-end;
+    background-color:  #193963;
 }
 
 .grid-item {
@@ -72,22 +88,11 @@
     border: solid #2a554f;
   }
 
-  .grid-item18 {
-    color: white;
-    padding: 0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    border-radius: 5px;
-    margin-top: 10px;
-  }
-
   .grid-item:nth-child(3n + 1) {
-    transform: translateY(88px);
+    transform: translateY(20px);
   }
   .grid-item:nth-child(3n + 3) {
-    transform: translateY(88px);
+    transform: translateY(20px);
   }
 
 .users-table {
@@ -97,81 +102,6 @@
     display: flex;
     flex-direction: column;
     margin-top: 80px;
-}
-
-.game-board {
-    grid-column: 2 / 3;
-    grid-row: 1 / 3;
-    background-color: #333;
-    border: 2px solid #444;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.player-sidebar {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
-    padding: 20px;
-    background-color: #3a3a3a;
-    border-right: 2px solid #444;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.player-sidebar h2 {
-    color: #f5b342;
-    font-size: 1.5em;
-    margin-bottom: 10px;
-}
-
-.player-sidebar p {
-    margin: 10px 0;
-}
-
-.action-button {
-    padding: 10px 20px;
-    margin-top: 20px;
-    background-color: #f5b342;
-    color: #333;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.action-button:hover {
-    background-color: #e1a329;
-}
-
-.chat-area {
-    grid-column: 1 / 4;
-    grid-row: 2 / 3;
-    background-color: #2b2b2b;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    border-top: 2px solid #444;
-}
-
-.messages {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 10px;
-    max-height: 100px;
-}
-
-.chat-input {
-    flex: 0.4;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #3d3d3d;
-    color: #e1e1e1;
 }
 
 .table-row {
