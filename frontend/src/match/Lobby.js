@@ -136,8 +136,8 @@ const fetchPlayers = async () => {
             jugador_actual: 1,
         }
     
-        let x = 0;
-        let y = 0;
+        let x = null;
+        let y = null;
         let orientation = 0;
     
         const requests = tileConfigs.flatMap(({ tile, count, capacity }) =>

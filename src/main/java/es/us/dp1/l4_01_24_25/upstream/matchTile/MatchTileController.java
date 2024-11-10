@@ -1,12 +1,14 @@
 package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
+import es.us.dp1.l4_01_24_25.upstream.coordenada.Coordenada;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
@@ -33,6 +36,26 @@ public class MatchTileController {
     public List<MatchTile> getAllMatchTiles() {
         return matchTileService.findAll();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<MatchTile> updateMatchTile(@PathVariable("id") Integer id, 
+                                                     @RequestBody Map<String, Integer> updates) throws ResourceNotFoundException {
+        // Buscar el MatchTile por ID
+        MatchTile matchTile = matchTileService.findById(id);
+        if (matchTile == null) {
+            throw new ResourceNotFoundException("MatchTile", "ID", id);
+        }
+
+        // Actualizar solo los valores de x e y si están presentes en el RequestBody
+        if (updates.containsKey("x") && updates.containsKey("y")) {
+            matchTile.setCoordinate(new Coordenada(updates.get("x"), updates.get("y"))); 
+        }
+
+        // Guardar el MatchTile actualizado
+        MatchTile updatedMatchTile = matchTileService.save(matchTile);
+        return ResponseEntity.ok(updatedMatchTile);
+    }
+
 
     @GetMapping("/{id}")
     public List<MatchTile> getMatchTileById(@PathVariable("id") Integer id) {
