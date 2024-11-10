@@ -16,23 +16,27 @@ export default function CreateGame() {
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const emptyMatch = {
-        name: "",
-        contrasena: "",
-        estado: "ESPERANDO",
-        numjugadores: 1,
-        ronda: 0,
-        fase: "CASILLAS",
-        jugador_inicial: 1,
-        jugador_actual: 1,
-    }
+      name: "",
+      contrasena: "",
+      creadorpartida: null,
+      estado: "ESPERANDO",
+      numjugadores: 1,
+      ronda: 0,
+      fase: "CASILLAS",
+      jugador_inicial: null,
+      jugador_actual: null,
+  }
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
-
+  console.log(finalUser.id)
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
         }
-    }, [jwt])
+        if (finalUser) {
+          setMatch(prevMatch => ({...prevMatch, creadorpartida: finalUser.id }))
+        }
+    }, [jwt, finalUser])
 
     let matchId;
     function handleSubmit(event){
@@ -109,7 +113,7 @@ function handleChange(event) {
             <div className="custom-button-row">
             <button className="auth-button">Save</button>
             <Link
-              to={`/achievements`}
+              to={`/dashboard`}
               className="auth-button"
               style={{ textDecoration: "none" }}
             >
