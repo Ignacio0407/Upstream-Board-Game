@@ -17,19 +17,21 @@
         const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt) // Tenemos los jugadores de la partida
         const [tilesList,setTilesList] = useFetchState([], '/api/v1/casilla',jwt)
         const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt)
+        const matchTilesNotC= matchTiles.filter(mT => mT.coordinate === null);
         //const playerList = players.map(player => <div color= {ColorToRgb(player.color)}></div>)
-        const matchTilesWithoutSeaOrSpawn = matchTiles.filter(mT => tilesList[mT.tile-1].tipo !== 'MAR' && tilesList[mT.tile-1].tipo !== 'DESOVE') // Quitar las casillas de mar y desove;  
-        matchTilesWithoutSeaOrSpawn.sort(() => Math.random() - 0.5)
+        /** const matchTilesWithoutSeaOrSpawn = matchTiles.filter(mT => tilesList[mT.tile-1].tipo !== 'MAR' && tilesList[mT.tile-1].tipo !== 'DESOVE') // Quitar las casillas de mar y desove;  
+        matchTilesWithoutSeaOrSpawn.sort(() => Math.random() - 0.5) */
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(20).fill(null));
         const [matchTilesWithImages, setTilesWithImages] = useState([]);
         const [isReady, setIsReady] = useState(false);
 
-        console.log("TILES ",tilesList);
+        console.log("TILES ",tilesList);    
         console.log("MATCH TILES ", matchTiles);
-        console.log("MATCH TILES WITHOUT SEA OR SPAWN ", matchTilesWithoutSeaOrSpawn);
+       // console.log("MATCH TILES WITHOUT SEA OR SPAWN ", matchTilesWithoutSeaOrSpawn);
         console.log("MATCH", match);
         console.log("PLAYERS", players);
+        
         
         const playerList =
         players.map((p) => {
@@ -51,9 +53,43 @@
                 matchTilesWithImagesCopy.splice(index, 1);
                 setTilesWithImages(matchTilesWithImagesCopy);
             }
-        }
+        }  
+
+        const updateTilePosition = (tile, x, y) => {
+            fetch(`/api/v1/matchTiles/${tile[0].id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify({ x, y })
+            })
+            .then(response => 
+                    console.log(response.json()))
+            .then(updatedTile => {
+                console.log(updatedTile);
+                const tileWithImage = matchTilesWithImages.find(t => t[0].id === tile.id);
+                setTilesWithImages(prevTiles =>
+                    prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
+                );
+                
+            })
+            .catch(error => console.error('Error updating tile position:', error));
+        };
+        
 
         const handleGridClick = (index) => {
+            if (selectedTile) {
+                const gridWidth = 3; // Definir el ancho de la cuadrícula (por ejemplo, 5 columnas)
+                const x = index % gridWidth; // Coordenada x (columna)
+                const y = Math.floor(grid.length / gridWidth) - 1 - Math.floor(index / gridWidth);
+    
+                updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
+    
+                // Reiniciar la casilla seleccionada después de moverla
+                setSelectedTile(null);
+            }
+            
             if(index !== 18 && index !== 19) {
                 if (selectedTile) {
                     const newGrid = [...grid];
@@ -62,8 +98,11 @@
                     setSelectedTile(null);
                 }
             }
-        }
+                 
+                
+        };
 
+        
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
             const realTile = tilesList[tileP.tile-1]
@@ -88,16 +127,19 @@
                     return null;
             }
         }   
-
     
+
         useEffect(() => {
+
 
             const timer = setTimeout(() => {
                 setIsReady(true);
                 
             }, 500);
+            
+
             setTilesWithImages(
-                matchTilesWithoutSeaOrSpawn.map((tile) => [tile, getImage(tile)])
+                matchTilesNotC.map((tile) => [tile, getImage(tile)])
             );
             const newGrid = [...grid];
         const gridWidth = 5; // Suponiendo una cuadrícula de 5 columnas
