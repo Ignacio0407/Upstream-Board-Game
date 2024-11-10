@@ -112,74 +112,77 @@ const fetchPlayers = async () => {
             window.location.reload(true))
     }
 */
-    const startGame = async () => {
-        setLoading(true);
-        const tileConfigs = [
-            { tile: 1, count: 7, capacity: 5 },
-            { tile: 2, count: 5, capacity: 4 },
-            { tile: 3, count: 5, capacity: 5 },
-            { tile: 4, count: 3, capacity: 5 },
-            { tile: 5, count: 5, capacity: 5 },
-            { tile: 6, count: 4, capacity: 5 },
-            { tile: 7, count: 1, capacity: 99 },
-            { tile: 8, count: 1, capacity: 99 }
-        ];
+const startGame = async () => {
+    setLoading(true);
 
-        const putData =  {
-            name: match.name,
-            contrasena: match.contrasena,
-            estado: "EN_CURSO",
-            numjugadores: match.numjugadores,
-            ronda: match.ronda,
-            fase: "CASILLAS",
-            jugador_inicial: 1,
-            jugador_actual: 1,
-        }
-    
-        let x = null;
-        let y = null;
-        let orientation = 0;
-    
-        const requests = tileConfigs.flatMap(({ tile, count, capacity }) =>
-            Array.from({ length: count }, () => {
-                const matchTile = {
-                    match: match.id,
-                    tile: tile,
-                    coordinate: { x, y },
-                    orientation: orientation,
-                    capacity: capacity
-                };
-    
-                return fetch("/api/v1/matches/"+ match.id, {
+    const tileConfigs = [
+        { tile: 1, count: 7, capacity: 5 },
+        { tile: 2, count: 5, capacity: 4 },
+        { tile: 3, count: 5, capacity: 5 },
+        { tile: 4, count: 3, capacity: 5 },
+        { tile: 5, count: 5, capacity: 5 },
+        { tile: 6, count: 4, capacity: 5 }
+    ];
 
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(putData),
-                }).then(fetch("/api/v1/matchTiles", {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: "application/json",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(matchTile)
-                }));
-            })
-        );
-    
-        try {
-            await Promise.all(requests);
-            console.log("Todas las MatchTiles han sido creadas.");
-        } catch (error) {
-            console.error("Error al crear algunas MatchTiles:", error);
-        }
-        setLoading(false);
-        (window.location.reload(true))
+    const putData = {
+        name: match.name,
+        contrasena: match.contrasena,
+        estado: "EN_CURSO",
+        numjugadores: match.numjugadores,
+        ronda: match.ronda,
+        fase: "CASILLAS",
+        jugador_inicial: 1,
+        jugador_actual: 1,
     };
+
+    let x = null;
+    let y = null;
+    let orientation = 0;
+
+    // Generar una lista completa de todos los tiles según tileConfigs
+    const allTiles = tileConfigs.flatMap(({ tile, count, capacity }) =>
+        Array.from({ length: count }, () => ({
+            match: match.id,
+            tile,
+            coordinate: { x, y },
+            orientation,
+            capacity
+        }))
+    );
+
+    // Mezclar la lista de tiles aleatoriamente
+    const shuffledTiles = allTiles.sort(() => Math.random() - 0.5);
+
+    // Crear las solicitudes de inserción para cada tile en el orden aleatorio
+    const requests = shuffledTiles.map(matchTile => 
+        fetch("/api/v1/matches/" + match.id, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(putData),
+        }).then(() => fetch("/api/v1/matchTiles", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(matchTile)
+        }))
+    );
+
+    try {
+        await Promise.all(requests);
+        console.log("Todas las MatchTiles han sido creadas en orden aleatorio.");
+    } catch (error) {
+        console.error("Error al crear algunas MatchTiles:", error);
+    }
+    setLoading(false);
+    window.location.reload(true);
+};
     
 
     function endGame(){
