@@ -42,4 +42,13 @@ public class Partida extends NamedEntity {
 	Jugador jugadoractual;
 
 	Integer creadorPartida;
+
+	public Integer getNumjugadores() {
+        return numjugadores;
+    }
+
+    // Método setter para el número de jugadores
+    public void setNumJugadores(Integer numjugadores) {
+        this.numjugadores = numjugadores;
+    }
 }
