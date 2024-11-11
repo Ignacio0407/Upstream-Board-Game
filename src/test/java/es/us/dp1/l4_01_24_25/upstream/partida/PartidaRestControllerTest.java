@@ -138,7 +138,7 @@ class PartidaRestControllerTest {
 
     // DELETE /api/v1/matches
     @Test
-    // @WithMockUser(username = "testUser", roles = {"USER"})
+    @WithMockUser(username = "testUser", roles = {"USER"})
     void testDeleteAllPartidas() throws Exception {
         mockMvc.perform(delete("/api/v1/matches"))
             .andExpect(status().isOk());
