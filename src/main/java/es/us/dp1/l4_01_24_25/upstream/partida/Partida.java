@@ -31,8 +31,6 @@ public class Partida extends NamedEntity {
 	
 	// Esto para unirse
 	String contrasena;
-
-	
 	@Enumerated(EnumType.STRING)
 	Estado estado;
 	// Esto para jugar en sí

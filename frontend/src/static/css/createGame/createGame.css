@@ -12,7 +12,6 @@
     height: 100%;
     width: 100%;
     flex-direction: column;
-    
 }
 
 .title-creategame{
@@ -53,7 +52,7 @@
     padding: 20px;  
     font-size: 16px; 
     margin-left: 30px;
-    margin-bottom: 40px; /* Aumenta este valor */
+    margin-bottom: 20px;
     color: #333;
 }
 
@@ -63,15 +62,7 @@ input::placeholder {
     font-style: italic;
     
 }
-.custom-form-input{
-    width: 450px;   
-    height: 40px;   
-    padding: 20px;  
-    font-size: 16px; 
-    margin-left: 30px;
-    margin-bottom: 40px; /* Aumenta este valor */
-    color: #333;
-}
+
 
 .botonCreate {
     width: 300px;
