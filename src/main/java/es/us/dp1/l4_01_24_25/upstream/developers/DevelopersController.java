@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/developers")
 public class DevelopersController {
     List<Developer> developers;
-
+    //comentario para ignacio
     @GetMapping
     public List<Developer> getDevelopers(){
         if(developers==null)
