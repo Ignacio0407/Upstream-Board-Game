@@ -10,6 +10,7 @@ import { Button } from 'reactstrap';
 import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
+import { useNavigate } from "react-router-dom";
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -19,6 +20,8 @@ export default function Dashboard() {
     const [alerts, setAlerts] = useState([]);
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+    const navigate = useNavigate();
+    const [spectatorIds, setSpectatorIds] = useState([]);
 
     useEffect(() => {
         if (jwt) {
@@ -29,6 +32,22 @@ export default function Dashboard() {
     }, [jwt])
 
     const modal = getErrorModal(setVisible, visible, message);
+    
+    function espectate(match){
+        setSpectatorIds(prevSpectators => [...prevSpectators, user.id]);
+        navigate('/matches/'+match.id, { state: { spectatorIds: [...spectatorIds, user.id] } });
+    }
+
+    function join(match){
+        if(match.contrasena != ""){
+            const contrasena = prompt("Enter the password to join the game");
+            if(contrasena != match.contrasena){
+                alert("Incorrect password");
+                return;
+            }
+        }
+        navigate('/matches/'+match.id);
+    }
 
     const matchesList = 
       matches.map((match) => {
@@ -39,11 +58,11 @@ export default function Dashboard() {
                 <td className='celda'>{match.estado}</td>
                 <td className='celda'>{match.contrasena != "" && <i className="fa fa-lock"></i>}</td>
                 <td className='celda'>{match.estado === 'ESPERANDO' &&
-                <BotonLink color={"success"} direction={'/matches/'+match.id} text={"Join game"}
-                />}</td>
+                <Button color={"success"} onClick={() => join(match)}>Join game</Button>
+                }</td>
                 <td className='celda'>{(match.estado === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
-                <BotonLink color={"warning"} direction={'/matches/'+match.id} text={"Spectate game"}
-                />}</td>
+                <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
+                }</td>
                 {user.roles[0] == "ADMIN" && <Button color="danger"
                     onClick={() =>
                     deleteFromList(

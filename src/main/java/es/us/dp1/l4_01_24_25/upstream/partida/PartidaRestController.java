@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,6 +23,7 @@ import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
+import es.us.dp1.l4_01_24_25.upstream.player.JugadorService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
@@ -30,9 +32,11 @@ import jakarta.validation.Valid;
 public class PartidaRestController {
     
     private final PartidaService partidaService;
+    private final JugadorService jugadorService;
 
-    public PartidaRestController(PartidaService partidaService) {
+    public PartidaRestController(PartidaService partidaService, JugadorService jugadorService) {
         this.partidaService = partidaService;
+        this.jugadorService = jugadorService;
     }
 
     @GetMapping
@@ -127,6 +131,9 @@ public class PartidaRestController {
     @PutMapping("/{id}")
     public ResponseEntity<Partida> updatePartidaById(@PathVariable("id") Integer idToUpdate, 
     @RequestBody @Valid Partida partidaNueva) {
+        System.out.println("##################################################################################################################################################");
+        System.out.println("ID a actualizar: " + idToUpdate);
+        System.out.println("");
         RestPreconditions.checkNotNull(partidaService.getPartidaById(idToUpdate), "Partida", "ID", idToUpdate);
         return new ResponseEntity<>(partidaService.updatePartidaById(partidaNueva,idToUpdate), HttpStatus.OK);
     }
@@ -138,5 +145,18 @@ public class PartidaRestController {
         System.out.println(partida);
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
+
+    @PatchMapping("/{matchId}/actualPlayer/{playerId}")
+    public ResponseEntity<Partida> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
+    // Verificamos si la partida existe
+    Partida partida = partidaService.getPartidaById(matchId);
+    if (partida == null) {
+        throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+    }
+    Jugador j = jugadorService.getJugadorById(playerId);
+    partida.setJugadoractual(j);
+    partidaService.savePartida(partida);
+    return new ResponseEntity<>(partida, HttpStatus.OK);
+}
 
 }

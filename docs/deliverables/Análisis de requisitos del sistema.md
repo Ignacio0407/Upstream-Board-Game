@@ -59,13 +59,12 @@ Administradores: Los administradores, tras registrarse y loguearse, podrán real
 ## Historias de Usuario -> Visual, lo que puede hacer el usuario.
 
  ### HU-(ISSUE#65): Iniciar sesión ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/65])
-Como jugador quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
+Como usuario quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
 
 ![](/docs/mockups/Mockup%20Inicio%20de%20Sesion.png)
 
  ### HU-(ISSUE#70): Registrarse ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/70])
-Como jugador quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión
-posteriormente.
+Como usuario quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión posteriormente.
 
 ![](/docs/mockups/Mockup%20Registrarse.png)
 
@@ -103,17 +102,53 @@ Como administrador quiero que el sistema me permita modificar usuarios, ya sea s
 ![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
 
  ### HU-(ISSUE#69): Listar desarrolladores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/69])
-Como administrador y jugador quiero que el sistema me permita listar todas las personas que han participado en el desarrollo
+Como administrador y usuario quiero que el sistema me permita listar todas las personas que han participado en el desarrollo
 del juego, junto con información básica de cada uno de ellos.
 ![](/docs/mockups/Mockup%20Listar%20Desarrolladores.png)
 
  ### HU-(ISSUE#71): Crear una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/71])
-Como jugador y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
+Como usuario y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
 ![](/docs/mockups/Mockup%20Crear%20Partida.png)
 
  ### HU-(ISSUE#72): Listar y unirse a partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/72])
-Como jugador y administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
+Como usuario y administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
 ![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
+
+ ### HU-(ISSUE#160): Buscar partida por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/160])
+ Como usuario quiero buscar partidas disponibles por su nombre.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+
+ ### HU-(ISSUE#161): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/161])
+ Como jugador dentro de una partida quiero poder colocar una casilla en el tablero.
+ ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
+
+ ### HU-(ISSUE#162): Elegir color ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/162])
+ Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
+ ![](/docs/mockups/Mockup%20Elegir%20Color.png)
+
+ ### HU-(ISSUE#163): Ver jugadores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/163])
+ Como jugador dentro de una lobby, quiero poder ver quién está en la partida conmigo.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+ 
+ ### HU-(ISSUE#164): Iniciar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/164])
+ Como jugador dentro de una lobby, quiero poder iniciar la partida.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+
+ ### HU-(ISSUE#165): Abandonar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/165])
+ Como jugador dentro de una lobby, quiero poder abandonar la lobby.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+
+ ### HU-(ISSUE#166): Ver logros desbloqueados ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/166])
+ Como usuario, quiero poder diferenciar los logros que tengo desbloqueados del resto de logros.
+ ![](/docs/mockups/Mockup%20Listar%20Logros%20Desbloqueados.png)
+
+ ### HU-(ISSUE#167): Ver las reglas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/167])
+ Como usuario, quiero consultar las reglas del juego.
+ ![](/docs/mockups/Mockup%20Ver%20Reglas.png)
+
+ ### HU-(ISSUE#168): Borrar una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/168])
+ Como administrador, quiero poder borrar partidas de la lista.
+ ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
 
 ## Diagrama conceptual del sistema
 
@@ -191,4 +226,38 @@ La partida se considera como finalizada si no quedan salmones vivos, o bien todo
 Ganará el jugador que acumule más puntos al final de la partida.
 
 ### R24 - Puntuación.
-Para puntuar se hará de dos formas: la primera, que será sumar un punto por cada salmón (QUE NO FICHA DE SALMÓN) que tenga el jugador. Es decir, si tiene una ficha con dos salmones, serán dos puntos. La segunda, que se suma a los puntos anteriores, consiste en sumar el número de fichas de salmón que tengas por cada huevo que haya en la casilla de Desove que se encuentre. Ejemplo a continuación: ![Puntuación](/docs/rules/puntuation.jpg)
+Para puntuar se hará de dos formas: la primera, que será sumar un punto por cada salmón (QUE NO FICHA DE SALMÓN) que tenga el jugador. Es decir, si tiene una ficha con dos salmones, serán dos puntos. La segunda, que se suma a los puntos anteriores, consiste en sumar el número de fichas de salmón que tengas por cada huevo que haya en la casilla de Desove que se encuentre. Ejemplo a continuación: 
+![Puntuación](/docs/rules/puntuation.jpg)
+
+### R25 - Color.
+El color de cada jugador será único para cada partida. No podrá haber dos jugadores con el mismo color seleccionado.
+
+### R26 - Colocar casilla.
+Un jugador podrá colocar una casilla únicamente cuando sea su turno.
+
+### R27 - Mover salmón.
+Un jugador podrá mover sus salmones únicamente cuando sea su turno.
+
+### R28 - Partidas simultáneas.
+Un usuario podrá representar a diversos jugadores en varias partidas al mismo tiempo. Cada una con su color de salmón y su puntuación.
+
+### R29 - Iniciar partida.
+Sólo el considerado creador de la partida podrá comenzar una partida desde el lobby.
+
+### R30 - Abandonar partida.
+Un jugador podrá abandonar la partida antes de que esta se dé por comenzada.
+
+### R31 - Eliminar partida.
+Un administrador podrá eliminar una partida de la lista.
+
+### R32 - Rotar casilla.
+Un jugador podrá rotar una casilla cuya orientación sea relevante para el desarrollo de la partida.
+
+### R33 - Nombres de partidas iguales.
+Dos partidas no podrán llamarse de la misma manera.
+
+### R34 - Nombres de partida inválidos.
+Una partida no podrá tener un nombre menor de 3 caracteres ni mayor de 50.
+
+### R35 - Unirse a partida en curso.
+Un jugador no podrá unirse a una partida que esté en curso.

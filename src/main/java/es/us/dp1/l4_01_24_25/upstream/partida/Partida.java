@@ -1,13 +1,20 @@
 package es.us.dp1.l4_01_24_25.upstream.partida;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
+import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
+import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
@@ -24,6 +31,8 @@ public class Partida extends NamedEntity {
 	
 	// Esto para unirse
 	String contrasena;
+
+	
 	@Enumerated(EnumType.STRING)
 	Estado estado;
 	// Esto para jugar en sí
@@ -35,13 +44,16 @@ public class Partida extends NamedEntity {
 	Fase fase;
 	
 	@OneToOne
-	@JoinColumn(name="jugador_inicial")
+	@JoinColumn(name="jugadorinicial")
+	@JsonSerialize(using = PlayerSerializer.class)
+	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadorinicial;
+	
 	@OneToOne
-	@JoinColumn(name="jugador_actual")
+	@JoinColumn(name="jugadoractual")
+	@JsonSerialize(using = PlayerSerializer.class)
+	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadoractual;
-
-	Integer creadorPartida;
 
 	public Integer getNumjugadores() {
         return numjugadores;
@@ -51,4 +63,11 @@ public class Partida extends NamedEntity {
     public void setNumJugadores(Integer numjugadores) {
         this.numjugadores = numjugadores;
     }
+
+	@ManyToOne
+	@JoinColumn(name = "creadorpartida")
+	@JsonSerialize(using = UserSerializer.class)
+	@JsonDeserialize(using = UserDeserializer.class)
+	User creadorpartida;
+
 }
