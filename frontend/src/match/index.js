@@ -20,7 +20,7 @@ export default function Match() {
         // Esperar 1 segundo (1000 ms) antes de cargar los datos
         const timer = setTimeout(() => {
             setIsReady(true);
-        }, 500);
+        }, 1000);
 
         // Limpiar el temporizador cuando el componente se desmonte
         return () => clearTimeout(timer);
@@ -31,6 +31,29 @@ export default function Match() {
         id ? `/api/v1/matches/${id}` : null, // Solo hace la solicitud si "id" no es undefined
         jwt
     );
+
+
+    useEffect(() => {
+        if(id && match.estado === "EN_CURSO") {
+
+        
+        const interval = setInterval(() => {
+        fetch(`/api/v1/matches/${match.id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`
+        },
+    }).then(response => response.json())
+    .then(data => setMatch(data))
+    .then(date => console.log(match))
+}, 1000); // Cada 5 segundos
+    return () => clearInterval(interval);
+
+}
+
+}, [match.estado,isReady]);
+
 
     useEffect(() => {
         console.log("Entered the game")
