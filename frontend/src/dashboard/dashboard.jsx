@@ -10,6 +10,7 @@ import { Button } from 'reactstrap';
 import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
+import { useNavigate } from "react-router-dom";
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -19,6 +20,8 @@ export default function Dashboard() {
     const [alerts, setAlerts] = useState([]);
     const [message, setMessage] = useState(null);
     const [visible, setVisible] = useState(false);
+    const navigate = useNavigate();
+    const [spectatorIds, setSpectatorIds] = useState([]);
 
     useEffect(() => {
         if (jwt) {
@@ -29,6 +32,11 @@ export default function Dashboard() {
     }, [jwt])
 
     const modal = getErrorModal(setVisible, visible, message);
+    
+    function espectate(match){
+        setSpectatorIds(prevSpectators => [...prevSpectators, user.id]);
+        navigate('/matches/'+match.id, { state: { spectatorIds: [...spectatorIds, user.id] } });
+    }
 
     const matchesList = 
       matches.map((match) => {
@@ -42,7 +50,7 @@ export default function Dashboard() {
                 <BotonLink color={"success"} direction={'/matches/'+match.id} text={"Join game"}
                 />}</td>
                 <td className='celda'>{(match.estado === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
-                <BotonLink color={"warning"} direction={'/matches/'+match.id} text={"Spectate game"}
+                <Button color={"warning"} onClick={() => espectate(match)} name={"Spectate game"}
                 />}</td>
                 {user.roles[0] == "ADMIN" && <Button color="danger"
                     onClick={() =>

@@ -7,6 +7,7 @@ import { Button, Table } from 'reactstrap';
 import { useNavigate } from "react-router-dom";
 import ColorPickerModal from '../util/ColorPickerModal';
 import { ColorToRgb } from '../util/ColorParser';
+import { useLocation } from "react-router-dom";
 
 function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -21,7 +22,8 @@ function Lobby({match}){
     const [numjug, Setnumjug] = useState(match.numjugadores);
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
-    
+    const spectatorIds = useLocation().state?.spectatorIds||[];
+
     const putData = {
         name: match.name,
         contrasena: match.contrasena,
@@ -46,7 +48,7 @@ function Lobby({match}){
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        console.log("playersfiltered",playersFiltered)
+        console.log("playersfiltered",spectatorIds)
         if(playersFiltered.length > 0) {
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
@@ -193,6 +195,10 @@ const startGame = async () => {
     
 
     function endGame(){
+        console.log(user.id)
+        if(spectatorIds.find(p => p === user.id)){
+            navigate("/dashboard");
+        }else{
         const numJugadores = numjug;
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
         let putData = {}
@@ -240,6 +246,7 @@ const startGame = async () => {
               body: JSON.stringify(putData),
         }).then(navigate("/dashboard")))
     }
+    }
     
     const playerList = filteredPlayers.map((p) =>{
         return (
@@ -280,9 +287,9 @@ const startGame = async () => {
     
     return(
         <div className='lobbyContainer'>
-        {filteredPlayers.find(p => p.usuario === user.id)===undefined? (showColorPicker &&
+        {filteredPlayers.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
-        ):<h1>Ya estas en la partida</h1>}
+        )}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
@@ -298,9 +305,9 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        <Button color='success' onClick={startGame}>
+        {spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
             Iniciar Partida
-        </Button>
+        </Button>}
         {loading && <div>Loading tiles...</div>}
 
         <Button color='danger' onClick={endGame}>
