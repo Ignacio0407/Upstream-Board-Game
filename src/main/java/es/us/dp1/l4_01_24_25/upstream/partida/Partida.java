@@ -52,9 +52,21 @@ public class Partida extends NamedEntity {
 	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadoractual;
 
+	Integer creadorPartida;
+
+	public Integer getNumjugadores() {
+        return numjugadores;
+    }
+
+    // Método setter para el número de jugadores
+    public void setNumJugadores(Integer numjugadores) {
+        this.numjugadores = numjugadores;
+    }
+
 	@OneToOne
 	@JoinColumn(name="creadorpartida")
 	@JsonSerialize(using = UserSerializer.class)
 	@JsonDeserialize(using = UserDeserializer.class)
 	User creadorpartida;
+
 }

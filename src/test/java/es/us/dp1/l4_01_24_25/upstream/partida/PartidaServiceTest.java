@@ -169,6 +169,7 @@ class PartidaServiceTest {
         void testUpdatePartidaById_Success() {
             // Given
             Partida updatedPartida = new Partida();
+            //updatedPartida.setNumJugadores(5);
             updatedPartida.setName("UpdatedPartida");
             when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
             when(partidaRepository.save(any(Partida.class))).thenReturn(updatedPartida);
