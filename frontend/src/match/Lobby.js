@@ -49,7 +49,6 @@ function Lobby({match}){
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        console.log("playersfiltered",match)
         if(playersFiltered.length > 0) {
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
@@ -137,25 +136,19 @@ const startGame = async () => {
     
 
     function endGame(){
-        console.log(user.id)
         if(spectatorIds.find(p => p === user.id)){
             navigate("/dashboard");
         }else{
         const numJugadores = numjug - 1;
-        console.log("playerId",filteredPlayers)
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
-        
-        console.log(matches)
-        console.log("numjugadores",match.id)
+        matches.numjugadores = numJugadores;
         if(numJugadores === 0){
             matches.estado = "FINALIZADA";
-            matches.numjugadores = 0;
         }
         else{
             matches.estado = "ESPERANDO";
-            matches.numjugadores = numJugadores; 
+             
         }
-        console.log("match",putData)
         fetch("/api/v1/players/"+ playerId, {
             method: "DELETE",
             headers: {
@@ -199,9 +192,7 @@ const startGame = async () => {
             puntos: 0,
             usuario: finalUser.id,
             partida: match.id,
-        }
-        console.log(JSON.stringify(emptyPlayer))
-        console.log("color " + color) // Para depuración, muestra el objeto en consola)
+        } // Para depuración, muestra el objeto en consola)
         fetch(`/api/v1/players`, {  // Usa el ID del usuario actual
             method: "POST",
             headers: {
