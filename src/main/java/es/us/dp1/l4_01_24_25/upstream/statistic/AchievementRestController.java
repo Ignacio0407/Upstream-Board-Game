@@ -7,10 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -47,34 +44,32 @@ public class AchievementRestController {
 		Achievement achievementToGet=achievementService.getById(id);
 		if(achievementToGet==null)
 			throw new ResourceNotFoundException("Achievement with id "+id+" not found!");
-		return new ResponseEntity<Achievement>(achievementToGet, HttpStatus.OK);
+		return new ResponseEntity<>(achievementToGet, HttpStatus.OK);
 	}
 
 	@PostMapping
-	@PreAuthorize("ADMIN")
-	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br){ 
-		Achievement result=null;
-		if(!br.hasErrors())
-			result=achievementService.saveAchievement(newAchievement);
-		else
-			throw new BadRequestException(br.getAllErrors());
-		return new ResponseEntity<>(result,HttpStatus.CREATED);	
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement) { 
+		Achievement result = achievementService.saveAchievement(newAchievement);
+		return new ResponseEntity<>(result, HttpStatus.CREATED);
 	}
 
+	@SuppressWarnings("null")
 	@PutMapping("/{id}")
-	@PreAuthorize("ADMIN")
-	public ResponseEntity<Void> modifyAchievement(@RequestBody @Valid Achievement newAchievement, BindingResult br,@PathVariable("id") int id) {
-		Achievement achievementToUpdate=this.findAchievement(id).getBody();
-		if(br.hasErrors())
-			throw new BadRequestException(br.getAllErrors());		
-		else if(newAchievement.getId()==null || !newAchievement.getId().equals(id))
-			throw new BadRequestException("Achievement id is not consistent with resource URL:"+id);
-		else{
-			BeanUtils.copyProperties(newAchievement, achievementToUpdate, "id");
-			achievementService.saveAchievement(achievementToUpdate);
-		}			
+	@PreAuthorize("hasAuthority('ADMIN')")
+	public ResponseEntity<Void> modifyAchievement(@RequestBody @Valid Achievement newAchievement, @PathVariable("id") int id) {
+		Achievement achievementToUpdate = this.findAchievement(id).getBody();
+		
+		if (newAchievement.getId() == null || !newAchievement.getId().equals(id)) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		
+		BeanUtils.copyProperties(newAchievement, achievementToUpdate, "id");
+		achievementService.saveAchievement(achievementToUpdate);
+		
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("ADMIN")

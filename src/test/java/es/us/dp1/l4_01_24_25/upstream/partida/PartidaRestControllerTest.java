@@ -191,34 +191,6 @@ class PartidaRestControllerTest {
         });
     }
 
-    /*
-    @Test
-    void testDeleteSomePartidasById_Positive() throws ErrorMessage {
-       /* List<Integer> ids = Arrays.asList(1, 2, 3);
-
-        // Simulamos que no se lanza ninguna excepción para esta lista de IDs
-        doNothing().when(partidaService).deleteSomePartidasById(ids);
-
-        ResponseEntity<Object> response = partidaRestController.deleteSomePartidasById(ids);
-
-        verify(partidaService, times(1)).deleteSomePartidasById(ids);
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode())
-        /*List<Integer> ids = Arrays.asList(1, 2, 3);
-
-        ResponseEntity<Object> response = partidaRestController.deleteSomePartidasById(ids);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        List<Integer> ids = Arrays.asList(1, 2);
-        List<Partida> partidas = Arrays.asList(new Partida(), new Partida());
-        when(partidaService.deleteSomePartidasById(ids)).thenReturn(partida);
-
-        ResponseEntity<Object> response = partidaRestController.deletePartidaById(1);
-
-        verify(partidaService, times(1)).deletePartidaById(1);
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-    */
-
     @Test
     void testDeleteSomePartidasById_Positive() throws ErrorMessage {
         // IDs de las partidas a borrar
