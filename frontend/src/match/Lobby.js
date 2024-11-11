@@ -48,7 +48,7 @@ function Lobby({match}){
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        console.log("playersfiltered",spectatorIds)
+        console.log("playersfiltered",match)
         if(playersFiltered.length > 0) {
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
@@ -293,6 +293,9 @@ const startGame = async () => {
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
+        <h4 className='passwordContainer'>
+            Password: {match.contrasena}
+        </h4>
         <div className='lobbyMainContainer'>
         
         <Table className='lobbyPlayerContainer'>

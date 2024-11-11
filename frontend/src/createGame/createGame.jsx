@@ -28,6 +28,9 @@ export default function CreateGame() {
   }
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
+
+
+
   console.log(finalUser.id)
     useEffect(() => {
         if (jwt) {
@@ -41,9 +44,6 @@ export default function CreateGame() {
     let matchId;
     function handleSubmit(event){
         event.preventDefault();
-        console.log("Match", match);
-        console.log(match);
-        console.log(user.id);
         fetch("/api/v1/matches", {
 
             method: "POST",
@@ -58,6 +58,7 @@ export default function CreateGame() {
         data => {
           const matchCreada = JSON.parse(data)
           matchId = matchCreada.id;
+          console.log(matchCreada)
           navigate(`/matches/${matchId}`)
       })
       .catch(error => console.error("Error:", error));
@@ -103,7 +104,7 @@ function handleChange(event) {
               type="text"
               name="contrasena"
               id="contrasena"
-              value={match.contrasena || ""}
+              value={match.contrasena}
               onChange={handleChange}
               className="input-table"
             />
