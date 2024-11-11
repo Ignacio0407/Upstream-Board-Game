@@ -59,7 +59,7 @@ public class SecurityConfiguration {
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/usersachievements/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
 			.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).permitAll()
-			.anyRequest().authenticated())					
+			.anyRequest().authenticated())				
 			
 			.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);		
 		return http.build();

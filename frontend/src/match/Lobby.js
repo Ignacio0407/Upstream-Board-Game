@@ -7,12 +7,14 @@ import { Button, Table } from 'reactstrap';
 import { useNavigate } from "react-router-dom";
 import ColorPickerModal from '../util/ColorPickerModal';
 import { ColorToRgb } from '../util/ColorParser';
+import { useLocation } from "react-router-dom";
 
 function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const [players,setPlayers] = useFetchState([],`/api/v1/players`,jwt)
+    const [matches,setMatches] = useFetchState([],`/api/v1/matches/${match.id}`,jwt)
     const [filteredPlayers,setFilteredPlayers] = useState([])
     const [userPlayer,setUserPlayer] = useState(null);
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
@@ -21,7 +23,8 @@ function Lobby({match}){
     const [numjug, Setnumjug] = useState(match.numjugadores);
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
-    
+    const spectatorIds = useLocation().state?.spectatorIds||[];
+
     const putData = {
         name: match.name,
         contrasena: match.contrasena,
@@ -46,7 +49,6 @@ function Lobby({match}){
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        console.log("playersfiltered",playersFiltered)
         if(playersFiltered.length > 0) {
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
@@ -56,26 +58,6 @@ function Lobby({match}){
         
     }, [players, match.id, user.id]);
 
-/*
-    useEffect(() => {
-        // Función para obtener los jugadores desde la API
-        if(jwt){
-            fetchPlayers();
-        }
-        else{
-            setPlayers(null);
-        }
-        // Inicializa el fetch de jugadores
-    
-
-        // Establece un intervalo para actualizar los jugadores cada 10 segundos
-        const intervalId = setInterval(fetchPlayers, 3000); // Actualiza cada 10 segundos
-
-        // Limpia el intervalo cuando el componente se desmonta
-        return () => clearInterval(intervalId);
-    },[jwt]); // Solo se ejecuta cuando el JWT cambia
-
-    */
 
 const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
@@ -90,46 +72,7 @@ const fetchPlayers = async () => {
         setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
-/*
-    function startGame(){
-        const putData =  {
-            name: match.name,
-            contrasena: match.contrasena,
-            estado: "EN_CURSO",
-            numjugadores: match.numjugadores,
-            ronda: match.ronda,
-            fase: "CASILLAS",
-            jugador_inicial: 1,
-            jugador_actual: 1,
-        }
-        const matchTiles = {
-            match: match.id,
-            tile: 1,
-            coordinate: {x: 0, y: 0},
-            orientation: 0,
-            capacity: 5
-        }
-        fetch("/api/v1/matches/"+ match.id, {
 
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(putData),
-        }).then(fetch("/api/v1/matchTiles", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(matchTiles),
-        })).then( 
-            window.location.reload(true))
-    }
-*/
 const startGame = async () => {
     setLoading(true);
 
@@ -193,34 +136,19 @@ const startGame = async () => {
     
 
     function endGame(){
-        const numJugadores = numjug;
+        if(spectatorIds.find(p => p === user.id)){
+            navigate("/dashboard");
+        }else{
+        const numJugadores = numjug - 1;
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
-        let putData = {}
+        matches.numjugadores = numJugadores;
         if(numJugadores === 0){
-            putData =  {
-                name: match.name,
-                contrasena: match.contrasena,
-                creadorpartida: match.creadorpartida,
-                estado: "FINALIZADA",
-                numjugadores: 0,
-                ronda: match.ronda,
-                fase: "CASILLAS",
-                jugadorinicial: 1,
-                jugadoractual: 1,   
-        }}
+            matches.estado = "FINALIZADA";
+        }
         else{
-        putData =  {
-            name: match.name,
-            contrasena: match.contrasena,
-            creadorpartida: match.creadorpartida,
-            estado: "ESPERANDO",
-            numjugadores: numJugadores,
-            ronda: match.ronda,
-            fase: "CASILLAS",
-            jugadorinicial: 1,
-            jugadoractual: 1,
-        }}
-        console.log("match",match)
+            matches.estado = "ESPERANDO";
+             
+        }
         fetch("/api/v1/players/"+ playerId, {
             method: "DELETE",
             headers: {
@@ -228,8 +156,8 @@ const startGame = async () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-        }).then(
-        fetch("/api/v1/matches/"+ match.id, {
+                 
+        }).then(()=> fetch("/api/v1/matches/"+ match.id, {
 
             method: "PUT",
             headers: {
@@ -237,8 +165,11 @@ const startGame = async () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(putData),
-        }).then(navigate("/dashboard")))
+              body: JSON.stringify(matches),
+        }).then(
+            navigate("/dashboard")
+        ))
+    }
     }
     
     const playerList = filteredPlayers.map((p) =>{
@@ -261,9 +192,7 @@ const startGame = async () => {
             puntos: 0,
             usuario: finalUser.id,
             partida: match.id,
-        }
-        console.log(JSON.stringify(emptyPlayer))
-        console.log("color " + color) // Para depuración, muestra el objeto en consola)
+        } // Para depuración, muestra el objeto en consola)
         fetch(`/api/v1/players`, {  // Usa el ID del usuario actual
             method: "POST",
             headers: {
@@ -280,12 +209,15 @@ const startGame = async () => {
     
     return(
         <div className='lobbyContainer'>
-        {filteredPlayers.find(p => p.usuario === user.id)===undefined? (showColorPicker &&
+        {filteredPlayers.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
-        ):<h1>Ya estas en la partida</h1>}
+        )}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
+        {match.contrasena !== "" && <h4 className='passwordContainer'>
+            Password: {match.contrasena}
+        </h4>}
         <div className='lobbyMainContainer'>
         
         <Table className='lobbyPlayerContainer'>
@@ -298,9 +230,9 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        <Button color='success' onClick={startGame}>
+        {spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
             Iniciar Partida
-        </Button>
+        </Button>}
         {loading && <div>Loading tiles...</div>}
 
         <Button color='danger' onClick={endGame}>

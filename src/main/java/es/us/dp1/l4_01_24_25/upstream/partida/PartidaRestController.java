@@ -146,7 +146,7 @@ public class PartidaRestController {
 
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
-    public ResponseEntity<Partida> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId, @RequestBody Jugador jugadorParcial) throws ResourceNotFoundException {
+    public ResponseEntity<Partida> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
     // Verificamos si la partida existe
     Partida partida = partidaService.getPartidaById(matchId);
     if (partida == null) {
@@ -154,6 +154,7 @@ public class PartidaRestController {
     }
     Jugador j = jugadorService.getJugadorById(playerId);
     partida.setJugadoractual(j);
+    partidaService.savePartida(partida);
     return new ResponseEntity<>(partida, HttpStatus.OK);
 }
 
