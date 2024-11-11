@@ -43,6 +43,12 @@ public class PartidaService {
         else throw new ResourceNotFoundException("No players in game " + id);
     }
 
+    @Transactional(readOnly = true)
+    public Integer getNumjugadores(Integer id) throws ResourceNotFoundException{
+        List<Jugador> players = getPlayersFromGame(id);
+        return players.size();
+    }
+
     /* Aunque el manejo de errores de operaciones CRUD se realice en el controller, pongo solamente este
        aquí porque simplifica muchísimo la gestión de errores de bastantes de los métodos implementados. */
     private Partida optionalToValueWithNotFoundException(Optional<Partida> op) {
@@ -94,7 +100,10 @@ public class PartidaService {
         if (partidaToUpdate == null){
             return null;
         }
-        if (partidaToUpdate.getNumjugadores().equals(0)){ 
+        System.out.println("ñññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññ");
+        System.out.println("Partida a actualizar: " + partidaToUpdate.getNumjugadores());
+        System.out.println("##########################################################################################################################################################");
+        if (partidaToUpdate.getNumjugadores() != null && partidaToUpdate.getNumjugadores().equals(0)){ 
             partidaToUpdate.setEstado(Estado.FINALIZADA);
         }
         return updatePartida(partidaNueva, partidaToUpdate);
