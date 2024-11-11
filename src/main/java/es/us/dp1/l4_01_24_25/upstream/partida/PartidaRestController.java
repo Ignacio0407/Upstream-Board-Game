@@ -139,9 +139,11 @@ public class PartidaRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Partida> createPartida(@RequestBody @Valid Partida partida) throws DataAccessException{
-        System.out.println(partida);
+        if ((partida == null))
+            return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
+
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Partida> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId, @RequestBody Jugador jugadorParcial) throws ResourceNotFoundException {

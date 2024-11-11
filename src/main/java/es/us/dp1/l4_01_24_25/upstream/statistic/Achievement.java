@@ -1,17 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.statistic;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
-import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -32,7 +24,4 @@ public class Achievement extends NamedEntity {
     @NotNull
     Metric metric;
 
-/*     public String getActualDescription(){
-        return description.replace("<THRESHOLD>",String.valueOf(threshold));
-    } */
 }
