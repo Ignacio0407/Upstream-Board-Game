@@ -77,7 +77,7 @@
             }, 1000); // Cada 5 segundos
             
             return () => clearInterval(interval);
-        }, [match.id, jwt]);
+        }, [jwt]);
 
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
@@ -89,7 +89,7 @@
                 const orderedPlayers = [...players].sort(p => p.orden)
                 setPlayers(orderedPlayers) // Siempre igual
             }
-        }, [players, tilesList, matchTiles]);
+        }, [tilesList, matchTiles]);
 
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
@@ -119,9 +119,7 @@
         const handleTileClick = (tile) => {
                 if (myPlayer.id === match.jugadoractual) {
                     setSelectedTile(tile);
-                    // Aquí actualizas el estado de tilesAndImages para que se muestre la siguiente imagen
-                    const updatedTilesAndImages = tilesAndImages.slice(1); // Elimina el primer elemento de la lista
-                    setTilesAndImages(updatedTilesAndImages); // Actualiza la lista
+
                 }
         }
 
@@ -164,14 +162,17 @@
     
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
-                const nextPlayer = players[myPlayer.orden+1];
+                let nextPlayer = players[myPlayer.orden+1];
+                if(!nextPlayer){
+                    nextPlayer = players[0];
+                }
                 fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${jwt}`
                     }
-                })
+                }).then(response => response.json())
             }    
         };
 

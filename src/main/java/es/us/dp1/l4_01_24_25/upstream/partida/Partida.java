@@ -14,6 +14,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
@@ -52,8 +53,6 @@ public class Partida extends NamedEntity {
 	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadoractual;
 
-	Integer creadorPartida;
-
 	public Integer getNumjugadores() {
         return numjugadores;
     }
@@ -63,8 +62,8 @@ public class Partida extends NamedEntity {
         this.numjugadores = numjugadores;
     }
 
-	@OneToOne
-	@JoinColumn(name="creadorpartida")
+	@ManyToOne
+	@JoinColumn(name = "creadorpartida")
 	@JsonSerialize(using = UserSerializer.class)
 	@JsonDeserialize(using = UserDeserializer.class)
 	User creadorpartida;
