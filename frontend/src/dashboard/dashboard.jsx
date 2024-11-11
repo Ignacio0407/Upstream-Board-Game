@@ -38,17 +38,6 @@ export default function Dashboard() {
         navigate('/matches/'+match.id, { state: { spectatorIds: [...spectatorIds, user.id] } });
     }
 
-    function join(match){
-        if(match.contrasena != ""){
-            const contrasena = prompt("Enter the password to join the game");
-            if(contrasena != match.contrasena){
-                alert("Incorrect password");
-                return;
-            }
-        }
-        navigate('/matches/'+match.id);
-    }
-
     const matchesList = 
       matches.map((match) => {
         return (
@@ -58,11 +47,11 @@ export default function Dashboard() {
                 <td className='celda'>{match.estado}</td>
                 <td className='celda'>{match.contrasena != "" && <i className="fa fa-lock"></i>}</td>
                 <td className='celda'>{match.estado === 'ESPERANDO' &&
-                <Button color={"success"} onClick={() => join(match)}>Join game</Button>
-                }</td>
+                <BotonLink color={"success"} direction={'/matches/'+match.id} text={"Join game"}
+                />}</td>
                 <td className='celda'>{(match.estado === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
-                <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
-                }</td>
+                <Button color={"warning"} onClick={() => espectate(match)} name={"Spectate game"}
+                />}</td>
                 {user.roles[0] == "ADMIN" && <Button color="danger"
                     onClick={() =>
                     deleteFromList(

@@ -131,9 +131,6 @@ public class PartidaRestController {
     @PutMapping("/{id}")
     public ResponseEntity<Partida> updatePartidaById(@PathVariable("id") Integer idToUpdate, 
     @RequestBody @Valid Partida partidaNueva) {
-        System.out.println("##################################################################################################################################################");
-        System.out.println("ID a actualizar: " + idToUpdate);
-        System.out.println("");
         RestPreconditions.checkNotNull(partidaService.getPartidaById(idToUpdate), "Partida", "ID", idToUpdate);
         return new ResponseEntity<>(partidaService.updatePartidaById(partidaNueva,idToUpdate), HttpStatus.OK);
     }
