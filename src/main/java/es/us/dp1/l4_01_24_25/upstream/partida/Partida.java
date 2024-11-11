@@ -42,16 +42,22 @@ public class Partida extends NamedEntity {
 	Fase fase;
 	
 	@OneToOne
-	@JoinColumn(name="jugadorinicial")
+	@JoinColumn(name="jugador_inicial")
 	@JsonSerialize(using = PlayerSerializer.class)
 	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadorinicial;
 	
 	@OneToOne
-	@JoinColumn(name="jugadoractual")
+	@JoinColumn(name="jugador_actual")
 	@JsonSerialize(using = PlayerSerializer.class)
 	@JsonDeserialize(using = PlayerDeserializer.class)
 	Jugador jugadoractual;
+
+	@OneToOne
+	@JoinColumn(name="creador_partida")
+	@JsonSerialize(using = UserSerializer.class)
+	@JsonDeserialize(using = UserDeserializer.class)
+	User creadorpartida;
 
 	public Integer getNumjugadores() {
         return numjugadores;
@@ -61,11 +67,5 @@ public class Partida extends NamedEntity {
     public void setNumJugadores(Integer numjugadores) {
         this.numjugadores = numjugadores;
     }
-
-	@ManyToOne
-	@JoinColumn(name = "creadorpartida")
-	@JsonSerialize(using = UserSerializer.class)
-	@JsonDeserialize(using = UserDeserializer.class)
-	User creadorpartida;
 
 }

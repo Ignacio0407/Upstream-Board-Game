@@ -29,7 +29,7 @@ INSERT INTO achievement(id,name,description,threshold,metric) VALUES (5,'Gambler
 INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 1);
 INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 2);
 INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 3);
-/*
+
 INSERT INTO player (id, name, color, orden, vivo, puntos,usuario) VALUES (1, 'Juan', 'ROJO', 1, TRUE, 10,1);
 INSERT INTO player (id, name, color, orden, vivo, puntos, usuario) VALUES (2, 'Maria', 'ROJO', 2, TRUE, 20,1);
 INSERT INTO player (id, name, color, orden, vivo, puntos, usuario) VALUES (3, 'Carlos', 'VERDE', 3, FALSE, 15,4);
@@ -38,12 +38,14 @@ INSERT INTO player (id, name, color, orden, vivo, puntos, usuario) VALUES (5, 'L
 INSERT INTO player (id, name, color, orden, vivo, puntos, usuario) VALUES (6, 'Elena', 'MORADO', 6, TRUE, 5,5);
 INSERT INTO player (id, name, color, orden, vivo, puntos, usuario) VALUES (7, 'Pedro', 'BLANCO', 7, TRUE, 12,6);
 
-INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (1, 'Partida1', 2, '1234', 'ESPERANDO', 1, 'MOVIENDO', 1, 1);
-INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (2, 'Partida2', 3, 'abcd', 'EN_CURSO', 2, 'CASILLAS', 2, 2);
-INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (3, 'Partida3', 4, '5678', 'FINALIZADA', 3, 'MOVIENDO', 3, 3);
-INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (4, 'Partida4', 5, 'efgh', 'ESPERANDO', 1, 'CASILLAS', 4, 4);
-INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual) VALUES (5, 'Partida5', 2, 'ijkl', 'EN_CURSO', 2, 'MOVIENDO', 5, 5);
+INSERT INTO matches (id, name, numjugadores, contrasena, estado, ronda, fase, jugador_inicial, jugador_actual, creador_partida) VALUES 
+(1, 'Partida1', 2, '1234', 'ESPERANDO', 1, 'MOVIENDO', 1, 1, 4),
+(2, 'Partida2', 3, 'abcd', 'EN_CURSO', 2, 'CASILLAS', 2, 2, 5),
+(3, 'Partida3', 4, '5678', 'FINALIZADA', 3, 'MOVIENDO', 3, 3, 6),
+(4, 'Partida4', 5, 'efgh', 'ESPERANDO', 1, 'CASILLAS', 4, 4, 7),
+(5, 'Partida5', 2, 'ijkl', 'EN_CURSO', 2, 'MOVIENDO', 5, 5, 8);
 
+/*
 UPDATE player SET partida = 1 WHERE id=1;
 UPDATE player SET partida = 1 WHERE id=2;
 UPDATE player SET partida = 1 WHERE id=3;
