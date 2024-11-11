@@ -1,10 +1,55 @@
 # Documento de diseño del sistema
 
-_Esta es una plantilla que sirve como guía para realizar este entregable. Por favor, mantén las mismas secciones y los contenidos que se indican para poder hacer su revisión más ágil._ 
-
 ## Introducción
 
-_En esta sección debes describir de manera general cual es la funcionalidad del proyecto a rasgos generales. ¿Qué valor puede aportar? ¿Qué objetivos pretendemos alcanzar con su implementación? ¿Cuántos jugadores pueden intervenir en una partida como máximo y como mínimo? ¿Cómo se desarrolla normalmente una partida?¿Cuánto suelen durar?¿Cuando termina la partida?¿Cuantos puntos gana cada jugador o cual es el criterio para elegir al vencedor?_
+Upstream es un juego de mesa con una temática basada en el deshielo en el paso del frío invierno a primavera. Este deshielo abre el camino de vuelta a casa para los salmones, banco que cada jugador debe controlar con el objetivo de remontar el río y así dejar sus huevos en el lugar en el que nacieron, tras una larga vida en alta mar. Por el camino, deben evitar obstáculos diversos, además de depredadores como osos, garzas o águilas.
+
+En una partida de Upstream pueden jugar de 2 a 5 jugadores, esta suele terminar o bien cuando todos los salmones perecen o todos llegan a la zona de desove.
+
+Elementos del juego:
+    
+    · Ficha de salmón (4 para cada jugador): por un lado muestra una pareja de salmones, y por el otro un único salmón.
+    · Loseta de agua (7): loseta libre, sin normas especiales. 
+    · Losetas de mar y desove.
+    · Loseta de salto de agua (4): los obstáculos obligan a los salmones a saltar en lugar de nadar.
+    · Loseta de águila (5): si una ficha de salmón nada aquí, se pierde un salmón y se voltea la loseta.
+    · Loseta de oso (3): si una ficha de salmon salta hacia o desde aquí, se pierde un salmón.
+    · Loseta de garza (5): si al final de tu turno se tiene una ficha aquí, se pierde un salmón.
+    · Loseta de roca (5): tiene la capacidad de cualquier loseta - 1. (la capacidad de cualquier loseta es igual al número de jugadores)
+
+Preparación inicial:
+
+Coloca las losetas de Mar en la mesa con una ficha de salmón de cada jugador en cada una de ellas por la cara que muestra la pareja de salmones. Mezcla las losetas restantes y déjalas en una pila boca abajo.
+
+Empezando por el último jugador que comió salmón y en sentido de las agujas del reloj, cada jugador coge una loseta de la pila y la coloca a continuación del río, en cualquiera de los 3 espacios inmediatamente superiores a las losetas de Mar, hasta que haya exactamente 4 losetas en cada columna (además de las losetas de Mar). Se pueden colocar las losetas en cualquier espacio respetando el ancho de 3 y sin superar las 4 losetas por columna, orientadas como el jugador elija. Una vez colocadas las losetas, el jugador al que le tocase colocar loseta es el jugador inicial.
+
+Estructura del juego:
+
+Empezando por el jugador inicial, los jugadores toman turnos en sentido horario para mover sus fichas de Salmón. Disponen de 5 puntos de movimientos que deben gastar obligatoriamente. Una vez que todos los jugadores hayan realizado su turno, se habrá completado una ronda. Al final de cada ronda, el jugador inicial retira las 3 últimas losetas de río y coloca 3 más de la pila en la parte superior del río, formando una nueva línea, y el inicial pasa a ser el siguiente jugador. Se puede elegir la orientación de las losetas si es relevante (si tienen obstáculos). Si se retira una loseta donde hay una o más fichas de Salmón, devuélvelas a la caja.
+
+¡IMPORTANTE! Durante la primera ronda de juego, NO se retiran losetas, sólo se colocan 3 nuevas losetas. Al final de la segunda ronda, retira las 4 losetas de Mar, y coloca 3 nuevas losetas. Tras esto, cada ronda se irán retirando y colocando losetas de 3 en 3 hasta agotar la pila de losetas.
+
+Movimiento:
+
+Cada jugador cuenta con 5 puntos de movimiento durante su turno que debe gastar en mover sus fichas de salmón. Puede invertir los 5 puntos en una sola ficha o dividirlos como desee, siempre y cuando gaste los 5 puntos. Las parejas se mueven juntas, por lo que cuesta igual mover un salmón sólo que una pareja, ambos se consideran una ficha. Nunca se puede mover hacia atrás. El movimiento puede ser nadando o saltando.
+
+        · Nadar: Moverse de una loseta a otra sin obstáculos entre medio se considera nadar. Nadar cuesta 1 punto por loseta a la que se desplace la ficha. Si una loseta está llena (capacidad = tantas fichas como jugadores), las fichas de salmón no pueden cruzarla nadando ni pararse en ella.
+
+        · Saltar: Moverse de una loseta a otra ignorando todos los obstáculos se considera saltar. Cuesta 1 punto de movimiento, más 1 punto por cada loseta saltada. Sólo se puede saltar en línea recta (no se puede cambiar de dirección durante el salto).
+
+Final de la partida:
+
+Cuando se vayan a colocar las últimas dos losetas de río, éstas deben colocarse a los lados, para poner las de Desove en el centro, al final del río. Cuando una ficha llegue a la primera loseta de Desove debe detenerse y ya no podrán gastarse puntos de movimiento con esa ficha. Al final de cada ronda se sigue eliminando la fila inferior del río, pero no se colocan nuevas losetas. En lugar de eso se mueven todas las fichas en el lago del Desove a la casilla siguiente. IMPORTANTE: En estas casillas no hay máximo de fichas por casilla.
+
+Puntuaciones:
+
+Cuando todos los salmones estén en las losetas de Desove o en la caja, se acaba la partida automáticamente y cada jugador recibe sus puntos:
+
+    • Por cada salmón (que NO ficha de salmón) que tenga, 1 punto.
+    • Por cada ficha de salmón que tenga, 1 punto por cada huevo que haya en la casilla de Desove donde se encuentra.
+
+El jugador con mayor puntuación será el ganador. En caso de empate ganará el que tenga más salmones. Si persiste el empate ganará quien tenga más fichas o en su defecto, quien tenga sus fichas más adelantadas.
+
 
 [Enlace al vídeo de explicación de las reglas del juego / partida jugada por el grupo](http://youtube.com)
 
@@ -12,50 +57,11 @@ _En esta sección debes describir de manera general cual es la funcionalidad del
 
 ### Diagrama de Dominio/Diseño
 
-_En esta sección debe proporcionar un diagrama UML de clases que describa el modelo de dominio, recuerda que debe estar basado en el diagrama conceptual del documento de análisis de requisitos del sistema pero que debe:_
-•	_Especificar la direccionalidad de las relaciones (a no ser que sean bidireccionales)_
-•	_Especificar la cardinalidad de las relaciones_
-•	_Especificar el tipo de los atributos_
-•	_Especificar las restricciones simples aplicadas a cada atributo de cada clase de domino_
-•	_Incluir las clases específicas de la tecnología usada, como por ejemplo BaseEntity, NamedEntity, etc._
-•	_Incluir los validadores específicos creados para las distintas clases de dominio (indicando en su caso una relación de uso con el estereotipo <<validates>>._
-
-_Un ejemplo de diagrama para los ejercicios planteados en los boletines de laboratorio sería (hemos omitido las generalizaciones hacia BaseEntity para simplificar el diagrama):_
-
-
-_Ej:_
-
-```mermaid
-classDiagram
-    note "From Duck till Zebra"
-    Animal <|-- Duck
-    note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : age
-    Animal : gender
-    class Duck{
-        beakColor        
-    }
-    class Fish{
-       sizeInFeet
-    }
-    class Zebra{
-        is_wild
-        
-    }
-```
-_En este caso hemos vuelto a usar mermaid para crear el diagrama de dominio/diseño, pero recuerda que puedes usar cualquier otra herramienta que consideres oportuno para crear tus diagramas e inclurlos en este document como imagen tal y como se explica en [este tutorial](https://www.baeldung.com/ops/github-readme-insert-image)_
+![](/docs/diagrams/UML%20diagram.png)
 
 ### Diagrama de Capas (incluyendo Controladores, Servicios y Repositorios)
-_En esta sección debe proporcionar un diagrama UML de clases que describa el conjunto de controladores, servicios, y repositorios implementados, incluya la división en capas del sistema como paquetes horizontales tal y como se muestra en el siguiente ejemplo:_
 
-![your-UML-diagram-name](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml)
-
-_El diagrama debe especificar además las relaciones de uso entre controladores y servicios, entre servicios y servicios, y entre servicios y repositorios._
-_Tal y como se muestra en el diagrama de ejemplo, para el caso de los repositorios se deben especificar las consultas personalizadas creadas (usando la signatura de su método asociado)._
-
-_En este caso, como mermaid no soporta la definición de paquetes, hemos usado una [herramienta muy similar llamada plantUML}(https://www.plantuml.com/). Esta otra herramienta tiene un formulario para visualizar los diagramas previamente disponible en [https://www.plantuml.com/plantuml/uml/}(https://www.plantuml.com/plantuml/uml/). Lo que hemos hecho es preparar el diagrama en ese formulario, y una vez teníamos el diagrama lista, grabarlo en un fichero aparte dentro del propio repositorio, y enlazarlo con el formulario para que éste nos genera la imagen del diagrama usando una funcionalizad que nos permite especificar el código del diagrama a partir de una url. Por ejemplo, si accedes a esta url verás el editor con el código cargado a partir del fichero del repositorio original: [http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/gii-is-DP1/group-project-seed/main/docs/diagrams/LayersUMLPackageDiagram.iuml)._
+![](/docs/diagrams/Layers%20diagrampng.png)
 
 ## Descomposición del mockups del tablero de juego en componentes
 
@@ -98,45 +104,30 @@ Indicar las clases o paquetes creados como resultado de la aplicación del patr�
 Describir porqué era interesante aplicar el patrón.
 
 ## Decisiones de diseño
-_En esta sección describiremos las decisiones de diseño que se han tomado a lo largo del desarrollo de la aplicación que vayan más allá de la mera aplicación de patrones de diseño o arquitectónicos._
 
-### Decisión X
-#### Descripción del problema:*
 
-Describir el problema de diseño que se detectó, o el porqué era necesario plantearse las posibilidades de diseño disponibles para implementar la funcionalidad asociada a esta decisión de diseño.
-
-#### Alternativas de solución evaluadas:
-Especificar las distintas alternativas que se evaluaron antes de seleccionar el diseño concreto implementado finalmente en el sistema. Si se considera oportuno se pude incluir las ventajas e inconvenientes de cada alternativa
-
-#### Justificación de la solución adoptada
-
-Describir porqué se escogió la solución adoptada. Si se considera oportuno puede hacerse en función de qué  ventajas/inconvenientes de cada una de las soluciones consideramos más importantes.
-Os recordamos que la decisión sobre cómo implementar las distintas reglas de negocio, cómo informar de los errores en el frontend, y qué datos devolver u obtener a través de las APIs y cómo personalizar su representación en caso de que sea necesario son decisiones de diseño relevantes.
-
-_Ejemplos de uso de la plantilla con otras decisiones de diseño:_
-
-### Decisión 1: Importación de datos reales para demostración
+### Decisión 1: Elección del color del salmón
 #### Descripción del problema:
 
-Como grupo nos gustaría poder hacer pruebas con un conjunto de datos reales suficientes, porque resulta más motivador. El problema es al incluir todos esos datos como parte del script de inicialización de la base de datos, el arranque del sistema para desarrollo y pruebas resulta muy tedioso.
+En las normas del juego no se dice nada sobre como escoger el color de los salmones
 
 #### Alternativas de solución evaluadas:
 
-*Alternativa 1.a*: Incluir los datos en el propio script de inicialización de la BD (data.sql).
+*Alternativa 1.a*: Que el color se asigne aleatoriamente al jugador.
 
 *Ventajas:*
-•	Simple, no requiere nada más que escribir el SQL que genere los datos.
-*Inconvenientes:*
-•	Ralentiza todo el trabajo con el sistema para el desarrollo. 
-•	Tenemos que buscar nosotros los datos reales
+•	No hay que peleas entre jugadores por el color del salmón.
 
-*Alternativa 1.b*: Crear un script con los datos adicionales a incluir (extra-data.sql) y un controlador que se encargue de leerlo y lanzar las consultas a petición cuando queramos tener más datos para mostrar.
-*Ventajas:*
-•	Podemos reutilizar parte de los datos que ya tenemos especificados en (data.sql).
-•	No afecta al trabajo diario de desarrollo y pruebas de la aplicación
 *Inconvenientes:*
-•	Puede suponer saltarnos hasta cierto punto la división en capas si no creamos un servicio de carga de datos. 
-•	Tenemos que buscar nosotros los datos reales adicionales
+•	Si tienes alguna preferencia de color, no puedes elegirlo y dependes de la suerte.
+
+*Alternativa 1.b*: Seleccionar el color del salmón.
+
+*Ventajas:*
+•	Puedes elegir tu color favorito para el salmón.
+
+*Inconvenientes:*
+•	Dos jugadores pueden querer el mismo color.
 
 *Alternativa 1.c*: Crear un controlador que llame a un servicio de importación de datos, que a su vez invoca a un cliente REST de la API de datos oficiales de XXXX para traerse los datos, procesarlos y poder grabarlos desde el servicio de importación.
 
@@ -149,7 +140,164 @@ Como grupo nos gustaría poder hacer pruebas con un conjunto de datos reales suf
 •	Añade cierta complejidad al proyecto
 
 *Justificación de la solución adoptada*
-Como consideramos que la división en capas es fundamental y no queremos renunciar a un trabajo ágil durante el desarrollo de la aplicación, seleccionamos la alternativa de diseño 1.c.
+Hemos decidido que deberiamos dejar elegir el color del salmón a los juagadores para que asi puedan ponerle su color favorito a estos.
+
+### Decisión 2: Primer jugador
+#### Descripción del problema:
+
+En las normas del juego se dice que empieaza a jugar la persona que comió salmón por última vez.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 2.a*: Se siguen las normas del juego.
+
+*Ventajas:*
+•	Se está jugando según las normas.
+
+*Inconvenientes:*
+•	No hay ningún control de quién esta mintiendo o no con lo la última vez que comió salmón, esto podría resultar en que todos los jugadores digan que comieron salmón hoy.
+
+*Alternativa 2.b*: Aleatoriamente se asigna el orden.
+
+*Ventajas:*
+•	No esta el problema de que la gente se invente la fecha de la última vez que comió salmón.
+
+*Inconvenientes:*
+•	No seguimos las normas del juego.
+
+*Alternativa 2.c*: El jugador que inicia la partida es el primero en jugar.
+
+•	No esta el problema de que la gente se invente la fecha de la última vez que comió salmón.
+•	Es más intuitivo.
+
+*Inconvenientes:*
+•	No seguimos las normas del juego.
+
+*Justificación de la solución adoptada*
+Hemos decidido que el jugador que inicia la partida es el primero en jugar porque es más intutivo que la opción de que se asigne automaticamente. Además que no tendríamos el problema de que la gente se invente la fecha.
+
+
+### Decisión 3: Cero jugadores en una partida
+#### Descripción del problema:
+
+Teniendo un botón de salir de partida, una partida podría quedarse sin jugadores.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 3.a*: La partida sigue en curso.
+
+*Ventajas:*
+•	Ninguna.
+
+*Inconvenientes:*
+•	No tiene ningún tipo de sentido que una partida tenga 0 jugadores.
+
+*Alternativa 3.b*: Poner un botón de acabar partida.
+
+*Ventajas:*
+•	No se quedaría la partida sin ningún jugador, ya que antes le darian al botón de finalizar partida.
+
+*Inconvenientes:*
+•	Cualquier jugador en cualquier momento puedo finalizar la partida.
+
+*Alternativa 3.c*: Si la partida tiene 0 jugadores se da por finalizada la partida.
+
+•	Tiene sentido que si una partida se queda sin jugadores se de por terminada.
+
+*Inconvenientes:*
+•	No se podría retomar esa partida.
+
+*Justificación de la solución adoptada*
+Hemos decidido que si la partida tiene 0 jugadores se da por finalizada la partida, porque no vemos mucha utilidad en dejar una partida vacia para poder retormarla despues.
+
+### Decisión 4: No es obligatorio usar una contraseña para entrar en una partida.
+#### Descripción del problema:
+
+Tener contraseñas para entrar en una partida, para que así no entre cualquiera.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 4.a*: No hay contraseña.
+
+*Ventajas:*
+•	Es más facil entrar en la partida.
+
+*Inconvenientes:*
+•	Cualquier persona puede entrar en tu partida.
+
+*Alternativa 4.b*: Poner contraseña obligatoria.
+
+*Ventajas:*
+•	Puedes tener control de quién entra en tu partida.
+
+*Inconvenientes:*
+•	Puede que quieras jugar una partida con gente que no conoces.
+
+*Alternativa 4.c*: Contraseña no obligatoria.
+
+•	Puedes tener control de quién entra en tu partida.
+•	Puedes jugar una partida con gente que no conoces.
+
+*Inconvenientes:*
+•	Ninguno.
+
+*Justificación de la solución adoptada*
+Hemos decidido que no sea obligatorio usar una contraseña para entrar en una partida, porque asi no le quitas la opción de ponerle contraseña a la gente que quiera ponerla y no obligar a ponerla a quienes no quisieran.
+
+### Decisión 5: Casilla mar
+#### Descripción del problema:
+
+La casilla mar es similar al espacio azul en el grid.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 5.a*: Cargar la imagen de la casilla mar.
+
+*Ventajas:*
+•	Va más fiel al juego original.
+
+*Inconvenientes:*
+•	Requiere má tiempo para implementarlo.
+
+*Alternativa 5.b*: No cargar la imagen de la casilla mar.
+
+*Ventajas:*
+•	Es más facil de implementar.
+•	No hay una difrencia estetica muy grande.
+
+*Inconvenientes:*
+•	No es fiel al juego original.
+
+*Justificación de la solución adoptada*
+Hemos decidido que la casilla mar no tenga una imagen sino que sea un espacio azul en el grid, ya que
+ahorramos código y tiempo.
+
+### Decisión 6: El jugador que creó la partida se sale de la partida
+#### Descripción del problema:
+
+Al tener en cuenta quién fue el creador de la partida para asignar el orden en la partida, si este jugaodr sale no esta claro quien pasaría a ser el jugador inicial.
+
+#### Alternativas de solución evaluadas:
+
+*Alternativa 6.a*: Se asigna aleatoriamente.
+
+*Ventajas:*
+•	Hay algún tipo de ordén en cuanto a quien empieza.
+
+*Inconvenientes:*
+•	Es aleatorio.
+
+*Alternativa 6.b*: El primer jugador que entró en la partida tras su creación queda con el rol de creador de la partida.
+
+*Ventajas:*
+•	Es más intuitivo.
+•	Hay algún tipo de ordén en cuanto a quien empieza.
+
+*Inconvenientes:*
+•	Ninguno.
+
+*Justificación de la solución adoptada*
+Hemos decidido que una partida no se cancela porque el jugador que la creó se salga de esta, si esto ocurre, el primer jugador que entró en esta tras su creación quedará con el rol de creador de la partida. Esto se ha decidido porque en la pantalla en la que se ven los nombres de los jugadores, estos se ven en ordén de entrada en la partida, asi que al salirse el primero (jugador que creó la partida) el resto sube de posición.
 
 ## Refactorizaciones aplicadas
 
