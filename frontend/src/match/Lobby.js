@@ -43,20 +43,30 @@ function Lobby({match}){
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
+        sincMatch();
         setOrdenPartida(0);
         setUserPlayer(playerUser);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        if(playersFiltered.length > 0) {
+        if(playersFiltered.length > 0 && matches.estado === "FINALIZADA"){
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
         }
-        const intervalId = setInterval(fetchPlayers, 1000);
-        return () => clearInterval(intervalId);
-        
+        if(matches.estado === "EN_CURSO"){
+            setLoading(false);
+            window.location.reload(true);
+        }
+        else if(matches.estado === "FINALIZADA"){
+            navigate("/dashboard");
+        }
+        else {
+            const intervalId = setInterval(fetchPlayers, 1000);
+            return () => clearInterval(intervalId);
+        }
     }, [players, match.id, user.id]);
+
 
 
 const fetchPlayers = async () => {
@@ -72,6 +82,21 @@ const fetchPlayers = async () => {
         setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
+
+
+const sincMatch = async () => {
+    const response = await fetch("/api/v1/matches/"+ match.id, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+    });
+    const data = await response.json();
+    setMatches([])
+    setMatches(data); // Actualiza el estado con los nuevos jugadores
+};
 
 const startGame = async () => {
     setLoading(true);
@@ -138,8 +163,12 @@ const startGame = async () => {
     function endGame(){
         if(spectatorIds.find(p => p === user.id)){
             navigate("/dashboard");
-        }else{
-        const numJugadores = numjug - 1;
+        }
+        else{
+            let numJugadores = numjug - 1;
+            if(match.creadorpartida === user.id){
+                numJugadores = 0;
+            }
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
         matches.numjugadores = numJugadores;
         if(numJugadores === 0){
