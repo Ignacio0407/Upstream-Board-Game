@@ -96,7 +96,7 @@ public class JugadorRestController {
         
 	}
 
-    @DeleteMapping(value = "{id}")
+    @DeleteMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Object> deleteJugadorById(@PathVariable("id") Integer id) throws ErrorMessage {
 		RestPreconditions.checkNotNull(jugadorService.getJugadorById(id), "Jugador", "ID", id);

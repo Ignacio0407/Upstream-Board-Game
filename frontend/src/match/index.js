@@ -46,7 +46,6 @@ export default function Match() {
         },
     }).then(response => response.json())
     .then(data => setMatch(data))
-    .then(date => console.log(match))
 }, 1000); // Cada 5 segundos
     return () => clearInterval(interval);
 

@@ -230,7 +230,7 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        {spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
+        {match.creadorpartida === user.id && spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>}
         {loading && <div>Loading tiles...</div>}
