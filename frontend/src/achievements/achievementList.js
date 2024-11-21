@@ -49,7 +49,7 @@ export default function AchievementList() {
             <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}> {a.metric} </td>
             <td className="table-cell">
             {roles[0] === "ADMIN" && 
-                <BotonLinkOutline outlineColor={"warning"} direction={'/achievements/'+a.id} text={"Edit"}/>}
+                <BotonLink outline={true} color={"warning"} direction={'/achievements/'+a.id} text={"Edit"}/>}
             </td>
             {roles[0] === "ADMIN" &&<Button outline color="danger"
                     onClick={() =>
@@ -105,7 +105,7 @@ export default function AchievementList() {
                     <tbody>{achievementList}</tbody>
 
                     {roles[0] === "ADMIN" && 
-                    <BotonLinkOutline outlineColor={"success"} direction={'/achievements/new'} text={"Create achievement"}/>}
+                    <BotonLink outline={true} color={"success"} direction={'/achievements/new'} text={"Create achievement"}/>}
 
                     </div>
                 </div>

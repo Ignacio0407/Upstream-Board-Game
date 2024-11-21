@@ -16,7 +16,7 @@ import SwaggerDocs from "./public/swagger";
 import DeveloperList from "./developers/developers";
 import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
-import Dashboard from "./dashboard/dashboard"
+import GameList from "./gameList/gameList"
 import CreateGame from "./createGame/createGame";
 import Rules from "./rules/rules";
 import Match from "./match"
@@ -90,7 +90,7 @@ function App() {
   } else {
     userRoutes = (
       <>
-        { <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> }        
+        { <Route path="/dashboard" element={<PrivateRoute><GameList /></PrivateRoute>} /> }        
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rules" element={<Rules />} />

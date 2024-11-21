@@ -89,6 +89,20 @@ public class PartidaRestController {
         partidaService.deleteAllPartidas();
     }
 
+    @DeleteMapping(value = "{id}")
+	@ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("ADMIN")
+	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
+		Partida p = partidaService.getPartidaById(id);
+        RestPreconditions.checkNotNull(p, "Partida", "id", id);
+		if (p != null) {
+			partidaService.deletePartidaById(id);
+			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
+		} else
+			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
+            "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
+	}
+
     @DeleteMapping(value = "/ids/{ids}")
 	@ResponseStatus(HttpStatus.OK)
     @PreAuthorize("ADMIN")
@@ -113,20 +127,6 @@ public class PartidaRestController {
         
 	}
 
-    @DeleteMapping(value = "{id}")
-	@ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
-		Partida p = partidaService.getPartidaById(id);
-        RestPreconditions.checkNotNull(p, "Partida", "id", id);
-		if (p != null) {
-			partidaService.deletePartidaById(id);
-			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
-		} else
-			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
-	}
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Partida> updatePartidaById(@PathVariable("id") Integer idToUpdate, 
@@ -139,23 +139,33 @@ public class PartidaRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Partida> createPartida(@RequestBody @Valid Partida partida) throws DataAccessException{
-        if ((partida == null))
+        if ((partida == null)){
             return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
+        }
+        if (partida.getName().length()<3 || partida.getName().length()>50){
+            return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
+        }
+
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
 
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Partida> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
-    // Verificamos si la partida existe
-    Partida partida = partidaService.getPartidaById(matchId);
-    if (partida == null) {
-        throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        // Verificamos si la partida existe
+        Partida partida = partidaService.getPartidaById(matchId);
+        if (partida == null) {
+            throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        }
+        Jugador j = jugadorService.getJugadorById(playerId);
+        partida.setJugadoractual(j);
+        partidaService.savePartida(partida);
+        return new ResponseEntity<>(partida, HttpStatus.OK);
     }
-    Jugador j = jugadorService.getJugadorById(playerId);
-    partida.setJugadoractual(j);
-    partidaService.savePartida(partida);
-    return new ResponseEntity<>(partida, HttpStatus.OK);
-}
+
+    /*
+    public void limitarCasillasIniciales () {
+
+    } */  
 
 }

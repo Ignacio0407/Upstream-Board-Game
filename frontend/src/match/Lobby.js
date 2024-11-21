@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import ColorPickerModal from '../util/ColorPickerModal';
 import { ColorToRgb } from '../util/ColorParser';
 import { useLocation } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -24,6 +26,33 @@ function Lobby({match}){
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
     const spectatorIds = useLocation().state?.spectatorIds||[];
+    
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    const stompClient = new Client({
+    webSocketFactory: () => socket,
+    debug: (str) => {
+        console.log(str);
+    },
+    connectHeaders: {
+        Authorization: `Bearer ${jwt}`
+    },
+    onConnect: (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/refresh', (message) => {
+            console.log('Message received: ' + message.body);
+            fetchPlayers() ;
+        });
+    },
+    onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    },
+    onWebSocketError: (error) => {
+        console.error('Error with websocket', error);
+    }
+});
+
+stompClient.activate();
 
     const putData = {
         name: match.name,
@@ -38,7 +67,7 @@ function Lobby({match}){
     };
 
     const [reData, setReData] = useState(putData);
-
+    
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
@@ -60,14 +89,17 @@ function Lobby({match}){
         }
         else if(matches.estado === "FINALIZADA"){
             navigate("/dashboard");
-        }
+        }/*
         else {
             const intervalId = setInterval(fetchPlayers, 1000);
             return () => clearInterval(intervalId);
-        }
-    }, [players, match.id, user.id]);
+        }*/
+    }, [players, match.id, user.id, matches.estado]);
 
 
+
+
+    
 
 const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
@@ -211,8 +243,8 @@ const startGame = async () => {
     })
 
     
-    function handleColorChange(color) {
-        const order = filteredPlayers.length + 1 - 1;
+    async function handleColorChange(color) {
+        const order = filteredPlayers.length;
         const emptyPlayer = {
             name: finalUser.username,
             color: color,
@@ -221,20 +253,33 @@ const startGame = async () => {
             puntos: 0,
             usuario: finalUser.id,
             partida: match.id,
-        } // Para depuración, muestra el objeto en consola)
-        fetch(`/api/v1/players`, {  // Usa el ID del usuario actual
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(emptyPlayer),
-        }).then(() => {
-            setShowColorPicker(false); // Oculta el modal después de seleccionar el color // Incrementa el número de orden para los jugadores  
-        });
+        };
 
+        try {
+            const response = await fetch(`/api/v1/players`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(emptyPlayer),
+            });
+
+            if (response.ok) {
+                stompClient.publish({
+                    destination: "/app/hello",
+                    body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
+                });
+                setShowColorPicker(false);
+            } else {
+                console.error('Error al crear el jugador:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error al crear el jugador:', error);
+        }
     }
+    
     
     return(
         <div className='lobbyContainer'>
