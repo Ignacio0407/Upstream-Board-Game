@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'; 
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
-import '../static/css/dashboard/dashb.css'
+import '../static/css/gameList/gameList.css'
 import BotonLink from "../util/BotonLink";
 import useFetchState from '../util/useFetchState';
 import SearchBar from '../util/SearchBar';
@@ -12,7 +12,7 @@ import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
 import { useNavigate } from "react-router-dom";
    
-export default function Dashboard() { 
+export default function GameList() { 
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);

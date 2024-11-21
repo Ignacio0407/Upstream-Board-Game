@@ -1,0 +1,30 @@
+.hexagon-cell {
+    width: 100px;
+    height: 115.47px; /* width * 1.1547 */
+    position: relative;
+    margin: 5px;
+    background-color: transparent;
+    cursor: pointer;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  
+  .hexagon-cell.valid-move {
+    border: 2px solid #FFD700;
+    animation: pulse 2s infinite;
+  }
+  
+  .hexagon-cell:hover {
+    opacity: 0.8;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    }
+  }

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import tokenService from '../services/token.service'
-import useFetchState from "../util/useFetchState";
 import "../static/css/game/playerCard.css"
 import { Table } from 'reactstrap';
 
@@ -16,7 +14,6 @@ function PlayerCard({nombre,color}){
                 {color}
             </td>
             </tr>
-
         </Table>
     )
 
