@@ -37,21 +37,20 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<Jugador> getPlayersFromGame(Integer id) throws ResourceNotFoundException{
-        List<Jugador> p = partidaRepository.findPlayersFromGame(id);
+    public List<Player> getPlayersFromGame(Integer id) throws ResourceNotFoundException{
+        List<Player> p = matchRepository.findPlayersFromGame(id);
         if(!p.isEmpty()) return p;
         else throw new ResourceNotFoundException("No players in game " + id);
     }
 
     @Transactional(readOnly = true)
     public Integer getNumjugadores(Integer id) throws ResourceNotFoundException{
-        List<Jugador> players = getPlayersFromGame(id);
+        List<Player> players = getPlayersFromGame(id);
         return players.size();
     }
 
     /* Aunque el manejo de errores de operaciones CRUD se realice en el controller, pongo solamente este
        aquí porque simplifica muchísimo la gestión de errores de bastantes de los métodos implementados. */
-    private Partida optionalToValueWithNotFoundException(Optional<Partida> op) {
     private Match optionalToValueOrNull(Optional<Match> op) {
         if (!op.isPresent()) {
             return null;
@@ -62,13 +61,13 @@ public class MatchService {
     @Transactional(readOnly = true)
     public Match getPartidaById(Integer id) {
         Optional <Match> op = matchRepository.findById(id);
-        return optionalToValueWithNotFoundException(op);
+        return optionalToValueOrNull(op);
     }
 
     @Transactional(readOnly = true)
     public Match getPartidaByName(String name) {
         Optional <Match> op = Optional.ofNullable(matchRepository.findByName(name));
-        return optionalToValueWithNotFoundException(op);
+        return optionalToValueOrNull(op);
     }
 
     @Transactional
@@ -101,10 +100,7 @@ public class MatchService {
         if (partidaToUpdate == null){
             return null;
         }
-        System.out.println("ñññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññññ");
-        System.out.println("Partida a actualizar: " + partidaToUpdate.getNumjugadores());
-        System.out.println("##########################################################################################################################################################");
-        if (partidaToUpdate.getPlayersNum() != null && partidaToUpdate.getPlayersNum().equals(0)){ 
+       if (partidaToUpdate.getPlayersNum() != null && partidaToUpdate.getPlayersNum().equals(0)){ 
             partidaToUpdate.setState(State.FINALIZADA);
         }
         return updatePartida(partidaNueva, partidaToUpdate);
@@ -116,13 +112,5 @@ public class MatchService {
 		matchRepository.save(partida);
 		return partida;
 	}
-
-    // FALTA VER EL ID
-    @Transactional
-    public Partida copyPartida(Partida partidaOriginal) {
-        Partida partidaCopia = new Partida();
-        BeanUtils.copyProperties(partidaOriginal, partidaCopia, "id");
-        return partidaCopia;
-    }
     
 }

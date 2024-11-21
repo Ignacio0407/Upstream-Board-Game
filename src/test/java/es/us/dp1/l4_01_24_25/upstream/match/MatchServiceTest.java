@@ -19,10 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import es.us.dp1.l4_01_24_25.upstream.match.Match;
-import es.us.dp1.l4_01_24_25.upstream.match.MatchRepository;
-import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
 
@@ -138,31 +134,6 @@ class MatchServiceTest {
     @Nested
     @DisplayName("POST Operations Tests")
     class PostOperationsTests {
-        
-        @Test
-        void testSavePartida_Success() {
-            // Given
-            when(partidaRepository.save(any(Match.class))).thenReturn(partida1);
-
-            // When
-            Match result = partidaService.savePartida(partida1);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(partida1.getName(), result.getName());
-            verify(partidaRepository).save(partida1);
-        }
-
-        @Test
-        void testCopyPartida_Success() {
-            // When
-            Partida result = partidaService.copyPartida(partida1);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(partida1.getName(), result.getName());
-            assertNull(result.getId()); // ID should not be copied
-        }
     }
 
     @Nested

@@ -127,20 +127,6 @@ public class MatchRestController {
         
 	}
 
-    @DeleteMapping(value = "{id}")
-	@ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
-		Partida p = partidaService.getPartidaById(id);
-        RestPreconditions.checkNotNull(p, "Partida", "id", id);
-		if (p != null) {
-			partidaService.deletePartidaById(id);
-			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
-		} else
-			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
-	}
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Match> updatePartidaById(@PathVariable("id") Integer idToUpdate, 
@@ -158,6 +144,7 @@ public class MatchRestController {
         }
         if (partida.getName().length()<3 || partida.getName().length()>50){
             return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
 
