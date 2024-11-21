@@ -25,6 +25,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "matches")
+@Table(name = "matches")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Match extends NamedEntity {
 
