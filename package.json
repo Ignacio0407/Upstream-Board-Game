@@ -1,5 +1,20 @@
 {
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.6.0"
-  }
+    "@fortawesome/fontawesome-free": "^6.6.0",
+    "@stomp/stompjs": "^7.0.0",
+    "dp1-2024-2025--l4-01": "file:"
+  },
+  "name": "dp1-2024-2025--l4-01",
+  "description": "Small project based on spring-petclinic for teaching SPA architectures with react, java and spring developer for teaching DP1 at the Software Engineering degree of University of Sevilla.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

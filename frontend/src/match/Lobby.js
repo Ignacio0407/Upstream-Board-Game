@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import ColorPickerModal from '../util/ColorPickerModal';
 import { ColorToRgb } from '../util/ColorParser';
 import { useLocation } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -24,6 +26,33 @@ function Lobby({match}){
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
     const spectatorIds = useLocation().state?.spectatorIds||[];
+    
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    const stompClient = new Client({
+    webSocketFactory: () => socket,
+    debug: (str) => {
+        console.log(str);
+    },
+    connectHeaders: {
+        Authorization: `Bearer ${jwt}`
+    },
+    onConnect: (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/refresh', (message) => {
+            console.log('Message received: ' + message.body);
+            fetchPlayers() ;
+        });
+    },
+    onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    },
+    onWebSocketError: (error) => {
+        console.error('Error with websocket', error);
+    }
+});
+
+stompClient.activate();
 
     const putData = {
         name: match.name,
@@ -38,26 +67,39 @@ function Lobby({match}){
     };
 
     const [reData, setReData] = useState(putData);
-
+    
 
     useEffect(() => {
         const playersFiltered = players.filter(player => player.partida === match.id);
         const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
+        sincMatch();
         setOrdenPartida(0);
         setUserPlayer(playerUser);
         setFilteredPlayers(playersFiltered);
         const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(playersFiltered.length);
-        if(playersFiltered.length > 0) {
+        if(playersFiltered.length > 0 && matches.estado === "FINALIZADA"){
             const jugInicial = playersFiltered.filter(p => p.orden === 0);            
             setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
         }
-        const intervalId = setInterval(fetchPlayers, 1000);
-        return () => clearInterval(intervalId);
-        
-    }, [players, match.id, user.id]);
+        if(matches.estado === "EN_CURSO"){
+            setLoading(false);
+            window.location.reload(true);
+        }
+        else if(matches.estado === "FINALIZADA"){
+            navigate("/dashboard");
+        }/*
+        else {
+            const intervalId = setInterval(fetchPlayers, 1000);
+            return () => clearInterval(intervalId);
+        }*/
+    }, [players, match.id, user.id, matches.estado]);
 
+
+
+
+    
 
 const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
@@ -72,6 +114,21 @@ const fetchPlayers = async () => {
         setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
+
+
+const sincMatch = async () => {
+    const response = await fetch("/api/v1/matches/"+ match.id, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${jwt}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+    });
+    const data = await response.json();
+    setMatches([])
+    setMatches(data); // Actualiza el estado con los nuevos jugadores
+};
 
 const startGame = async () => {
     setLoading(true);
@@ -138,8 +195,12 @@ const startGame = async () => {
     function endGame(){
         if(spectatorIds.find(p => p === user.id)){
             navigate("/dashboard");
-        }else{
-        const numJugadores = numjug - 1;
+        }
+        else{
+            let numJugadores = numjug - 1;
+            if(match.creadorpartida === user.id){
+                numJugadores = 0;
+            }
         const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
         matches.numjugadores = numJugadores;
         if(numJugadores === 0){
@@ -182,8 +243,8 @@ const startGame = async () => {
     })
 
     
-    function handleColorChange(color) {
-        const order = filteredPlayers.length + 1 - 1;
+    async function handleColorChange(color) {
+        const order = filteredPlayers.length;
         const emptyPlayer = {
             name: finalUser.username,
             color: color,
@@ -192,20 +253,33 @@ const startGame = async () => {
             puntos: 0,
             usuario: finalUser.id,
             partida: match.id,
-        } // Para depuración, muestra el objeto en consola)
-        fetch(`/api/v1/players`, {  // Usa el ID del usuario actual
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(emptyPlayer),
-        }).then(() => {
-            setShowColorPicker(false); // Oculta el modal después de seleccionar el color // Incrementa el número de orden para los jugadores  
-        });
+        };
 
+        try {
+            const response = await fetch(`/api/v1/players`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(emptyPlayer),
+            });
+
+            if (response.ok) {
+                stompClient.publish({
+                    destination: "/app/hello",
+                    body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
+                });
+                setShowColorPicker(false);
+            } else {
+                console.error('Error al crear el jugador:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error al crear el jugador:', error);
+        }
     }
+    
     
     return(
         <div className='lobbyContainer'>
@@ -230,7 +304,7 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        {spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
+        {match.creadorpartida === user.id && spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>}
         {loading && <div>Loading tiles...</div>}
