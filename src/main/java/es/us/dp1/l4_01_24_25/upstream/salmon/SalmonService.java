@@ -9,20 +9,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SalmonService {
 
-    SalmonRepository rs;
+    SalmonRepository salmonRepository;
 
     public SalmonService(SalmonRepository rs){
-        this.rs = rs;
+        this.salmonRepository = rs;
     }
 
     @Transactional(readOnly=true)
     public List<Salmon> findAll(){
-        return rs.findAll();
+        return salmonRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public Optional<Salmon> findById(int id){
-        return rs.findById(id);
+        return salmonRepository.findById(id);
     }
 
 }

@@ -7,24 +7,24 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-import es.us.dp1.l4_01_24_25.upstream.partida.Partida;
-import es.us.dp1.l4_01_24_25.upstream.partida.PartidaService;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 
-public class MatchDeserializer extends JsonDeserializer<Partida> {
+public class MatchDeserializer extends JsonDeserializer<Match> {
 
-    private PartidaService partidaService;
+    private MatchService matchService;
 
-    public MatchDeserializer(PartidaService partidaService) {
-        this.partidaService = partidaService;
+    public MatchDeserializer(MatchService partidaService) {
+        this.matchService = partidaService;
     }
 
     @Override
-    public Partida deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        Partida r = null;
+    public Match deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        Match r = null;
 
         try {
             Integer pId = p.getIntValue();
-            r = this.partidaService.getPartidaById(pId);
+            r = this.matchService.getPartidaById(pId);
         } catch (Exception e) {
             throw new IOException("Partida no encontrada con esa id: " + p.getValueAsString());
         }

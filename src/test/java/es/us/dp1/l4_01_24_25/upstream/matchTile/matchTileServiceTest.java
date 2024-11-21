@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import es.us.dp1.l4_01_24_25.upstream.partida.Partida;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
 
 @ExtendWith(MockitoExtension.class)
 class matchTileServiceTest {
@@ -32,11 +32,11 @@ class matchTileServiceTest {
 
     private MatchTile matchTile1;
     private MatchTile matchTile2;
-    private Partida partidaTest;
+    private Match partidaTest;
 
     @BeforeEach
     void setup() {
-        partidaTest = new Partida();
+        partidaTest = new Match();
         partidaTest.setId(1);
 
         matchTile1 = new MatchTile();
