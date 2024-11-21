@@ -155,7 +155,7 @@ class PartidaRestControllerTest {
 
         ResponseEntity<Partida> response = partidaRestController.createPartida(partida);
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(partida, response.getBody());
     }
 

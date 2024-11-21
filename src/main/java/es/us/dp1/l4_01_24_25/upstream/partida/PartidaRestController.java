@@ -139,13 +139,8 @@ public class PartidaRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Partida> createPartida(@RequestBody @Valid Partida partida) throws DataAccessException{
-        if ((partida == null)){
+        if ((partida == null))
             return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
-        }
-        if (partida.getName().length()<3 || partida.getName().length()>50){
-            return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
-        }
-
         return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
 

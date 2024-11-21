@@ -17,7 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
@@ -26,10 +25,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "matches", uniqueConstraints= { @UniqueConstraint(columnNames="matches")})
+@Table(name = "matches")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Partida extends NamedEntity {
-
+	
 	// Esto para unirse
 	String contrasena;
 	@Enumerated(EnumType.STRING)

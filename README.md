@@ -1,8 +1,5 @@
-# React Upstream
-Small project based on spring-petclinic for completing teachings regarding SPA architectures with react, java and spring developer for teaching DP1 at the Software Engineering degree of University of Sevilla.
-The usage of Upstream and Petclinic is irrelevenat throught the readme.
-
-
+# React Petclinic
+Small project based on spring-petclinic for teaching SPA architectures with react, java and spring developer for teaching DP1 at the Software Engineering degree of University of Sevilla.
 
 This is a fork of https://github.com/spring-projects/spring-petclinic  The main changes that have been performed were:
 - Trimming several parts of the application to keep the example low
@@ -11,13 +8,12 @@ This is a fork of https://github.com/spring-projects/spring-petclinic  The main 
 - Modifying the security configuration to use JWT
 - Creating a React frontend.
 
-Therefore, this game shares a common base with react petclinic, overall in the configuration and security settings, but differs a lot in functionality, since it allows to play the board game Upstream, with a few achivements to get, along with friends to make and help inside the game if desired.
-
 ## Understanding the Spring Petclinic application  backend with a few diagrams
 <a href="https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application">See the presentation here</a>
 
-## Running Upstream backend locally
-Upstream is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built using [Maven](https://spring.io/guides/gs/maven/). You can build a jar file and run it from the command line:
+## Running petclinic backend locally
+Petclinic is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built using [Maven](https://spring.io/guides/gs/maven/). You can build a jar file and run it from the command line:
+
 
 ```
 git clone https://github.com/gii-is-DP1/spring-petclinic.git
@@ -25,8 +21,6 @@ cd spring-petclinic
 ./mvnw package
 java -jar target/*.jar
 ```
-
-Upstream backend can also be run by pressing f5 on UpstreamApp.java
 
 You can then access petclinic backend here: [http://localhost:8080/](http://localhost:8080/swagger-ui/index.html)
 
@@ -95,9 +89,8 @@ Visit [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagge
 ## Starting the frontend
 
 The Spring Petclinic is implemented with a React frontend in the folder named "frontend".
-You can start the development server to see frontend by coping these commmands (maybe you should use the command npm insall prior to this):
+You can start the development server to see frontend using the command (maybe you should use the command npm insall prior to this):
 ```
-cd frontend
 npm start
 ```
-You can then access the Upstream frontend at [http://localhost:3000](http://localhost:3000)
+You can then access the PetClinic frontend at [http://localhost:3000](http://localhost:3000)

@@ -29,6 +29,7 @@ export default function Dashboard() {
         }
         console.log("Matches" + matches)
         console.log(user.roles[0])
+        console.log("holaaaaaaaaaaa")
     }, [jwt])
 
     const modal = getErrorModal(setVisible, visible, message);
