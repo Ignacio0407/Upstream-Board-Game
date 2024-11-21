@@ -13,6 +13,6 @@ import lombok.Setter;
 @Table(name="salmon")
 public class Salmon extends BaseEntity{
     Integer color;
-    String imagen;
+    String image;
     
 }

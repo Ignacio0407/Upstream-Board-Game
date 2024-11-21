@@ -7,20 +7,20 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-import es.us.dp1.l4_01_24_25.upstream.casilla.Casilla;
-import es.us.dp1.l4_01_24_25.upstream.casilla.CasillaService;
+import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
-public class TileDeserializer extends JsonDeserializer<Casilla>{
+public class TileDeserializer extends JsonDeserializer<Tile>{
 
-    private CasillaService casillaService;
+    private TileService casillaService;
     
-    public TileDeserializer(CasillaService casillaService) {
+    public TileDeserializer(TileService casillaService) {
         this.casillaService = casillaService;
     }
 
     @Override
-    public Casilla deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        Casilla r = null;
+    public Tile deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        Tile r = null;
         try {
             Integer i = p.getIntValue();
             r = this.casillaService.findById(i).get();

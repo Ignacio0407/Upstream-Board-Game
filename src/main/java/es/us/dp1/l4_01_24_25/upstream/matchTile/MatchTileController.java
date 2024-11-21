@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
-import es.us.dp1.l4_01_24_25.upstream.coordenada.Coordenada;
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
@@ -48,7 +48,7 @@ public class MatchTileController {
 
         // Actualizar solo los valores de x e y si están presentes en el RequestBody
         if (updates.containsKey("x") && updates.containsKey("y")) {
-            matchTile.setCoordinate(new Coordenada(updates.get("x"), updates.get("y"))); 
+            matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y"))); 
         }
 
         // Guardar el MatchTile actualizado

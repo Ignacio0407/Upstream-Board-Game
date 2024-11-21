@@ -17,25 +17,29 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileRepository;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
+
 @ExtendWith(MockitoExtension.class)
 class casillaServiceTest {
 
     @Mock
-    private CasillaRepository casillaRepository;
+    private TileRepository casillaRepository;
 
     @InjectMocks
-    private CasillaService casillaService;
+    private TileService casillaService;
 
-    private Casilla casilla1;
-    private Casilla casilla2;
+    private Tile casilla1;
+    private Tile casilla2;
 
     @BeforeEach
     void setup() {
 
-        casilla1 = new Casilla();
+        casilla1 = new Tile();
         casilla1.setId(1);
 
-        casilla2 = new Casilla();
+        casilla2 = new Tile();
         casilla2.setId(2);
     }
 
@@ -46,11 +50,11 @@ class casillaServiceTest {
         @Test
         void testGetAllCasillas() {
             // Given
-            List<Casilla> expectedCasillas = Arrays.asList(casilla1, casilla2);
+            List<Tile> expectedCasillas = Arrays.asList(casilla1, casilla2);
             when(casillaRepository.findAll()).thenReturn(expectedCasillas);
 
             // When
-            List<Casilla> result = casillaService.findAll();
+            List<Tile> result = casillaService.findAll();
 
             // Then
             assertEquals(expectedCasillas, result);
@@ -63,7 +67,7 @@ class casillaServiceTest {
             when(casillaRepository.findById(1)).thenReturn(Optional.of(casilla1));
 
             // When
-            Optional<Casilla> result = casillaService.findById(1);
+            Optional<Tile> result = casillaService.findById(1);
 
             // Then
             assertNotNull(result);

@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmon;
+package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,28 +14,30 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping
-@Tag(name="Salmon", description="Salmon API")
-public class SalmonController {
-    SalmonService salmonService;
+@RequestMapping("/api/v1/tiles")
+@Tag(name = "tile", description = "Tile API")
+public class TileController {
+ 
+    TileService tileService;
 
     @Autowired
-    public SalmonController(SalmonService salmonService) {
-        this.salmonService = salmonService;
+    public TileController(TileService cs) {
+        this.tileService = cs;
     }
 
     @GetMapping
-    public ResponseEntity<List<Salmon>> findAll() {
-        List<Salmon> res = (List<Salmon>) salmonService.findAll();
+    public ResponseEntity<List<Tile>> findAll() {
+        List<Tile> res = (List<Tile>) tileService.findAll();
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Salmon findById(int id) {
-        Optional<Salmon> s = salmonService.findById(id);
-        if(!s.isPresent()) {
-            throw new ResourceNotFoundException("Salmon","id",id);
+    public Tile findById(int id) {
+        Optional<Tile> c = tileService.findById(id);
+        if(!c.isPresent()) {
+            throw new ResourceNotFoundException("Casilla","id",id);
         }
-        return s.get();
+        return c.get();
     }
+
 }

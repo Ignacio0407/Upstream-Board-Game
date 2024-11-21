@@ -6,15 +6,15 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.util.HtmlUtils;
 
-import es.us.dp1.l4_01_24_25.upstream.player.Jugador;
-import es.us.dp1.l4_01_24_25.upstream.player.JugadorService;
+import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 
 @Controller
 public class GreetingController {
 
 	@MessageMapping("/hello")
 	@SendTo("/topic/refresh")
-	public String greeting(Jugador message) throws Exception {
+	public String greeting(Player message) throws Exception {
 		return "Hello";
 	}
 
