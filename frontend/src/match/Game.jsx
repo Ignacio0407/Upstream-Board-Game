@@ -150,16 +150,24 @@
 
         const handleGridClick = (index) => {
             if (selectedTile) {
+                const isNearSea = (index === 17 || index === 16 || index === 15) && !grid[index]
+                const hasTileBelow =  grid[index+3] !== null && !grid[index]
+                let rightRange = false
+                if(match.round ===0){
+                    rightRange = index > 5 
+                }
+
+                if((isNearSea || hasTileBelow) && rightRange){
                 const newGrid = [...grid];
-                    newGrid[index] = selectedTile;
-                    setGrid(newGrid);
-                    setSelectedTile(null);
-                    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-                    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-                    
-                    // Calcular la coordenada x (columna) y y (fila) con filas invertidas
-                    const x = index % gridWidth; // Coordenada x (columna)
-                    const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
+                newGrid[index] = selectedTile;
+                setGrid(newGrid);
+                setSelectedTile(null);
+                const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+                const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+                
+                // Calcular la coordenada x (columna) y y (fila) con filas invertidas
+                const x = index % gridWidth; // Coordenada x (columna)
+                const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
     
                 updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
     
@@ -179,6 +187,7 @@
                     }
                 }).then(response => response.json())
             }    
+        }
             
         };
 

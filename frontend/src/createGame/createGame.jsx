@@ -17,7 +17,7 @@ export default function CreateGame() {
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const emptyMatch = {
       name: "",
-      password: "",
+      password: "asd",
       matchCreator: null,
       state: "ESPERANDO",
       playersNum: 1,
@@ -104,7 +104,7 @@ function handleChange(event) {
               type="text"
               name="contrasena"
               id="contrasena"
-              value={match.password}
+              value={match.password || ""}
               onChange={handleChange}
               className="input-table"
             />
