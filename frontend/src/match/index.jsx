@@ -71,7 +71,7 @@ export default function Match() {
 
     return(
         
-        match.estado === "ESPERANDO" ? <Lobby match={match}></Lobby> : <Game match={match}></Game>
+        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : <Game match={match}></Game>
     )
 
 

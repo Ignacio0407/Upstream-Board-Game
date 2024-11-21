@@ -17,14 +17,14 @@ export default function CreateGame() {
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const emptyMatch = {
       name: "",
-      contrasena: "",
-      creadorpartida: null,
-      estado: "ESPERANDO",
-      numjugadores: 1,
-      ronda: 0,
-      fase: "CASILLAS",
-      jugador_inicial: null,
-      jugador_actual: null,
+      password: "",
+      matchCreator: null,
+      state: "ESPERANDO",
+      playersNum: 1,
+      round: 0,
+      phase: "CASILLAS",
+      initialPlayer: null,
+      actualPlayer: null,
   }
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function CreateGame() {
             setUsername(jwt_decode(jwt).sub);
         }
         if (finalUser) {
-          setMatch(prevMatch => ({...prevMatch, creadorpartida: finalUser.id }))
+          setMatch(prevMatch => ({...prevMatch, matchCreator: finalUser.id }))
         }
     }, [jwt, finalUser])
 
@@ -104,7 +104,7 @@ function handleChange(event) {
               type="text"
               name="contrasena"
               id="contrasena"
-              value={match.contrasena}
+              value={match.password}
               onChange={handleChange}
               className="input-table"
             />

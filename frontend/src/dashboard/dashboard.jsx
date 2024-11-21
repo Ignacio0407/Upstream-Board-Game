@@ -55,13 +55,13 @@ export default function Dashboard() {
         return (
             <tr key={match.nombre} className='fila'>
                 <td className='celda'>{match.name}</td>
-                <td className='celda'>{match.numjugadores}</td>
-                <td className='celda'>{match.estado}</td>
-                <td className='celda'>{match.contrasena != "" && <i className="fa fa-lock"></i>}</td>
-                <td className='celda'>{match.estado === 'ESPERANDO' &&
+                <td className='celda'>{match.playersNum}</td>
+                <td className='celda'>{match.state}</td>
+                <td className='celda'>{match.password != "" && <i className="fa fa-lock"></i>}</td>
+                <td className='celda'>{match.state === 'ESPERANDO' &&
                 <Button color={"success"} onClick={() => join(match)}>Join game</Button>
                 }</td>
-                <td className='celda'>{(match.estado === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
+                <td className='celda'>{(match.state === 'EN_CURSO' || match.estado === 'ESPERANDO') &&
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
                 {user.roles[0] == "ADMIN" && <Button color="danger"

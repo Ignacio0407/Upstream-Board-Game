@@ -68,7 +68,7 @@ public class MatchRestController {
     public ResponseEntity<List<Player>> findPlayersFromGame(@PathVariable("id") Integer id) throws ResourceNotFoundException {
         List<Player> l = partidaService.getPlayersFromGame(id);
         if(l == null) {
-            return new ResponseEntity<>(l, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(List.of(), HttpStatus.NOT_FOUND);
         } else return new ResponseEntity<>(l, HttpStatus.OK);
     }
 

@@ -15,9 +15,8 @@ function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
-    const [players,setPlayers] = useFetchState([],`/api/v1/players`,jwt)
+    const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt)
     const [matches,setMatches] = useFetchState([],`/api/v1/matches/${match.id}`,jwt)
-    const [filteredPlayers,setFilteredPlayers] = useState([])
     const [userPlayer,setUserPlayer] = useState(null);
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
@@ -56,45 +55,45 @@ stompClient.activate();
 
     const putData = {
         name: match.name,
-        contrasena: match.contrasena,
-        creadorpartida: match.creadorpartida,
-        estado: "EN_CURSO",
-        numjugadores: 1,
-        ronda: match.ronda,
-        fase: "CASILLAS",
-        jugadorinicial: 1,
-        jugadoractual: 1,
+        password: match.password,
+        matchCreator: match.matchCreator,
+        state: "EN_CURSO",
+        playersNum: 1,
+        round: 0,
+        phase: "CASILLAS",
+        initialPlayer: 1,
+        actualPlayer: 1
     };
 
     const [reData, setReData] = useState(putData);
     
 
     useEffect(() => {
-        const playersFiltered = players.filter(player => player.partida === match.id);
-        const playerUser = playersFiltered.find(player => player.usuario.id === user.id);
+        const playerUser = players.find(player => player.userPlayer.id === user.id);
         sincMatch();
         setOrdenPartida(0);
         setUserPlayer(playerUser);
-        setFilteredPlayers(playersFiltered);
-        const colorsUsed = playersFiltered.map(player => ColorToRgb(player.color));
+        const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
-        Setnumjug(playersFiltered.length);
-        if(playersFiltered.length > 0 && matches.estado === "FINALIZADA"){
-            const jugInicial = playersFiltered.filter(p => p.orden === 0);            
-            setReData(d => ({...d, numjugadores: playersFiltered.length , jugadorinicial: jugInicial[0].id, jugadoractual: jugInicial[0].id}))
+        Setnumjug(players.length);
+        if(players.length > 0){
+            const jugInicial = players.filter(p => p.playerOrder === 0);
+            console.log("jugInicial",jugInicial)            
+            setReData(d => ({...d, playersNum: players.length , initialPlayer: jugInicial[0].id, actualPlayer: jugInicial[0].id, state: "EN_CURSO", round: 0}))
         }
-        if(matches.estado === "EN_CURSO"){
-            setLoading(false);
+        console.log("reData",reData)
+        console.log("match",match)
+        if(matches.state === "EN_CURSO" && !loading){
             window.location.reload(true);
         }
-        else if(matches.estado === "FINALIZADA"){
+        else if(matches.state === "FINALIZADA"){
             navigate("/dashboard");
         }/*
         else {
             const intervalId = setInterval(fetchPlayers, 1000);
             return () => clearInterval(intervalId);
         }*/
-    }, [players, match.id, user.id, matches.estado]);
+    }, [players, match.id, user.id, matches.state]);
 
 
 
@@ -161,25 +160,28 @@ const startGame = async () => {
     const shuffledTiles = allTiles.sort(() => Math.random() - 0.5);
 
     // Crear las solicitudes de inserción para cada tile en el orden aleatorio
-    const requests = shuffledTiles.map(matchTile => 
-        fetch("/api/v1/matches/" + match.id, {
+    const requests = shuffledTiles.map(matchTile =>
+        fetch(`/api/v1/matches/${match.id}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(reData),
-        }).then(() => fetch("/api/v1/matchTiles", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(matchTile)
-        }))
+            body: JSON.stringify({...reData, numjugadores: numjug}),
+        }).then(() =>
+            fetch("/api/v1/matchTiles", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(matchTile),
+            })
+        )
     );
+
 
     try {
         await Promise.all(requests);
@@ -198,16 +200,16 @@ const startGame = async () => {
         }
         else{
             let numJugadores = numjug - 1;
-            if(match.creadorpartida === user.id){
+            if(match.matchCreator === user.id){
                 numJugadores = 0;
             }
-        const playerId = filteredPlayers.find(p => p.usuario === user.id).id;
-        matches.numjugadores = numJugadores;
+        const playerId = players.find(p => p.userPlayer === user.id);
+        matches.playersNum = numJugadores;
         if(numJugadores === 0){
-            matches.estado = "FINALIZADA";
+            matches.state = "FINALIZADA";
         }
         else{
-            matches.estado = "ESPERANDO";
+            matches.state = "ESPERANDO";
              
         }
         fetch("/api/v1/players/"+ playerId, {
@@ -233,7 +235,7 @@ const startGame = async () => {
     }
     }
     
-    const playerList = filteredPlayers.map((p) =>{
+    const playerList = players.map((p) =>{
         return (
             <tr key={p.id} className="r">
                  <PlayerCard nombre={p.name} color={p.color}/>
@@ -244,15 +246,15 @@ const startGame = async () => {
 
     
     async function handleColorChange(color) {
-        const order = filteredPlayers.length;
+        const order = players.length;
         const emptyPlayer = {
             name: finalUser.username,
             color: color,
-            orden: order,
-            vivo: true,
-            puntos: 0,
-            usuario: finalUser.id,
-            partida: match.id,
+            playerOrder: order,
+            alive: true,
+            points: 0,
+            userPlayer: finalUser.id,
+            match: match.id,
         };
 
         try {
@@ -283,14 +285,14 @@ const startGame = async () => {
     
     return(
         <div className='lobbyContainer'>
-        {filteredPlayers.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
+        {players.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
         )}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
         {match.contrasena !== "" && <h4 className='passwordContainer'>
-            Password: {match.contrasena}
+            Password: {match.password}
         </h4>}
         <div className='lobbyMainContainer'>
         
@@ -304,7 +306,7 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        {match.creadorpartida === user.id && spectatorIds.find(p => p === user.id) === undefined && <Button color='success' onClick={startGame}>
+        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && <Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>}
         {loading && <div>Loading tiles...</div>}

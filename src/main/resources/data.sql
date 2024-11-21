@@ -31,7 +31,7 @@ INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 1);
 INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 2);
 INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 3);
 
-
+/*
 INSERT INTO player (id, name, color, player_order, alive, points, user_player) VALUES 
 (1, 'Juan', 'ROJO', 1, TRUE, 10, 1),
 (2, 'Maria', 'ROJO', 2, TRUE, 20, 1),
@@ -48,11 +48,12 @@ INSERT INTO matches (id, name, players_num, password, state, round, phase, initi
 (4, 'Partida4', 5, 'efgh', 'ESPERANDO', 1, 'CASILLAS', 4, 4, 7),
 (5, 'Partida5', 2, 'ijkl', 'EN_CURSO', 2, 'MOVIENDO', 5, 5, 8);
 
-/*
+
 UPDATE player SET partida = 1 WHERE id=1;
 UPDATE player SET partida = 1 WHERE id=2;
 UPDATE player SET partida = 1 WHERE id=3;
 */
+
 INSERT INTO tile_type(id, type) VALUES 
 (1, 'AGUA'),
 (2, 'PIEDRA'),

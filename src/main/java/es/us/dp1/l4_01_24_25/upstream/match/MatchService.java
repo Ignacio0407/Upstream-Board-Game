@@ -37,10 +37,10 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public List<Player> getPlayersFromGame(Integer id) throws ResourceNotFoundException{
+    public List<Player> getPlayersFromGame(Integer id) {
         List<Player> p = matchRepository.findPlayersFromGame(id);
         if(!p.isEmpty()) return p;
-        else throw new ResourceNotFoundException("No players in game " + id);
+        else return List.of();
     }
 
     @Transactional(readOnly = true)

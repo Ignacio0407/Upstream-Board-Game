@@ -8,26 +8,25 @@
     import jumpTile from '../static/images/tiles/jumpTile.png'
     import rockTile from '../static/images/tiles/rockTile.png'
     import seaTile from '../static/images/tiles/seaTile.png'
-    import spawningTile from '../static/images/tiles/spawningTile.png'
     import waterTile from '../static/images/tiles/waterTile.png'
 
     function Game({match}){
         const jwt = tokenService.getLocalAccessToken();
         const user = tokenService.getUser();
         const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
-        const [tilesList,setTilesList] = useFetchState([], '/api/v1/casilla',jwt); // Siempre igual
+        const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
         const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
         const [allDataLoaded, setAllDataLoaded] = useState(false);
         const [tilesAndImages, setTilesAndImages] = useState([]);
         const [gridTiles, setGridTiles] = useState([]);
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
-        const myPlayer = players.filter(p => p.usuario === user.id)[0];
+        const [myPlayer, setMyPlayer] = useState(null);
 
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
             const realTile = tilesList[tileP.tile-1]
-            switch (realTile.tipo) {
+            switch (realTile.type) {
                 case 'OSO':
                     return bearTile;
                 case 'AGUILA':
@@ -81,13 +80,17 @@
 
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
+                console.log("players", players)
+                console.log("tilesList ", tilesList)
+                console.log("matchTiles", matchTiles)
                 setAllDataLoaded(true);
                 const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getImage(t)])
                 const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
                 setTilesAndImages(matchTilesCopy)
                 setGridTiles(matchTilesCopy2)
-                const orderedPlayers = [...players].sort(p => p.orden)
+                const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
+                setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
             }
         }, [tilesList, matchTiles]);
 
@@ -117,7 +120,7 @@
         }*/
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === match.jugadoractual) {
+                if (myPlayer.id === match.actualPlayer) {
                     setSelectedTile(tile);
 
                 }
@@ -162,7 +165,9 @@
     
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
-                let nextPlayer = players[myPlayer.orden+1];
+                let nextPlayer = players[myPlayer.playerOrder+1];
+                console.log(nextPlayer)
+                console.log(players)
                 if(!nextPlayer){
                     nextPlayer = players[0];
                 }
@@ -174,6 +179,7 @@
                     }
                 }).then(response => response.json())
             }    
+            
         };
 
         return(
@@ -191,14 +197,14 @@
                     marginTop: '10px',
                     marginLeft: '552px',
                     fontSize: '30px',
-                    }}>Round: {match.ronda}</h1>
+                    }}>Round: {match.round}</h1>
                 <h1 style={{
                     position: 'absolute',
                     marginBottom: '10px',
                     marginTop: '10px',
                     marginLeft: '830px',
                     fontSize: '30px',
-                    }}>Phase: {match.fase}</h1>
+                    }}>Phase: {match.phase}</h1>
                 <div className="users-table">
                     <thead>
                         <tr>
@@ -219,7 +225,7 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === match.jugadoractual && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
