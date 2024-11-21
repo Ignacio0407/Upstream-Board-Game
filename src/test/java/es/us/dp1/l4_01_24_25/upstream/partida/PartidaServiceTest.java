@@ -148,6 +148,17 @@ class PartidaServiceTest {
             assertEquals(partida1.getName(), result.getName());
             verify(partidaRepository).save(partida1);
         }
+
+        @Test
+        void testCopyPartida_Success() {
+            // When
+            Partida result = partidaService.copyPartida(partida1);
+
+            // Then
+            assertNotNull(result);
+            assertEquals(partida1.getName(), result.getName());
+            assertNull(result.getId()); // ID should not be copied
+        }
     }
 
     @Nested
