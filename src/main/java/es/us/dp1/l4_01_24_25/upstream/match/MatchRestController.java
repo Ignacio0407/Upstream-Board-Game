@@ -142,6 +142,14 @@ public class MatchRestController {
         if ((partida == null)){
             return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
         }
+        Match p = partidaService.getPartidaByName(partida.getName());
+        if(p != null){
+            
+            throw new DataAccessException("askdna") {
+                
+            };
+        }
+        
         if (partida.getName().length()<3 || partida.getName().length()>50){
             return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
         }

@@ -37,31 +37,41 @@ export default function CreateGame() {
             setUsername(jwt_decode(jwt).sub);
         }
         if (finalUser) {
-          setMatch(prevMatch => ({...prevMatch, matchCreator: finalUser.id }))
         }
     }, [jwt, finalUser])
 
     let matchId;
-    function handleSubmit(event){
-        event.preventDefault();
-        fetch("/api/v1/matches", {
-
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(match),
-        }).then((response) => response.text())
-        .then(
-        data => {
-          const matchCreada = JSON.parse(data)
-          matchId = matchCreada.id;
-          console.log(matchCreada)
-          navigate(`/matches/${matchId}`)
+    function handleSubmit(event) {
+      event.preventDefault();
+      fetch("/api/v1/matches", {
+          method: "POST",
+          headers: {
+              Authorization: `Bearer ${jwt}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(match),
       })
-      .catch(error => console.error("Error:", error));
+      .then(response => {
+          if (!response.ok) {
+              // Lanza un error si el estado no es exitoso
+              return response.text().then(err => {
+                  throw new Error(`Error al crear la partida: ${response.status}`);
+              });
+          }
+          return response.text();
+      })
+      .then(data => {
+          const matchCreada = JSON.parse(data);
+          matchId = matchCreada.id;
+          console.log(matchCreada);
+          navigate(`/matches/${matchId}`);
+      })
+      .catch(error => {
+          // Manejar errores aquí
+          console.log("Error al crear la partida:", error);
+          alert("Error al crear la partida")
+      });
   }
         
 
