@@ -164,32 +164,26 @@
                 );
                 
             })
-            .catch(error => console.error('Error updating tile position:', error));
+            .catch(error => console.error('Error updating tile position:', error)
+                    );
         };
 
         const handleGridClick = (index) => {
             if (selectedTile) {
-                const isNearSea = (index === 17 || index === 16 || index === 15) && !grid[index]
-                const hasTileBelow =  grid[index+3] !== null && !grid[index]
-                let rightRange = false
-                if(upMatch.round ===0){
-                    rightRange = index > 5 
-                }
-
-                if((isNearSea || hasTileBelow) && rightRange){
-                const newGrid = [...grid];
-                newGrid[index] = selectedTile;
-                setGrid(newGrid);
-                setSelectedTile(null);
                 const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
                 const gridHeight = 6; // Altura de la cuadrícula (número de filas)
                 
                 // Calcular la coordenada x (columna) y y (fila) con filas invertidas
                 const x = index % gridWidth; // Coordenada x (columna)
                 const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-    
+                try{
                 updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
-    
+                }catch(error){
+                    console.log("Error updating tile position:", error);
+                    return;
+                }
+
+
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
                 let nextPlayer = players[myPlayer.playerOrder+1];
@@ -205,7 +199,7 @@
                         'Authorization': `Bearer ${jwt}`
                     }
                 }).then(response => response.json())
-            }    
+            
         }
             
         };
