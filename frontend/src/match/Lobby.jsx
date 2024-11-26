@@ -21,7 +21,7 @@ function Lobby({match}){
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
-    const [numjug, Setnumjug] = useState(match.numjugadores);
+    const [numjug, Setnumjug] = useState(match.playersNum);
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
     const spectatorIds = useLocation().state?.spectatorIds||[];
@@ -30,7 +30,7 @@ function Lobby({match}){
     const stompClient = new Client({
     webSocketFactory: () => socket,
     debug: (str) => {
-        console.log(str);
+        //console.log(str);
     },
     connectHeaders: {
         Authorization: `Bearer ${jwt}`
@@ -40,6 +40,7 @@ function Lobby({match}){
         stompClient.subscribe('/topic/refresh', (message) => {
             console.log('Message received: ' + message.body);
             fetchPlayers() ;
+
         });
     },
     onStompError: (frame) => {
@@ -78,11 +79,11 @@ stompClient.activate();
         Setnumjug(players.length);
         if(players.length > 0){
             const jugInicial = players.filter(p => p.playerOrder === 0);
-            console.log("jugInicial",jugInicial)            
+            //console.log("jugInicial",jugInicial)            
             setReData(d => ({...d, playersNum: players.length , initialPlayer: jugInicial[0].id, actualPlayer: jugInicial[0].id, state: "EN_CURSO", round: 0}))
         }
-        console.log("reData",reData)
-        console.log("match",match)
+       // console.log("reData",reData)
+        //console.log("match",match)
         if(matches.state === "EN_CURSO" && !loading){
             window.location.reload(true);
         }
@@ -285,13 +286,13 @@ const startGame = async () => {
     
     return(
         <div className='lobbyContainer'>
-        {players.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
+        {players.find(p => p.userPlayer === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
         )}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
-        {match.contrasena !== "" && <h4 className='passwordContainer'>
+        {match.password !== "" && <h4 className='passwordContainer'>
             Password: {match.password}
         </h4>}
         <div className='lobbyMainContainer'>

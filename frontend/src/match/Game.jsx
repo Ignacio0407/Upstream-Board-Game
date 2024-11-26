@@ -80,9 +80,6 @@
 
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
-                console.log("players", players)
-                console.log("tilesList ", tilesList)
-                console.log("matchTiles", matchTiles)
                 setAllDataLoaded(true);
                 const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getImage(t)])
                 const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
@@ -91,6 +88,11 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+                console.log("players", players)
+                console.log("tilesList ", tilesList)
+                console.log("matchTiles", matchTiles)
+                console.log("match", match)
+                console.log("myPlayer", myPlayer)
             }
         }, [tilesList, matchTiles]);
 

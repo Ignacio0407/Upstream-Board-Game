@@ -47,7 +47,7 @@ export default function CreateGame() {
               Accept: "application/json",
               "Content-Type": "application/json",
           },
-          body: JSON.stringify(match),
+          body: JSON.stringify({...match, matchCreator: finalUser.id}),
       })
       .then(response => {
           if (!response.ok) {
