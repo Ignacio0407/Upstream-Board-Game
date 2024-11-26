@@ -40,8 +40,11 @@ function Lobby({match}){
         stompClient.subscribe('/topic/refresh', (message) => {
             console.log('Message received: ' + message.body);
             fetchPlayers() ;
-
         });
+        stompClient.subscribe('/topic/game', (message) => {
+            console.log('Message received: ' + message.body);
+            window.location.reload(true);
+        })
     },
     onStompError: (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
@@ -84,9 +87,11 @@ stompClient.activate();
         }
        // console.log("reData",reData)
         //console.log("match",match)
+        /*
         if(matches.state === "EN_CURSO" && !loading){
             window.location.reload(true);
         }
+            */
         else if(matches.state === "FINALIZADA"){
             navigate("/dashboard");
         }/*
@@ -134,12 +139,12 @@ const startGame = async () => {
     setLoading(true);
 
     const tileConfigs = [
-        { tile: 1, count: 7, capacity: 5 },
-        { tile: 2, count: 5, capacity: 4 },
-        { tile: 3, count: 5, capacity: 5 },
-        { tile: 4, count: 3, capacity: 5 },
-        { tile: 5, count: 5, capacity: 5 },
-        { tile: 6, count: 4, capacity: 5 }
+        { tile: 1, count: 7, capacity: numjug },
+        { tile: 2, count: 5, capacity: numjug-1 },
+        { tile: 3, count: 5, capacity: numjug },
+        { tile: 4, count: 3, capacity: numjug },
+        { tile: 5, count: 5, capacity: numjug },
+        { tile: 6, count: 4, capacity: numjug }
     ];    
 
     let x = null;
@@ -186,11 +191,16 @@ const startGame = async () => {
 
     try {
         await Promise.all(requests);
+        stompClient.publish({
+                destination: "/app/start",
+                body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
+        });
         console.log("Todas las MatchTiles han sido creadas en orden aleatorio.");
     } catch (error) {
         console.error("Error al crear algunas MatchTiles:", error);
     }
     setLoading(false);
+    
     window.location.reload(true);
 };
     

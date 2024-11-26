@@ -22,6 +22,7 @@
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
         const [myPlayer, setMyPlayer] = useState(null);
+        const [upMatch, setUpMatch] = useState(match);
 
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -88,17 +89,33 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+                sincMatch();
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
                 console.log("matchTiles", matchTiles)
-                console.log("match", match)
+                console.log("match", upMatch)
                 console.log("myPlayer", myPlayer)
+
             }
         }, [tilesList, matchTiles]);
 
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
+
+        const sincMatch = async () => {
+            const response = await fetch("/api/v1/matches/"+ match.id, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setUpMatch([])
+            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
+        };
 
         const playerList = players.map((p) => {
             return (
@@ -122,7 +139,7 @@
         }*/
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === match.actualPlayer) {
+                if (myPlayer.id === upMatch.actualPlayer) {
                     setSelectedTile(tile);
 
                 }
@@ -202,14 +219,14 @@
                     marginTop: '10px',
                     marginLeft: '552px',
                     fontSize: '30px',
-                    }}>Round: {match.round}</h1>
+                    }}>Round: {upMatch.round}</h1>
                 <h1 style={{
                     position: 'absolute',
                     marginBottom: '10px',
                     marginTop: '10px',
                     marginLeft: '830px',
                     fontSize: '30px',
-                    }}>Phase: {match.phase}</h1>
+                    }}>Phase: {upMatch.phase}</h1>
                 <div className="users-table">
                     <thead>
                         <tr>
@@ -230,7 +247,7 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === upMatch.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
