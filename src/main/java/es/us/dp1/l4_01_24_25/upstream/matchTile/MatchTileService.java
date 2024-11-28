@@ -45,5 +45,11 @@ public class MatchTileService {
         this.matchTileRepository.delete(toDelete);
     }
 
+    public Boolean validateTilePlacement(Integer round, Integer y) {
+        int maxAllowedRow = round - 1;  
+        return y <= maxAllowedRow;
+    }
+    
+
 
 }

@@ -30,6 +30,12 @@ public class AchievementService {
         return result.isPresent()?result.get():null;
     }
 
+    @Transactional(readOnly = true)    
+    public Achievement getByName(String name){
+        Optional<Achievement> result = Optional.ofNullable(repo.findByName(name));
+        return result.isPresent()?result.get():null;
+    }
+
     @Transactional
     public Achievement saveAchievement(@Valid Achievement newAchievement) {
         return repo.save(newAchievement);

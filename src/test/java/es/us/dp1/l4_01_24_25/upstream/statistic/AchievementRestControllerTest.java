@@ -60,7 +60,7 @@ class AchievementRestControllerTest {
         Achievement achievement = new Achievement();
         when(achievementService.getById(1)).thenReturn(achievement);
 
-        ResponseEntity<Achievement> response = achievementRestController.findAchievement(1);
+        ResponseEntity<Achievement> response = achievementRestController.findById(1);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(achievement, response.getBody());
@@ -71,7 +71,7 @@ class AchievementRestControllerTest {
         when(achievementService.getById(1)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            achievementRestController.findAchievement(1);
+            achievementRestController.findById(1);
         });
     }
 
@@ -80,7 +80,7 @@ class AchievementRestControllerTest {
         Achievement achievement = new Achievement();
         when(achievementService.saveAchievement(achievement)).thenReturn(achievement);
 
-        ResponseEntity<Achievement> response = achievementRestController.createAchievement(achievement);
+        ResponseEntity<Achievement> response = achievementRestController.create(achievement);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(achievement, response.getBody());

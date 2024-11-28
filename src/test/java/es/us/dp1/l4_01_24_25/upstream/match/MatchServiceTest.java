@@ -53,7 +53,7 @@ class MatchServiceTest {
             when(partidaRepository.findAll()).thenReturn(expectedPartidas);
 
             // When
-            List<Match> result = partidaService.getPartidas();
+            List<Match> result = partidaService.getAll();
 
             // Then
             assertEquals(expectedPartidas, result);
@@ -66,7 +66,7 @@ class MatchServiceTest {
             when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
 
             // When
-            Match result = partidaService.getPartidaById(1);
+            Match result = partidaService.getById(1);
 
             // Then
             assertNotNull(result);
@@ -80,7 +80,7 @@ class MatchServiceTest {
             when(partidaRepository.findById(99)).thenReturn(Optional.empty());
 
             // When
-            Match result = partidaService.getPartidaById(99);
+            Match result = partidaService.getById(99);
 
             // Then
             assertNull(result);
@@ -93,7 +93,7 @@ class MatchServiceTest {
             when(partidaRepository.findByName("Partida1")).thenReturn(partida1);
 
             // When
-            Match result = partidaService.getPartidaByName("Partida1");
+            Match result = partidaService.geByName("Partida1");
 
             // Then
             assertNotNull(result);
@@ -107,7 +107,7 @@ class MatchServiceTest {
             when(partidaRepository.findByName("NonExistent")).thenReturn(null);
 
             // When
-            Match result = partidaService.getPartidaByName("NonExistent");
+            Match result = partidaService.geByName("NonExistent");
 
             // Then
             assertNull(result);
@@ -122,7 +122,7 @@ class MatchServiceTest {
             when(partidaRepository.findByName("Partida2")).thenReturn(partida2);
 
             // When
-            List<Match> result = partidaService.getSomePartidasByName(names);
+            List<Match> result = partidaService.getSomeByName(names);
 
             // Then
             assertEquals(2, result.size());
@@ -150,7 +150,7 @@ class MatchServiceTest {
             when(partidaRepository.save(any(Match.class))).thenReturn(updatedPartida);
 
             // When
-            Match result = partidaService.updatePartidaById(updatedPartida, 1);
+            Match result = partidaService.updateById(updatedPartida, 1);
 
             // Then
             assertNotNull(result);
@@ -164,7 +164,7 @@ class MatchServiceTest {
             when(partidaRepository.findById(99)).thenReturn(Optional.empty());
 
             // When/Then
-            assertNull(partidaService.updatePartidaById(partida1, 99));
+            assertNull(partidaService.updateById(partida1, 99));
             verify(partidaRepository).findById(99);
         }
     }
@@ -176,7 +176,7 @@ class MatchServiceTest {
         @Test
         void testDeleteAllPartidas() {
             // When
-            partidaService.deleteAllPartidas();
+            partidaService.deleteAll();
 
             // Then
             verify(partidaRepository).deleteAll();
@@ -202,7 +202,7 @@ class MatchServiceTest {
             when(partidaRepository.findById(2)).thenReturn(Optional.of(partida2));
 
             // When
-            partidaService.deleteSomePartidasById(ids);
+            partidaService.deleteSomeById(ids);
 
             // Then
             verify(partidaRepository).deleteById(1);

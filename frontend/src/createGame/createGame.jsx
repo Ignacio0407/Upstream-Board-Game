@@ -25,11 +25,10 @@ export default function CreateGame() {
       phase: "CASILLAS",
       initialPlayer: null,
       actualPlayer: null,
-  }
+    }
+
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
-
-
 
   console.log(finalUser.id)
     useEffect(() => {

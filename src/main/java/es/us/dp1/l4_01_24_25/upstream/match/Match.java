@@ -58,6 +58,10 @@ public class Match extends NamedEntity {
 	@JsonDeserialize(using = UserDeserializer.class)
 	User matchCreator;
 
+	public Match() {
+		
+	}
+
 	public Integer getPlayersNum() {
         return playersNum;
     }

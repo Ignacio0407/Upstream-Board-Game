@@ -4,247 +4,305 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 
-class matchRestControllerTest {
+@WebMvcTest(controllers = MatchRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
+class MatchRestControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
     private MatchService matchService;
 
-    @Mock
+    @MockBean
     private PlayerService playerService;
 
-    @InjectMocks
-    private MatchRestController partidaRestController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    void testFindAllPartidas_Positive() {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindAll_Positive() throws Exception {
         List<Match> partidas = Arrays.asList(new Match(), new Match());
-        when(matchService.getPartidas()).thenReturn(partidas);
+        when(matchService.getAll()).thenReturn(partidas);
         
-        ResponseEntity<List<Match>> response = partidaRestController.findAllPartidas();
-        
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partidas, response.getBody());
+        mockMvc.perform(get("/api/v1/matches"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partidas)));
     }
 
     @Test
-    void testFindAllPartidas_Negative() {
-        when(matchService.getPartidas()).thenReturn(Collections.emptyList());
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindAll_Negative() throws Exception {
+        when(matchService.getAll()).thenReturn(Collections.emptyList());
 
-        ResponseEntity<List<Match>> response = partidaRestController.findAllPartidas();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(0, response.getBody().size());
+        mockMvc.perform(get("/api/v1/matches"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
     }
 
     @Test
-    void testFindSomePartidasByName_Positive() throws ResourceNotFoundException {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindSomeByName_Positive() throws Exception {
         List<String> nombres = Arrays.asList("Partida1", "Partida2");
         List<Match> partidas = Arrays.asList(new Match(), new Match());
-        when(matchService.getSomePartidasByName(nombres)).thenReturn(partidas);
+        when(matchService.getSomeByName(nombres)).thenReturn(partidas);
 
-        ResponseEntity<List<Match>> response = partidaRestController.findSomePartidasByName(nombres);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partidas, response.getBody());
+        mockMvc.perform(get("/api/v1/matches/names/Partida1,Partida2"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partidas)));
     }
 
     @Test
-    void testFindSomePartidasByName_Negative() throws ResourceNotFoundException {
-        List<String> nombres = Arrays.asList("Partida1", "NoExiste");
-        when(matchService.getSomePartidasByName(nombres))
-                .thenThrow(new ResourceNotFoundException("Una o más partidas no encontradas"));
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindSomeByName_Negative() throws Exception {
+        when(matchService.getSomeByName(any()))
+            .thenThrow(new ResourceNotFoundException("Una o más partidas no encontradas"));
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            partidaRestController.findSomePartidasByName(nombres);
-        });
+        mockMvc.perform(get("/api/v1/matches/names/Partida1,NoExiste"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    void testFindPartidaById_Positive() throws ResourceNotFoundException {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindById_Positive() throws Exception {
         Match partida = new Match();
-        when(matchService.getPartidaById(1)).thenReturn(partida);
+        when(matchService.getById(1)).thenReturn(partida);
 
-        ResponseEntity<Match> response = partidaRestController.findPartidaById(1);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partida, response.getBody());
+        mockMvc.perform(get("/api/v1/matches/1"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
     }
 
     @Test
-    void testFindPartidaById_Negative() throws ResourceNotFoundException {
-        when(matchService.getPartidaById(1)).thenReturn(null);
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindById_Negative() throws Exception {
+        when(matchService.getById(1)).thenReturn(null);
 
-        ResponseEntity<Match> response = partidaRestController.findPartidaById(1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        mockMvc.perform(get("/api/v1/matches/1"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    void testFindPartidaByName_Positive() throws ResourceNotFoundException {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindByName_Positive() throws Exception {
         Match partida = new Match();
-        when(matchService.getPartidaByName("Partida1")).thenReturn(partida);
+        partida.setName("Partida1");
+        when(matchService.geByName("Partida1")).thenReturn(partida);
 
-        ResponseEntity<Match> response = partidaRestController.findPartidaByName("Partida1");
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partida, response.getBody());
+        mockMvc.perform(get("/api/v1/matches/name/Partida1"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
     }
 
     @Test
-    void testFindPartidaByName_Negative() {
-        // Simulamos que al buscar la partida por nombre, se lanza una ResourceNotFoundException
-        when(matchService.getPartidaByName("NonExistent")).thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindByName_Negative() throws Exception {
+        when(matchService.geByName("NonExistent"))
+            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            partidaRestController.findPartidaByName("NonExistent");
-        });
+        mockMvc.perform(get("/api/v1/matches/name/NonExistent"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    void testFindPlayersFromGame_Positive() throws ResourceNotFoundException {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindPlayersFromGame_Positive() throws Exception {
         List<Player> jugadores = Arrays.asList(new Player(), new Player());
         when(matchService.getPlayersFromGame(1)).thenReturn(jugadores);
 
-        ResponseEntity<List<Player>> response = partidaRestController.findPlayersFromGame(1);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(jugadores, response.getBody());
+        mockMvc.perform(get("/api/v1/matches/1/players"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(jugadores)));
     }
 
     @Test
-    void testFindPlayersFromGame_Negative() throws ResourceNotFoundException {
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindPlayersFromGame_Negative() throws Exception {
         when(matchService.getPlayersFromGame(1)).thenReturn(null);
 
-        ResponseEntity<List<Player>> response = partidaRestController.findPlayersFromGame(1);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        mockMvc.perform(get("/api/v1/matches/1/players"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    void testCreatePartida_Positive() {
+    @WithMockUser(roles = {"USER"})
+    void testCreate_Positive() throws Exception {
         Match partida = new Match();
-        when(matchService.savePartida(partida)).thenReturn(partida);
+        partida.setName("Test Match");
+        partida.setPlayersNum(1);
+        when(matchService.save(any(Match.class))).thenReturn(partida);
 
-        ResponseEntity<Match> response = partidaRestController.createPartida(partida);
+        mockMvc.perform(post("/api/v1/matches")
+        .with(csrf())
+        .with(user("testUser").roles("USER"))
+        .contentType(MediaType.APPLICATION_JSON) // Asegura el tipo de contenido
+        .content(objectMapper.writeValueAsString(partida)))
+        .andExpect(status().isCreated())
+        .andExpect(content().json(objectMapper.writeValueAsString(partida)));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partida, response.getBody());
     }
 
     @Test
-    void testCreatePartida_Negative() {
-        Match partidaInvalida = null;  // Asume que los campos necesarios no están inicializados
-        //when(partidaService.savePartida(partidaInvalida)).thenThrow(new IllegalArgumentException("Datos inválidos"));
-
-        ResponseEntity<Match> response = partidaRestController.createPartida(partidaInvalida);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void testDeletePartidaById_Positive() throws ErrorMessage {
-        Match partida = new Match();
-        when(matchService.getPartidaById(1)).thenReturn(partida);
-
-        ResponseEntity<Object> response = partidaRestController.deletePartidaById(1);
-
-        verify(matchService, times(1)).deletePartidaById(1);
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    void testDeletePartidaById_Negative() {
-    // Simulamos que al buscar la partida con id 1, se lanza una ResourceNotFoundException
-    doThrow(new ResourceNotFoundException("Partida no encontrada")).when(matchService).getPartidaById(1);
-
-    // Verificamos que el controlador lanza la excepción esperada
-    assertThrows(ResourceNotFoundException.class, () -> {
-        partidaRestController.deletePartidaById(1);
-        });
-    }
-
-    @Test
-    void testDeleteSomePartidasById_Positive() throws ErrorMessage {
-        // IDs de las partidas a borrar
-        List<Integer> ids = Arrays.asList(1, 2, 3);
-
-        // Simulamos que todas las partidas existen (getPartidaById devuelve una partida no nula)
-        when(matchService.getPartidaById(1)).thenReturn(new Match());
-        when(matchService.getPartidaById(2)).thenReturn(new Match());
-        when(matchService.getPartidaById(3)).thenReturn(new Match());
-
-        // Simulamos que la eliminación no lanza excepciones (doNothing porque es void). INNECESARIO
-        doNothing().when(matchService).deleteSomePartidasById(ids);
-
-        // Llamada al controlador
-        ResponseEntity<Object> response = partidaRestController.deleteSomePartidasById(ids);
-
-        // Verificamos que el servicio deleteSomePartidasById se haya llamado con los IDs correctos. INNECESARIO
-        verify(matchService, times(1)).deleteSomePartidasById(ids);
+    @WithMockUser(roles = {"USER"})
+    void testCreate_Negative() throws Exception {
+        Match partidaInvalida = new Match(); // Sin los campos requeridos
+        partidaInvalida.setId(1);
+        partidaInvalida.setName("as");
         
-        // Verificamos que la respuesta es correcta, debería ser OK ya que todas las partidas se borraron
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Partidas borradas", ((MessageResponse) response.getBody()).getMessage());
+        mockMvc.perform(post("/api/v1/matches")
+            .with(csrf())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(partidaInvalida)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testDeleteSomePartidasById_Negative() throws ErrorMessage {
-        List<Integer> ids = Arrays.asList(1, 99); // Suponemos que la partida con id 99 no existe
-        doThrow(new ResourceNotFoundException("Una o más partidas no encontradas")).when(matchService).deleteSomePartidasById(ids);
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            partidaRestController.deleteSomePartidasById(ids);
-        });
-    }
-
-    @Test
-    void testUpdatePartidaById_Positive() throws ErrorMessage {
+    void testDeleteById_Positive() throws Exception {
         Match partida = new Match();
-        when(matchService.getPartidaById(1)).thenReturn(partida);
-        when(matchService.updatePartidaById(partida, 1)).thenReturn(partida);
+        when(matchService.getById(1)).thenReturn(partida);
 
-        ResponseEntity<Match> response = partidaRestController.updatePartidaById(1, partida);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(partida, response.getBody());
+        mockMvc.perform(delete("/api/v1/matches/1")
+        .with(csrf())
+        .with(user("testUser").roles("ADMIN")))
+        .andExpect(status().isNoContent());
     }
 
     @Test
-    void testUpdatePartidaById_Negative() {
-        // Simulamos que al buscar la partida con id 1, se lanza una ResourceNotFoundException
-        doThrow(new ResourceNotFoundException("Partida no encontrada")).when(matchService).getPartidaById(1);
-    
-        // Verificamos que el controlador lanza la excepción esperada
-        assertThrows(ResourceNotFoundException.class, () -> {
-            partidaRestController.updatePartidaById(1, new Match());
-        });
+    void testDeleteById_Negative() throws Exception {
+        doThrow(new ResourceNotFoundException("Partida no encontrada"))
+            .when(matchService).getById(1);
+
+        mockMvc.perform(delete("/api/v1/matches/1")
+        .with(csrf())
+        .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testDeleteSomeById_Positive() throws Exception {
+        when(matchService.getById(anyInt())).thenReturn(new Match());
+
+        mockMvc.perform(delete("/api/v1/matches/ids/1,2,3")
+        .with(csrf())
+        .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("Partidas borradas"));
+    }
+
+    @Test
+    void testDeleteSomeById_Negative() throws Exception {
+        doThrow(new ResourceNotFoundException("Una o más partidas no encontradas"))
+            .when(matchService).deleteSomeById(any());
+
+        mockMvc.perform(delete("/api/v1/matches/ids/1,99")
+                .with(csrf())
+                .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdate_Positive() throws Exception {
+        Match partida = new Match();
+        partida.setName("Updated Match");
+        partida.setId(1);
+        when(matchService.getById(1)).thenReturn(partida);
+        when(matchService.updateById(any(Match.class), anyInt())).thenReturn(partida);
+
+        mockMvc.perform(put("/api/v1/matches/1")
+                .with(csrf()) 
+                .with(user("testUser").roles("ADMIN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(partida))) // Agrega el contenido JSON
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
+    }
+
+
+    @Test
+    @WithMockUser(roles = {"USER"})
+    void testUpdate_Negative() throws Exception {
+        doThrow(new ResourceNotFoundException("Partida no encontrada"))
+            .when(matchService).getById(1);
+
+        mockMvc.perform(put("/api/v1/matches/1")
+            .with(csrf())
+            .with(user("testUser").roles("USER"))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(new Match())))
+            .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    void testUpdateJugadorActual_Positive() throws Exception {
+        Match partida = new Match();
+        Player jugador = new Player();
+        when(matchService.getById(1)).thenReturn(partida);
+        when(playerService.getJugadorById(1)).thenReturn(jugador);
+        when(matchService.save(any(Match.class))).thenReturn(partida);
+
+        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
+                .with(csrf())
+                .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
+    }
+
+    @Test
+    void testUpdateJugadorActual_MatchNotFound() throws Exception {
+        when(matchService.getById(1))
+            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+
+        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
+                .with(csrf())
+                .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateJugadorActual_PlayerNotFound() throws Exception {
+        Match partida = new Match();
+        when(matchService.getById(1)).thenReturn(partida);
+        when(playerService.getJugadorById(1))
+            .thenThrow(new ResourceNotFoundException("Jugador no encontrado"));
+
+        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
+                .with(csrf())
+                .with(user("testUser").roles("ADMIN")))
+            .andExpect(status().isNotFound());
+    }
+
 }

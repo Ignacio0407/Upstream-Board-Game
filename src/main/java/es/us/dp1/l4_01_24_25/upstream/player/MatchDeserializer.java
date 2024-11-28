@@ -24,7 +24,7 @@ public class MatchDeserializer extends JsonDeserializer<Match> {
 
         try {
             Integer pId = p.getIntValue();
-            r = this.matchService.getPartidaById(pId);
+            r = this.matchService.getById(pId);
         } catch (Exception e) {
             throw new IOException("Partida no encontrada con esa id: " + p.getValueAsString());
         }

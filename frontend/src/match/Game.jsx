@@ -45,6 +45,22 @@
         }
 
         useEffect(() => {
+            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
+                console.log("players", players)
+                console.log("tilesList ", tilesList)
+                console.log("matchTiles", matchTiles)
+                setAllDataLoaded(true);
+                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getImage(t)])
+                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
+                setTilesAndImages(matchTilesCopy)
+                setGridTiles(matchTilesCopy2)
+                const orderedPlayers = [...players].sort(p => p.playerOrder)
+                setPlayers(orderedPlayers) // Siempre igual
+                setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+            }
+        }, [tilesList, matchTiles]);
+
+        useEffect(() => {
             // Construir el nuevo estado del grid basado en gridTiles
             const newGrid = Array(18).fill(null); // Crea una cuadrícula vacía de 18 espacios (ajustar si es necesario)
             const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
@@ -59,6 +75,7 @@
         
             // Actualizar el estado del grid
             setGrid(newGrid);
+            console.log(grid)
         }, [gridTiles]);
 
         useEffect(() => {
@@ -74,25 +91,9 @@
                 .then(data => setMatchTiles(data))
                 .catch(error => console.error('Error fetching tiles:', error));
             }, 1000); // Cada 5 segundos
-            
+                
             return () => clearInterval(interval);
         }, [jwt]);
-
-        useEffect(() => {
-            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
-                console.log("players", players)
-                console.log("tilesList ", tilesList)
-                console.log("matchTiles", matchTiles)
-                setAllDataLoaded(true);
-                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getImage(t)])
-                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
-                setTilesAndImages(matchTilesCopy)
-                setGridTiles(matchTilesCopy2)
-                const orderedPlayers = [...players].sort(p => p.playerOrder)
-                setPlayers(orderedPlayers) // Siempre igual
-                setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            }
-        }, [tilesList, matchTiles]);
 
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
@@ -109,23 +110,13 @@
             );
         })
 
-        /*const handleTileClick = (tile) => {
-            setSelectedTile(tile);
-            /*const index = tilesAndImages.indexOf(tile);
-            const matchTilesWithImagesCopy = [...tilesAndImages];
-            if (index > -1) {
-                matchTilesWithImagesCopy.splice(index, 1);
-                setTilesAndImages(matchTilesWithImagesCopy);
-            }
-        }*/
-
         const handleTileClick = (tile) => {
                 if (myPlayer.id === match.actualPlayer) {
                     setSelectedTile(tile);
-
                 }
         }
 
+        // Actualiza la posición de la casilla en el grid
         const updateTilePosition = (tile, x, y) => {
             fetch(`/api/v1/matchTiles/${tile[0].id}`, {
                 method: 'PATCH',
@@ -133,10 +124,13 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${jwt}`
                 },
-                body: JSON.stringify({ x, y })
+                body: JSON.stringify({ x, y})
             })
-            .then(response => 
-                    console.log(response.json()))
+            .then(response => {
+                console.log(response.json())
+                if (!response.ok) throw new Error('Invalid tile placement');
+                return response.json();
+            })
             .then(updatedTile => {
                 console.log(updatedTile);
                 const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
@@ -148,6 +142,7 @@
             .catch(error => console.error('Error updating tile position:', error));
         };
 
+        // Actualiza el grid una vez está seleccionada la casilla
         const handleGridClick = (index) => {
             if (selectedTile) {
                 const isNearSea = (index === 17 || index === 16 || index === 15) && !grid[index]
@@ -157,14 +152,13 @@
                     rightRange = index > 5 
                 }
 
-                if((isNearSea || hasTileBelow) && rightRange){
                 const newGrid = [...grid];
                 newGrid[index] = selectedTile;
                 setGrid(newGrid);
                 setSelectedTile(null);
                 const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
                 const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-                
+            
                 // Calcular la coordenada x (columna) y y (fila) con filas invertidas
                 const x = index % gridWidth; // Coordenada x (columna)
                 const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
@@ -185,35 +179,17 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${jwt}`
                     }
-                }).then(response => response.json())
-            }    
+                }).then(response => response.json())  
         }
             
         };
 
         return(
             <div className='gamePage-container'>
-                <h1 style={{
-                    position: 'absolute',
-                    marginBottom: '10px',
-                    marginTop: '10px',
-                    marginLeft: '1208px',
-                    fontSize: '30px',
-                    }}>Game: {match.name}</h1>
-                <h1 style={{
-                    position: 'absolute',
-                    marginBottom: '10px',
-                    marginTop: '10px',
-                    marginLeft: '552px',
-                    fontSize: '30px',
-                    }}>Round: {match.round}</h1>
-                <h1 style={{
-                    position: 'absolute',
-                    marginBottom: '10px',
-                    marginTop: '10px',
-                    marginLeft: '830px',
-                    fontSize: '30px',
-                    }}>Phase: {match.phase}</h1>
+                <h1 class="game-title game-name">Game: {match.name}</h1>
+                <h1 class="game-title game-round">Round: {match.round}</h1>
+                <h1 class="game-title game-phase">Phase: {match.phase}</h1>
+
                 <div className="users-table">
                     <thead>
                         <tr>
@@ -225,6 +201,7 @@
                     </thead>
                     <tbody>{playerList}</tbody>
                 </div>
+                
                 {tilesAndImages.length > 0 &&
                 <div key={tilesAndImages[0][0].id}
                     style={{
@@ -258,4 +235,4 @@
 
     }
 
-    export default Game;
+export default Game;

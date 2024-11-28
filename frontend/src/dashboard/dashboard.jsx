@@ -27,9 +27,6 @@ export default function Dashboard() {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
         }
-        console.log("Matches" + matches)
-        console.log(user.roles[0])
-        console.log("holaaaaaaaaaaa")
     }, [jwt])
 
     const modal = getErrorModal(setVisible, visible, message);
@@ -87,7 +84,7 @@ export default function Dashboard() {
             <h1 className='welcome'>
             Game Listing for {username}
             </h1>
-            <SearchBar setMatches={setMatches} />
+            <SearchBar setter={setMatches} uri={"matches"} />
             <WhiteSpace />
             <div>
             <div className='crear-partida'>

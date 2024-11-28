@@ -40,16 +40,24 @@ public class AchievementRestController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Achievement> findAchievement(@PathVariable("id") int id){
+	public ResponseEntity<Achievement> findById(@PathVariable("id") int id){
 		Achievement achievementToGet=achievementService.getById(id);
 		if(achievementToGet==null)
 			throw new ResourceNotFoundException("Achievement with id "+id+" not found!");
 		return new ResponseEntity<>(achievementToGet, HttpStatus.OK);
 	}
 
+	@GetMapping("/name/{name}")
+	public ResponseEntity<Achievement> findByName(@PathVariable("name") String name){
+		Achievement achievementToGet=achievementService.getByName(name);
+		if(achievementToGet==null)
+			throw new ResourceNotFoundException("Achievement with name "+name+" not found!");
+		return new ResponseEntity<>(achievementToGet, HttpStatus.OK);
+	}
+
 	@PostMapping
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<Achievement> createAchievement(@RequestBody @Valid Achievement newAchievement) { 
+	public ResponseEntity<Achievement> create(@RequestBody @Valid Achievement newAchievement) { 
 		Achievement result = achievementService.saveAchievement(newAchievement);
 		return new ResponseEntity<>(result, HttpStatus.CREATED);
 	}
@@ -58,7 +66,7 @@ public class AchievementRestController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Void> modifyAchievement(@RequestBody @Valid Achievement newAchievement, @PathVariable("id") int id) {
-		Achievement achievementToUpdate = this.findAchievement(id).getBody();
+		Achievement achievementToUpdate = this.findById(id).getBody();
 		
 		if (newAchievement.getId() == null || !newAchievement.getId().equals(id)) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -74,7 +82,7 @@ public class AchievementRestController {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("ADMIN")
 	public ResponseEntity<Void> deleteAchievement(@PathVariable("id") int id){
-		findAchievement(id);
+		findById(id);
 		achievementService.deleteAchievementById(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

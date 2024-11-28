@@ -41,6 +41,7 @@ INSERT INTO player (id, name, color, player_order, alive, points, user_player) V
 (6, 'Elena', 'MORADO', 6, TRUE, 5, 5),
 (7, 'Pedro', 'BLANCO', 7, TRUE, 12, 6);
 
+
 INSERT INTO matches (id, name, players_num, password, state, round, phase, initial_player, actual_player, match_creator) VALUES 
 (1, 'Partida1', 2, '1234', 'ESPERANDO', 1, 'MOVIENDO', 1, 1, 4),
 (2, 'Partida2', 3, 'abcd', 'EN_CURSO', 2, 'CASILLAS', 2, 2, 5),

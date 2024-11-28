@@ -1,13 +1,14 @@
 import { Table, Button } from "reactstrap";
 import tokenService from "../services/token.service";
 import useFetchState from "../util/useFetchState";
-import deleteFromList from "./../util/deleteFromList";
+import deleteFromList from "../util/deleteFromList";
 import { useState } from "react";
 import jwt_decode from "jwt-decode";
-import getErrorModal from "./../util/getErrorModal";
+import getErrorModal from "../util/getErrorModal";
 import '../static/css/achievement/achievement.css'
-import BotonLink, { BotonLinkOutline } from "../util/BotonLink";
+import BotonLink from "../util/BotonLink";
 const imgnotfound = "https://cdn-icons-png.flaticon.com/512/5778/5778223.png";
+import SearchBar from "../util/SearchBar";
 
 export default function AchievementList() {
 
@@ -49,7 +50,7 @@ export default function AchievementList() {
             <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}> {a.metric} </td>
             <td className="table-cell">
             {roles[0] === "ADMIN" && 
-                <BotonLinkOutline outlineColor={"warning"} direction={'/achievements/'+a.id} text={"Edit"}/>}
+                <BotonLink outline={true} color={"warning"} direction={'/achievements/'+a.id} text={"Edit"}/>}
             </td>
             {roles[0] === "ADMIN" &&<Button outline color="danger"
                     onClick={() =>
@@ -86,6 +87,7 @@ export default function AchievementList() {
                         </Table>
 
                 </div>
+                <SearchBar setter={setAchievements} uri={"achievements"} />
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
                 <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
@@ -105,7 +107,7 @@ export default function AchievementList() {
                     <tbody>{achievementList}</tbody>
 
                     {roles[0] === "ADMIN" && 
-                    <BotonLinkOutline outlineColor={"success"} direction={'/achievements/new'} text={"Create achievement"}/>}
+                    <BotonLink outline={true} color={"success"} direction={'/achievements/new'} text={"Create achievement"}/>}
 
                     </div>
                 </div>

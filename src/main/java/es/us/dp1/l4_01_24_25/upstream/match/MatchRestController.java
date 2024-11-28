@@ -31,17 +31,17 @@ import jakarta.validation.Valid;
 @RequestMapping("api/v1/matches")
 public class MatchRestController {
     
-    private final MatchService partidaService;
-    private final PlayerService jugadorService;
+    private final MatchService matchService;
+    private final PlayerService playerService;
 
     public MatchRestController(MatchService partidaService, PlayerService jugadorService) {
-        this.partidaService = partidaService;
-        this.jugadorService = jugadorService;
+        this.matchService = partidaService;
+        this.playerService = jugadorService;
     }
 
     @GetMapping
     public ResponseEntity<List<Match>> findAllPartidas() {
-        return new ResponseEntity<>(partidaService.getPartidas(), HttpStatus.OK);
+        return new ResponseEntity<>(matchService.getAll(), HttpStatus.OK);
     }
 
     // TODO
@@ -51,13 +51,13 @@ public class MatchRestController {
     }
 
     @GetMapping("/names/{names}")
-    public ResponseEntity<List<Match>> findSomePartidasByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
-        return new ResponseEntity<>(partidaService.getSomePartidasByName(names), HttpStatus.OK);
+    public ResponseEntity<List<Match>> findSomeByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
+        return new ResponseEntity<>(matchService.getSomeByName(names), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Match> findPartidaById(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
-        Match p = partidaService.getPartidaById(id);
+    public ResponseEntity<Match> findById (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+        Match p = matchService.getById(id);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
@@ -66,15 +66,15 @@ public class MatchRestController {
 
     @GetMapping("/{id}/players")
     public ResponseEntity<List<Player>> findPlayersFromGame(@PathVariable("id") Integer id) throws ResourceNotFoundException {
-        List<Player> l = partidaService.getPlayersFromGame(id);
+        List<Player> l = matchService.getPlayersFromGame(id);
         if(l == null) {
             return new ResponseEntity<>(List.of(), HttpStatus.NOT_FOUND);
         } else return new ResponseEntity<>(l, HttpStatus.OK);
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<Match> findPartidaByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
-        Match p = partidaService.getPartidaByName(name);
+    public ResponseEntity<Match> findByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
+        Match p = matchService.geByName(name);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
@@ -85,18 +85,18 @@ public class MatchRestController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("ADMIN")
-    public void deleteAllPartidas() {
-        partidaService.deleteAllPartidas();
+    public void deleteAll() {
+        matchService.deleteAll();
     }
 
     @DeleteMapping(value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
     @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deletePartidaById(@PathVariable("id") Integer id) throws ErrorMessage {
-		Match p = partidaService.getPartidaById(id);
+	public ResponseEntity<Object> deleteById (@PathVariable("id") Integer id) throws ErrorMessage {
+		Match p = matchService.getById(id);
         RestPreconditions.checkNotNull(p, "Partida", "id", id);
 		if (p != null) {
-			partidaService.deletePartidaById(id);
+			matchService.deletePartidaById(id);
 			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
 		} else
 			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
@@ -106,18 +106,18 @@ public class MatchRestController {
     @DeleteMapping(value = "/ids/{ids}")
 	@ResponseStatus(HttpStatus.OK)
     @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deleteSomePartidasById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
+	public ResponseEntity<Object> deleteSomeById (@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
 		List<Integer> idsPartidasNoBorradas = new LinkedList<>();
         Integer numPartidasEncontradas = 0;
         for (Integer id : ids) {
-            RestPreconditions.checkNotNull(partidaService.getPartidaById(id), "Partida", "ID", id);
-		if (partidaService.getPartidaById(id) != null) {
+            RestPreconditions.checkNotNull(matchService.getById(id), "Partida", "ID", id);
+		if (matchService.getById(id) != null) {
             numPartidasEncontradas++;
 		} else
             idsPartidasNoBorradas.add(id);
         }
         if (numPartidasEncontradas == ids.size()) {
-            partidaService.deleteSomePartidasById(ids);
+            matchService.deleteSomeById(ids);
             return new ResponseEntity<>(new MessageResponse("Partidas borradas"), HttpStatus.OK);
         }
         else {
@@ -129,36 +129,52 @@ public class MatchRestController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Match> updatePartidaById(@PathVariable("id") Integer idToUpdate, 
-    @RequestBody @Valid Match partidaNueva) {
-        RestPreconditions.checkNotNull(partidaService.getPartidaById(idToUpdate), "Partida", "ID", idToUpdate);
-        return new ResponseEntity<>(partidaService.updatePartidaById(partidaNueva,idToUpdate), HttpStatus.OK);
-    }
+    public ResponseEntity<Match> updateById(@PathVariable("id") Integer idToUpdate, @RequestBody @Valid Match partidaNueva) {
+        try {
+            RestPreconditions.checkNotNull(matchService.getById(idToUpdate), "Partida", "ID", idToUpdate);
+            return new ResponseEntity<>(matchService.updateById(partidaNueva, idToUpdate), HttpStatus.OK);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }    
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Match> createPartida(@RequestBody @Valid Match partida) throws DataAccessException{
-        if ((partida == null)){
-            return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Match> create(@RequestBody @Valid Match partida) {
+        try {
+            if (partida == null || partida.getName() == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            if (partida.getName().length() < 3 || partida.getName().length() > 50) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(matchService.save(partida), HttpStatus.CREATED);
+        } catch (DataAccessException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (partida.getName().length()<3 || partida.getName().length()>50){
-            return new ResponseEntity<>(partida, HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(partidaService.savePartida(partida), HttpStatus.OK);
     }
 
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
-        // Verificamos si la partida existe
-        Match partida = partidaService.getPartidaById(matchId);
+        Match partida = matchService.getById(matchId);
         if (partida == null) {
             throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         }
-        Player j = jugadorService.getJugadorById(playerId);
+        Player j = playerService.getJugadorById(playerId);
         partida.setActualPlayer(j);
-        partidaService.savePartida(partida);
+        matchService.save(partida);
+        return new ResponseEntity<>(partida, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{matchId}/ronda")
+    public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match partida = matchService.getById(matchId);
+        if (partida == null) {
+            throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        }
+        partida.setRound(partida.getRound()+1);
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
