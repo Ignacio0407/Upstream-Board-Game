@@ -1,5 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
-
+//ESTO ES NECESARIO
 
 import java.io.IOException;
 
@@ -18,5 +18,6 @@ public class MatchSerializer extends JsonSerializer<Match>{
     public void serialize(Match value, JsonGenerator gen, SerializerProvider serializers)
         throws IOException {
             gen.writeNumber(value.getId());
+        
         }
 }

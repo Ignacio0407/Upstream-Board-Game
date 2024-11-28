@@ -17,7 +17,7 @@ export default function CreateGame() {
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const emptyMatch = {
       name: "",
-      password: "asd",
+      password: "",
       matchCreator: null,
       state: "ESPERANDO",
       playersNum: 1,
@@ -30,37 +30,46 @@ export default function CreateGame() {
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
 
-  console.log(finalUser.id)
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
         }
         if (finalUser) {
-          setMatch(prevMatch => ({...prevMatch, matchCreator: finalUser.id }))
         }
     }, [jwt, finalUser])
 
     let matchId;
-    function handleSubmit(event){
-        event.preventDefault();
-        fetch("/api/v1/matches", {
-
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(match),
-        }).then((response) => response.text())
-        .then(
-        data => {
-          const matchCreada = JSON.parse(data)
-          matchId = matchCreada.id;
-          console.log(matchCreada)
-          navigate(`/matches/${matchId}`)
+    function handleSubmit(event) {
+      event.preventDefault();
+      fetch("/api/v1/matches", {
+          method: "POST",
+          headers: {
+              Authorization: `Bearer ${jwt}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({...match, matchCreator: finalUser.id}),
       })
-      .catch(error => console.error("Error:", error));
+      .then(response => {
+          if (!response.ok) {
+              // Lanza un error si el estado no es exitoso
+              return response.text().then(err => {
+                  throw new Error(`Error al crear la partida: ya existe una partida con nombre ${match.name}`);
+              });
+          }
+          return response.text();
+      })
+      .then(data => {
+          const matchCreada = JSON.parse(data);
+          matchId = matchCreada.id;
+          console.log(matchCreada);
+          navigate(`/matches/${matchId}`);
+      })
+      .catch(error => {
+          // Manejar errores aquí
+          console.log("Error al crear la partida:", error);
+          alert(`El nombre "${match.name}" no es válido`);
+      });
   }
         
 
@@ -88,6 +97,7 @@ function handleChange(event) {
               type="text"
               required
               name="name"
+              placeholder='Mínimo 3 caracteres, máximo 50 caracteres'
               id="name"
               value={match.name || ""}
               onChange={handleChange}
@@ -96,13 +106,13 @@ function handleChange(event) {
             </div>
             
             <div className="custom-form-input">
-            <Label for="contrasena" className="custom-form-input-label">
-              Contraseña
+            <Label for="password" className="custom-form-input-label">
+              Password
             </Label>
             <Input
               type="text"
-              name="contrasena"
-              id="contrasena"
+              name="password"
+              id="password"
               value={match.password || ""}
               onChange={handleChange}
               className="input-table"

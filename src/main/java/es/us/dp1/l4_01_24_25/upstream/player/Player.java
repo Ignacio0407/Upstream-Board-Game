@@ -48,4 +48,18 @@ public class Player extends BaseEntity implements Serializable{
     @JoinColumn(name="partida")
     Match match;
 
+    @Override
+    public String toString() {
+    return "Player{" +
+            "id=" + getId() + // Esto asume que la clase BaseEntity tiene un campo id con su getter.
+            ", name='" + name + '\'' +
+            ", color=" + color +
+            ", playerOrder=" + playerOrder +
+            ", alive=" + alive +
+            ", points=" + points +
+            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") + // Evita acceder a objetos nulos.
+            ", match=" + (match != null ? match.getId() : "null") +
+            '}';
+}
+
 }

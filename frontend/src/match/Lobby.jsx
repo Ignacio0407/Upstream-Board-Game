@@ -21,7 +21,7 @@ function Lobby({match}){
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
-    const [numjug, Setnumjug] = useState(match.numjugadores);
+    const [numjug, Setnumjug] = useState(match.playersNum);
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
     const spectatorIds = useLocation().state?.spectatorIds||[];
@@ -30,7 +30,7 @@ function Lobby({match}){
     const stompClient = new Client({
     webSocketFactory: () => socket,
     debug: (str) => {
-        console.log(str);
+        //console.log(str);
     },
     connectHeaders: {
         Authorization: `Bearer ${jwt}`
@@ -41,6 +41,10 @@ function Lobby({match}){
             console.log('Message received: ' + message.body);
             fetchPlayers() ;
         });
+        stompClient.subscribe('/topic/game', (message) => {
+            console.log('Message received: ' + message.body);
+            window.location.reload(true);
+        })
     },
     onStompError: (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
@@ -78,14 +82,16 @@ stompClient.activate();
         Setnumjug(players.length);
         if(players.length > 0){
             const jugInicial = players.filter(p => p.playerOrder === 0);
-            console.log("jugInicial",jugInicial)            
+            //console.log("jugInicial",jugInicial)            
             setReData(d => ({...d, playersNum: players.length , initialPlayer: jugInicial[0].id, actualPlayer: jugInicial[0].id, state: "EN_CURSO", round: 0}))
         }
-        console.log("reData",reData)
-        console.log("match",match)
+       // console.log("reData",reData)
+        //console.log("match",match)
+        /*
         if(matches.state === "EN_CURSO" && !loading){
             window.location.reload(true);
         }
+            */
         else if(matches.state === "FINALIZADA"){
             navigate("/dashboard");
         }/*
@@ -129,12 +135,12 @@ const startGame = async () => {
     setLoading(true);
 
     const tileConfigs = [
-        { tile: 1, count: 7, capacity: 5 },
-        { tile: 2, count: 5, capacity: 4 },
-        { tile: 3, count: 5, capacity: 5 },
-        { tile: 4, count: 3, capacity: 5 },
-        { tile: 5, count: 5, capacity: 5 },
-        { tile: 6, count: 4, capacity: 5 }
+        { tile: 1, count: 7, capacity: numjug },
+        { tile: 2, count: 5, capacity: numjug-1 },
+        { tile: 3, count: 5, capacity: numjug },
+        { tile: 4, count: 3, capacity: numjug },
+        { tile: 5, count: 5, capacity: numjug },
+        { tile: 6, count: 4, capacity: numjug }
     ];    
 
     let x = null;
@@ -181,11 +187,16 @@ const startGame = async () => {
 
     try {
         await Promise.all(requests);
+        stompClient.publish({
+                destination: "/app/start",
+                body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
+        });
         console.log("Todas las MatchTiles han sido creadas en orden aleatorio.");
     } catch (error) {
         console.error("Error al crear algunas MatchTiles:", error);
     }
     setLoading(false);
+    
     window.location.reload(true);
 };
     
@@ -281,13 +292,13 @@ const startGame = async () => {
     
     return(
         <div className='lobbyContainer'>
-        {players.find(p => p.usuario === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
+        {players.find(p => p.userPlayer === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         <ColorPickerModal onColorSelect={handleColorChange} takenColors = {takenColors} />
         )}
         <h1 className='lobbyTitleContainer'>
             {match.name}
         </h1>
-        {match.contrasena !== "" && <h4 className='passwordContainer'>
+        {match.password !== "" && <h4 className='passwordContainer'>
             Password: {match.password}
         </h4>}
         <div className='lobbyMainContainer'>

@@ -159,6 +159,7 @@ public class MatchRestController {
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
         Match partida = matchService.getById(matchId);
+
         if (partida == null) {
             throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         }

@@ -18,4 +18,10 @@ public class GreetingController {
 		return "Hello";
 	}
 
+	@MessageMapping("/start")
+	@SendTo("/topic/game")
+	public String greeting2(Player message) throws Exception{
+		return "Hello";
+	}
+
 }

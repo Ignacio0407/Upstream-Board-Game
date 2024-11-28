@@ -37,9 +37,9 @@ export default function Dashboard() {
     }
 
     function join(match){
-        if(match.contrasena != ""){
+        if(match.password !== ""){
             const contrasena = prompt("Enter the password to join the game");
-            if(contrasena != match.contrasena){
+            if(contrasena !== match.password){
                 alert("Incorrect password");
                 return;
             }
