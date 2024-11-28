@@ -40,12 +40,11 @@ public class MatchTileController {
     @PatchMapping("/{id}")
     public ResponseEntity<MatchTile> updateMatchTile(@PathVariable("id") Integer id, 
                                                      @RequestBody Map<String, Integer> updates) throws ResourceNotFoundException {
-        // Buscar el MatchTile por ID
+        
         MatchTile matchTile = matchTileService.findById(id);
         if (matchTile == null) {
             throw new ResourceNotFoundException("MatchTile", "ID", id);
         }
-
         if(updates.get("y") != 0){
             MatchTile matchTile2 = matchTileService.findAll().stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
@@ -61,10 +60,14 @@ public class MatchTileController {
 
         // Actualizar solo los valores de x e y si están presentes en el RequestBody
         if (updates.containsKey("x") && updates.containsKey("y")) {
-            matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y"))); 
+            Integer x = updates.get("x");
+            Integer y = updates.get("y");
+            if (!matchTileService.validateTilePlacement(updates.get("round"), y)) {
+                return ResponseEntity.badRequest().build();
+            }
+            matchTile.setCoordinate(new Coordinate(x, y));
         }
 
-        // Guardar el MatchTile actualizado
         MatchTile updatedMatchTile = matchTileService.save(matchTile);
         return ResponseEntity.ok(updatedMatchTile);
     }

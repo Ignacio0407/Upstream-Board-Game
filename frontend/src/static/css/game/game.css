@@ -1,51 +1,22 @@
 .rotarFicha {
     transform: rotate(60deg);
 }
-/*
-.gamePage-container {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.tiles-container {
-    display: flex;
-    padding: 10px;
-    align-items: flex-end;
-}
-
-.text {
-    color: black;
-}
-*/
 
 .gamePage-container {
     position: relative;
     text-align: center;
     background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/upStreamFondo.jpg');
     background-size: cover;
-  }
-
-.tiles-container {
+    /* 
+    height: 100%;
+    width: 100%;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Centra las casillas en el contenedor */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    */
   }
 
-  .tile-image {
-    position: absolute;
-    bottom: -850px; /* Ajusta la distancia desde la parte inferior de la página */
-    right: 20px; /* Ajusta la distancia desde el lado derecho de la página */
-    width: 150px; /* Tamaño de la imagen */
-  }
-
-
-
-/**//**//**//**//**//**//**/
 .game-container {
     position: absolute;
     display: flex;
@@ -58,6 +29,26 @@
     background-color:  #1e95a2;
     border: solid;
 }
+
+.game-title {
+  position: absolute;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 30px;
+}
+
+.game-name {
+  margin-left: 1208px;
+}
+
+.game-round {
+  margin-left: 552px;
+}
+
+.game-phase {
+  margin-left: 830px;
+}
+
 
 .grid1 {
     display: grid;
@@ -88,12 +79,12 @@
     border: solid #2a554f;
   }
 
-  .grid-item:nth-child(3n + 1) {
-    transform: translateY(20px);
-  }
-  .grid-item:nth-child(3n + 3) {
-    transform: translateY(20px);
-  }
+.grid-item:nth-child(3n + 1) {
+  transform: translateY(20px);
+}
+.grid-item:nth-child(3n + 3) {
+  transform: translateY(20px);
+}
 
 .users-table {
     position: absolute;
@@ -122,5 +113,19 @@
     border-top: 1px solid black;
 }
 
+.tiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centra las casillas en el contenedor */
+    /* 
+    padding: 10px;
+    align-items: flex-end;
+    */
+  }
 
-
+.tile-image {
+  position: absolute;
+  bottom: -850px; /* Ajusta la distancia desde la parte inferior de la página */
+  right: 20px; /* Ajusta la distancia desde el lado derecho de la página */
+  width: 150px; /* Tamaño de la imagen */
+}

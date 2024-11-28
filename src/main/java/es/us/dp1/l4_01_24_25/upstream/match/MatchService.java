@@ -24,15 +24,14 @@ public class MatchService {
     }
     
     @Transactional(readOnly = true)
-    public List<Match> getPartidas() {
+    public List<Match> getAll() {
         return matchRepository.findAll();
     }
 
-    // Buscar varias partidas a la vez
     @Transactional(readOnly = true)
-    public List<Match> getSomePartidasByName(List<String> names) {
+    public List<Match> getSomeByName(List<String> names) {
         List<Match> partidas = new LinkedList<>();
-        names.stream().forEach(name -> partidas.add(getPartidaByName(name)));
+        names.stream().forEach(name -> partidas.add(geByName(name)));
         return new ArrayList<>(partidas);
     }
 
@@ -59,56 +58,56 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public Match getPartidaById(Integer id) {
+    public Match getById(Integer id) {
         Optional <Match> op = matchRepository.findById(id);
         return optionalToValueOrNull(op);
     }
 
     @Transactional(readOnly = true)
-    public Match getPartidaByName(String name) {
+    public Match geByName(String name) {
         Optional <Match> op = Optional.ofNullable(matchRepository.findByName(name));
         return optionalToValueOrNull(op);
     }
 
     @Transactional
-    public void deleteAllPartidas() {
+    public void deleteAll() {
         matchRepository.deleteAll();
     }
 
     @Transactional
-    public void deleteSomePartidasById(List<Integer> idsToDelete) {
+    public void deleteSomeById(List<Integer> idsToDelete) {
         idsToDelete.stream().forEach( id -> deletePartidaById(id));
     }
 
     @Transactional
     public void deletePartidaById(Integer id) {
-        getPartidaById(id); // Si no existe p, ya lanza la excepcion.
+        getById(id);
         matchRepository.deleteById(id);
 
     }
 
 
     @Transactional
-    private Match updatePartida(Match partidaNueva, Match partidaToUpdate) {
+    private Match update(Match partidaNueva, Match partidaToUpdate) {
         BeanUtils.copyProperties(partidaNueva, partidaToUpdate, "id");
-        return matchRepository.save(partidaToUpdate); // Guarda y retorna la versión actualizada
+        return matchRepository.save(partidaToUpdate);
     }
 
     @Transactional
-    public Match updatePartidaById(Match partidaNueva, Integer idtoUpdate) {
-        Match partidaToUpdate = getPartidaById(idtoUpdate);
+    public Match updateById(Match partidaNueva, Integer idtoUpdate) {
+        Match partidaToUpdate = getById(idtoUpdate);
         if (partidaToUpdate == null){
             return null;
         }
        if (partidaToUpdate.getPlayersNum() != null && partidaToUpdate.getPlayersNum().equals(0)){ 
             partidaToUpdate.setState(State.FINALIZADA);
         }
-        return updatePartida(partidaNueva, partidaToUpdate);
+        return update(partidaNueva, partidaToUpdate);
     }
 
 
     @Transactional
-	public Match savePartida(Match partida) {
+	public Match save(Match partida) {
 		matchRepository.save(partida);
 		return partida;
 	}

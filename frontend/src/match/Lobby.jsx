@@ -100,11 +100,7 @@ stompClient.activate();
             return () => clearInterval(intervalId);
         }*/
     }, [players, match.id, user.id, matches.state]);
-
-
-
-
-    
+ 
 
 const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
