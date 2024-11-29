@@ -22,6 +22,7 @@
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
         const [myPlayer, setMyPlayer] = useState(null);
+        const [upMatch, setUpMatch] = useState(match);
 
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -57,6 +58,7 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+                sincMatch();
             }
         }, [tilesList, matchTiles]);
 
@@ -99,6 +101,20 @@
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
 
+        const sincMatch = async () => {
+            const response = await fetch("/api/v1/matches/"+ match.id, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setUpMatch([])
+            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
+        };
+
         const playerList = players.map((p) => {
             return (
                 <tr key = {p.id} className="table-row">
@@ -111,7 +127,7 @@
         })
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === match.actualPlayer) {
+                if (myPlayer.id === upMatch.actualPlayer) {
                     setSelectedTile(tile);
                 }
         }
@@ -139,32 +155,27 @@
                 );
                 
             })
-            .catch(error => console.error('Error updating tile position:', error));
+            .catch(error => console.error('Error updating tile position:', error)
+                    );
         };
 
         // Actualiza el grid una vez está seleccionada la casilla
         const handleGridClick = (index) => {
             if (selectedTile) {
-                const isNearSea = (index === 17 || index === 16 || index === 15) && !grid[index]
-                const hasTileBelow =  grid[index+3] !== null && !grid[index]
-                let rightRange = false
-                if(match.round ===0){
-                    rightRange = index > 5 
-                }
-
-                const newGrid = [...grid];
-                newGrid[index] = selectedTile;
-                setGrid(newGrid);
-                setSelectedTile(null);
                 const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
                 const gridHeight = 6; // Altura de la cuadrícula (número de filas)
             
                 // Calcular la coordenada x (columna) y y (fila) con filas invertidas
                 const x = index % gridWidth; // Coordenada x (columna)
                 const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-    
+                try{
                 updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
-    
+                }catch(error){
+                    console.log("Error updating tile position:", error);
+                    return;
+                }
+
+
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
                 let nextPlayer = players[myPlayer.playerOrder+1];
@@ -179,7 +190,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${jwt}`
                     }
-                }).then(response => response.json())  
+                }).then(response => response.json())
         }
             
         };
@@ -189,7 +200,6 @@
                 <h1 class="game-title game-name">Game: {match.name}</h1>
                 <h1 class="game-title game-round">Round: {match.round}</h1>
                 <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-
                 <div className="users-table">
                     <thead>
                         <tr>
@@ -211,7 +221,7 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === upMatch.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
