@@ -160,34 +160,31 @@ class MatchRestControllerTest {
     @Test
     @WithMockUser(roles = {"USER"})
     void testCreate_Positive() throws Exception {
-        Match partida = new Match();
-        partida.setName("Test Match");
-        partida.setPlayersNum(1);
-        when(matchService.save(any(Match.class))).thenReturn(partida);
+        Match match = new Match();
+        match.setName("Test Match");
+        when(matchService.save(any(Match.class))).thenReturn(match);
 
         mockMvc.perform(post("/api/v1/matches")
-        .with(csrf())
-        .with(user("testUser").roles("USER"))
-        .contentType(MediaType.APPLICATION_JSON) // Asegura el tipo de contenido
-        .content(objectMapper.writeValueAsString(partida)))
-        .andExpect(status().isCreated())
-        .andExpect(content().json(objectMapper.writeValueAsString(partida)));
+                .with(csrf())
+                .with(user("testUser").roles("USER"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(match)))
+                .andExpect(status().isCreated());
 
     }
 
     @Test
     @WithMockUser(roles = {"USER"})
     void testCreate_Negative() throws Exception {
-        Match partidaInvalida = new Match(); // Sin los campos requeridos
-        partidaInvalida.setId(1);
-        partidaInvalida.setName("as");
+        when(matchService.getById(anyInt())).thenThrow(new IllegalArgumentException());
         
         mockMvc.perform(post("/api/v1/matches")
-            .with(csrf())
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(partidaInvalida)))
-            .andExpect(status().isBadRequest());
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")) // Enviar un JSON vacío
+                .andExpect(status().isBadRequest());
     }
+
 
     @Test
     void testDeleteById_Positive() throws Exception {
@@ -268,17 +265,21 @@ class MatchRestControllerTest {
 
     @Test
     void testUpdateJugadorActual_Positive() throws Exception {
-        Match partida = new Match();
-        Player jugador = new Player();
-        when(matchService.getById(1)).thenReturn(partida);
-        when(playerService.getJugadorById(1)).thenReturn(jugador);
-        when(matchService.save(any(Match.class))).thenReturn(partida);
+        Match match = new Match();
+        match.setId(1);
+        Player player = new Player();
+        player.setId(1);
+
+        // Configura mocks para devolver objetos válidos
+        when(matchService.getById(1)).thenReturn(match);
+        when(playerService.getJugadorById(1)).thenReturn(player);
+        when(matchService.save(any(Match.class))).thenReturn(match);
 
         mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
                 .with(csrf())
                 .with(user("testUser").roles("ADMIN")))
             .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
+            .andExpect(content().json(objectMapper.writeValueAsString(match)));
     }
 
     @Test

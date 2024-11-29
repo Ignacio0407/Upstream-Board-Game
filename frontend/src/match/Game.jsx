@@ -45,6 +45,20 @@
             }
         }
 
+        const sincMatch = async () => {
+            const response = await fetch("/api/v1/matches/"+ match.id, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setUpMatch([])
+            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
+        };
+
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
                 console.log("players", players)
@@ -100,20 +114,6 @@
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
-
-        const sincMatch = async () => {
-            const response = await fetch("/api/v1/matches/"+ match.id, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            setUpMatch([])
-            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
-        };
 
         const playerList = players.map((p) => {
             return (
@@ -174,7 +174,6 @@
                     console.log("Error updating tile position:", error);
                     return;
                 }
-
 
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
