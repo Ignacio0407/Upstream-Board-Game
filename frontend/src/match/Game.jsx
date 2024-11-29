@@ -22,7 +22,6 @@
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
         const [myPlayer, setMyPlayer] = useState(null);
-        const [upMatch, setUpMatch] = useState(match);
 
         const getImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -58,7 +57,6 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-                sincMatch();
             }
         }, [tilesList, matchTiles]);
 
@@ -101,33 +99,21 @@
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
 
-        const sincMatch = async () => {
-            const response = await fetch("/api/v1/matches/"+ match.id, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            setUpMatch([])
-            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
-        };
+
 
         const playerList = players.map((p) => {
             return (
                 <tr key = {p.id} className="table-row">
                     <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
                     <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.puntos}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.vivo? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
                 </tr>
             );
         })
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === upMatch.actualPlayer) {
+                if (myPlayer.id === match.actualPlayer) {
                     setSelectedTile(tile);
                 }
         }
@@ -221,7 +207,7 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === upMatch.actualPlayer && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
