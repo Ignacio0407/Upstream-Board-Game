@@ -56,7 +56,6 @@ public class AchievementRestController {
 	}
 
 	@PostMapping
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Achievement> create(@RequestBody @Valid Achievement newAchievement) { 
 		Achievement result = achievementService.saveAchievement(newAchievement);
 		return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -64,12 +63,11 @@ public class AchievementRestController {
 
 	@SuppressWarnings("null")
 	@PutMapping("/{id}")
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<Void> modifyAchievement(@RequestBody @Valid Achievement newAchievement, @PathVariable("id") int id) {
 		Achievement achievementToUpdate = this.findById(id).getBody();
-		
+
 		if (newAchievement.getId() == null || !newAchievement.getId().equals(id)) {
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		
 		BeanUtils.copyProperties(newAchievement, achievementToUpdate, "id");
