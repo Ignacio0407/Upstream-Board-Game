@@ -87,6 +87,26 @@ class AchievementRestControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindByName_Positive() throws Exception {
+        Achievement achievement = new Achievement();
+        when(achievementService.getByName("234")).thenReturn(achievement);
+
+        mockMvc.perform(get("/api/v1/achievements/name/234"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(achievement)));
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    void testFindByName_Negative() throws Exception {
+        when(achievementService.getByName("234")).thenReturn(null);
+
+        mockMvc.perform(get("/api/v1/achievements/1"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     void testCreate_Positive() throws Exception {
         Achievement achievement = new Achievement();
         achievement.setName("Test Achievement");
