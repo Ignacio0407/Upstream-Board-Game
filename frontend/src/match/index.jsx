@@ -50,7 +50,7 @@ export default function Match() {
                 })
         
     })
-}, 5000); // Cada 5 segundos
+}, 500); // Cada 5 segundos
     return () => clearInterval(interval);
 
 }

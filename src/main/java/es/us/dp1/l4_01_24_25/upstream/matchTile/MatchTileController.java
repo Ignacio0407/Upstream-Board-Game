@@ -52,8 +52,16 @@ public class MatchTileController {
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
-    }
+        }
     
+        boolean positionOccupied = matchTileService.findAll().stream()
+        .anyMatch(mT -> mT.getCoordinate() != null 
+                     && mT.getCoordinate().x() == updates.get("x") 
+                     && mT.getCoordinate().y() == updates.get("y"));
+
+    if (positionOccupied) {
+        throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
+    }
     
         if(matchTile.getMatch().getRound() == 0 && updates.get("y") > 3){
             throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);

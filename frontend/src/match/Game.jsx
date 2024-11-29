@@ -118,68 +118,75 @@
                 }
         }
 
-        // Actualiza la posición de la casilla en el grid
-        const updateTilePosition = (tile, x, y) => {
-            fetch(`/api/v1/matchTiles/${tile[0].id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-                body: JSON.stringify({ x, y})
-            })
-            .then(response => {
-                console.log(response.json())
-                if (!response.ok) throw new Error('Invalid tile placement');
-                return response.json();
-            })
-            .then(updatedTile => {
-                console.log(updatedTile);
-                const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
-                setTilesAndImages(prevTiles =>
-                    prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
-                );
-                
-            })
-            .catch(error => console.error('Error updating tile position:', error)
-                    );
-        };
-
-        // Actualiza el grid una vez está seleccionada la casilla
-        const handleGridClick = (index) => {
-            if (selectedTile) {
-                const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-                const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-            
-                // Calcular la coordenada x (columna) y y (fila) con filas invertidas
-                const x = index % gridWidth; // Coordenada x (columna)
-                const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-                try{
-                updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
-                }catch(error){
-                    console.log("Error updating tile position:", error);
-                    return;
-                }
-
-
-                // Reiniciar la casilla seleccionada después de moverla
-                setSelectedTile(null);
-                let nextPlayer = players[myPlayer.playerOrder+1];
-                console.log(nextPlayer)
-                console.log(players)
-                if(!nextPlayer){
-                    nextPlayer = players[0];
-                }
-                fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+        const updateTilePosition = async (tile, x, y) => {
+            try {
+                const response = await fetch(`/api/v1/matchTiles/${tile[0].id}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${jwt}`
-                    }
-                }).then(response => response.json())
-        }
-            
+                    },
+                    body: JSON.stringify({ x, y })
+                });
+        
+                if (!response.ok) {
+                    throw new Error('Invalid tile placement');
+                }
+        
+                const updatedTile = await response.json();
+                console.log(updatedTile);
+        
+                const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
+                setTilesAndImages(prevTiles =>
+                    prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
+                );
+        
+                return updatedTile; 
+            } catch (error) {
+                console.error('Error updating tile position:', error);
+                throw error; 
+            }
         };
+
+        // Actualiza el grid una vez está seleccionada la casilla
+        const handleGridClick = async (index) => {
+    if (selectedTile) {
+        const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+        const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+
+        // Calcular la coordenada x (columna) y y (fila) con filas invertidas
+        const x = index % gridWidth; // Coordenada x (columna)
+        const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
+
+        try {
+            // Intentar actualizar la posición de la tile
+            await updateTilePosition(selectedTile, x, y);
+
+            // Reiniciar la casilla seleccionada después de moverla
+            setSelectedTile(null);
+
+            // Determinar el siguiente jugador
+            let nextPlayer = players[myPlayer.playerOrder + 1];
+            if (!nextPlayer) {
+                nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
+            }
+
+            // Actualizar el turno en el servidor
+            await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                }
+            });
+
+        } catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+            // Detener ejecución si ocurre un error
+            return;
+        }
+    }
+};
 
         return(
             <div className='gamePage-container'>
