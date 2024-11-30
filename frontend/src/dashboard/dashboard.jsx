@@ -6,11 +6,13 @@ import BotonLink from "../util/BotonLink";
 import useFetchState from '../util/useFetchState';
 import SearchBar from '../util/SearchBar';
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import { Button } from 'reactstrap';
+import { Button, Table } from 'reactstrap';
 import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
 import { useNavigate } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -22,7 +24,33 @@ export default function Dashboard() {
     const [visible, setVisible] = useState(false);
     const navigate = useNavigate();
     const [spectatorIds, setSpectatorIds] = useState([]);
+    const [matchList, setMatchList] = useState(null);
 
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    const stompClient = new Client({
+    webSocketFactory: () => socket,
+    debug: (str) => {
+        //console.log(str);
+    },
+    connectHeaders: {
+        Authorization: `Bearer ${jwt}`
+    },
+    onConnect: (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/get', (message) => {
+            console.log('Message received: ' + message.body);
+            sincMatch();
+        });
+    },
+    onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    },
+    onWebSocketError: (error) => {
+        console.error('Error with websocket', error);
+    }
+    });
+    stompClient.activate();
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
@@ -47,8 +75,21 @@ export default function Dashboard() {
         navigate('/matches/'+match.id);
     }
 
-    const matchesList = 
-      matches.map((match) => {
+    const sincMatch = async () => {
+        const response = await fetch("/api/v1/matches", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        setMatches([])
+        setMatches(data); // Actualiza el estado con los nuevos jugadores
+    };
+    
+      const matchesList = matches.map((match) => {
         return (
             <tr key={match.nombre} className='fila'>
                 <td className='celda'>{match.name}</td>
@@ -76,7 +117,8 @@ export default function Dashboard() {
                 </Button>}
             </tr>
         );
-      })
+      });
+    
 
     return ( 
         <> 
@@ -101,7 +143,9 @@ export default function Dashboard() {
                         <th className='cabeza'>Spectate</th>
                     </tr>
                 </thead>
-                <tbody>{matchesList}</tbody>
+                <Table>
+                    {matchesList}
+                </Table>
                 </div>
             </div>
         </div> 
