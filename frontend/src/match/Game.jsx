@@ -91,7 +91,6 @@
                 .then(data => setMatchTiles(data))
                 .catch(error => console.error('Error fetching tiles:', error));
             }, 1000); // Cada 5 segundos
-                
             return () => clearInterval(interval);
         }, [jwt]);
 
@@ -188,6 +187,38 @@
     }
 };
 
+    const handleRotateTile = async (tile) => {
+        try {
+            const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
+
+            const response = await fetch(`/api/v1/matchTiles/${tile[0].id}/rotation`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify(newOrientation)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error updating tile rotation');
+                
+            }
+            console.log(response);
+
+        } catch (error) {
+            console.error('Error rotating tile:', error);
+        }
+    };
+
+    const getRotationStyle = (tile) => {
+        // Puedes usar la propiedad `orientation` de cada tile
+        return {
+            transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados
+        };
+    };
+
+
         return(
             <div className='gamePage-container'>
                 <h1 class="game-title game-name">Game: {match.name}</h1>
@@ -206,6 +237,7 @@
                 </div>
                 
                 {tilesAndImages.length > 0 &&
+                
                 <div key={tilesAndImages[0][0].id}
                     style={{
                         cursor: 'pointer',
@@ -218,14 +250,22 @@
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
-                        src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img>}
+                        src={tilesAndImages[0][1]} alt='' style={{
+                            width: '150px',
+                            ...getRotationStyle(tilesAndImages[0][0])} 
+                            }></img>
+                        }
+                        {myPlayer.id ===match.actualPlayer && 
+                        (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
+                            tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
+                        && <button onClick={() => handleRotateTile(tilesAndImages[0])}>Rotate Tile</button>}
                 </div>
                 }
                 <div className='game-container'>
                     <div className='grid1'>
                     {grid.map((tile, index) => (
                         <div key={index} onClick={() => handleGridClick(index)} className="grid-item"> 
-                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'400px'} : { width: '150px' }} /> : null}
+                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'400px'} : { width: '150px', ...getRotationStyle(tile[0][0])}} /> : null}
                         </div>
                     ))}
                     </div>
