@@ -11,6 +11,8 @@ import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
 import { useNavigate } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -22,7 +24,34 @@ export default function Dashboard() {
     const [visible, setVisible] = useState(false);
     const navigate = useNavigate();
     const [spectatorIds, setSpectatorIds] = useState([]);
+    const [matchList, setMatchList] = useState(null);
 
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    const stompClient = new Client({
+    webSocketFactory: () => socket,
+    debug: (str) => {
+        //console.log(str);
+    },
+    connectHeaders: {
+        Authorization: `Bearer ${jwt}`
+    },
+    onConnect: (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/get', (message) => {
+            console.log('Message received: ' + message.body);
+            window.location.reload(true);
+            //sincMatchesList();
+        });
+    },
+    onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    },
+    onWebSocketError: (error) => {
+        console.error('Error with websocket', error);
+    }
+    });
+    stompClient.activate();
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
@@ -47,8 +76,9 @@ export default function Dashboard() {
         navigate('/matches/'+match.id);
     }
 
-    const matchesList = 
-      matches.map((match) => {
+    
+    
+      const matchesList = matches.map((match) => {
         return (
             <tr key={match.nombre} className='fila'>
                 <td className='celda'>{match.name}</td>
@@ -76,7 +106,8 @@ export default function Dashboard() {
                 </Button>}
             </tr>
         );
-      })
+      });
+    
 
     return ( 
         <> 
