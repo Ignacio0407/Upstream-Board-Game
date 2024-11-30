@@ -99,5 +99,31 @@ public class MatchTileController {
         matchTileService.deleteMatchTile(id);
         return new ResponseEntity<>(new MessageResponse("MatchTile deleted!"), HttpStatus.OK);    
     }
+
+    @PatchMapping("/{id}/rotation")
+public ResponseEntity<MatchTile> updateMatchTileRotation(
+    @PathVariable("id") Integer id, 
+    @RequestBody Integer rotation) throws ResourceNotFoundException {
+
+    // Buscar el MatchTile por su ID
+    MatchTile matchTile = matchTileService.findById(id);
+    if (matchTile == null) {
+        throw new ResourceNotFoundException("MatchTile", "ID", id);
+    }
+
+    // Actualizar el campo "orientation" (rotation)
+    matchTile.setOrientation(rotation);
+
+    // Guardar el MatchTile actualizado
+    MatchTile updatedMatchTile = matchTileService.save(matchTile);
+
+    // Retornar el MatchTile actualizado
+    return ResponseEntity.ok(updatedMatchTile);
+}
+
     
 }
+
+
+
+
