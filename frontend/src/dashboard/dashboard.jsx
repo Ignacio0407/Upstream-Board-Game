@@ -6,7 +6,7 @@ import BotonLink from "../util/BotonLink";
 import useFetchState from '../util/useFetchState';
 import SearchBar from '../util/SearchBar';
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import { Button, Table } from 'reactstrap';
+import { Button } from 'reactstrap';
 import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
@@ -39,7 +39,8 @@ export default function Dashboard() {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/get', (message) => {
             console.log('Message received: ' + message.body);
-            sincMatch();
+            window.location.reload(true);
+            //sincMatchesList();
         });
     },
     onStompError: (frame) => {
@@ -75,19 +76,7 @@ export default function Dashboard() {
         navigate('/matches/'+match.id);
     }
 
-    const sincMatch = async () => {
-        const response = await fetch("/api/v1/matches", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
-        const data = await response.json();
-        setMatches([])
-        setMatches(data); // Actualiza el estado con los nuevos jugadores
-    };
+    
     
       const matchesList = matches.map((match) => {
         return (
@@ -143,9 +132,7 @@ export default function Dashboard() {
                         <th className='cabeza'>Spectate</th>
                     </tr>
                 </thead>
-                <Table>
-                    {matchesList}
-                </Table>
+                <tbody>{matchesList}</tbody>
                 </div>
             </div>
         </div> 
