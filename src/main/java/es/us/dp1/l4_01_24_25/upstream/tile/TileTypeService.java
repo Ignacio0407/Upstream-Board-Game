@@ -1,10 +1,12 @@
 package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 
+@Service
 public class TileTypeService {
     
     private final TileTypeRepository tileTypeRepository;
