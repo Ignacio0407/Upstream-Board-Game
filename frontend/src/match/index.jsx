@@ -33,24 +33,28 @@ export default function Match() {
 
 
     useEffect(() => {
-        if(id && match.estado === "EN_CURSO") {
+        if(id) {
 
         
         const interval = setInterval(() => {
-        fetch(`/api/v1/matches/${match.id}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwt}`
-        },
-    }).then(response => response.json())
-    .then(data => setMatch(data))
-}, 1000); // Cada 5 segundos
+            fetch("/api/v1/matches/"+ id, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            }).then(response => {response.json()
+                .then(data => {setMatch(data)
+                })
+        
+    })
+}, 500); // Cada 5 segundos
     return () => clearInterval(interval);
 
 }
 
-}, [match.estado,isReady]);
+}, [isReady]);
 
 
     useEffect(() => {

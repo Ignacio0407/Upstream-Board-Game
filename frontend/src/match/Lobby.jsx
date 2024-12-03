@@ -96,9 +96,10 @@ stompClient.activate();
         }
     }, [players, match.id, user.id, matches.state]);
  
-
     const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
+const fetchPlayers = async () => {
+        const response = await fetch("/api/v1/matches/"+match.id+"/players", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,

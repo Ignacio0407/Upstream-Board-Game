@@ -2,11 +2,14 @@ package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+@Component
 public class TileTypeDeserializer extends JsonDeserializer<TileType> {
 
     private TileTypeService tileTypeService;

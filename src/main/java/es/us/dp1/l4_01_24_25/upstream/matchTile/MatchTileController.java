@@ -42,6 +42,7 @@ public class MatchTileController {
                                                      @RequestBody Map<String, Integer> updates) throws ResourceNotFoundException {
         
         MatchTile matchTile = matchTileService.findById(id);
+        
         if (matchTile == null) {
             throw new ResourceNotFoundException("MatchTile", "ID", id);
         }
@@ -51,20 +52,27 @@ public class MatchTileController {
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
+        }
+    
+        boolean positionOccupied = matchTileService.findAll().stream()
+        .anyMatch(mT -> mT.getCoordinate() != null 
+                     && mT.getCoordinate().x() == updates.get("x") 
+                     && mT.getCoordinate().y() == updates.get("y"));
+
+    if (positionOccupied) {
+        throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
     }
     
-
         if(matchTile.getMatch().getRound() == 0 && updates.get("y") > 3){
             throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
+             
 
         // Actualizar solo los valores de x e y si están presentes en el RequestBody
         if (updates.containsKey("x") && updates.containsKey("y")) {
             Integer x = updates.get("x");
             Integer y = updates.get("y");
-            if (!matchTileService.validateTilePlacement(updates.get("round"), y)) {
-                return ResponseEntity.badRequest().build();
-            }
+                 
             matchTile.setCoordinate(new Coordinate(x, y));
         }
 
@@ -91,5 +99,31 @@ public class MatchTileController {
         matchTileService.deleteMatchTile(id);
         return new ResponseEntity<>(new MessageResponse("MatchTile deleted!"), HttpStatus.OK);    
     }
+
+    @PatchMapping("/{id}/rotation")
+public ResponseEntity<MatchTile> updateMatchTileRotation(
+    @PathVariable("id") Integer id, 
+    @RequestBody Integer rotation) throws ResourceNotFoundException {
+
+    // Buscar el MatchTile por su ID
+    MatchTile matchTile = matchTileService.findById(id);
+    if (matchTile == null) {
+        throw new ResourceNotFoundException("MatchTile", "ID", id);
+    }
+
+    // Actualizar el campo "orientation" (rotation)
+    matchTile.setOrientation(rotation);
+
+    // Guardar el MatchTile actualizado
+    MatchTile updatedMatchTile = matchTileService.save(matchTile);
+
+    // Retornar el MatchTile actualizado
+    return ResponseEntity.ok(updatedMatchTile);
+}
+
     
 }
+
+
+
+

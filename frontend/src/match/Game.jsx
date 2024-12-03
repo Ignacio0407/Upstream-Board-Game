@@ -34,7 +34,6 @@
         const [selectedTile, setSelectedTile] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
         const [myPlayer, setMyPlayer] = useState(null);
-        const [upMatch, setUpMatch] = useState(match);
 
         const getTileImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -141,7 +140,6 @@
                 .then(data => setMatchTiles(data))
                 .catch(error => console.error('Error fetching tiles:', error));
             }, 1000); // Cada 5 segundos
-                
             return () => clearInterval(interval);
         }, [jwt]);
 
@@ -154,60 +152,57 @@
                 <tr key = {p.id} className="table-row">
                     <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
                     <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.puntos}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.vivo? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
                 </tr>
             );
         })
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === upMatch.actualPlayer) {
+                if (myPlayer.id === match.actualPlayer) {
                     setSelectedTile(tile);
                 }
         }
 
-        // Actualiza la posición de la casilla en el grid
-        const updateTilePosition = (tile, x, y) => {
-            fetch(`/api/v1/matchTiles/${tile[0].id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-                body: JSON.stringify({ x, y})
-            })
-            .then(response => {
-                console.log(response.json())
-                if (!response.ok) throw new Error('Invalid tile placement');
-                return response.json();
-            })
-            .then(updatedTile => {
+        const updateTilePosition = async (tile, x, y) => {
+            try {
+                const response = await fetch(`/api/v1/matchTiles/${tile[0].id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: JSON.stringify({ x, y })
+                });
+        
+                if (!response.ok) {
+                    throw new Error('Invalid tile placement');
+                }
+        
+                const updatedTile = await response.json();
                 console.log(updatedTile);
+        
                 const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
                 setTilesAndImages(prevTiles =>
                     prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
                 );
-                
-            })
-            .catch(error => console.error('Error updating tile position:', error)
-                    );
+        
+                return updatedTile; 
+            } catch (error) {
+                console.error('Error updating tile position:', error);
+                throw error; 
+            }
         };
 
         // Actualiza el grid una vez está seleccionada la casilla
-        const handleGridClick = (index) => {
-            if (selectedTile) {
-                const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-                const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-            
-                // Calcular la coordenada x (columna) y y (fila) con filas invertidas
-                const x = index % gridWidth; // Coordenada x (columna)
-                const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-                try{
-                updateTilePosition(selectedTile, x, y); // Actualizar posición en el servidor
-                }catch(error){
-                    console.log("Error updating tile position:", error);
-                    return;
-                }
+        const handleGridClick = async (index) => {
+    if (selectedTile) {
+        const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+        const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+
+        // Calcular la coordenada x (columna) y y (fila) con filas invertidas
+        const x = index % gridWidth; // Coordenada x (columna)
+        const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
                 // Reiniciar la casilla seleccionada después de moverla
                 setSelectedTile(null);
@@ -216,17 +211,68 @@
                 console.log(players)
                 if(!nextPlayer){
                     nextPlayer = players[0];
+                  
+        try {
+            // Intentar actualizar la posición de la tile
+            await updateTilePosition(selectedTile, x, y);
+
+            // Reiniciar la casilla seleccionada después de moverla
+            setSelectedTile(null);
+
+            // Determinar el siguiente jugador
+            let nextPlayer = players[myPlayer.playerOrder + 1];
+            if (!nextPlayer) {
+                nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
+            }
+
+            // Actualizar el turno en el servidor
+            await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
                 }
-                fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${jwt}`
-                    }
-                }).then(response => response.json())
+            });
+
+        } catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+            // Detener ejecución si ocurre un error
+            return;
         }
-            
+    }
+};
+
+    const handleRotateTile = async (tile) => {
+        try {
+            const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
+
+            const response = await fetch(`/api/v1/matchTiles/${tile[0].id}/rotation`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify(newOrientation)
+            });
+
+            if (!response.ok) {
+                throw new Error('Error updating tile rotation');
+                
+            }
+            console.log(response);
+
+        } catch (error) {
+            console.error('Error rotating tile:', error);
+        }
+    };
+
+    const getRotationStyle = (tile) => {
+        // Puedes usar la propiedad `orientation` de cada tile
+        return {
+            transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados
         };
+    };
+
 
         return(
             <div className='gamePage-container'>
@@ -246,6 +292,7 @@
                 </div>
                 
                 {tilesAndImages.length > 0 &&
+                
                 <div key={tilesAndImages[0][0].id}
                     style={{
                         cursor: 'pointer',
@@ -254,18 +301,26 @@
                         right: '20px'
                     }}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === upMatch.actualPlayer && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
-                        src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img>}
+                        src={tilesAndImages[0][1]} alt='' style={{
+                            width: '150px',
+                            ...getRotationStyle(tilesAndImages[0][0])} 
+                            }></img>
+                        }
+                        {myPlayer.id ===match.actualPlayer && 
+                        (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
+                            tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
+                        && <button onClick={() => handleRotateTile(tilesAndImages[0])}>Rotate Tile</button>}
                 </div>
                 }
                 <div className='game-container'>
                     <div className='grid1'>
                     {grid.map((tile, index) => (
                         <div key={index} onClick={() => handleGridClick(index)} className="grid-item"> 
-                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'400px'} : { width: '150px' }} /> : null}
+                            {tile ? <img src={tile[1]} alt="Grid Tile" style={tile[1]===seaTile ? {width:'400px'} : { width: '150px', ...getRotationStyle(tile[0][0])}} /> : null}
                         </div>
                     ))}
                     </div>

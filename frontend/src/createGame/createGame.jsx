@@ -9,6 +9,9 @@ import useFetchState from '../util/useFetchState';
 import '../static/css/createGame/createGame.css'
 import '../static/css/admin/adminPage.css'
 
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
+
 export default function CreateGame() { 
     
     const [username, setUsername] = useState("");
@@ -30,6 +33,28 @@ export default function CreateGame() {
    const [match,setMatch] = useState(emptyMatch)    
    const navigate = useNavigate();
 
+   const socket = new SockJS('http://localhost:8080/ws-upstream');
+   const stompClient = new Client({
+    webSocketFactory: () => socket,
+    debug: (str) => {
+        //console.log(str);
+    },
+    connectHeaders: {
+        Authorization: `Bearer ${jwt}`
+    },
+    onConnect: (frame) => {
+        console.log('Connected: ' + frame);
+    },
+    onStompError: (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    },
+    onWebSocketError: (error) => {
+        console.error('Error with websocket', error);
+    }
+    });
+
+    stompClient.activate();
     useEffect(() => {
         if (jwt) {
             setUsername(jwt_decode(jwt).sub);
@@ -63,6 +88,14 @@ export default function CreateGame() {
           const matchCreada = JSON.parse(data);
           matchId = matchCreada.id;
           console.log(matchCreada);
+          try{
+          stompClient.publish({
+            destination: "/app/dash",
+            body: JSON.stringify({ action: "colorChanged", matchId: matchId }),
+          });
+        }catch(e){
+          console.log("error",e)
+        }
           navigate(`/matches/${matchId}`);
       })
       .catch(error => {
