@@ -9,13 +9,25 @@
     import rockTile from '../static/images/tiles/rockTile.png'
     import seaTile from '../static/images/tiles/seaTile.png'
     import waterTile from '../static/images/tiles/waterTile.png'
+    import amarillo1 from '../static/images/salmons/Amarillo_1.png';
+    import amarillo2 from '../static/images/salmons/Amarillo_2.png';
+    import blanco1 from '../static/images/salmons/Blanco_1.png';
+    import blanco2 from '../static/images/salmons/Blanco_2.png';
+    import morado1 from '../static/images/salmons/Morado_1.png';
+    import morado2 from '../static/images/salmons/Morado_2.png';
+    import rojo1 from '../static/images/salmons/Rojo_1.png';
+    import rojo2 from '../static/images/salmons/Rojo_2.png';
+    import verde1 from '../static/images/salmons/Verde_1.png';
+    import verde2 from '../static/images/salmons/Verde_2.png';
 
-    function Game({match}){
+
+    export default function Game({match}){
         const jwt = tokenService.getLocalAccessToken();
         const user = tokenService.getUser();
         const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
         const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
         const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
+        const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
         const [allDataLoaded, setAllDataLoaded] = useState(false);
         const [tilesAndImages, setTilesAndImages] = useState([]);
         const [gridTiles, setGridTiles] = useState([]);
@@ -23,7 +35,7 @@
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
         const [myPlayer, setMyPlayer] = useState(null);
 
-        const getImage = (tileP) => {
+        const getTileImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
             const realTile = tilesList[tileP.tile-1]
             switch (realTile.type) {
@@ -44,19 +56,56 @@
             }
         }
 
+        // AL CREAR LA PARTIDA, SE CREAN, PARA CADA JUGADOR, 4 INSTANCIAS DE SALMONMATCH CON COORDENADAS (0,i+1)
+        const getSalmonImage = (salmonTile) => {
+            if (!salmonTile) return null;  // Casilla vacia
+            const realTile = salmons[salmonTile.salmon.color-1]
+            switch (realTile.type) {
+                case 'AMARILLO':
+                    return amarillo2;
+                case 'BLANCO':
+                    return blanco2;
+                case 'MORADO':
+                    return morado2;
+                case 'ROJO':
+                    return rojo2;
+                case 'VERDE':
+                    return verde1;
+                default:
+                    return null;
+            }
+        }
+
+        const sincMatch = async () => {
+            const response = await fetch("/api/v1/matches/"+ match.id, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setUpMatch([])
+            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
+        };
+
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
+                console.log("salmons", salmons)
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
                 console.log("matchTiles", matchTiles)
                 setAllDataLoaded(true);
-                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getImage(t)])
-                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getImage(t)])
+                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
                 setTilesAndImages(matchTilesCopy)
                 setGridTiles(matchTilesCopy2)
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+                sincMatch();
+                console.log("salmons", salmons)
             }
         }, [tilesList, matchTiles]);
 
@@ -97,8 +146,6 @@
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
-
-
 
         const playerList = players.map((p) => {
             return (
@@ -157,6 +204,14 @@
         const x = index % gridWidth; // Coordenada x (columna)
         const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
+                // Reiniciar la casilla seleccionada después de moverla
+                setSelectedTile(null);
+                let nextPlayer = players[myPlayer.playerOrder+1];
+                console.log(nextPlayer)
+                console.log(players)
+                if(!nextPlayer){
+                    nextPlayer = players[0];
+                  
         try {
             // Intentar actualizar la posición de la tile
             await updateTilePosition(selectedTile, x, y);
@@ -277,5 +332,3 @@
         )
 
     }
-
-export default Game;

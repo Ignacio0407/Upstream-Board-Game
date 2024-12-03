@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
@@ -74,7 +76,7 @@ public class PlayerRestController {
 
     @DeleteMapping(value = "/ids/{ids}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Object> deleteSomeJugadorsById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
+	public ResponseEntity<Object> deleteSomeById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
 		List<Integer> idsJugadorsNoBorradas = new LinkedList<>();
         Integer numJugadorsEncontradas = 0;
         for (Integer id : ids) {
@@ -85,7 +87,7 @@ public class PlayerRestController {
             idsJugadorsNoBorradas.add(id);
         }
         if (numJugadorsEncontradas == ids.size()) {
-            playerService.deleteSomeJugadoresById(ids);
+            playerService.deleteSomeById(ids);
             return new ResponseEntity<>(new MessageResponse("Jugadors borradas"), HttpStatus.OK);
         }
         else {
@@ -97,7 +99,7 @@ public class PlayerRestController {
 
     @DeleteMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Object> deleteJugadorById(@PathVariable("id") Integer id) throws ErrorMessage {
+	public ResponseEntity<Object> deleteById(@PathVariable("id") Integer id) throws ErrorMessage {
 		RestPreconditions.checkNotNull(playerService.getJugadorById(id), "Jugador", "ID", id);
 		if (playerService.getJugadorById(id) != null) {
 			playerService.deleteJugadorById(id);
@@ -122,5 +124,9 @@ public class PlayerRestController {
         return new ResponseEntity<>(playerService.saveJugador(jugador), HttpStatus.OK);
     }
 
-    // Copy jugador
+    @GetMapping("/{id}/salmonMatch")
+    public ResponseEntity<List<SalmonMatch>> findSalmonMatchFromPlayer(Integer playerId) {  
+        return new ResponseEntity<>(playerService.getSalmonsByPlayerId(playerId), HttpStatus.OK);
+    }
+
 }
