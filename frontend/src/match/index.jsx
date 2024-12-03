@@ -4,7 +4,6 @@ import useFetchState from "../util/useFetchState";
 import getIdFromUrl from "../util/getIdFromUrl";
 import Lobby from "./Lobby"
 import Game from "./Game"
-import { useNavigate } from 'react-router-dom';
 export default function Match() { 
 
     const jwt = tokenService.getLocalAccessToken();

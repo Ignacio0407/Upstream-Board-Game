@@ -1,13 +1,16 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,6 +19,7 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +36,7 @@ public class Player extends BaseEntity implements Serializable{
     Color color;
     @Column(name="player_order")
     Integer playerOrder;
+    
     Boolean alive;
     Integer points;
 
@@ -40,7 +45,6 @@ public class Player extends BaseEntity implements Serializable{
     @ManyToOne
     @JoinColumn(name="user_player")
     User userPlayer;
-
     
     @JsonSerialize(using = MatchSerializer.class)
     @JsonDeserialize(using = MatchDeserializer.class)
@@ -48,16 +52,19 @@ public class Player extends BaseEntity implements Serializable{
     @JoinColumn(name="partida")
     Match match;
 
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SalmonMatch> salmonMatches;
+
     @Override
     public String toString() {
     return "Player{" +
-            "id=" + getId() + // Esto asume que la clase BaseEntity tiene un campo id con su getter.
+            "id=" + getId() +
             ", name='" + name + '\'' +
             ", color=" + color +
             ", playerOrder=" + playerOrder +
             ", alive=" + alive +
             ", points=" + points +
-            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") + // Evita acceder a objetos nulos.
+            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") +
             ", match=" + (match != null ? match.getId() : "null") +
             '}';
 }

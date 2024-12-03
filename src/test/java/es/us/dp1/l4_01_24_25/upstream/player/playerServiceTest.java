@@ -62,7 +62,7 @@ class playerServiceTest {
         when(jugadorRepository.findById(2)).thenReturn(Optional.of(jugador2));
 
         List<Integer> ids = Arrays.asList(1, 2);
-        List<Player> result = jugadorService.getSomeJugadoresById(ids);
+        List<Player> result = jugadorService.getSomeById(ids);
 
         assertEquals(2, result.size());
         assertEquals("Jugador1", result.get(0).getName());
@@ -75,7 +75,7 @@ class playerServiceTest {
 
         List<Integer> ids = Arrays.asList(1, 2);
         assertThrows(ResourceNotFoundException.class, () -> 
-            jugadorService.getSomeJugadoresById(ids));
+            jugadorService.getSomeById(ids));
     }
 
     @Test
@@ -148,7 +148,7 @@ class playerServiceTest {
         when(jugadorRepository.findById(2)).thenReturn(Optional.of(jugador2));
 
         List<Integer> ids = Arrays.asList(1, 2);
-        jugadorService.deleteSomeJugadoresById(ids);
+        jugadorService.deleteSomeById(ids);
 
         verify(jugadorRepository, times(2)).deleteById(any());
     }
@@ -159,7 +159,7 @@ class playerServiceTest {
 
         List<Integer> ids = Arrays.asList(1, 2);
         assertThrows(ResourceNotFoundException.class, () -> 
-            jugadorService.deleteSomeJugadoresById(ids));
+            jugadorService.deleteSomeById(ids));
     }
 
     @Test
@@ -317,7 +317,7 @@ class playerServiceTest {
     @Test
     void testGetSomeJugadoresById_EmptyList() {
         List<Integer> ids = Arrays.asList();
-        List<Player> result = jugadorService.getSomeJugadoresById(ids);
+        List<Player> result = jugadorService.getSomeById(ids);
         assertTrue(result.isEmpty());
     }
 

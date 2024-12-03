@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +15,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping
+@RequestMapping("api/v1/salmons")
 @Tag(name="Salmon", description="Salmon API")
 public class SalmonController {
     SalmonService salmonService;
@@ -31,7 +32,7 @@ public class SalmonController {
     }
 
     @GetMapping("/{id}")
-    public Salmon findById(int id) {
+    public Salmon findById(@PathVariable("id") int id) {
         Optional<Salmon> s = salmonService.findById(id);
         if(!s.isPresent()) {
             throw new ResourceNotFoundException("Salmon","id",id);
