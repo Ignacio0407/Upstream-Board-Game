@@ -76,20 +76,6 @@
             }
         }
 
-        const sincMatch = async () => {
-            const response = await fetch("/api/v1/matches/"+ match.id, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
-            setUpMatch([])
-            setUpMatch(data); // Actualiza el estado con los nuevos jugadores
-        };
-
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
                 console.log("salmons", salmons)
@@ -104,7 +90,6 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-                sincMatch();
                 console.log("salmons", salmons)
             }
         }, [tilesList, matchTiles]);
@@ -121,7 +106,6 @@
                 const image = tile[1]; // Obtener la imagen asociada al tile
                 newGrid[index] = [tile, image]; // Asignar la tile con su imagen al grid
             });
-        
             // Actualizar el estado del grid
             setGrid(newGrid);
             console.log(grid)
@@ -196,7 +180,7 @@
 
         // Actualiza el grid una vez está seleccionada la casilla
         const handleGridClick = async (index) => {
-    if (selectedTile) {
+        if (selectedTile) {
         const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
         const gridHeight = 6; // Altura de la cuadrícula (número de filas)
 
@@ -239,8 +223,8 @@
             // Detener ejecución si ocurre un error
             return;
         }
-    }
-};
+    }}
+    };
 
     const handleRotateTile = async (tile) => {
         try {
