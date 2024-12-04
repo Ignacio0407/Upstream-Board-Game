@@ -24,9 +24,5 @@ public class Salmon extends BaseEntity{
     @Enumerated(EnumType.STRING)
     Color color;
     String image;
-
-    @OneToOne(mappedBy = "salmon", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "salmonMatch_id")
-    SalmonMatch salmonMatch;
     
 }

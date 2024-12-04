@@ -29,7 +29,6 @@ import lombok.Setter;
 public class SalmonMatch extends BaseEntity{
 
     @ManyToOne
-    @JoinColumn(name = "player_id")
     @JsonSerialize(using = PlayerSerializer.class)
 	@JsonDeserialize(using = PlayerDeserializer.class)
     Player player;
@@ -40,8 +39,9 @@ public class SalmonMatch extends BaseEntity{
     Coordinate coordinate;
     
     @NotNull
-    @OneToOne
-    @JoinColumn(name = "salmon_id")
+    @ManyToOne
+    @JsonSerialize(using = SalmonSerializer.class)
+	@JsonDeserialize(using = SalmonDeserializer.class)
     Salmon salmon;
 
     @ManyToOne

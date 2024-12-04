@@ -25,13 +25,6 @@ export default function Lobby({match}){
     const [loading, setLoading] = useState(false);
     const [ordenPartida, setOrdenPartida] = useState(0);
     const spectatorIds = useLocation().state?.spectatorIds||[];
-    const salmonIdsColor = {
-        'AMARILLO': 1,
-        'BLANCO': 3,
-        'ROJO': 5,    
-        'MORADO': 7,   
-        'VERDE': 9   
-    };
     
     const socket = new SockJS('http://localhost:8080/ws-upstream');
     const stompClient = new Client({
@@ -81,7 +74,6 @@ stompClient.activate();
 
     useEffect(() => {
         const playerUser = players.find(player => player.userPlayer.id === user.id);
-        sincMatch();
         setOrdenPartida(0);
         setUserPlayer(playerUser);
         const colorsUsed = players.map(player => ColorToRgb(player.color));
@@ -96,9 +88,7 @@ stompClient.activate();
         }
     }, [players, match.id, user.id, matches.state]);
  
-    const fetchPlayers = async () => {
-        const response = await fetch(`/api/v1/players`, {
-const fetchPlayers = async () => {
+        const fetchPlayers = async () => {
         const response = await fetch("/api/v1/matches/"+match.id+"/players", {
             method: "GET",
             headers: {
@@ -110,21 +100,6 @@ const fetchPlayers = async () => {
         const data = await response.json();
         setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
-    };
-
-
-    const sincMatch = async () => {
-        const response = await fetch("/api/v1/matches/"+ match.id, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
-        const data = await response.json();
-        setMatches([])
-        setMatches(data); // Actualiza el estado con los nuevos jugadores
     };
 
 const startGame = async () => {
@@ -181,7 +156,6 @@ const startGame = async () => {
         )
     );
 
-
     try {
         await Promise.all(requests);
         stompClient.publish({
@@ -197,7 +171,6 @@ const startGame = async () => {
     window.location.reload(true);
 };
     
-
     function endGame(){
         if(spectatorIds.find(p => p === user.id)){
             navigate("/dashboard");
@@ -248,7 +221,6 @@ const startGame = async () => {
         )
     })
 
-    
     async function handleColorChange(color) {
         const order = players.length;
         const emptyPlayer = {
@@ -278,65 +250,28 @@ const startGame = async () => {
                     body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
                 });
                 setShowColorPicker(false);
-                
-                const player = await response.json()
-                const salmonId = salmonIdsColor[player.color.toUpperCase()];
- /*               const salmon = await fetch(`/api/v1/salmons/${salmonId}`, {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                }).then(response => response.json()); */
-
-                const salmonMatches = [
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: null, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: null, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: null, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: null, salmon: salmonId, match: match.id },
-                ];
-                /* 
-                const salmonMatches = [
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: { x: 0, y: 1 }, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: { x: 1, y: 0 }, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: { x: 1, y: 2 }, salmon: salmonId, match: match.id },
-                    { player: player.id, color: color, salmonsNumber: 2, spawningNumber: 0, coordinate: { x: 2, y: 1 }, salmon: salmonId, match: match.id },
-                ];
-                */
-                
-                await Promise.all(
-                    salmonMatches.map(async (salmonMatch) => {
-                        await fetch('/api/v1/salmonMatches', {
-                            method: 'POST',
-                            headers: {
-                                Authorization: `Bearer ${jwt}`,
-                                Accept: 'application/json',
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify(salmonMatch),
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Error al crear el salmonMatch: ${response.statusText}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => console.log('Salmon match created:', data))
-                        .catch(error => console.error('Error creating salmon match:', error));
-                    })
-                );
-
+                const createdPlayer = await response.json();
+                const req = 
+                    fetch(`/api/v1/salmonMatches/player/${createdPlayer.id}`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        }});
+                try {
+                    await Promise.all(req);
+                    console.log("Todos los SalmonMatch han sido creados.");
+                } catch (error) {
+                    console.error("Error al crear algunos SalmonMatch:", error);
+                }
             } else {
                 console.error('Error al crear el jugador:', response.statusText);
             }
         } catch (error) {
             console.error('Error al crear el jugador:', error);
         }
-
-
     }
-    
     
     return(
         <div className='lobbyContainer'>

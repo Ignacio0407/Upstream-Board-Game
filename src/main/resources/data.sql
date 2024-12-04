@@ -77,12 +77,7 @@ INSERT INTO tile (id, image, tile_type) VALUES
 
 INSERT INTO salmon (id, color, image) VALUES
 (1, 'AMARILLO', 'src/main/resources/images/Amarillo_2.png'),
-(2, 'AMARILLO', 'src/main/resources/images/Amarillo_1.png'),
-(3, 'BLANCO', 'src/main/resources/images/Blanco_2.png'),
-(4, 'BLANCO', 'rc/main/resources/images/Blanco_1.png'),
-(5, 'ROJO', 'src/main/resources/images/Rojo_2.png'),
-(6, 'ROJO', 'src/main/resources/images/Rojo_1.png'),
-(7, 'MORADO', 'src/main/resources/images/Morado_2.png'),
-(8, 'MORADO', 'src/main/resources/images/Morado_1.png'),
-(9, 'VERDE', 'src/main/resources/images/Verde_2.png'),
-(10, 'VERDE', 'src/main/resources/images/Verde_1.png');
+(2, 'BLANCO', 'src/main/resources/images/Blanco_2.png'),
+(3, 'ROJO', 'src/main/resources/images/Rojo_2.png'),
+(4, 'MORADO', 'src/main/resources/images/Morado_2.png'),
+(5, 'VERDE', 'src/main/resources/images/Verde_2.png');

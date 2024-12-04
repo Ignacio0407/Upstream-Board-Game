@@ -52,9 +52,6 @@ public class Player extends BaseEntity implements Serializable{
     @JoinColumn(name="partida")
     Match match;
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SalmonMatch> salmonMatches;
-
     @Override
     public String toString() {
     return "Player{" +
