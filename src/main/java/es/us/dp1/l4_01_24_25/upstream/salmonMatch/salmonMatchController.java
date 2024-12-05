@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
-import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -60,8 +59,7 @@ public class SalmonMatchController {
 
     @PostMapping("/player/{playerId}")
     public void create(@PathVariable("playerId") Integer playerId) {
-        Integer i = 0;
-        while(i < 4) {
+        for (int i=0; i < 4; i++) {
             Player p = playerService.getJugadorById(playerId);
             Salmon s = salmonService.findAll().stream().filter(sal -> sal.getColor().equals(p.getColor())).toList().get(0);
             Match m = p.getMatch();
@@ -74,7 +72,6 @@ public class SalmonMatchController {
             r.setSalmon(s);
             r.setMatch(m);
             salmonMatchService.savePartidaSalmon(r);
-            i++;
         }
     }
 
