@@ -30,10 +30,15 @@
         const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
         const [allDataLoaded, setAllDataLoaded] = useState(false);
         const [tilesAndImages, setTilesAndImages] = useState([]);
+        const [salmonAndImages, setSalmonAndImages] = useState([]);
         const [gridTiles, setGridTiles] = useState([]);
+        const [gridSalmons, setGridSalmons] = useState([]);
         const [selectedTile, setSelectedTile] = useState(null);
+        const [selectedSalmon, setSelectedSalmon] = useState(null);
         const [grid, setGrid] = useState(Array(18).fill(null).reverse());
+        const [gridS, setGridS] = useState(Array(4).fill(null));
         const [myPlayer, setMyPlayer] = useState(null);
+        const [currentPhase, setCurrentPhase] = useState(match.phase);
 
         const getTileImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -59,50 +64,55 @@
         // AL CREAR LA PARTIDA, SE CREAN, PARA CADA JUGADOR, 4 INSTANCIAS DE SALMONMATCH CON COORDENADAS (0,i+1)
         const getSalmonImage = (salmonTile) => {
             if (!salmonTile) return null;  // Casilla vacia
-            const realTile = salmons[salmonTile.salmon.color-1]
-            switch (realTile.type) {
+            const color = players.filter(p => p.id === salmonTile.player)[0].color;
+            const salmonN = salmonTile.salmonsNumber;
+            switch(color){
                 case 'AMARILLO':
-                    return amarillo2;
+                    return salmonN === 1? amarillo1 : amarillo2;
                 case 'BLANCO':
-                    return blanco2;
+                    return salmonN === 1? blanco1 : blanco2;
                 case 'MORADO':
-                    return morado2;
+                    return salmonN === 1? morado1 : morado2;
                 case 'ROJO':
-                    return rojo2;
+                    return salmonN === 1? rojo1 : rojo2;
                 case 'VERDE':
-                    return verde1;
+                    return salmonN === 1? verde1 : verde2;
                 default:
                     return null;
             }
         }
 
         useEffect(() => {
-            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
+            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
                 console.log("salmons", salmons)
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
                 console.log("matchTiles", matchTiles)
                 setAllDataLoaded(true);
-                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
-                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
-                setTilesAndImages(matchTilesCopy)
-                setGridTiles(matchTilesCopy2)
+                const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+                const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+                const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+                const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+                setTilesAndImages(matchTilesNoCoord)
+                setGridTiles(matchTilesWCoord)
+                setSalmonAndImages(salmonMatchesNoCoord)
+                setGridSalmons(salmonMatchesWCoord)
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-                console.log("salmons", salmons)
+                console.log("salmonsWI", salmonMatchesNoCoord)
             }
         }, [tilesList, matchTiles]);
 
         useEffect(() => {
             // Construir el nuevo estado del grid basado en gridTiles
-            const newGrid = Array(18).fill(null); // Crea una cuadrícula vacía de 18 espacios (ajustar si es necesario)
-            const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-            const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+            const newGrid = Array(18).fill(null); // Crea una cuadrícula vacía de 18 espacios
+            const gridWidth = 3; // Ancho de la cuadrícula (número columnas)
+            const gridHeight = 6; // Altura de la cuadrícula (número filas)
             // Asignar las tiles con coordenadas al grid
             gridTiles.forEach((tile) => {
                 // Convertir las coordenadas (x, y) en un índice del grid
-                const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x; // Suponiendo que el grid tiene 3 columnas (ajustar según sea necesario)
+                const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x;
                 const image = tile[1]; // Obtener la imagen asociada al tile
                 newGrid[index] = [tile, image]; // Asignar la tile con su imagen al grid
             });
@@ -110,6 +120,17 @@
             setGrid(newGrid);
             console.log(grid)
         }, [gridTiles]);
+
+        useEffect(() => {
+            const newGridS = Array(4).fill(null).map(() => []);
+            players.forEach((p, index) => {
+                const pSalmons = salmons.filter(s => s.player === p.id);
+                if(pSalmons.length > 0) {
+                    for (let i = 0; i < 4; i++) {
+                    newGridS[i].push([pSalmons[0], getSalmonImage(pSalmons[0])]); }
+                }})
+            setGridS(newGridS);
+        }, [gridSalmons])
 
         useEffect(() => {
             const interval = setInterval(() => {
@@ -146,6 +167,13 @@
                 if (myPlayer.id === match.actualPlayer) {
                     setSelectedTile(tile);
                 }
+        }
+
+        const handleSalmonClick = (salmon) => {
+            if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon.player) {
+                setSelectedSalmon(salmon);
+                console.log("selectedSalmon",selectedSalmon)
+            }
         }
 
         const updateTilePosition = async (tile, x, y) => {
@@ -194,7 +222,7 @@
                 console.log(nextPlayer)
                 console.log(players)
                 if(!nextPlayer){
-                    nextPlayer = players[0];
+                    nextPlayer = players[0];}
                   
         try {
             // Intentar actualizar la posición de la tile
@@ -223,7 +251,8 @@
             // Detener ejecución si ocurre un error
             return;
         }
-    }}
+    }
+    
     };
 
     const handleRotateTile = async (tile) => {
@@ -278,12 +307,7 @@
                 {tilesAndImages.length > 0 &&
                 
                 <div key={tilesAndImages[0][0].id}
-                    style={{
-                        cursor: 'pointer',
-                        position: 'absolute',
-                        bottom: '-900px',
-                        right: '20px'
-                    }}
+                    style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
                         {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
@@ -294,7 +318,7 @@
                             ...getRotationStyle(tilesAndImages[0][0])} 
                             }></img>
                         }
-                        {myPlayer.id ===match.actualPlayer && 
+                        {myPlayer.id === match.actualPlayer && 
                         (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
                             tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
                         && <button onClick={() => handleRotateTile(tilesAndImages[0])}>Rotate Tile</button>}
@@ -309,7 +333,17 @@
                     ))}
                     </div>
                     <div className='grid2'>
-                        
+                    {gridS.map((salmon, index) => (
+                        <div key={index} className="grid-item2" onClick={() => handleSalmonClick(salmon)}>
+                            {salmon.map((salmon, i) => (
+                                <img
+                                key = {i}
+                                src = {salmon[1]}
+                                alt=""
+                                />
+                            ))}
+                        </div>
+                    ))}
                     </div>
                 </div>
             </div>
