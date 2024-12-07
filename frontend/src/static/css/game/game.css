@@ -79,6 +79,11 @@
     border: solid #2a554f;
   }
 
+.grid-item:nth-child(3n +2){
+  transform: translateY(5px)
+
+}
+
 .grid-item:nth-child(3n + 1) {
   transform: translateY(20px);
 }
