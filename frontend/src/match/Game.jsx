@@ -1,146 +1,146 @@
-    import React, { useState, useEffect } from 'react';
-    import tokenService from '../services/token.service'
-    import useFetchState from "../util/useFetchState";
-    import '../static/css/game/game.css'
-    import bearTile from '../static/images/tiles/bearTile.png'
-    import eagleTile from '../static/images/tiles/eagleTile.png'
-    import heronTile from '../static/images/tiles/heronTile.png'
-    import jumpTile from '../static/images/tiles/jumpTile.png'
-    import rockTile from '../static/images/tiles/rockTile.png'
-    import seaTile from '../static/images/tiles/seaTile.png'
-    import waterTile from '../static/images/tiles/waterTile.png'
-    import amarillo1 from '../static/images/salmons/Amarillo_1.png';
-    import amarillo2 from '../static/images/salmons/Amarillo_2.png';
-    import blanco1 from '../static/images/salmons/Blanco_1.png';
-    import blanco2 from '../static/images/salmons/Blanco_2.png';
-    import morado1 from '../static/images/salmons/Morado_1.png';
-    import morado2 from '../static/images/salmons/Morado_2.png';
-    import rojo1 from '../static/images/salmons/Rojo_1.png';
-    import rojo2 from '../static/images/salmons/Rojo_2.png';
-    import verde1 from '../static/images/salmons/Verde_1.png';
-    import verde2 from '../static/images/salmons/Verde_2.png';
+import React, { useState, useEffect } from 'react';
+import tokenService from '../services/token.service'
+import useFetchState from "../util/useFetchState";
+import '../static/css/game/game.css'
+import bearTile from '../static/images/tiles/bearTile.png'
+import eagleTile from '../static/images/tiles/eagleTile.png'
+import heronTile from '../static/images/tiles/heronTile.png'
+import jumpTile from '../static/images/tiles/jumpTile.png'
+import rockTile from '../static/images/tiles/rockTile.png'
+import seaTile from '../static/images/tiles/seaTile.png'
+import waterTile from '../static/images/tiles/waterTile.png'
+import amarillo1 from '../static/images/salmons/Amarillo_1.png';
+import amarillo2 from '../static/images/salmons/Amarillo_2.png';
+import blanco1 from '../static/images/salmons/Blanco_1.png';
+import blanco2 from '../static/images/salmons/Blanco_2.png';
+import morado1 from '../static/images/salmons/Morado_1.png';
+import morado2 from '../static/images/salmons/Morado_2.png';
+import rojo1 from '../static/images/salmons/Rojo_1.png';
+import rojo2 from '../static/images/salmons/Rojo_2.png';
+import verde1 from '../static/images/salmons/Verde_1.png';
+import verde2 from '../static/images/salmons/Verde_2.png';
 
 
-    export default function Game({match}){
-        const jwt = tokenService.getLocalAccessToken();
-        const user = tokenService.getUser();
-        const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
-        const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
-        const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
-        const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
-        const [allDataLoaded, setAllDataLoaded] = useState(false);
-        const [tilesAndImages, setTilesAndImages] = useState([]);
-        const [gridTiles, setGridTiles] = useState([]);
-        const [selectedTile, setSelectedTile] = useState(null);
-        const [grid, setGrid] = useState(Array(18).fill(null).reverse());
-        const [myPlayer, setMyPlayer] = useState(null);
+export default function Game({match}){
+    const jwt = tokenService.getLocalAccessToken();
+    const user = tokenService.getUser();
+    const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
+    const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
+    const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
+    const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
+    const [allDataLoaded, setAllDataLoaded] = useState(false);
+    const [tilesAndImages, setTilesAndImages] = useState([]);
+    const [gridTiles, setGridTiles] = useState([]);
+    const [selectedTile, setSelectedTile] = useState(null);
+    const [grid, setGrid] = useState(Array(18).fill(null).reverse());
+    const [myPlayer, setMyPlayer] = useState(null);
 
-        const getTileImage = (tileP) => {
-            if (!tileP) return null;  // Casilla vacia
-            const realTile = tilesList[tileP.tile-1]
-            switch (realTile.type) {
-                case 'OSO':
-                    return bearTile;
-                case 'AGUILA':
-                    return eagleTile;
-                case 'GARZA':
-                    return heronTile;
-                case 'SALTO':
-                    return jumpTile;
-                case 'PIEDRA':
-                    return rockTile;
-                case 'AGUA':
-                    return waterTile;
-                default:
-                    return null;
-            }
+    const getTileImage = (tileP) => {
+        if (!tileP) return null;  // Casilla vacia
+        const realTile = tilesList[tileP.tile-1]
+        switch (realTile.type) {
+            case 'OSO':
+                return bearTile;
+            case 'AGUILA':
+                return eagleTile;
+            case 'GARZA':
+                return heronTile;
+            case 'SALTO':
+                return jumpTile;
+            case 'PIEDRA':
+                return rockTile;
+            case 'AGUA':
+                return waterTile;
+            default:
+                return null;
         }
+    }
 
-        // AL CREAR LA PARTIDA, SE CREAN, PARA CADA JUGADOR, 4 INSTANCIAS DE SALMONMATCH CON COORDENADAS (0,i+1)
-        const getSalmonImage = (salmonTile) => {
-            if (!salmonTile) return null;  // Casilla vacia
-            const realTile = salmons[salmonTile.salmon.color-1]
-            switch (realTile.type) {
-                case 'AMARILLO':
-                    return amarillo2;
-                case 'BLANCO':
-                    return blanco2;
-                case 'MORADO':
-                    return morado2;
-                case 'ROJO':
-                    return rojo2;
-                case 'VERDE':
-                    return verde1;
-                default:
-                    return null;
-            }
+    // AL CREAR LA PARTIDA, SE CREAN, PARA CADA JUGADOR, 4 INSTANCIAS DE SALMONMATCH CON COORDENADAS (0,i+1)
+    const getSalmonImage = (salmonTile) => {
+        if (!salmonTile) return null;  // Casilla vacia
+        const realTile = salmons[salmonTile.salmon.color-1]
+        switch (realTile.type) {
+            case 'AMARILLO':
+                return amarillo2;
+            case 'BLANCO':
+                return blanco2;
+            case 'MORADO':
+                return morado2;
+            case 'ROJO':
+                return rojo2;
+            case 'VERDE':
+                return verde1;
+            default:
+                return null;
         }
+    }
 
-        useEffect(() => {
-            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
-                console.log("salmons", salmons)
-                console.log("players", players)
-                console.log("tilesList ", tilesList)
-                console.log("matchTiles", matchTiles)
-                setAllDataLoaded(true);
-                const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
-                const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
-                setTilesAndImages(matchTilesCopy)
-                setGridTiles(matchTilesCopy2)
-                const orderedPlayers = [...players].sort(p => p.playerOrder)
-                setPlayers(orderedPlayers) // Siempre igual
-                setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-                console.log("salmons", salmons)
-            }
-        }, [tilesList, matchTiles]);
-
-        useEffect(() => {
-            // Construir el nuevo estado del grid basado en gridTiles
-            const newGrid = Array(18).fill(null); // Crea una cuadrícula vacía de 18 espacios (ajustar si es necesario)
-            const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-            const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-            // Asignar las tiles con coordenadas al grid
-            gridTiles.forEach((tile) => {
-                // Convertir las coordenadas (x, y) en un índice del grid
-                const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x; // Suponiendo que el grid tiene 3 columnas (ajustar según sea necesario)
-                const image = tile[1]; // Obtener la imagen asociada al tile
-                newGrid[index] = [tile, image]; // Asignar la tile con su imagen al grid
-            });
-            // Actualizar el estado del grid
-            setGrid(newGrid);
-            console.log(grid)
-        }, [gridTiles]);
-
-        useEffect(() => {
-            const interval = setInterval(() => {
-                fetch(`/api/v1/matchTiles/${match.id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${jwt}`
-                    },
-                })
-                .then(response => response.json())
-                .then(data => setMatchTiles(data))
-                .catch(error => console.error('Error fetching tiles:', error));
-            }, 1000); // Cada 5 segundos
-            return () => clearInterval(interval);
-        }, [jwt]);
-
-        if (!allDataLoaded) {
-            return <div style={{justifySelf:'center'}}>Loading data</div>;
+    useEffect(() => {
+        if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0) {
+            console.log("salmons", salmons)
+            console.log("players", players)
+            console.log("tilesList ", tilesList)
+            console.log("matchTiles", matchTiles)
+            setAllDataLoaded(true);
+            const matchTilesCopy = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+            const matchTilesCopy2 = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+            setTilesAndImages(matchTilesCopy)
+            setGridTiles(matchTilesCopy2)
+            const orderedPlayers = [...players].sort(p => p.playerOrder)
+            setPlayers(orderedPlayers) // Siempre igual
+            setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+            console.log("salmons", salmons)
         }
+    }, [tilesList, matchTiles]);
 
-        const playerList = players.map((p) => {
-            return (
-                <tr key = {p.id} className="table-row">
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
-                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
-                </tr>
-            );
-        })
+    useEffect(() => {
+        // Construir el nuevo estado del grid basado en gridTiles
+        const newGrid = Array(18).fill(null); // Crea una cuadrícula vacía de 18 espacios (ajustar si es necesario)
+        const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+        const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+        // Asignar las tiles con coordenadas al grid
+        gridTiles.forEach((tile) => {
+            // Convertir las coordenadas (x, y) en un índice del grid
+            const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x; // Suponiendo que el grid tiene 3 columnas (ajustar según sea necesario)
+            const image = tile[1]; // Obtener la imagen asociada al tile
+            newGrid[index] = [tile, image]; // Asignar la tile con su imagen al grid
+        });
+        // Actualizar el estado del grid
+        setGrid(newGrid);
+        console.log(grid)
+    }, [gridTiles]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetch(`/api/v1/matchTiles/${match.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+            })
+            .then(response => response.json())
+            .then(data => setMatchTiles(data))
+            .catch(error => console.error('Error fetching tiles:', error));
+        }, 1000); // Cada 5 segundos
+        return () => clearInterval(interval);
+    }, [jwt]);
+
+    if (!allDataLoaded) {
+        return <div style={{justifySelf:'center'}}>Loading data</div>;
+    }
+
+    const playerList = players.map((p) => {
+        return (
+            <tr key = {p.id} className="table-row">
+                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
+                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
+                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
+                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+            </tr>
+        );
+    })
 
         const handleTileClick = (tile) => {
                 if (myPlayer.id === match.actualPlayer) {
@@ -195,7 +195,7 @@
                 console.log(players)
                 if(!nextPlayer){
                     nextPlayer = players[0];
-                  
+                
         try {
             // Intentar actualizar la posición de la tile
             await updateTilePosition(selectedTile, x, y);
@@ -251,7 +251,6 @@
     };
 
     const getRotationStyle = (tile) => {
-        // Puedes usar la propiedad `orientation` de cada tile
         return {
             transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados
         };
