@@ -1,11 +1,13 @@
 package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +58,17 @@ public class SalmonMatchController {
     public ResponseEntity<SalmonMatch> create(@RequestBody @Valid SalmonMatch salmonMatch) {
         return new ResponseEntity<>(salmonMatchService.savePartidaSalmon(salmonMatch), HttpStatus.CREATED);
     }
+
+    @PatchMapping("/coordinate/{id}")
+    public ResponseEntity<SalmonMatch> updateCoordinate(
+    @PathVariable Integer id,
+    @RequestBody @Valid  Map<String,Integer> coordinate) {
+    SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
+    Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y")); 
+    salmonMatch.setCoordinate(newCoordinate);   
+    SalmonMatch updatedSalmonMatch = salmonMatchService.savePartidaSalmon(salmonMatch);
+    return new ResponseEntity<>(updatedSalmonMatch, HttpStatus.OK);
+}
 
     @PostMapping("/player/{playerId}")
     public void create(@PathVariable("playerId") Integer playerId) {
