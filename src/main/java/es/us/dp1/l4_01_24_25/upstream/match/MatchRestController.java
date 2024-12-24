@@ -207,4 +207,15 @@ public class MatchRestController {
     return new ResponseEntity<>(m, HttpStatus.CREATED);
 }
 
+    @PatchMapping("/{matchId}/changephase")
+    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match p = matchService.getById(matchId);
+        Phase f = p.getPhase();
+        if(f.equals(Phase.CASILLAS)) p.setPhase(Phase.MOVIENDO);
+        else p.setPhase(Phase.CASILLAS);
+        matchService.save(p);
+        return new ResponseEntity<>(p, HttpStatus.OK);
+    }
+
+
 }

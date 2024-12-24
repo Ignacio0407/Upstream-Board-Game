@@ -35,6 +35,7 @@ public class Player extends BaseEntity implements Serializable{
     
     Boolean alive;
     Integer points;
+    Integer energy;
 
     @JsonSerialize(using = UserSerializer.class)
     @JsonDeserialize(using = UserDeserializer.class)
