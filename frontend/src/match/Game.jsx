@@ -87,7 +87,8 @@
                 console.log("salmons", salmons)
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
-                console.log("matchTiles", matchTiles)
+                console.log("matchTiles", gridTiles)
+                console.log("match", match)
                 setAllDataLoaded(true);
                 const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
                 const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
@@ -97,6 +98,7 @@
                 setGridTiles(matchTilesWCoord)
                 setSalmonAndImages(salmonMatchesNoCoord)
                 setGridSalmons(salmonMatchesWCoord)
+                console.log("gridTiles", gridTiles.length)
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
@@ -221,6 +223,7 @@
 
         const updateTilePosition = async (tile, x, y) => {
             try {
+                console.log("dato", tile, x, y)
                 const response = await fetch(`/api/v1/matchTiles/${tile[0].id}`, {
                     method: 'PATCH',
                     headers: {
@@ -229,7 +232,7 @@
                     },
                     body: JSON.stringify({ x, y })
                 });
-        
+                
                 if (!response.ok) {
                     console.log(x,y)
                     throw new Error('Invalid tile placement');
@@ -237,7 +240,7 @@
                 }
         
                 const updatedTile = await response.json();
-                console.log(updatedTile);
+                console.log("updatedTile",updatedTile);
         
                 const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
                 setTilesAndImages(prevTiles =>
@@ -261,6 +264,7 @@
         const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
                 // Reiniciar la casilla seleccionada después de moverla
+                /*
                 setSelectedTile(null);
                 setSelectedSalmon(null)
                 let nextPlayer = players[myPlayer.playerOrder+1];
@@ -268,20 +272,14 @@
                 console.log(players)
                 if(!nextPlayer){
                     nextPlayer = players[0];}
-                  
+                  */
         try {
             
-            console.log(selectedSalmon)
+            console.log("salmon seleccionada",selectedSalmon)
             if(selectedSalmon === null){
                 await updateTilePosition(selectedTile, x, y);
                 setSelectedTile(null);
-                }else{
-
-                await updateSalmonPosition(selectedSalmon, x, y);
-                setSelectedSalmon(null);
-                   
-                }
-            let nextPlayer = players[myPlayer.playerOrder + 1];
+                let nextPlayer = players[myPlayer.playerOrder + 1];
             if (!nextPlayer) {
                 nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
             }
@@ -294,7 +292,18 @@
                     'Authorization': `Bearer ${jwt}`
                 }
             });
-
+            }else{
+                const foundTile = gridTiles.find(
+                    t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
+                  );
+                console.log("AAAAAAA", foundTile)
+                if(foundTile){
+                await updateSalmonPosition(selectedSalmon, x, y);
+                setSelectedSalmon(null);
+                   
+                }
+            
+            }
         } catch (error) {
             console.error("Error updating tile position or advancing turn:", error);
             // Detener ejecución si ocurre un error

@@ -88,14 +88,8 @@ stompClient.activate();
         }
     }, [players, match.id, user.id, matches.state]);
  
-<<<<<<< HEAD
-
-const fetchPlayers = async () => {
-        const response = await fetch(`/api/v1/players`, {
-=======
         const fetchPlayers = async () => {
         const response = await fetch("/api/v1/matches/"+match.id+"/players", {
->>>>>>> main
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -302,7 +296,7 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && <Button color='success' onClick={startGame}>
+        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=2 &&<Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>}
         {loading && <div>Loading tiles...</div>}

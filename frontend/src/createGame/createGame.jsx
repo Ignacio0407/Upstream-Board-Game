@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
 import '../static/css/createGame/createGame.css'
 import '../static/css/admin/adminPage.css'
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 export default function CreateGame() { 
     const [name, setName] = useState("");
@@ -18,15 +20,6 @@ export default function CreateGame() {
      
    const navigate = useNavigate();
 
-<<<<<<< HEAD
-    useEffect(() => {
-        if (jwt) {
-            setUsername(jwt_decode(jwt).sub);
-        }
-        if (finalUser) {
-        }
-    }, [jwt, finalUser])
-=======
    const socket = new SockJS('http://localhost:8080/ws-upstream');
    const stompClient = new Client({
     webSocketFactory: () => socket,
@@ -49,7 +42,6 @@ export default function CreateGame() {
     });
 
     stompClient.activate();
->>>>>>> main
 
     function handleSubmit(event) {
       event.preventDefault();
@@ -71,13 +63,6 @@ export default function CreateGame() {
           }
           return response.json();
       })
-<<<<<<< HEAD
-      .then(data => {
-          const matchCreada = JSON.parse(data);
-          matchId = matchCreada.id;
-          console.log(matchCreada);
-          navigate(`/matches/${matchId}`);
-=======
       .then(matchCreada => {
           console.log("Match creado:", matchCreada);
 
@@ -91,7 +76,6 @@ export default function CreateGame() {
           }
 
           navigate(`/matches/${matchCreada.id}`);
->>>>>>> main
       })
       .catch(error => {
           console.error("Error al crear la partida:", error);
