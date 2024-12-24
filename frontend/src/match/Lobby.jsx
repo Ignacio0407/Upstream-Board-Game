@@ -231,6 +231,7 @@ const startGame = async () => {
             points: 0,
             userPlayer: finalUser.id,
             match: match.id,
+            energy: 5
         };
 
         try {

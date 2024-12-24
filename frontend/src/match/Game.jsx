@@ -38,7 +38,7 @@
         const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
         const [gridS, setGridS] = useState(Array(4).fill(null));
         const [myPlayer, setMyPlayer] = useState(null);
-        const [currentPhase, setCurrentPhase] = useState(match.phase);
+        const [currentPhase, setCurrentPhase] = useState(null);
 
         const getTileImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -100,7 +100,7 @@
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-                console.log("salmonsWI", salmonMatchesNoCoord)
+                setCurrentPhase(match.phase);
             }
         }, [tilesList, matchTiles]);
 
@@ -128,7 +128,7 @@
 
         useEffect(() => {
             const newGridS = Array(4).fill(null).map(() => []);
-            players.forEach((p, index) => {
+            players.forEach((p) => {
                 const pSalmons = salmons.filter(s => s.player === p.id);
                 if(pSalmons.length > 0) {
                     for (let i = 0; i < 4; i++) {
@@ -163,6 +163,33 @@
             return () => clearInterval(interval);
         }, [jwt]);
 
+        const changePhase = async () => {
+            if(gridTiles.length === 12 && currentPhase === 'CASILLAS') {
+                try {
+                    const response = await fetch(`/api/v1/matches/${match.id}/changephase`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${jwt}`
+                        }
+                    });
+
+                    if(response.ok) {
+                        console.log('Fase cambiada correctamente.');
+                    } else {
+                        console.error('Error al cambiar de fase.')
+                    }
+
+                } catch (error) {
+                    console.error('Error changing phase', error);
+                }
+            }
+        };
+
+        useEffect(() => {
+            changePhase();
+        }, [gridTiles])
+
         if (!allDataLoaded) {
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
@@ -179,14 +206,14 @@
         })
 
         const handleTileClick = (tile) => {
-                if (myPlayer.id === match.actualPlayer) {
+                if (myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS') {
                     setSelectedTile(tile);
                     setSelectedSalmon(null)
                 }
         }
 
         const handleSalmonClick = (salmon) => {
-            if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player) {
+            if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player && currentPhase === 'MOVIENDO') {
                 setSelectedSalmon(salmon);
                 console.log("selectedSalmon",selectedSalmon)
             }
@@ -358,7 +385,7 @@
                 <div key={tilesAndImages[0][0].id}
                     style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                     onClick={() => handleTileClick(tilesAndImages[0])}>
-                        {myPlayer.id === match.actualPlayer && <h2>Pick the tile!</h2>}
+                        {myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                         <h2>Next tile:</h2>
                         {<img 
                         onClick={() => handleTileClick(tilesAndImages[0])}
@@ -367,7 +394,7 @@
                             ...getRotationStyle(tilesAndImages[0][0])} 
                             }></img>
                         }
-                        {myPlayer.id === match.actualPlayer && 
+                        {myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS' && 
                         (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
                             tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
                         && <button onClick={() => handleRotateTile(tilesAndImages[0])}>Rotate Tile</button>}
