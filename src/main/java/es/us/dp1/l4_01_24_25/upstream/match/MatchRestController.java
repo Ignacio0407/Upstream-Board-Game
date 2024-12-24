@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.match;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
@@ -33,10 +37,12 @@ public class MatchRestController {
     
     private final MatchService matchService;
     private final PlayerService playerService;
+    private final UserService userService;
 
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService) {
+    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -178,5 +184,38 @@ public class MatchRestController {
         partida.setRound(partida.getRound()+1);
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
+
+    @PostMapping("/matchCreator/{userId}")
+    public ResponseEntity<Match> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
+    User u = userService.findUser(userId);
+    if (u == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    String name = requestBody.getOrDefault("name", "");
+    String password = requestBody.getOrDefault("password", "");
+    Match m = new Match();
+
+    m.setName(name);
+    m.setPassword(password);
+    m.setMatchCreator(u);
+    m.setState(State.ESPERANDO);
+    m.setPlayersNum(0);
+    m.setRound(0);
+    m.setPhase(Phase.CASILLAS);
+    m.setInitialPlayer(null);
+    m.setActualPlayer(null);
+    matchService.save(m);
+
+    return new ResponseEntity<>(m, HttpStatus.CREATED);
+}
+
+    @PatchMapping("/{matchId}/changephase")
+    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match p = matchService.getById(matchId);
+        Phase f = p.getPhase();
+        if(f.equals(Phase.CASILLAS)) p.setPhase(Phase.MOVIENDO);
+        else p.setPhase(Phase.CASILLAS);
+        matchService.save(p);
+        return new ResponseEntity<>(p, HttpStatus.OK);
+    }
+
 
 }
