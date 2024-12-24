@@ -25,4 +25,9 @@ public class SalmonService {
         return salmonRepository.findById(id);
     }
 
+    @Transactional()
+    public Salmon create(Salmon s){
+        return salmonRepository.save(s);
+    }
+
 }

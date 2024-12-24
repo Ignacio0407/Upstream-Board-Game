@@ -57,6 +57,7 @@ public class SecurityConfiguration {
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/local/ws-upstream/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).permitAll()
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/salmons")).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

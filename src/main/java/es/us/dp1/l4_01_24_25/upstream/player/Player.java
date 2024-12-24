@@ -20,9 +20,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "player") // -> Esto solo tiene la clase padre
 public class Player extends BaseEntity implements Serializable{
@@ -32,6 +32,7 @@ public class Player extends BaseEntity implements Serializable{
     Color color;
     @Column(name="player_order")
     Integer playerOrder;
+    
     Boolean alive;
     Integer points;
 
@@ -40,7 +41,6 @@ public class Player extends BaseEntity implements Serializable{
     @ManyToOne
     @JoinColumn(name="user_player")
     User userPlayer;
-
     
     @JsonSerialize(using = MatchSerializer.class)
     @JsonDeserialize(using = MatchDeserializer.class)
@@ -51,13 +51,13 @@ public class Player extends BaseEntity implements Serializable{
     @Override
     public String toString() {
     return "Player{" +
-            "id=" + getId() + // Esto asume que la clase BaseEntity tiene un campo id con su getter.
+            "id=" + getId() +
             ", name='" + name + '\'' +
             ", color=" + color +
             ", playerOrder=" + playerOrder +
             ", alive=" + alive +
             ", points=" + points +
-            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") + // Evita acceder a objetos nulos.
+            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") +
             ", match=" + (match != null ? match.getId() : "null") +
             '}';
 }

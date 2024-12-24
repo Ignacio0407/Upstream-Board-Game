@@ -75,5 +75,9 @@ INSERT INTO tile (id, image, tile_type) VALUES
 (7, 'src/main/resources/images/seaTile.png', 7),
 (8, 'src/main/resources/images/spawningTile.png', 8);
 
-
-
+INSERT INTO salmon (id, color, image) VALUES
+(1, 'AMARILLO', 'src/main/resources/images/Amarillo_2.png'),
+(2, 'BLANCO', 'src/main/resources/images/Blanco_2.png'),
+(3, 'ROJO', 'src/main/resources/images/Rojo_2.png'),
+(4, 'MORADO', 'src/main/resources/images/Morado_2.png'),
+(5, 'VERDE', 'src/main/resources/images/Verde_2.png');

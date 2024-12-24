@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 
 @Service
 public class PlayerService {
@@ -31,7 +32,7 @@ public class PlayerService {
 
     // COMPLETAR MANEJO ERRORES
     @Transactional(readOnly = true)
-    public List<Player> getSomeJugadoresById(List<Integer> ids) {
+    public List<Player> getSomeById(List<Integer> ids) {
         List<Player> Jugadores = new LinkedList<>();
         ids.stream().forEach(id -> Jugadores.add(getJugadorById(id)));
         //throw new ResourceNotFoundException("Jugadores no encontradas");
@@ -77,7 +78,7 @@ public class PlayerService {
     }
 
     @Transactional
-    public void deleteSomeJugadoresById(List<Integer> idsToDelete) {
+    public void deleteSomeById(List<Integer> idsToDelete) {
         idsToDelete.stream().forEach( id -> deleteJugadorById(id));
     }
 
@@ -126,26 +127,21 @@ public class PlayerService {
 	}
 
 
-
     @Transactional
 	public List<Player> saveJugadores(List<Player> Jugadores) throws DataAccessException {
-		List<Player> jugadoresGuardadas = new LinkedList<>();
         List<Player> jugadoresFallidas = new LinkedList<>();
         Jugadores.forEach(jugador -> {
             try {
-                Player saved = playerRepository.save(jugador);
-                jugadoresGuardadas.add(saved);
+                playerRepository.save(jugador);
             } catch (DataAccessException e) {
                 jugadoresFallidas.add(jugador);
             }
         });
-        if (jugadoresFallidas.isEmpty()) {
-            System.out.println("Jugadores guardadas correctamente");
-        }
-        else {
-            System.out.println("Algunas Jugadores no se han guardado, serán devueltas");
-        }
 		return jugadoresFallidas;
 	}
+
+    public List<SalmonMatch> getSalmonsByPlayerId(Integer playerId) { 
+        return playerRepository.findSalmonMatchesByPlayer(playerId);
+    }
 
 }

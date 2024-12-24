@@ -4,7 +4,7 @@ import tokenService from '../services/token.service';
 const jwt = tokenService.getLocalAccessToken();
 const baseUri = "api/v1/";
 
-export const fetchById = (id, extendedUri) => {
+export const fetchById = async (id, extendedUri) => {
   const uri = `${baseUri}${extendedUri}/${id}`;
   return axios.get(uri, {
     headers: {
@@ -15,7 +15,7 @@ export const fetchById = (id, extendedUri) => {
   });
 };
 
-export const fetchByName = (name, extendedUri) => {
+export const fetchByName = async (name, extendedUri) => {
   const uri = `${baseUri}${extendedUri}/name/${name}`;
   return axios.get(uri, {
     headers: {
@@ -26,7 +26,7 @@ export const fetchByName = (name, extendedUri) => {
   });
 };
 
-export const fetchByNames = (namesArray, extendedUri) => {
+export const fetchByNames = async (namesArray, extendedUri) => {
   const uri = `${baseUri}${extendedUri}/names/${namesArray.join(",")}`;
   return axios.get(uri, {
     headers: {

@@ -11,7 +11,7 @@ import { useLocation } from "react-router-dom";
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
-function Lobby({match}){
+export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
@@ -74,36 +74,28 @@ stompClient.activate();
 
     useEffect(() => {
         const playerUser = players.find(player => player.userPlayer.id === user.id);
-        sincMatch();
         setOrdenPartida(0);
         setUserPlayer(playerUser);
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(players.length);
         if(players.length > 0){
-            const jugInicial = players.filter(p => p.playerOrder === 0);
-            //console.log("jugInicial",jugInicial)            
+            const jugInicial = players.filter(p => p.playerOrder === 0);         
             setReData(d => ({...d, playersNum: players.length , initialPlayer: jugInicial[0].id, actualPlayer: jugInicial[0].id, state: "EN_CURSO", round: 0}))
         }
-       // console.log("reData",reData)
-        //console.log("match",match)
-        /*
-        if(matches.state === "EN_CURSO" && !loading){
-            window.location.reload(true);
-        }
-            */
         else if(matches.state === "FINALIZADA"){
             navigate("/dashboard");
-        }/*
-        else {
-            const intervalId = setInterval(fetchPlayers, 1000);
-            return () => clearInterval(intervalId);
-        }*/
+        }
     }, [players, match.id, user.id, matches.state]);
  
+<<<<<<< HEAD
 
 const fetchPlayers = async () => {
         const response = await fetch(`/api/v1/players`, {
+=======
+        const fetchPlayers = async () => {
+        const response = await fetch("/api/v1/matches/"+match.id+"/players", {
+>>>>>>> main
             method: "GET",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -115,21 +107,6 @@ const fetchPlayers = async () => {
         setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
-
-
-const sincMatch = async () => {
-    const response = await fetch("/api/v1/matches/"+ match.id, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${jwt}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-        },
-    });
-    const data = await response.json();
-    setMatches([])
-    setMatches(data); // Actualiza el estado con los nuevos jugadores
-};
 
 const startGame = async () => {
     setLoading(true);
@@ -162,6 +139,7 @@ const startGame = async () => {
     const shuffledTiles = allTiles.sort(() => Math.random() - 0.5);
 
     // Crear las solicitudes de inserción para cada tile en el orden aleatorio
+    // Aqui actualizo el match con los nuevos salmonMatches.
     const requests = shuffledTiles.map(matchTile =>
         fetch(`/api/v1/matches/${match.id}`, {
             method: "PUT",
@@ -184,7 +162,6 @@ const startGame = async () => {
         )
     );
 
-
     try {
         await Promise.all(requests);
         stompClient.publish({
@@ -200,7 +177,6 @@ const startGame = async () => {
     window.location.reload(true);
 };
     
-
     function endGame(){
         if(spectatorIds.find(p => p === user.id)){
             navigate("/dashboard");
@@ -251,7 +227,6 @@ const startGame = async () => {
         )
     })
 
-    
     async function handleColorChange(color) {
         const order = players.length;
         const emptyPlayer = {
@@ -281,6 +256,21 @@ const startGame = async () => {
                     body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
                 });
                 setShowColorPicker(false);
+                const createdPlayer = await response.json();
+                const req = 
+                    fetch(`/api/v1/salmonMatches/player/${createdPlayer.id}`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${jwt}`,
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        }});
+                try {
+                    await Promise.all(req);
+                    console.log("Todos los SalmonMatch han sido creados.");
+                } catch (error) {
+                    console.error("Error al crear algunos SalmonMatch:", error);
+                }
             } else {
                 console.error('Error al crear el jugador:', response.statusText);
             }
@@ -288,7 +278,6 @@ const startGame = async () => {
             console.error('Error al crear el jugador:', error);
         }
     }
-    
     
     return(
         <div className='lobbyContainer'>
@@ -325,5 +314,3 @@ const startGame = async () => {
         </div>
     )
 }
-
-export default Lobby
