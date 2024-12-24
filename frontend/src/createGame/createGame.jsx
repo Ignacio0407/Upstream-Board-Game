@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
 import '../static/css/createGame/createGame.css'
 import '../static/css/admin/adminPage.css'
-
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 
