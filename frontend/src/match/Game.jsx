@@ -84,11 +84,6 @@
 
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-                console.log("salmons", salmons)
-                console.log("players", players)
-                console.log("tilesList ", tilesList)
-                console.log("matchTiles", gridTiles)
-                console.log("match", match)
                 setAllDataLoaded(true);
                 const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
                 const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
@@ -98,7 +93,6 @@
                 setGridTiles(matchTilesWCoord)
                 setSalmonAndImages(salmonMatchesNoCoord)
                 setGridSalmons(salmonMatchesWCoord)
-                console.log("gridTiles", gridTiles.length)
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
@@ -129,11 +123,12 @@
         }, [gridTiles,gridSalmons]);
 
         useEffect(() => {
-            const newGridS = Array(4).fill(null).map(() => []);
+            const salmonsPerPlayer = 4;
+            const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
             players.forEach((p) => {
                 const pSalmons = salmons.filter(s => s.player === p.id);
                 if(pSalmons.length > 0) {
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < salmonsPerPlayer; i++) {
                     newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i])]); }
                 }})
             setGridS(newGridS);

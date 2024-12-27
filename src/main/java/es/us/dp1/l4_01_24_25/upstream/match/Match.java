@@ -17,6 +17,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -56,7 +57,7 @@ public class Match extends NamedEntity {
 	@JsonDeserialize(using = PlayerDeserializer.class)
 	Player actualPlayer;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="match_creator")
 	@JsonSerialize(using = UserSerializer.class)
 	@JsonDeserialize(using = UserDeserializer.class)
