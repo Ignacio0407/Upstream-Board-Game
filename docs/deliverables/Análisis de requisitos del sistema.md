@@ -152,112 +152,107 @@ Como usuario y administrador quiero que el sistema me permita listar las diferen
 
 ## Diagrama conceptual del sistema
 
-![Descomposición en componentes](/docs/diagrams/Modelo%20DP1%20v2-Page-1.jpg)
+![Descomposición en componentes](/docs/diagrams/Modelo-DP1-v3.png)
 
-## Reglas de Negocio -> Normas del juego
+# Reglas de Negocio -> Normas del juego
+
+## Preparación de la Partida.
 
 ### R1 - Orden de partida.
-El jugador inicial de la partida será el último en haber comido salmón. Desde ahí, se irá rotando en el sentido de las agujas del reloj.
+El jugador inicial será el último en haber comido salmón. Desde ahí, se rotará en el sentido de las agujas del reloj.
 
-### R2 - Movimiento obligatorio.
-Todos los jugadores deberán gastar sus 5 movimientos en su turno. No podrán moverse hacia atrás.
+### R2 - Número de losetas.
+Se deberá jugar con el número exacto de losetas especificadas en las normas (29 en total, sin contar Mar ni Desove): 7 losetas de agua, 4 losetas de salto de agua, 5 losetas de águila, 3 losetas de oso, 5 losetas de garza azul y 5 losetas de roca.
 
-### R3 - Número de losetas.
-Se deberá jugar con el número de losetas que viene especificado en las normas, que en total deberán sumar 29 sin contar Mar ni Desove. (7 loseta de agua + 4 loseta salto de agua + 5 loseta águila + 3 loseta oso + 5 garza azul + 5 loseta de roca)
+### R3 - Inicio de partida.
+La colocación inicial de las losetas deberá respetar el orden de turno y no exceder tres espacios de ancho ni cuatro de largo.
 
-### R4 - Inicio de partida.
-La colocación de las losetas en la primera ronda deberá respetar el orden de partida, y no superar los tres espacios de ancho ni los cuatro de largo.
+### R4 - Fichas de salmón.
+Cada jugador comenzará con cuatro fichas de salmón, colocadas en las losetas de Mar, con su cara inicial mostrando dos salmones.
 
-### R5 - Retirada de losetas.
-Al final de cada ronda se deberán quitar las tres losetas que hay en la última fila, haya o no salmones. Solo hay una excepción, al final de la primera ronda no se debe retirar nada, al final de la segunda se retirará el mar. A partir de ese momento, se retiran las tres losetas finales al término de cada ronda.
+## Mecánicas de Juego.
 
-### R6 - Adición de losetas.
-Al final de cada ronda se deberán colocar tres losetas nuevas en la parte superior. Solo hay una excepción, que se dará si se llega a la última ronda, y sólo quedarán dos losetas si todo se ha hecho correctamente. Estas dos losetas deben colocarse en los lados, dejando el centro libre para encajar el Desove.
+### R5 - Movimiento obligatorio.
+Cada jugador dispone de 5 puntos de movimiento por turno, los cuales deben gastarse completamente. No se permite moverse hacia atrás.
 
-### R7 - Movimiento.
-Los jugadores están obligados a gastar sus cinco puntos de movimiento de forma obligatoria en cada ronda. Pueden gastarse todos en la misma ficha de salmón, o repartirlas como quiera.
+### R6 - Tipos de movimiento.
 
-### R8 - Nadar. 
-Un salmón podrá nadar, gastando un punto de movimiento por cada loseta que nade. 
+· Nadar: Desplazarse a una loseta adyacente cuesta 1 punto por loseta, siempre que no haya obstáculos en la intersección.
 
-### R9 - Saltar.
-Un jugador podrá saltar, gastando un punto por cada loseta que se mueva, y otro por cada obstáculo saltado. 
+· Saltar: Saltar por encima de una o más losetas cuesta 1 punto por cada loseta cruzada, más 1 adicional por cada obstáculo saltado.
 
-### R10 - Capacidad de losetas.
-Un jugador podrá situarse en una loseta mientras que el número total de salmones en esa loseta sea igual al número de jugadores. Esto es una excepción en la loseta de roca, cuya capacidad es igual a la del número de jugadores menos uno.
+### R7 - Capacidad de losetas.
+Una loseta puede contener tantas fichas de salmón como jugadores haya en la partida, excepto en las losetas de roca, cuya capacidad es igual al número de jugadores menos uno.
 
-### R11 - Loseta llena.
-Si un salmón trata de nadar por una loseta llena, deberá saltarla, gastando así un movimiento extra. 
+### R8 - Loseta llena.
+Si una loseta está llena, un salmón deberá saltarla, gastando los puntos de movimiento correspondientes. Si no puede hacerlo, no podrá avanzar.
 
-### R12 - Águila.
-Un Águila se comerá un salmón si una ficha termina su salto en su loseta o entra en esta nadando. Si salta la loseta por encima, sin caer en ella, el Águila no se come al salmón. Cuando un Águila se come un salmón, voltea su loseta, y esta pasa a ser una loseta de agua normal.
+### R9 - Amenazas.
 
-### R13 - Oso.
-Un Oso se comerá un salmón cuando una ficha salte sobre, desde o hasta la loseta. Si llega o pasa nadando, el Oso no se comerá al salmón.
+· Águilas: Se comen un salmón si una ficha termina su salto o entra nadando en su loseta. Al hacerlo, la loseta se voltea y pasa a ser de agua normal.
 
-### R14 - Garza azul.
-Una Garza azul se comerá un salmón si, al final de tu turno, tienes alguna ficha en estas losetas.
+· Osos: Se comen un salmón si una ficha salta sobre, desde o hacia su loseta. Si se cruza nadando, no afecta.
 
-### R15 - Colocación final.
-Las dos últimas losetas de la pila deberán colocarse a los extremos del río, dejando el centro libre para el Desove.
+· Garzas azules: Al final del turno, las garzas devoran un salmón de cualquier ficha que se encuentre en su loseta.
 
-### R16 - Desove.
-Cuando una ficha de salmón de un jugador llega al Desove, esta se moverá a través de las distintas losetas de Desove avanzando una posición por cada final de ronda.
+## Condiciones del Tablero.
 
-### R17 - Ficha de Salmón.
-Todos los jugadores comenzarán con cuatro fichas de Salmón. Estas fichas tienen dos caras: una cara con dos salmones, y otra con un único salmón. Todos los jugadores comenzarán con sus cuatro fichas en la cara de los dos salmones.
+### R10 - Retirada de losetas.
+Al final de cada ronda, se retiran las tres losetas más bajas del tablero. Excepciones: en la primera ronda no se retira nada; en la segunda ronda, se retiran las losetas de Mar.
 
-### R18 - Mar.
-Todos los jugadores comenzarán en el mar. Cada una de sus cuatro fichas de salmón se colocarán en cada loseta del Mar.
+### R11 - Adición de losetas.
+Al final de cada ronda, se colocan tres nuevas losetas en la parte superior del río, excepto en la última ronda, donde solo se añaden dos losetas para dejar el centro libre para el Desove.
 
-### R19 - Eliminación de Salmón.
-Cuando una ficha de salmón que esté por la cara de los dos salmones sea comida, se dará la vuelta a la cara que contiene solo un salmón. Cuando está por la cara de un salmón y es comida, la ficha se retirará de la partida.
+### R12 - Colocación final.
+Las dos últimas losetas de la pila deben colocarse a los lados del río, dejando el espacio central libre para el Desove.
 
-### R20 - Unión de Desove al Río.
-Cuando el Desove se ha unido al río, no se deben añadir nuevas losetas al río, pues ya no quedarán más en la pila. Además, cada vez que un salmón entre al desove, se moverá como se especifica en la R16. Sin embargo, se seguirán retirando las losetas del final del río.
+### R13 - Unión del Desove al río.
+Cuando el Desove se une al río, ya no se añaden más losetas, pero las filas inferiores siguen eliminándose al final de cada ronda.
 
-### R21 - Capacidad máxima Desove.
-El Desove no tiene una capacidad máxima en ninguna de sus casillas.
+### R14 - Capacidad del Desove.
+Las losetas de Desove no tienen un límite de capacidad para fichas de salmón.
 
-### R22 - Final de partida.
-La partida se considera como finalizada si no quedan salmones vivos, o bien todos se encuentran en el Desove.
+## Finalización y puntuación.
 
-### R23 - Ganador.
-Ganará el jugador que acumule más puntos al final de la partida.
+### R15 - Final de partida.
+La partida termina cuando todos los salmones están en el Desove o han sido eliminados.
 
-### R24 - Puntuación.
-Para puntuar se hará de dos formas: la primera, que será sumar un punto por cada salmón (QUE NO FICHA DE SALMÓN) que tenga el jugador. Es decir, si tiene una ficha con dos salmones, serán dos puntos. La segunda, que se suma a los puntos anteriores, consiste en sumar el número de fichas de salmón que tengas por cada huevo que haya en la casilla de Desove que se encuentre. Ejemplo a continuación: 
-![Puntuación](/docs/rules/puntuation.jpg)
+### R16 - Puntuación.
 
-### R25 - Color.
-El color de cada jugador será único para cada partida. No podrá haber dos jugadores con el mismo color seleccionado.
+· Cada salmón cuenta como 1 punto.
 
-### R26 - Colocar casilla.
-Un jugador podrá colocar una casilla únicamente cuando sea su turno.
+· Cada ficha de salmón en el Desove otorga puntos adicionales según el número de huevos en su casilla.
 
-### R27 - Mover salmón.
-Un jugador podrá mover sus salmones únicamente cuando sea su turno.
+### R17 - Ganador.
+El jugador con más puntos será el ganador. En caso de empate, gana quien tenga más salmones; si persiste, el jugador con fichas más adelantadas.
 
-### R28 - Partidas simultáneas.
-Un usuario podrá representar a diversos jugadores en varias partidas al mismo tiempo. Cada una con su color de salmón y su puntuación.
+## Gestión de Partidas.
 
-### R29 - Iniciar partida.
-Sólo el considerado creador de la partida podrá comenzar una partida desde el lobby.
+### R18 - Creación de partida.
+Solo el creador de la partida puede iniciar la partida desde el lobby.
 
-### R30 - Abandonar partida.
-Un jugador podrá abandonar la partida antes de que esta se dé por comenzada.
+### R19 - Abandonar partida.
+Los jugadores pueden abandonar la partida antes de que esta comience.
 
-### R31 - Eliminar partida.
-Un administrador podrá eliminar una partida de la lista.
+### R20 - Eliminar partida.
+Un administrador puede eliminar partidas de la lista.
 
-### R32 - Rotar casilla.
-Un jugador podrá rotar una casilla cuya orientación sea relevante para el desarrollo de la partida.
+### R21 - Partidas simultáneas.
+Un usuario puede participar en varias partidas simultáneamente, representando diferentes jugadores.
 
-### R33 - Nombres de partidas iguales.
-Dos partidas no podrán llamarse de la misma manera.
+### R22 - Nombres de partidas.
 
-### R34 - Nombres de partida inválidos.
-Una partida no podrá tener un nombre menor de 3 caracteres ni mayor de 50.
+· No pueden repetirse entre partidas activas.
 
-### R35 - Unirse a partida en curso.
-Un jugador no podrá unirse a una partida que esté en curso.
+· Deben tener entre 3 y 50 caracteres.
+
+## Interacciones adicionales.
+
+### R23 - Colocación y rotación de losetas.
+Un jugador puede colocar y rotar una loseta cuya orientación sea relevante para el juego, únicamente durante su turno.
+
+### R24 - Movimiento de salmones.
+Cada jugador puede mover únicamente sus propios salmones y solo en su turno.
+
+### R25 - Color de jugador.
+El color asignado a cada jugador será único dentro de la partida.
