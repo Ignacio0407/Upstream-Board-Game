@@ -56,20 +56,6 @@ export default function Lobby({match}){
 });
 
 stompClient.activate();
-
-    const putData = {
-        name: match.name,
-        password: match.password,
-        matchCreator: match.matchCreator,
-        state: "EN_CURSO",
-        playersNum: 1,
-        round: 0,
-        phase: "CASILLAS",
-        initialPlayer: 1,
-        actualPlayer: 1
-    };
-
-    const [reData, setReData] = useState(putData);
     
 
     useEffect(() => {
@@ -79,11 +65,8 @@ stompClient.activate();
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         Setnumjug(players.length);
-        if(players.length > 0){
-            const jugInicial = players.filter(p => p.playerOrder === 0);         
-            setReData(d => ({...d, playersNum: players.length , initialPlayer: jugInicial[0].id, actualPlayer: jugInicial[0].id, state: "EN_CURSO", round: 0}))
-        }
-        else if(matches.state === "FINALIZADA"){
+ 
+        if(matches.state === "FINALIZADA"){
             navigate("/dashboard");
         }
     }, [players, match.id, user.id, matches.state]);
@@ -104,57 +87,25 @@ stompClient.activate();
 
 const startGame = async () => {
     setLoading(true);
-
-    const tileConfigs = [
-        { tile: 1, count: 7, capacity: numjug },
-        { tile: 2, count: 5, capacity: numjug-1 },
-        { tile: 3, count: 5, capacity: numjug },
-        { tile: 4, count: 3, capacity: numjug },
-        { tile: 5, count: 5, capacity: numjug },
-        { tile: 6, count: 4, capacity: numjug }
-    ];    
-
-    let x = null;
-    let y = null;
-    let orientation = 0;
-
-    // Generar una lista completa de todos los tiles según tileConfigs
-    const allTiles = tileConfigs.flatMap(({ tile, count, capacity }) =>
-        Array.from({ length: count }, () => ({
-            match: match.id,
-            tile,
-            coordinate: { x, y },
-            orientation,
-            capacity
-        }))
-    );
-
-    // Mezclar la lista de tiles aleatoriamente
-    const shuffledTiles = allTiles.sort(() => Math.random() - 0.5);
-
-    // Crear las solicitudes de inserción para cada tile en el orden aleatorio
-    // Aqui actualizo el match con los nuevos salmonMatches.
-    const requests = shuffledTiles.map(matchTile =>
-        fetch(`/api/v1/matches/${match.id}`, {
-            method: "PUT",
+    const requests = async () => {
+        await fetch(`/api/v1/matches/${match.id}/startGame`, {
+            method: "PATCH",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({...reData, numjugadores: numjug}),
-        }).then(() =>
-            fetch("/api/v1/matchTiles", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(matchTile),
-            })
-        )
-    );
+        });
+        await fetch(`/api/v1/matchTiles/createMatchTiles/${match.id}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+    };
+    await requests();
 
     try {
         await Promise.all(requests);
@@ -222,27 +173,15 @@ const startGame = async () => {
     })
 
     async function handleColorChange(color) {
-        const order = players.length;
-        const emptyPlayer = {
-            name: finalUser.username,
-            color: color,
-            playerOrder: order,
-            alive: true,
-            points: 0,
-            userPlayer: finalUser.id,
-            match: match.id,
-            energy: 5
-        };
-
         try {
-            const response = await fetch(`/api/v1/players`, {
+            const response = await fetch(`/api/v1/players/match/${match.id}`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                     Accept: "application/json",
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(emptyPlayer),
+                body: JSON.stringify({color: color,user: finalUser.id,}),
             });
 
             if (response.ok) {
@@ -297,7 +236,7 @@ const startGame = async () => {
         </Table>
         <div className='lobbyUtilContainer'>
         </div>
-        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=2 &&<Button color='success' onClick={startGame}>
+        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=1 &&<Button color='success' onClick={startGame}>
             Iniciar Partida
         </Button>}
         {loading && <div>Loading tiles...</div>}

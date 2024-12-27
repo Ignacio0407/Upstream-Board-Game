@@ -217,5 +217,18 @@ public class MatchRestController {
         return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
+    @PatchMapping("/{matchId}/startGame")
+    public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match m = matchService.getById(matchId);
+        List<Player> p = playerService.getPlayersByMatch(matchId);
+
+        m.setState(State.EN_CURSO);
+        m.setActualPlayer(p.get(0));
+        m.setInitialPlayer(p.get(0));
+        m.setNumJugadores(p.size());
+        matchService.save(m);
+        return new ResponseEntity<>(m, HttpStatus.OK);
+    }
+
 
 }
