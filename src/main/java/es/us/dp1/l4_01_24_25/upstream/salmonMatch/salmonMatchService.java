@@ -40,4 +40,9 @@ public class salmonMatchService {
 	public List<SalmonMatch> getAllFromPlayer(Integer playerId) {
 		return salmonMatchRepository.findAllFromPlayer(playerId);
 	}
+
+    @Transactional
+    public void delete(Integer id) throws DataAccessException {
+        salmonMatchRepository.deleteById(id);
+    }
 }
