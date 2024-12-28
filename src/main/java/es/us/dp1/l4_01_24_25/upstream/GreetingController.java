@@ -24,4 +24,9 @@ public class GreetingController {
 		return "Hello";
 	}
 
+	@MessageMapping("/dash")
+	@SendTo("/topic/reload")
+	public String greeting3(Player message) throws Exception{
+		return "Hello";
+	}
 }
