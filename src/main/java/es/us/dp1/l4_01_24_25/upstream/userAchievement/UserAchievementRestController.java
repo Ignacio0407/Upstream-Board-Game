@@ -14,7 +14,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
+import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
+import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -25,10 +29,14 @@ import jakarta.validation.Valid;
 public class UserAchievementRestController {
     
     private final UserAchievementService userAchievementService;
+    private final UserService userService;
+    private final AchievementService achievementService;
 
     @Autowired
-    public UserAchievementRestController(UserAchievementService userAchievementService) {
+    public UserAchievementRestController(UserAchievementService userAchievementService, UserService userService, AchievementService achievementService) {
         this.userAchievementService = userAchievementService;
+        this.userService = userService;
+        this.achievementService = achievementService;
     }
 
     @GetMapping
@@ -48,6 +56,16 @@ public class UserAchievementRestController {
     public ResponseEntity<UserAchievement> create(@RequestBody @Valid UserAchievement userAchievement) {
         UserAchievement savedUA = userAchievementService.saveUA(userAchievement);
         return new ResponseEntity<>(savedUA, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/unlockrules/{username}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) {
+        User u = userService.findUser(username);
+        Achievement a = achievementService.getById(4);
+        UserAchievement ua = new UserAchievement(u, a);
+        userAchievementService.saveUA(ua);
+        return new ResponseEntity<>(ua, HttpStatus.CREATED);
     }
 
 }

@@ -26,6 +26,26 @@ function AppNavbar() {
     let userLogout = <></>;
     let publicLinks = <></>;
 
+    const unlockAchievement = async () => {
+        try {
+            const response = await fetch(`/api/v1/usersachievements/unlockrules/${username}`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            console.log("Achievement unlocked successfully!");
+            alert("Achievement Eager unlocked successfully!");
+        } catch (error) {
+            console.error("Failed to unlock achievement:", error);
+        }
+    };
+
     roles.forEach((role) => {
         if (role === "ADMIN") {
             adminLinks = (
@@ -64,9 +84,6 @@ function AppNavbar() {
         publicLinks = (
             <>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} id="rules" tag={Link} to="/rules">Rules</NavLink>
-                </NavItem>
-                <NavItem>
                     <NavLink style={{ color: "white" }} id="plans" tag={Link} to="/plans">Pricing Plans</NavLink>
                 </NavItem>
                 <NavItem>
@@ -88,7 +105,7 @@ function AppNavbar() {
         userLogout = (
             <>
                 <NavItem>
-                    <NavLink style={{ color: "white" }} id="rules" tag={Link} to="/rules">Rules</NavLink>
+                    <NavLink style={{ color: "white" }} id="rules" tag={Link} to="/rules" onClick={unlockAchievement}>Rules</NavLink>
                 </NavItem>
                 <NavItem>
                     <NavLink style={{ color: "white" }} id="plans" tag={Link} to="/plans">Pricing Plans</NavLink>
