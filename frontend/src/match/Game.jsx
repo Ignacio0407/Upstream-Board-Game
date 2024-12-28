@@ -19,6 +19,8 @@
     import rojo2 from '../static/images/salmons/Rojo_2.png';
     import verde1 from '../static/images/salmons/Verde_1.png';
     import verde2 from '../static/images/salmons/Verde_2.png';
+    import SockJS from 'sockjs-client';
+    import { Client } from '@stomp/stompjs';
 
 
     export default function Game({match}){
@@ -39,6 +41,9 @@
         const [gridS, setGridS] = useState(Array(4).fill(null));
         const [myPlayer, setMyPlayer] = useState(null);
         const [currentPhase, setCurrentPhase] = useState(null);
+
+        
+        
 
         const getTileImage = (tileP) => {
             if (!tileP) return null;  // Casilla vacia
@@ -83,13 +88,18 @@
         }
 
         useEffect(() => {
+            if(gridTiles.length > 0 || gridSalmons.length > 0){
+                reloadSalmon();
+                reloadTiles();
+            }
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-                
+                /*
                 console.log("salmons", salmons)
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
                 console.log("matchTiles", gridTiles)
                 console.log("match", match)
+                */
                 setAllDataLoaded(true);
                 const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
                 const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
@@ -105,6 +115,45 @@
                 setCurrentPhase(match.phase);
             }
         }, [tilesList, matchTiles]);
+
+        
+        const socket = new SockJS('http://localhost:8080/ws-upstream');
+            const stompClient = new Client({
+            webSocketFactory: () => socket,
+            debug: (str) => {
+                //console.log(str);
+            },
+            connectHeaders: {
+                Authorization: `Bearer ${jwt}`
+            },
+            onConnect: (frame) => {
+                console.log('Connected: ' + frame);
+                
+                stompClient.subscribe('/topic/salmon', (message) => {
+                    console.log('Message received: ' + message.body);
+                    const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+                    const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+                    setSalmonAndImages(salmonMatchesNoCoord)
+                    setGridSalmons(salmonMatchesWCoord)
+                });
+                stompClient.subscribe('/topic/tiles', (message) => {
+                    console.log('Message received: ' + message.body);
+                    const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+                    const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+                    setTilesAndImages(matchTilesNoCoord)
+                    setGridTiles(matchTilesWCoord)    
+                });
+            },
+            onStompError: (frame) => {
+                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('Additional details: ' + frame.body);
+            },
+            onWebSocketError: (error) => {
+                console.error('Error with websocket', error);
+            }
+        });
+        
+        stompClient.activate();
 
         useEffect(() => {
             // Construir el nuevo estado del grid basado en gridTiles
@@ -125,7 +174,7 @@
                 newGrid[index].push(salmon,image,"salmon")
             });
             setGrid(newGrid);
-            console.log(grid)
+            //console.log(grid)
         }, [gridTiles,gridSalmons]);
 
         useEffect(() => {
@@ -165,6 +214,21 @@
             }, 1000); // Cada 5 segundos
             return () => clearInterval(interval);
         }, [jwt]);
+
+        const reloadSalmon = async () => {
+            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+            const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+            setSalmonAndImages(salmonMatchesNoCoord)
+            setGridSalmons(salmonMatchesWCoord) // Actualiza el estado con los nuevos jugadores
+        };
+
+        const reloadTiles = async () => {
+            const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+            const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+            setTilesAndImages(matchTilesNoCoord)
+            setGridTiles(matchTilesWCoord) // Actualiza el estado con los nuevos jugadores
+        };
+
 
         const changePhase = async () => {
             if(gridTiles.length === 12 && currentPhase === 'CASILLAS') {
@@ -251,16 +315,17 @@
                 },
                 body: JSON.stringify({energy: energyUsed})
             })
-            console.log("AAAAAAAAAAAA",salmon)
+            //console.log("AAAAAAAAAAAA",salmon)
             if (!response.ok) {
                 throw new Error('Invalid salmon placement');
-            }
+            }/*
             else if (!response2.ok){
                 throw new Error('Invalid energy placement');
-            }
+            }*/
             else{
-                console.log(response, salmonAndImages)
-                const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon.id);
+                console.log("salmon e imagen",response, salmonAndImages, salmon)
+                const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon[0].id);
+                console.log("salmonWithImage",salmonWithImage)
                 setSalmonAndImages(prevSalmons =>
                     prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
                 );
