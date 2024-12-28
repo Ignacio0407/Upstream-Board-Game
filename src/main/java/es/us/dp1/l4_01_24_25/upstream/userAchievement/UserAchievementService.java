@@ -30,7 +30,7 @@ public class UserAchievementService {
     }
 
     @Transactional
-    public Iterable<UserAchievement> findAll() {
+    public List<UserAchievement> findAll() {
         return userAchievementRepository.findAll();
     }
 
@@ -43,6 +43,11 @@ public class UserAchievementService {
     @Transactional
     public Optional<UserAchievement> findById(Integer id) {
         return userAchievementRepository.findById(id);
+    }
+
+    @Transactional
+    public UserAchievement findByUandA(User u, Achievement a) {
+        return userAchievementRepository.findRepeatedUserAchievement(u, a);
     }
 
     @Transactional

@@ -60,10 +60,12 @@ public class UserAchievementRestController {
 
     @PostMapping("/unlockrules/{username}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) {
+    public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) throws Exception {
         User u = userService.findUser(username);
         Achievement a = achievementService.getById(4);
         UserAchievement ua = new UserAchievement(u, a);
+        UserAchievement repeated = userAchievementService.findByUandA(u, a);
+        if(repeated != null) throw new Exception(); 
         userAchievementService.saveUA(ua);
         return new ResponseEntity<>(ua, HttpStatus.CREATED);
     }
