@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -160,4 +161,15 @@ public class PlayerRestController {
         return new ResponseEntity<>(playerService.getSalmonsByPlayerId(playerId), HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}/energy")
+    public ResponseEntity<Player> updateRound(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException {
+        Player jugador = playerService.getById(id);
+        //System.out.println(jugador);
+        if (jugador == null) {
+            throw new ResourceNotFoundException("Partida no encontrada", "id", id.toString());
+        }
+        jugador.setEnergy(jugador.getEnergy() - energyUsed);
+        return new ResponseEntity<>(jugador, HttpStatus.OK);
+    }
+    
 }
