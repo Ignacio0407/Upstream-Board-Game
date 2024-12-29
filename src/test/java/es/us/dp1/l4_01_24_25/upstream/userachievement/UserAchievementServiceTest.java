@@ -39,8 +39,13 @@ public class UserAchievementServiceTest {
 
     private UserAchievement ua1;
     private UserAchievement ua2;
+    private UserAchievement ua3;
+    private UserAchievement ua4;
+    private UserAchievement ua5;
     private User u1;
     private Achievement a1;
+    private Achievement a2;
+    private Achievement a3;
 
     @BeforeEach
     void setup() {
@@ -55,6 +60,16 @@ public class UserAchievementServiceTest {
 
         a1 = new Achievement();
         a1.setId(1);
+
+        a2 = new Achievement();
+        a2.setId(2);
+
+        a3 = new Achievement();
+        a3.setId(3);
+
+        ua3 = new UserAchievement(u1, a1);
+        ua4 = new UserAchievement(u1, a2);
+        ua5 = new UserAchievement(u1, a3);
     }
 
     @Test
@@ -131,6 +146,28 @@ public class UserAchievementServiceTest {
     }
 
     @Test
+    void testGetUserAchievementByUserIdSuccess() {
+        List<UserAchievement> expected = List.of(ua3, ua4, ua5);
+        when(userAchievementRepository.findByUserId(1)).thenReturn(expected);
+
+        List<UserAchievement> result = userAchievementRepository.findByUserId(1);
+
+        assertEquals(expected, result);
+        verify(userAchievementRepository).findByUserId(1);
+    }
+
+    @Test
+    void testGetUserAchievementByUserIdFail() {
+        List<UserAchievement> expected = List.of(ua3, ua4, ua5);
+        when(userAchievementRepository.findByUserId(1)).thenReturn(expected);
+
+        List<UserAchievement> result = userAchievementRepository.findByUserId(1);
+
+        assertNotEquals(List.of(ua1, ua2, ua3, ua4), result);
+        verify(userAchievementRepository).findByUserId(1);
+    }
+
+    @Test
     void testGetUserAchievementByUandASuccess() {
         when(userAchievementRepository.findRepeatedUserAchievement(u1, a1)).thenReturn(ua1);
 
@@ -160,6 +197,22 @@ public class UserAchievementServiceTest {
         verify(userAchievementRepository, times(1)).findRepeatedUserAchievement(u1, a1);
     }
 
+    @Test
+    void testGetUserAchievementByUandAThrowsExceptionNullUser() {
+        ResourceNotFoundException ex = new ResourceNotFoundException("");
+        when(userAchievementRepository.findRepeatedUserAchievement(null, a1)).thenThrow(ex);
 
+        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findRepeatedUserAchievement(null, a1));
+        verify(userAchievementRepository, times(1)).findRepeatedUserAchievement(null, a1);
+    }
+
+    @Test
+    void testGetUserAchievementByUandAThrowsExceptionNullAchievement() {
+        ResourceNotFoundException ex = new ResourceNotFoundException("");
+        when(userAchievementRepository.findRepeatedUserAchievement(u1, null)).thenThrow(ex);
+
+        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findRepeatedUserAchievement(u1, null));
+        verify(userAchievementRepository, times(1)).findRepeatedUserAchievement(u1, null);
+    }
 
 }
