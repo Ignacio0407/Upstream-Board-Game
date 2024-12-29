@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementRepository;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
@@ -46,8 +47,11 @@ public class UserAchievementService {
     }
 
     @Transactional
-    public UserAchievement findByUandA(User u, Achievement a) {
-        return userAchievementRepository.findRepeatedUserAchievement(u, a);
+    public UserAchievement findByUandA(User u, Achievement a) throws ResourceNotFoundException{
+        User pu = userRepository.findById(u.getId()).get();
+        Achievement pa = achievementRepository.findById(a.getId()).get();
+        if(pu != null && pa != null) return userAchievementRepository.findRepeatedUserAchievement(u, a);
+        else throw new ResourceNotFoundException("Usuario con id: " + u.getId() + " o logro con id: " + a.getId() + "no encontrados");
     }
 
     @Transactional
