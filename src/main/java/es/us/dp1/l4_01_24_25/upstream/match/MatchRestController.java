@@ -23,9 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
@@ -38,11 +44,15 @@ public class MatchRestController {
     private final MatchService matchService;
     private final PlayerService playerService;
     private final UserService userService;
+    private final MatchTileService matchTileService;
+    private final salmonMatchService sms;
 
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService) {
+    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, salmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
         this.userService = userService;
+        this.matchTileService = matchTileService;
+        this.sms = sms;
     }
 
     @GetMapping
@@ -208,13 +218,42 @@ public class MatchRestController {
 }
 
     @PatchMapping("/{matchId}/changephase")
-    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
         Match p = matchService.getById(matchId);
         Phase f = p.getPhase();
+        List<MatchTile> mt = matchTileService.findByMatchId(matchId);
+        List<SalmonMatch> sm = sms.getAllFromMatch(matchId);
         if(f.equals(Phase.CASILLAS)) p.setPhase(Phase.MOVIENDO);
-        else p.setPhase(Phase.CASILLAS);
+        else {
+            List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
+            for(MatchTile g:garzas) {
+                for(SalmonMatch s:sm) {
+                    if(g.getCoordinate().equals(s.getCoordinate())) {
+                        s.setSalmonsNumber(s.getSalmonsNumber()-1);
+                        if(s.getSalmonsNumber().equals(0)) sms.delete(s.getId());
+                        else sms.savePartidaSalmon(s);
+                    }
+                }    
+            }
+            p.setPhase(Phase.CASILLAS);
+            p.setRound(p.getRound()+1);
+            
+        }
         matchService.save(p);
         return new ResponseEntity<>(p, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{matchId}/startGame")
+    public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match m = matchService.getById(matchId);
+        List<Player> p = playerService.getPlayersByMatch(matchId);
+
+        m.setState(State.EN_CURSO);
+        m.setActualPlayer(p.get(0));
+        m.setInitialPlayer(p.get(0));
+        m.setNumJugadores(p.size());
+        matchService.save(m);
+        return new ResponseEntity<>(m, HttpStatus.OK);
     }
 
 

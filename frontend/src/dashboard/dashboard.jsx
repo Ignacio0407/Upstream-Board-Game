@@ -11,6 +11,8 @@ import deleteFromList from '../util/deleteFromList';
 import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
 import { useNavigate } from "react-router-dom";
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -46,6 +48,34 @@ export default function Dashboard() {
         }
         navigate('/matches/'+match.id);
     }
+
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+        const stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: (str) => {
+            //console.log(str);
+        },
+        connectHeaders: {
+            Authorization: `Bearer ${jwt}`
+        },
+        onConnect: (frame) => {
+            console.log('Connected: ' + frame);
+            
+            stompClient.subscribe('/topic/reload', (message) => {
+                console.log('Message received: ' + message.body);
+                window.location.reload(true);
+            })
+        },
+        onStompError: (frame) => {
+            console.error('Broker reported error: ' + frame.headers['message']);
+            console.error('Additional details: ' + frame.body);
+        },
+        onWebSocketError: (error) => {
+            console.error('Error with websocket', error);
+        }
+    });
+
+    stompClient.activate();
 
     const matchesList = 
       matches.map((match) => {

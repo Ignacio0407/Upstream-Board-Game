@@ -84,6 +84,7 @@ export default function Game({match}){
 
         useEffect(() => {
             if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+                
                 console.log("salmons", salmons)
                 console.log("players", players)
                 console.log("tilesList ", tilesList)
@@ -98,7 +99,6 @@ export default function Game({match}){
                 setGridTiles(matchTilesWCoord)
                 setSalmonAndImages(salmonMatchesNoCoord)
                 setGridSalmons(salmonMatchesWCoord)
-                console.log("gridTiles", gridTiles.length)
                 const orderedPlayers = [...players].sort(p => p.playerOrder)
                 setPlayers(orderedPlayers) // Siempre igual
                 setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
@@ -129,11 +129,12 @@ export default function Game({match}){
         }, [gridTiles,gridSalmons]);
 
         useEffect(() => {
-            const newGridS = Array(4).fill(null).map(() => []);
+            const salmonsPerPlayer = 4;
+            const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
             players.forEach((p) => {
                 const pSalmons = salmons.filter(s => s.player === p.id);
                 if(pSalmons.length > 0) {
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 0; i < salmonsPerPlayer; i++) {
                     newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i])]); }
                 }})
             setGridS(newGridS);
@@ -203,6 +204,7 @@ export default function Game({match}){
                 <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
                 <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
                 <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.energy}</td>
             </tr>
         );
     })
@@ -223,6 +225,16 @@ export default function Game({match}){
 
         const updateSalmonPosition = async(salmon,x,y) => {
             try{
+                let energyUsed;
+                if(salmon[0].coordinate === null){
+                    energyUsed = x + y;
+                }else{
+                    energyUsed = Math.abs(salmon[0].coordinate.x - x) + Math.abs(salmon[0].coordinate.y - y);
+                }
+
+                if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
+                    throw new Error('Not enough energy');
+                }
             const response = await fetch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, {
                 method: 'PATCH',
                 headers: {
@@ -231,9 +243,22 @@ export default function Game({match}){
                 },
                 body: JSON.stringify({ x, y })
             });
+            const response2 = await fetch(`/api/v1/players/${salmon[0].player}/energy`,{
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify({energy: energyUsed})
+            })
+            console.log("AAAAAAAAAAAA",salmon)
             if (!response.ok) {
                 throw new Error('Invalid salmon placement');
-            }else{
+            }
+            else if (!response2.ok){
+                throw new Error('Invalid energy placement');
+            }
+            else{
                 console.log(response, salmonAndImages)
                 const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon.id);
                 setSalmonAndImages(prevSalmons =>
@@ -383,6 +408,7 @@ export default function Game({match}){
                             <th className="table-row" style={{position: 'relative', padding: '20px'}}>Color</th>
                             <th className="table-row" style={{position: 'relative', padding: '20px'}}>Points</th>
                             <th className="table-row" style={{position: 'relative', padding: '20px'}}>Alive</th>
+                            <th className="table-row" style={{position: 'relative', padding: '20px'}}>Energy</th>
                         </tr>
                     </thead>
                     <tbody>{playerList}</tbody>
