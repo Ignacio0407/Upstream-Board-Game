@@ -69,7 +69,7 @@ INSERT INTO tile (id, image, tile_type) VALUES
 (1, 'src/main/resources/images/waterTile.png', 1),
 (2, 'src/main/resources/images/rockTile.png', 2),
 (3, 'src/main/resources/images/heronTile.png', 3),
-(4, 'frontend/src/static/images/tiles/bearTile.png', 4),
+(4, 'src/main/resources/images/bearTile.png', 4),
 (5, 'src/main/resources/images/eagleTile.png', 5),
 (6, 'src/main/resources/images/jumpTile.png', 6),
 (7, 'src/main/resources/images/seaTile.png', 7),

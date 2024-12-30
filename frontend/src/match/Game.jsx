@@ -83,7 +83,7 @@ export default function Game({match}){
         }
 
         useEffect(() => {
-            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0 && !allDataLoaded) {
                 
                 console.log("salmons", salmons)
                 console.log("players", players)
@@ -197,17 +197,17 @@ export default function Game({match}){
             return <div style={{justifySelf:'center'}}>Loading data</div>;
         }
 
-    const playerList = players.map((p) => {
-        return (
-            <tr key = {p.id} className="table-row">
-                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
-                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
-                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
-                <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
+        const playerList = players.map((p) => {
+            return (
+                <tr key = {p.id} className="table-row">
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.name}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.color}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.points}</td>
+                    <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.alive? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}</td>
                     <td className={'table-cell'} style={{position: 'relative', padding: '20px'}}>{p.energy}</td>
-            </tr>
-        );
-    })
+                </tr>
+            );
+        })
 
         const handleTileClick = (tile) => {
                 if (myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS') {
@@ -227,49 +227,58 @@ export default function Game({match}){
             try{
                 let energyUsed;
                 if(salmon[0].coordinate === null){
-                    energyUsed = x + y;
+                    energyUsed = y;
                 }else{
-                    energyUsed = Math.abs(salmon[0].coordinate.x - x) + Math.abs(salmon[0].coordinate.y - y);
+                    energyUsed = Math.abs(salmon[0].coordinate.y - y);
                 }
-
-                if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
+                //if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
+                if (energyUsed > match.actualPlayer.energy) {
                     throw new Error('Not enough energy');
                 }
-            const response = await fetch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-                body: JSON.stringify({ x, y })
-            });
-            const response2 = await fetch(`/api/v1/players/${salmon[0].player}/energy`,{
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-                body: JSON.stringify({energy: energyUsed})
-            })
-            console.log("AAAAAAAAAAAA",salmon)
-            if (!response.ok) {
-                throw new Error('Invalid salmon placement');
-            }
-            else if (!response2.ok){
-                throw new Error('Invalid energy placement');
-            }
-            else{
-                console.log(response, salmonAndImages)
-                const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon.id);
-                setSalmonAndImages(prevSalmons =>
-                    prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
-                );
-                
-            }
+                const moveValidResponse = await fetch(`/api/v1/matches/${salmon[0].id}/moveIsPossible?x=${x}&y=${y}`, {
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                });
+                const energyValidResponse = await fetch(`/api/v1/matches/${salmon[0].id}/${match.actualPlayer.id}/energyValid?x=${x}&y=${y}`, {
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                });
+                const updateCoordinate = await fetch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: JSON.stringify({ x, y })
+                });
+                const updateEnergy = await fetch(`/api/v1/players/${salmon[0].player}/energy`,{
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: JSON.stringify({energy: energyUsed})
+                })
+                console.log("AAAAAAAAAAAA",salmon)
+                if (!updateCoordinate.ok && !moveValidResponse) {
+                    throw new Error('Invalid salmon placement');
+                }
+                else if (!updateEnergy.ok && !energyValidResponse){
+                    throw new Error('Invalid energy placement');
+                }
+                else if (moveValidResponse && energyValidResponse) {
+                    console.log(updateCoordinate, salmonAndImages)
+                    const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon.id);
+                    setSalmonAndImages(prevSalmons =>
+                        prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
+                    );
+                }
 
-        }catch{
+            }catch{
 
-        }
+            }
 
         }
 
@@ -308,62 +317,57 @@ export default function Game({match}){
 
         // Actualiza el grid una vez está seleccionada la casilla
         const handleGridClick = async (index) => {
-        const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-        const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-
-        // Calcular la coordenada x (columna) y y (fila) con filas invertidas
-        const x = index % gridWidth; // Coordenada x (columna)
-        const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-
-                // Reiniciar la casilla seleccionada después de moverla
-                /*
-                setSelectedTile(null);
-                setSelectedSalmon(null)
-                let nextPlayer = players[myPlayer.playerOrder+1];
-                console.log(nextPlayer)
-                console.log(players)
-                if(!nextPlayer){
-                    nextPlayer = players[0];}
-                  */
-        try {
-            
-            console.log("salmon seleccionada",selectedSalmon)
-            if(selectedSalmon === null){
-                await updateTilePosition(selectedTile, x, y);
-                setSelectedTile(null);
-                let nextPlayer = players[myPlayer.playerOrder + 1];
-            if (!nextPlayer) {
-                nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
-            }
-
-            // Actualizar el turno en el servidor
-            await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                }
-            });
-            }else{
-                const foundTile = gridTiles.find(
-                    t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
-                  );
-                console.log("AAAAAAA", foundTile)
-                if(foundTile){
-                await updateSalmonPosition(selectedSalmon, x, y);
-                setSelectedSalmon(null);
-                   
-                }
-            
-            }
-        } catch (error) {
-            console.error("Error updating tile position or advancing turn:", error);
-            // Detener ejecución si ocurre un error
-            return;
-        }
+            const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+            const gridHeight = 6; // Altura de la cuadrícula (número de filas)
     
+            // Calcular la coordenada x (columna) y y (fila) con filas invertidas
+            const x = index % gridWidth; // Coordenada x (columna)
+            const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
     
-    };
+                    // Reiniciar la casilla seleccionada después de moverla
+                    /*
+                    setSelectedTile(null);
+                    setSelectedSalmon(null)
+                    let nextPlayer = players[myPlayer.playerOrder+1];
+                    console.log(nextPlayer)
+                    console.log(players)
+                    if(!nextPlayer){
+                        nextPlayer = players[0];}
+                      */
+            try {
+                console.log("salmon seleccionada",selectedSalmon)
+                if(selectedSalmon === null){
+                    await updateTilePosition(selectedTile, x, y);
+                    setSelectedTile(null);
+                    let nextPlayer = players[myPlayer.playerOrder + 1];
+                if (!nextPlayer) {
+                    nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
+                }
+    
+                // Actualizar el turno en el servidor
+                await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                });
+                }else{
+                    const foundTile = gridTiles.find(
+                        t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
+                      );
+                    console.log("AAAAAAA", foundTile)
+                    if(foundTile){
+                    await updateSalmonPosition(selectedSalmon, x, y);
+                    setSelectedSalmon(null);  
+                    }
+                }
+            } catch (error) {
+                console.error("Error updating tile position or advancing turn:", error);
+                // Detener ejecución si ocurre un error
+                return;
+            }
+        };
 
     const handleRotateTile = async (tile) => {
         try {

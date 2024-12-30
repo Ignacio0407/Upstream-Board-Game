@@ -60,15 +60,13 @@ public class SalmonMatchController {
     }
 
     @PatchMapping("/coordinate/{id}")
-    public ResponseEntity<SalmonMatch> updateCoordinate(
-    @PathVariable Integer id,
-    @RequestBody @Valid  Map<String,Integer> coordinate) {
+    public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) {
     SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
     Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y")); 
     salmonMatch.setCoordinate(newCoordinate);   
     SalmonMatch updatedSalmonMatch = salmonMatchService.savePartidaSalmon(salmonMatch);
     return new ResponseEntity<>(updatedSalmonMatch, HttpStatus.OK);
-}
+    }
 
     @PostMapping("/player/{playerId}")
     public void create(@PathVariable("playerId") Integer playerId) {

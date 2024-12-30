@@ -31,7 +31,7 @@ import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/v1/players")
+@RequestMapping("/api/v1/players")
 public class PlayerRestController {
     
     private final PlayerService playerService;
@@ -162,11 +162,10 @@ public class PlayerRestController {
     }
 
     @PatchMapping("/{id}/energy")
-    public ResponseEntity<Player> updateRound(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException {
+    public ResponseEntity<Player> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException {
         Player jugador = playerService.getById(id);
-        //System.out.println(jugador);
         if (jugador == null) {
-            throw new ResourceNotFoundException("Partida no encontrada", "id", id.toString());
+            throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
         }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
         return new ResponseEntity<>(jugador, HttpStatus.OK);
