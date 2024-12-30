@@ -42,9 +42,6 @@ import { Client } from '@stomp/stompjs';
         const [myPlayer, setMyPlayer] = useState(null);
         const [currentPhase, setCurrentPhase] = useState(null);
 
-    
-    
-
     const getTileImage = (tileP) => {
         if (!tileP) return null;  // Casilla vacia
         const realTile = tilesList[tileP.tile-1]
@@ -92,7 +89,7 @@ import { Client } from '@stomp/stompjs';
                 reloadSalmon();
                 reloadTiles();
             }
-            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0 && !allDataLoaded) {
                 //console.log("players", players)
                 /*
                 console.log("match", match)
@@ -313,7 +310,7 @@ import { Client } from '@stomp/stompjs';
                 if(salmon[0].coordinate === null){
                     energyUsed = y+1;
                 }else{
-                    energyUsed = Math.abs(salmon[0].coordinate.x - x) + Math.abs(salmon[0].coordinate.y - y);
+                    energyUsed = Math.abs(salmon[0].coordinate.y - y)+1;
                 }
 
                 if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
@@ -349,8 +346,7 @@ import { Client } from '@stomp/stompjs';
                 //console.log("salmonWithImage",salmonWithImage)
                 setSalmonAndImages(prevSalmons =>
                     prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
-                );
-                
+                );    
             }
 
     }catch{

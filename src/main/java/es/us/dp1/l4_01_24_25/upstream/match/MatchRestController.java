@@ -254,7 +254,14 @@ public class MatchRestController {
 
     @GetMapping("/{salmon}/moveIsPossible")
     public ResponseEntity<Boolean> moveValid( @PathVariable("salmon") SalmonMatch salmonToMove, @RequestParam("x") int x, @RequestParam("y") int y) {
-        return ResponseEntity.ok(y > salmonToMove.getCoordinate().y() && Math.abs(x - salmonToMove.getCoordinate().x()) <= 1);
+        Integer xToMove = Math.abs(x - salmonToMove.getCoordinate().x());
+        Integer yToMove = Math.abs(y - salmonToMove.getCoordinate().y());
+        if (xToMove == 2) {
+            if (yToMove < 2) {
+                return ResponseEntity.ok(false);
+            }
+        }
+        return ResponseEntity.ok(y > salmonToMove.getCoordinate().y());
     }
 
     @GetMapping("/{salmon}/{playerId}/energyValid")
