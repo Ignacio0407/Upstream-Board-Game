@@ -169,6 +169,7 @@ public class PlayerRestController {
             throw new ResourceNotFoundException("Partida no encontrada", "id", id.toString());
         }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
+        playerService.saveJugador(jugador);
         return new ResponseEntity<>(jugador, HttpStatus.OK);
     }
     
