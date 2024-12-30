@@ -31,12 +31,14 @@ public class UserAchievementRestController {
     private final UserAchievementService userAchievementService;
     private final UserService userService;
     private final AchievementService achievementService;
+    private final AchievementChecker achievementChecker;
 
     @Autowired
-    public UserAchievementRestController(UserAchievementService userAchievementService, UserService userService, AchievementService achievementService) {
+    public UserAchievementRestController(UserAchievementService userAchievementService, UserService userService, AchievementService achievementService, AchievementChecker achievementChecker) {
         this.userAchievementService = userAchievementService;
         this.userService = userService;
         this.achievementService = achievementService;
+        this.achievementChecker = achievementChecker;
     }
 
     @GetMapping
@@ -67,6 +69,7 @@ public class UserAchievementRestController {
         UserAchievement repeated = userAchievementService.findByUandA(u, a);
         if(repeated != null) throw new Exception(); 
         userAchievementService.saveUA(ua);
+        //achievementChecker.checkAchievements();
         return new ResponseEntity<>(ua, HttpStatus.CREATED);
     }
 

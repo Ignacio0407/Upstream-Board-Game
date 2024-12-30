@@ -1,49 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import tokenService from '../services/token.service'
-import useFetchState from "../util/useFetchState";
-import '../static/css/game/game.css'
-import bearTile from '../static/images/tiles/bearTile.png'
-import eagleTile from '../static/images/tiles/eagleTile.png'
-import heronTile from '../static/images/tiles/heronTile.png'
-import jumpTile from '../static/images/tiles/jumpTile.png'
-import rockTile from '../static/images/tiles/rockTile.png'
-import seaTile from '../static/images/tiles/seaTile.png'
-import waterTile from '../static/images/tiles/waterTile.png'
-import amarillo1 from '../static/images/salmons/Amarillo_1.png';
-import amarillo2 from '../static/images/salmons/Amarillo_2.png';
-import blanco1 from '../static/images/salmons/Blanco_1.png';
-import blanco2 from '../static/images/salmons/Blanco_2.png';
-import morado1 from '../static/images/salmons/Morado_1.png';
-import morado2 from '../static/images/salmons/Morado_2.png';
-import rojo1 from '../static/images/salmons/Rojo_1.png';
-import rojo2 from '../static/images/salmons/Rojo_2.png';
-import verde1 from '../static/images/salmons/Verde_1.png';
-import verde2 from '../static/images/salmons/Verde_2.png';
-import SockJS from 'sockjs-client';
-import { Client } from '@stomp/stompjs';
+    import React, { useState, useEffect } from 'react';
+    import tokenService from '../services/token.service'
+    import useFetchState from "../util/useFetchState";
+    import '../static/css/game/game.css'
+    import bearTile from '../static/images/tiles/bearTile.png'
+    import eagleTile from '../static/images/tiles/eagleTile.png'
+    import heronTile from '../static/images/tiles/heronTile.png'
+    import jumpTile from '../static/images/tiles/jumpTile.png'
+    import rockTile from '../static/images/tiles/rockTile.png'
+    import seaTile from '../static/images/tiles/seaTile.png'
+    import waterTile from '../static/images/tiles/waterTile.png'
+    import amarillo1 from '../static/images/salmons/Amarillo_1.png';
+    import amarillo2 from '../static/images/salmons/Amarillo_2.png';
+    import blanco1 from '../static/images/salmons/Blanco_1.png';
+    import blanco2 from '../static/images/salmons/Blanco_2.png';
+    import morado1 from '../static/images/salmons/Morado_1.png';
+    import morado2 from '../static/images/salmons/Morado_2.png';
+    import rojo1 from '../static/images/salmons/Rojo_1.png';
+    import rojo2 from '../static/images/salmons/Rojo_2.png';
+    import verde1 from '../static/images/salmons/Verde_1.png';
+    import verde2 from '../static/images/salmons/Verde_2.png';
+    import SockJS from 'sockjs-client';
+    import { Client } from '@stomp/stompjs';
 
 
-export default function Game({match}){
-    const jwt = tokenService.getLocalAccessToken();
-    const user = tokenService.getUser();
-    const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
-    const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
-    const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
-    const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
-    const [allDataLoaded, setAllDataLoaded] = useState(false);
-    const [tilesAndImages, setTilesAndImages] = useState([]);
-    const [salmonAndImages, setSalmonAndImages] = useState([]);
-    const [gridTiles, setGridTiles] = useState([]);
-    const [gridSalmons, setGridSalmons] = useState([]);
-    const [selectedTile, setSelectedTile] = useState(null);
-    const [selectedSalmon, setSelectedSalmon] = useState(null);
-    const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
-    const [gridS, setGridS] = useState(Array(4).fill(null));
-    const [myPlayer, setMyPlayer] = useState(null);
-    const [currentPhase, setCurrentPhase] = useState(null);
+    export default function Game({match}){
+        const jwt = tokenService.getLocalAccessToken();
+        const user = tokenService.getUser();
+        const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
+        const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
+        const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
+        const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
+        const [allDataLoaded, setAllDataLoaded] = useState(false);
+        const [tilesAndImages, setTilesAndImages] = useState([]);
+        const [salmonAndImages, setSalmonAndImages] = useState([]);
+        const [gridTiles, setGridTiles] = useState([]);
+        const [gridSalmons, setGridSalmons] = useState([]);
+        const [selectedTile, setSelectedTile] = useState(null);
+        const [selectedSalmon, setSelectedSalmon] = useState(null);
+        const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
+        const [gridS, setGridS] = useState(Array(4).fill(null));
+        const [myPlayer, setMyPlayer] = useState(null);
+        const [currentPhase, setCurrentPhase] = useState(null);
 
-    
-    
+        
+        
 
     const getTileImage = (tileP) => {
         if (!tileP) return null;  // Casilla vacia
@@ -87,92 +87,92 @@ export default function Game({match}){
         }
     }
 
-    useEffect(() => {
-        if(gridTiles.length > 0 || gridSalmons.length > 0){
-            reloadSalmon();
-            reloadTiles();
-        }
-        if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-            //console.log("players", players)
-            /*
-            console.log("match", match)
-            
-            console.log("salmons", salmons)
-            
-            console.log("tilesList ", tilesList)
-            console.log("matchTiles", gridTiles)
-            */
-            setAllDataLoaded(true);
-            const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
-            const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
-            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
-            const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
-            setTilesAndImages(matchTilesNoCoord)
-            setGridTiles(matchTilesWCoord)
-            setSalmonAndImages(salmonMatchesNoCoord)
-            setGridSalmons(salmonMatchesWCoord)
-            const orderedPlayers = [...players].sort(p => p.playerOrder)
-            setPlayers(orderedPlayers) // Siempre igual
-            setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            setCurrentPhase(match.phase);
-        }
-    }, [tilesList, matchTiles]);
-
-    const fetchPlayers = async () => {
-        const response = await fetch(`/api/v1/matches/${match.id}/players`, {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
-        const data = await response.json();
-        setPlayers(data); // Actualiza el estado con los nuevos jugadores
-    };
-    
-    const socket = new SockJS('http://localhost:8080/ws-upstream');
-        const stompClient = new Client({
-        webSocketFactory: () => socket,
-        debug: (str) => {
-            //console.log(str);
-        },
-        connectHeaders: {
-            Authorization: `Bearer ${jwt}`
-        },
-        onConnect: (frame) => {
-            console.log('Connected: ' + frame);
-            
-            stompClient.subscribe('/topic/salmon', (message) => {
-                console.log('Message received: ' + message.body);
-                const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
-                const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
-                setSalmonAndImages(salmonMatchesNoCoord)
-                setGridSalmons(salmonMatchesWCoord)
-            });
-            stompClient.subscribe('/topic/tiles', (message) => {
-                console.log('Message received: ' + message.body);
+        useEffect(() => {
+            if(gridTiles.length > 0 || gridSalmons.length > 0){
+                reloadSalmon();
+                reloadTiles();
+            }
+            if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+                //console.log("players", players)
+                /*
+                console.log("match", match)
+                
+                console.log("salmons", salmons)
+                
+                console.log("tilesList ", tilesList)
+                console.log("matchTiles", gridTiles)
+                */
+                setAllDataLoaded(true);
                 const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
                 const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+                const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+                const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
                 setTilesAndImages(matchTilesNoCoord)
-                setGridTiles(matchTilesWCoord)    
+                setGridTiles(matchTilesWCoord)
+                setSalmonAndImages(salmonMatchesNoCoord)
+                setGridSalmons(salmonMatchesWCoord)
+                const orderedPlayers = [...players].sort(p => p.playerOrder)
+                setPlayers(orderedPlayers) // Siempre igual
+                setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+                setCurrentPhase(match.phase);
+            }
+        }, [tilesList, matchTiles]);
+
+        const fetchPlayers = async () => {
+            const response = await fetch(`/api/v1/matches/${match.id}/players`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${jwt}`,
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+            const data = await response.json();
+            setPlayers(data); // Actualiza el estado con los nuevos jugadores
+        };
+        
+        const socket = new SockJS('http://localhost:8080/ws-upstream');
+            const stompClient = new Client({
+            webSocketFactory: () => socket,
+            debug: (str) => {
+                //console.log(str);
+            },
+            connectHeaders: {
+                Authorization: `Bearer ${jwt}`
+            },
+            onConnect: (frame) => {
+                console.log('Connected: ' + frame);
                 
-            });
-            stompClient.subscribe('/topic/players', (message) => {
-                console.log('Message received: ' + message.body);
-                fetchPlayers();
-            });
-        },
-        onStompError: (frame) => {
-            console.error('Broker reported error: ' + frame.headers['message']);
-            console.error('Additional details: ' + frame.body);
-        },
-        onWebSocketError: (error) => {
-            console.error('Error with websocket', error);
-        }
-    });
-    
-    stompClient.activate();
+                stompClient.subscribe('/topic/salmon', (message) => {
+                    console.log('Message received: ' + message.body);
+                    const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+                    const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+                    setSalmonAndImages(salmonMatchesNoCoord)
+                    setGridSalmons(salmonMatchesWCoord)
+                });
+                stompClient.subscribe('/topic/tiles', (message) => {
+                    console.log('Message received: ' + message.body);
+                    const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+                    const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+                    setTilesAndImages(matchTilesNoCoord)
+                    setGridTiles(matchTilesWCoord)    
+                    
+                });
+                stompClient.subscribe('/topic/players', (message) => {
+                    console.log('Message received: ' + message.body);
+                    fetchPlayers();
+                });
+            },
+            onStompError: (frame) => {
+                console.error('Broker reported error: ' + frame.headers['message']);
+                console.error('Additional details: ' + frame.body);
+            },
+            onWebSocketError: (error) => {
+                console.error('Error with websocket', error);
+            }
+        });
+        
+        stompClient.activate();
 
     useEffect(() => {
         // Construir el nuevo estado del grid basado en gridTiles
@@ -187,14 +187,14 @@ export default function Game({match}){
             newGrid[index].push([tile, image,"tile"]); // Asignar la tile con su imagen al grid 
         });
 
-        gridSalmons.forEach((salmon) => {
-            const index = (gridHeight - 1 - salmon[0].coordinate.y) * gridWidth + salmon[0].coordinate.x;
-            const image = salmon[1]; // Obtener la imagen asociada al salmon
-            newGrid[index].push(salmon,image,"salmon")
-        });
-        setGrid(newGrid);
-        //console.log(grid)
-    }, [gridTiles,gridSalmons]);
+            gridSalmons.forEach((salmon) => {
+                const index = (gridHeight - 1 - salmon[0].coordinate.y) * gridWidth + salmon[0].coordinate.x;
+                const image = salmon[1]; // Obtener la imagen asociada al salmon
+                newGrid[index].push(salmon,image,"salmon")
+            });
+            setGrid(newGrid);
+            //console.log(grid)
+        }, [gridTiles,gridSalmons]);
 
     useEffect(() => {
         const salmonsPerPlayer = 4;
@@ -208,45 +208,45 @@ export default function Game({match}){
         setGridS(newGridS);
     }, [gridSalmons])
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetch(`/api/v1/matchTiles/${match.id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-            })
-            .then(response => response.json())
-            .then(data => setMatchTiles(data))
-            .catch(error => console.error('Error fetching tiles:', error));
-            fetch(`/api/v1/salmonMatches/match/${match.id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-            })
-            .then(response => response.json())
-            .then(data => setSalmons(data))
-            .catch(error => console.error('Error fetching tiles:', error));
-        }, 1000); // Cada 5 segundos
-        return () => clearInterval(interval);
-    }, [jwt]);
+        useEffect(() => {
+            const interval = setInterval(() => {
+                fetch(`/api/v1/matchTiles/${match.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                })
+                .then(response => response.json())
+                .then(data => setMatchTiles(data))
+                .catch(error => console.error('Error fetching tiles:', error));
+                fetch(`/api/v1/salmonMatches/match/${match.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                })
+                .then(response => response.json())
+                .then(data => setSalmons(data))
+                .catch(error => console.error('Error fetching tiles:', error));
+            }, 1000); // Cada 5 segundos
+            return () => clearInterval(interval);
+        }, [jwt]);
 
-    const reloadSalmon = async () => {
-        const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
-        const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
-        setSalmonAndImages(salmonMatchesNoCoord)
-        setGridSalmons(salmonMatchesWCoord) // Actualiza el estado con los nuevos jugadores
-    };
+        const reloadSalmon = async () => {
+            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+            const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+            setSalmonAndImages(salmonMatchesNoCoord)
+            setGridSalmons(salmonMatchesWCoord) // Actualiza el estado con los nuevos jugadores
+        };
 
-    const reloadTiles = async () => {
-        const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
-        const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
-        setTilesAndImages(matchTilesNoCoord)
-        setGridTiles(matchTilesWCoord) // Actualiza el estado con los nuevos jugadores
-    };
+        const reloadTiles = async () => {
+            const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+            const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+            setTilesAndImages(matchTilesNoCoord)
+            setGridTiles(matchTilesWCoord) // Actualiza el estado con los nuevos jugadores
+        };
 
 
     const changePhase = async () => {
@@ -306,52 +306,52 @@ export default function Game({match}){
         }
     }
 
-    const updateSalmonPosition = async(salmon,x,y) => {
-        console.log("salmon",salmon[0])
-        try{
-            let energyUsed;
-            if(salmon[0].coordinate === null){
-                energyUsed = y+1;
-            }else{
-                energyUsed = Math.abs(salmon[0].coordinate.x - x) + Math.abs(salmon[0].coordinate.y - y);
-            }
+        const updateSalmonPosition = async(salmon,x,y) => {
+            console.log("salmon",salmon[0])
+            try{
+                let energyUsed;
+                if(salmon[0].coordinate === null){
+                    energyUsed = y+1;
+                }else{
+                    energyUsed = Math.abs(salmon[0].coordinate.x - x) + Math.abs(salmon[0].coordinate.y - y);
+                }
 
-            if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
-                throw new Error('Not enough energy');
+                if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
+                    throw new Error('Not enough energy');
+                }
+            const responseSalmon = await fetch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify({ x, y })
+            });
+            //console.log(playerList)
+            const responseEnergy = await fetch(`/api/v1/players/${salmon[0].player}/energy`,{
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify(energyUsed)
+            })
+            console.log("energyUsed",energyUsed)
+            if (!responseSalmon.ok) {
+                throw new Error('Invalid salmon placement');
             }
-        const responseSalmon = await fetch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwt}`
-            },
-            body: JSON.stringify({ x, y })
-        });
-        //console.log(playerList)
-        const responseEnergy = await fetch(`/api/v1/players/${salmon[0].player}/energy`,{
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwt}`
-            },
-            body: JSON.stringify(energyUsed)
-        })
-        console.log("energyUsed",energyUsed)
-        if (!responseSalmon.ok) {
-            throw new Error('Invalid salmon placement');
-        }
-        else if (!responseEnergy.ok){
-            throw new Error('Invalid energy use');
-        }
-        else{
-            console.log("salmon e imagen",responseEnergy, salmonAndImages, salmon, energyUsed)
-            const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon[0].id);
-            //console.log("salmonWithImage",salmonWithImage)
-            setSalmonAndImages(prevSalmons =>
-                prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
-            );
-            
-        }
+            else if (!responseEnergy.ok){
+                throw new Error('Invalid energy use');
+            }
+            else{
+                console.log("salmon e imagen",responseEnergy, salmonAndImages, salmon, energyUsed)
+                const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon[0].id);
+                //console.log("salmonWithImage",salmonWithImage)
+                setSalmonAndImages(prevSalmons =>
+                    prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
+                );
+                
+            }
 
     }catch{
 
@@ -401,77 +401,77 @@ export default function Game({match}){
     const x = index % gridWidth; // Coordenada x (columna)
     const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
-            // Reiniciar la casilla seleccionada después de moverla
-            /*
-            setSelectedTile(null);
-            setSelectedSalmon(null)
-            let nextPlayer = players[myPlayer.playerOrder+1];
-            console.log(nextPlayer)
-            console.log(players)
-            if(!nextPlayer){
-                nextPlayer = players[0];}
-              */
-    try {
-        
-        console.log("salmon seleccionada",selectedSalmon)
-        
-        let nextPlayer = players[myPlayer.playerOrder + 1];
-        if(selectedSalmon === null){
-            await updateTilePosition(selectedTile, x, y);
-            setSelectedTile(null);
-        if (!nextPlayer) {
-            nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
-        }
-
-        // Actualizar el turno en el servidor
-        await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${jwt}`
-            }
-        });
-        }else{
-            const foundTile = gridTiles.find(
-                t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
-              );
-            console.log("AAAAAAA", foundTile)
-            if(foundTile){
-                console.log("selectedSalmon",selectedSalmon)
-            await updateSalmonPosition(selectedSalmon, x, y);
-            setSelectedSalmon(null);
-            try{
-                stompClient.publish({
-                    destination: "/app/players",
-                    body: JSON.stringify({ action: "colorChanged" }),
-                });
-            //console.log("refreshPlayers",refreshPlayers)
-            }catch(error){
-                console.error("Error updating players", error);
-            }
-            }
-            const actualPlayer = players.find(p => p.id === match.actualPlayer);
-            console.log("actualPlayer",actualPlayer)
-            if(actualPlayer.energy === 0){
-                console.log("actual player sin energia")
-                await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${jwt}`
-                    }
-                });
-            }
+                // Reiniciar la casilla seleccionada después de moverla
+                /*
+                setSelectedTile(null);
+                setSelectedSalmon(null)
+                let nextPlayer = players[myPlayer.playerOrder+1];
+                console.log(nextPlayer)
+                console.log(players)
+                if(!nextPlayer){
+                    nextPlayer = players[0];}
+                  */
+        try {
             
+            console.log("salmon seleccionada",selectedSalmon)
+            
+            let nextPlayer = players[myPlayer.playerOrder + 1];
+            if(selectedSalmon === null){
+                await updateTilePosition(selectedTile, x, y);
+                setSelectedTile(null);
+            if (!nextPlayer) {
+                nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
+            }
+
+            // Actualizar el turno en el servidor
+            await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                }
+            });
+            }else{
+                const foundTile = gridTiles.find(
+                    t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
+                  );
+                console.log("AAAAAAA", foundTile)
+                if(foundTile){
+                    console.log("selectedSalmon",selectedSalmon)
+                await updateSalmonPosition(selectedSalmon, x, y);
+                setSelectedSalmon(null);
+                try{
+                    stompClient.publish({
+                        destination: "/app/players",
+                        body: JSON.stringify({ action: "colorChanged" }),
+                    });
+                //console.log("refreshPlayers",refreshPlayers)
+                }catch(error){
+                    console.error("Error updating players", error);
+                }
+                }
+                const actualPlayer = players.find(p => p.id === match.actualPlayer);
+                console.log("actualPlayer",actualPlayer)
+                if(actualPlayer.energy === 0){
+                    console.log("actual player sin energia")
+                    await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${jwt}`
+                        }
+                    });
+                }
+                
+            }
+        } catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+            // Detener ejecución si ocurre un error
+            return;
         }
-    } catch (error) {
-        console.error("Error updating tile position or advancing turn:", error);
-        // Detener ejecución si ocurre un error
-        return;
-    }
-
-
-};
+    
+    
+    };
 
 const handleRotateTile = async (tile) => {
     try {

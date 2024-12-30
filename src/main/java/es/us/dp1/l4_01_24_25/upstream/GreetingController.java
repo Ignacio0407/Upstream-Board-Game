@@ -29,4 +29,10 @@ public class GreetingController {
 	public String greeting3(Player message) throws Exception{
 		return "Hello";
 	}
+
+	@MessageMapping("/fetch")
+	@SendTo("/topic/`players")
+	public String greeting4(Player message) throws Exception{
+		return "Hello";
+	}
 }
