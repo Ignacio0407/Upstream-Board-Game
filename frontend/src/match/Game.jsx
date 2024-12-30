@@ -1,3 +1,26 @@
+import React, { useState, useEffect } from 'react';
+import tokenService from '../services/token.service'
+import useFetchState from "../util/useFetchState";
+import '../static/css/game/game.css'
+import bearTile from '../static/images/tiles/bearTile.png'
+import eagleTile from '../static/images/tiles/eagleTile.png'
+import heronTile from '../static/images/tiles/heronTile.png'
+import jumpTile from '../static/images/tiles/jumpTile.png'
+import rockTile from '../static/images/tiles/rockTile.png'
+import seaTile from '../static/images/tiles/seaTile.png'
+import waterTile from '../static/images/tiles/waterTile.png'
+import amarillo1 from '../static/images/salmons/Amarillo_1.png';
+import amarillo2 from '../static/images/salmons/Amarillo_2.png';
+import blanco1 from '../static/images/salmons/Blanco_1.png';
+import blanco2 from '../static/images/salmons/Blanco_2.png';
+import morado1 from '../static/images/salmons/Morado_1.png';
+import morado2 from '../static/images/salmons/Morado_2.png';
+import rojo1 from '../static/images/salmons/Rojo_1.png';
+import rojo2 from '../static/images/salmons/Rojo_2.png';
+import verde1 from '../static/images/salmons/Verde_1.png';
+import verde2 from '../static/images/salmons/Verde_2.png';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
     import React, { useState, useEffect } from 'react';
     import tokenService from '../services/token.service'
     import useFetchState from "../util/useFetchState";
@@ -42,8 +65,8 @@
         const [myPlayer, setMyPlayer] = useState(null);
         const [currentPhase, setCurrentPhase] = useState(null);
 
-        
-        
+    
+    
 
     const getTileImage = (tileP) => {
         if (!tileP) return null;  // Casilla vacia
@@ -87,6 +110,92 @@
         }
     }
 
+    useEffect(() => {
+        if(gridTiles.length > 0 || gridSalmons.length > 0){
+            reloadSalmon();
+            reloadTiles();
+        }
+        if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            //console.log("players", players)
+            /*
+            console.log("match", match)
+            
+            console.log("salmons", salmons)
+            
+            console.log("tilesList ", tilesList)
+            console.log("matchTiles", gridTiles)
+            */
+            setAllDataLoaded(true);
+            const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+            const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+            const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+            setTilesAndImages(matchTilesNoCoord)
+            setGridTiles(matchTilesWCoord)
+            setSalmonAndImages(salmonMatchesNoCoord)
+            setGridSalmons(salmonMatchesWCoord)
+            const orderedPlayers = [...players].sort(p => p.playerOrder)
+            setPlayers(orderedPlayers) // Siempre igual
+            setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+            setCurrentPhase(match.phase);
+        }
+    }, [tilesList, matchTiles]);
+
+    const fetchPlayers = async () => {
+        const response = await fetch(`/api/v1/matches/${match.id}/players`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        });
+        const data = await response.json();
+        setPlayers(data); // Actualiza el estado con los nuevos jugadores
+    };
+    
+    const socket = new SockJS('http://localhost:8080/ws-upstream');
+        const stompClient = new Client({
+        webSocketFactory: () => socket,
+        debug: (str) => {
+            //console.log(str);
+        },
+        connectHeaders: {
+            Authorization: `Bearer ${jwt}`
+        },
+        onConnect: (frame) => {
+            console.log('Connected: ' + frame);
+            
+            stompClient.subscribe('/topic/salmon', (message) => {
+                console.log('Message received: ' + message.body);
+                const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
+                const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
+                setSalmonAndImages(salmonMatchesNoCoord)
+                setGridSalmons(salmonMatchesWCoord)
+            });
+            stompClient.subscribe('/topic/tiles', (message) => {
+                console.log('Message received: ' + message.body);
+                const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
+                const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
+                setTilesAndImages(matchTilesNoCoord)
+                setGridTiles(matchTilesWCoord)    
+                
+            });
+            stompClient.subscribe('/topic/players', (message) => {
+                console.log('Message received: ' + message.body);
+                fetchPlayers();
+            });
+        },
+        onStompError: (frame) => {
+            console.error('Broker reported error: ' + frame.headers['message']);
+            console.error('Additional details: ' + frame.body);
+        },
+        onWebSocketError: (error) => {
+            console.error('Error with websocket', error);
+        }
+    });
+    
+    stompClient.activate();
         useEffect(() => {
             if(gridTiles.length > 0 || gridSalmons.length > 0){
                 reloadSalmon();
@@ -401,77 +510,77 @@
     const x = index % gridWidth; // Coordenada x (columna)
     const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
-                // Reiniciar la casilla seleccionada después de moverla
-                /*
-                setSelectedTile(null);
-                setSelectedSalmon(null)
-                let nextPlayer = players[myPlayer.playerOrder+1];
-                console.log(nextPlayer)
-                console.log(players)
-                if(!nextPlayer){
-                    nextPlayer = players[0];}
-                  */
-        try {
-            
-            console.log("salmon seleccionada",selectedSalmon)
-            
-            let nextPlayer = players[myPlayer.playerOrder + 1];
-            if(selectedSalmon === null){
-                await updateTilePosition(selectedTile, x, y);
-                setSelectedTile(null);
-            if (!nextPlayer) {
-                nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
-            }
-
-            // Actualizar el turno en el servidor
-            await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                }
-            });
-            }else{
-                const foundTile = gridTiles.find(
-                    t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
-                  );
-                console.log("AAAAAAA", foundTile)
-                if(foundTile){
-                    console.log("selectedSalmon",selectedSalmon)
-                await updateSalmonPosition(selectedSalmon, x, y);
-                setSelectedSalmon(null);
-                try{
-                    stompClient.publish({
-                        destination: "/app/players",
-                        body: JSON.stringify({ action: "colorChanged" }),
-                    });
-                //console.log("refreshPlayers",refreshPlayers)
-                }catch(error){
-                    console.error("Error updating players", error);
-                }
-                }
-                const actualPlayer = players.find(p => p.id === match.actualPlayer);
-                console.log("actualPlayer",actualPlayer)
-                if(actualPlayer.energy === 0){
-                    console.log("actual player sin energia")
-                    await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${jwt}`
-                        }
-                    });
-                }
-                
-            }
-        } catch (error) {
-            console.error("Error updating tile position or advancing turn:", error);
-            // Detener ejecución si ocurre un error
-            return;
+            // Reiniciar la casilla seleccionada después de moverla
+            /*
+            setSelectedTile(null);
+            setSelectedSalmon(null)
+            let nextPlayer = players[myPlayer.playerOrder+1];
+            console.log(nextPlayer)
+            console.log(players)
+            if(!nextPlayer){
+                nextPlayer = players[0];}
+              */
+    try {
+        
+        console.log("salmon seleccionada",selectedSalmon)
+        
+        let nextPlayer = players[myPlayer.playerOrder + 1];
+        if(selectedSalmon === null){
+            await updateTilePosition(selectedTile, x, y);
+            setSelectedTile(null);
+        if (!nextPlayer) {
+            nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
         }
-    
-    
-    };
+
+        // Actualizar el turno en el servidor
+        await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            }
+        });
+        }else{
+            const foundTile = gridTiles.find(
+                t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
+              );
+            console.log("AAAAAAA", foundTile)
+            if(foundTile){
+                console.log("selectedSalmon",selectedSalmon)
+            await updateSalmonPosition(selectedSalmon, x, y);
+            setSelectedSalmon(null);
+            try{
+                stompClient.publish({
+                    destination: "/app/players",
+                    body: JSON.stringify({ action: "colorChanged" }),
+                });
+            //console.log("refreshPlayers",refreshPlayers)
+            }catch(error){
+                console.error("Error updating players", error);
+            }
+            }
+            const actualPlayer = players.find(p => p.id === match.actualPlayer);
+            console.log("actualPlayer",actualPlayer)
+            if(actualPlayer.energy === 0){
+                console.log("actual player sin energia")
+                await fetch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                });
+            }
+            
+        }
+    } catch (error) {
+        console.error("Error updating tile position or advancing turn:", error);
+        // Detener ejecución si ocurre un error
+        return;
+    }
+
+
+};
 
 const handleRotateTile = async (tile) => {
     try {
