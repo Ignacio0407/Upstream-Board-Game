@@ -1,14 +1,36 @@
 .playerCardContainer {
-    background-color: white;
+    display: flex;
     align-items: center;
-    justify-content: center;
-
+    justify-content: space-between;
+    background-color: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    width: 100%;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5); 
 }
 
-.column-card {
-        background-color: white;
-        padding: 10px;
-        text-align: left;
-        border-top: 1px solid black;
-        font-size: 100%;
+.rowContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    
+}
+.column-card-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: left;
+    margin-left: 5%;
+    
+}
+
+.column-card-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-left: 20px; 
+    flex-shrink: 0; 
+    border-width: 1px;
 }

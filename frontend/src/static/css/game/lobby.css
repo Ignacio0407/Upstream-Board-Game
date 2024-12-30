@@ -21,10 +21,15 @@
     
 }
 .lobbyTitleContainer {  
-    margin-top: 5%;
-    background-color: rgba(255, 255, 255, 0.6);
+    margin-top: 7%;
+    background-color: rgba(255, 255, 255, 0.3);
     border-radius: 10px;
-    padding: 3%;
+    padding: 2%;
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    align-items: center;
+    align-content: center;
+    text-align: center;
 }
 
 
@@ -33,10 +38,32 @@
     display: flex;
     flex-direction: column;
     align-self: flex-end;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5%;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
 }
 
 .lobbyUtilContainer {
     display: flex;
     flex-direction: column;
-    align-self: flex-end;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5%;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+.buttonStart {
+    margin-bottom: 5%;
+    height: 60px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    margin-top: 2%;
+}
+
+.buttonExit {
+    height: 40px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    margin-bottom: 2%;
 }

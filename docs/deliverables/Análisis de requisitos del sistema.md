@@ -59,16 +59,16 @@ Administradores: Los administradores, tras registrarse y loguearse, podrán real
 ## Historias de Usuario -> Visual, lo que puede hacer el usuario.
 
  ### HU-(ISSUE#65): Iniciar sesión ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/65])
-Como usuario quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
+Como usuario quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas. (HU implementada con el proyecto base).
 
 ![](/docs/mockups/Mockup%20Inicio%20de%20Sesion.png)
 
  ### HU-(ISSUE#70): Registrarse ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/70])
-Como usuario quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión posteriormente.
+Como usuario quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión posteriormente. (HU implementada con el proyecto base).
 
 ![](/docs/mockups/Mockup%20Registrarse.png)
 
- ### HU-(ISSUE#ID): Jugar partidas ([Enlace a la Issue asociada a la historia de usuario]()
+ ### HU-(ISSUE#62): Jugar partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/62])
 Como jugador quiero que el sistema me permita jugar partidas, bien sea creándolas o uniéndome a ellas.
 ![](/docs/mockups/Mockup%20Pantalla%20Inicial.png)
 
@@ -89,21 +89,21 @@ jugadores y administradores.
 
  ### HU-(ISSUE#67): Listar usuarios ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/67])
 Como administrador quiero que el sistema me permita listar todos los usuarios del juego registrados además de ver 
-sus nombres y sus roles.
+sus nombres y sus roles. (HU implementada con el proyecto base).
 ![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
 
  ### HU-(ISSUE#68): Crear un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
 Como administrador quiero que el sistema me permita crear un nuevo usuario, especificando su nombre, contraseña
-y rol, eligiendo entre jugador o administrador.
+y rol, eligiendo entre jugador o administrador. (HU implementada con el proyecto base).
 ![](/docs/mockups/Mockup%20Crear%20Usuarios.png)
 
  ### HU-(ISSUE#68): Modificar y eliminar un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
-Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol, y eliminar usuarios, borrándolos de la base de datos.
+Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol, y eliminar usuarios, borrándolos de la base de datos. (HU implementada con el proyecto base).
 ![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
 
  ### HU-(ISSUE#69): Listar desarrolladores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/69])
 Como administrador y usuario quiero que el sistema me permita listar todas las personas que han participado en el desarrollo
-del juego, junto con información básica de cada uno de ellos.
+del juego, junto con información básica de cada uno de ellos. (HU implementada con el proyecto base).
 ![](/docs/mockups/Mockup%20Listar%20Desarrolladores.png)
 
  ### HU-(ISSUE#71): Crear una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/71])
@@ -118,7 +118,7 @@ Como usuario y administrador quiero que el sistema me permita listar las diferen
  Como usuario quiero buscar partidas disponibles por su nombre.
  ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
 
- ### HU-(ISSUE#161): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/161])
+ ### HU-(ISSUE#152): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/152])
  Como jugador dentro de una partida quiero poder colocar una casilla en el tablero.
  ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
 
@@ -143,11 +143,11 @@ Como usuario y administrador quiero que el sistema me permita listar las diferen
  ![](/docs/mockups/Mockup%20Listar%20Logros%20Desbloqueados.png)
 
  ### HU-(ISSUE#167): Ver las reglas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/167])
- Como usuario, quiero consultar las reglas del juego.
+ Como usuario, quiero consultar las reglas del juego. 
  ![](/docs/mockups/Mockup%20Ver%20Reglas.png)
 
  ### HU-(ISSUE#168): Borrar una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/168])
- Como administrador, quiero poder borrar partidas de la lista.
+ Como administrador, quiero poder borrar partidas de la lista. (HU implementada con el proyecto base).
  ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
 
 ## Diagrama conceptual del sistema
