@@ -17,6 +17,8 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,6 +37,8 @@ public class Player extends BaseEntity implements Serializable{
     
     Boolean alive;
     Integer points;
+    @Min(0)
+    @Max(5)
     Integer energy;
 
     @JsonSerialize(using = UserSerializer.class)
