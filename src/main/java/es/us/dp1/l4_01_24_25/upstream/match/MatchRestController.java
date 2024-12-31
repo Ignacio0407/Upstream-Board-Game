@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,18 +28,15 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatchService;
-import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
-import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/v1/matches")
+@RequestMapping("/api/v1/matches")
 public class MatchRestController {
     
     private final MatchService matchService;
@@ -202,7 +200,6 @@ public class MatchRestController {
     String name = requestBody.getOrDefault("name", "");
     String password = requestBody.getOrDefault("password", "");
     Match m = new Match();
-
     m.setName(name);
     m.setPassword(password);
     m.setMatchCreator(u);
@@ -213,7 +210,6 @@ public class MatchRestController {
     m.setInitialPlayer(null);
     m.setActualPlayer(null);
     matchService.save(m);
-
     return new ResponseEntity<>(m, HttpStatus.CREATED);
 }
 
@@ -256,5 +252,28 @@ public class MatchRestController {
         return new ResponseEntity<>(m, HttpStatus.OK);
     }
 
+    @GetMapping("/{salmon}/moveIsPossible")
+    public ResponseEntity<Boolean> moveValid( @PathVariable("salmon") SalmonMatch salmonToMove, @RequestParam("x") int x, @RequestParam("y") int y) {
+        Integer xToMove = Math.abs(x - salmonToMove.getCoordinate().x());
+        Integer yToMove = Math.abs(y - salmonToMove.getCoordinate().y());
+        if (xToMove == 2) {
+            if (yToMove < 2) {
+                return ResponseEntity.ok(false);
+            }
+        }
+        return ResponseEntity.ok(y > salmonToMove.getCoordinate().y());
+    }
+
+    @GetMapping("/{salmon}/{playerId}/energyValid")
+    public ResponseEntity<Boolean> energyValid(@PathVariable("salmon") SalmonMatch salmonToMove,@RequestParam("x") int x,
+            @RequestParam("y") int y, @PathVariable("playerId") Integer playerId) {
+        Player player = playerService.getById(playerId);
+        if (moveValid(salmonToMove, x, y).getBody()) {
+            Boolean isValid = y - salmonToMove.getCoordinate().y() <= player.getEnergy();
+            return ResponseEntity.ok(isValid);
+        } else {
+            return ResponseEntity.ok(false);
+        }
+    }
 
 }

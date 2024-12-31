@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import {RgbToColor} from './ColorParser';
 
-function ColorPickerModal({ onColorSelect , takenColors}) {
+export default function ColorPickerModal({ onColorSelect , takenColors}) {
     // Estado para el color seleccionado y para la visibilidad del modal
     const [isVisible, setIsVisible] = useState(true);
     const [selectedColor, setSelectedColor] = useState(null);
@@ -124,5 +124,3 @@ const styles = {
         borderRadius: '5px',
     },
 };
-
-export default ColorPickerModal;

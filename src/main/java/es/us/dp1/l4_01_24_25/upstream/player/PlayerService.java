@@ -29,13 +29,6 @@ public class PlayerService {
         return playerRepository.findAll();
     }
 
-    /*
-    @Transactional(readOnly = true)
-    public Match getById(Integer id) {
-        Optional <Match> op = matchRepository.findById(id);
-        return optionalToValueOrNull(op);
-    }*/
-
     @Transactional(readOnly = true)
     public Player getById(Integer id) {
         Optional <Player> op = playerRepository.findById(id);
