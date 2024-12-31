@@ -58,3 +58,37 @@ export const fetchTilesList = () => {
     },
   });
 };
+
+export const get = async (uri, jwt) => {
+  return fetch(uri, {
+    method: "GET",
+    headers: {
+        Authorization: `Bearer ${jwt}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+    },
+  });
+}
+
+export const patch = async (uri, jwt, data = null) => {
+  if (!data) {
+    return fetch(uri, {
+      method: "PATCH",
+      headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+      },
+    });
+  } else {
+    return fetch(uri, {
+      method: "PATCH",
+      headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data)
+    });
+  }
+}
