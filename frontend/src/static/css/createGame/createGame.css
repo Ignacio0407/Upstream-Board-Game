@@ -19,51 +19,54 @@
     justify-content: center;             
     padding: 20px;  
     margin-top: 90px;            
-    border-radius: 5px;   
-    border: 2px solid black;      
+    border-radius: 5px;       
     margin-left: 10px; 
     margin-right: 10px;  
-    background-color: rgba(255, 255, 255, 0.2);     
-}
-
-.inputs-table {
-    width: 90%;
-    margin: 20px auto;
-    border-collapse:collapse;
-    background-color: #33678A; 
-    color: white;
-    align-items: center;
-    justify-content: center;
-    display:table;
-    table-layout: fixed;
+    background-color: rgba(255, 255, 255, 0.3); 
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
 }
 
 
-.td2 {
-    padding: 40px;
-    text-align: left;
-    border-top: 1px solid #517A94;
-    font-size: 40px;
+.button-create {
+    margin-bottom: 5%;
+    height: 40px;
+    width: 40%;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    margin-top: 2%; 
+    background-color: rgb(25, 191, 0);
+    border-radius: 5px;
+    border: none;
 }
 
-.input {
-    width: 300px;   
-    height: 40px;   
-    padding: 20px;  
-    font-size: 16px; 
-    margin-left: 30px;
-    margin-bottom: 20px;
-    color: #333;
+.custom-button-row {
+    margin-top: 20px;
 }
 
-input::placeholder {
-    color: #888;
-    font-size: 14px;
-    font-style: italic;
+.password-container{
+    margin-top: 20px;
+}
+
+.button-cancel {
+    margin-bottom: 5%;
+    height: 40px;
+    width: 40%;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    margin-top: 2%; 
+    background-color: rgb(191, 41, 0);
+    border-radius: 5px;
+    border: none;
+}
+
+.form-container {
+    border-radius: 5px;   
+    background-color: rgba(255, 255, 255, 0.3); 
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    width: 33%;
+    margin: 10px;
+    padding: 20px;
+}
+
+.label-input {
+    font-size: 20px;
     
-}
-
-
-.botonCreate {
-    width: 300px;
 }
