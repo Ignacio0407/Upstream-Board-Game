@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Label } from "reactstrap"; 
+import { Form, Input, Label, Button } from "reactstrap"; 
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 // import '../static/css/createGame/createGame.css'
@@ -89,10 +89,10 @@ export default function CreateGame() {
             Create Game
         </h2>
 
-        <div className="auth-form-container">
+        <div className="form-container">
             <Form onSubmit={handleSubmit}>
-                <div className="custom-form-input">
-                    <Label for="name" className="custom-form-input-label">
+                <div className="">
+                    <Label for="name" className="label-input">
                         Name
                     </Label>
                     <Input
@@ -107,8 +107,8 @@ export default function CreateGame() {
                     />
                 </div>
 
-                <div className="custom-form-input">
-                    <Label for="password" className="custom-form-input-label">
+                <div className="password-container">
+                    <Label for="password" className="label-input">
                         Password
                     </Label>
                     <Input
@@ -122,14 +122,12 @@ export default function CreateGame() {
                 </div>
 
                 <div className="custom-button-row">
-                    <button className="auth-button">Save</button>
-                    <Link
-                        to={`/dashboard`}
-                        className="auth-button"
-                        style={{ textDecoration: "none" }}
-                    >
-                        Cancel
-                    </Link>
+                <Button color='success' onClick={handleSubmit} className='button-create'>
+                         Crear
+                </Button>
+                <Button color='danger' onClick={() => navigate('/dashboard')} className='button-cancel'>
+                         Cancelar
+                </Button>
                 </div>
             </Form>
         </div>
