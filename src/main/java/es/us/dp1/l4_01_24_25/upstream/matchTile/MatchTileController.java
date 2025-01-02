@@ -125,97 +125,82 @@ public class MatchTileController {
     return ResponseEntity.ok(updatedMatchTile);
 }
 
-@PostMapping("/createMatchTiles/{id}")
-@ResponseStatus(HttpStatus.CREATED)
-public ResponseEntity<List<MatchTile>> createMultipleMatchTiles(@PathVariable("id") Integer id) throws DataAccessException {
-    // Retrieve or create Tile objects for tile types 1 and 2
-    Tile agua = tileService.findById(1).orElse(null);
-    Tile piedra = tileService.findById(2).orElse(null);
-    Tile garza = tileService.findById(3).orElse(null);
-    Tile oso = tileService.findById(4).orElse(null);
-    Tile aguila = tileService.findById(5).orElse(null);
-    Tile salto = tileService.findById(6).orElse(null);
+    @PostMapping("/createMatchTiles/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<List<MatchTile>> createMultipleMatchTiles(@PathVariable("id") Integer id) throws DataAccessException {
+        Tile agua = tileService.findById(1).orElse(null);
+        Tile piedra = tileService.findById(2).orElse(null);
+        Tile garza = tileService.findById(3).orElse(null);
+        Tile oso = tileService.findById(4).orElse(null);
+        Tile aguila = tileService.findById(5).orElse(null);
+        Tile salto = tileService.findById(6).orElse(null);
+        if (agua == null || piedra == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Match match = matchService.getById(id);
+        if (match == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        List<MatchTile> createdTiles = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(agua);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        }
+        for (int i = 0; i < 5; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(piedra);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum()-1);
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        }
+        for (int i = 0; i < 5; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(garza);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        }
+        for (int i = 0; i < 3; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(oso);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        }
+        for (int i = 0; i < 5; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(aguila);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        } 
+        for (int i = 0; i < 4; i++) {
+            MatchTile matchTile = new MatchTile();
+            matchTile.setTile(salto);
+            matchTile.setMatch(match);
+            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setOrientation(0);
+            matchTile.setCoordinate(null);
+            createdTiles.add(matchTile);
+        }    
+        Collections.shuffle(createdTiles);
+        createdTiles.stream().forEach(mT -> matchTileService.save(mT));
 
-    if (agua == null || piedra == null) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(createdTiles, HttpStatus.CREATED);
     }
-
-    Match match = matchService.getById(id);
-    if (match == null) {
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    List<MatchTile> createdTiles = new ArrayList<>();
-
-    // Create 7 tiles of type 1
-    for (int i = 0; i < 7; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(agua);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum());
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    for (int i = 0; i < 5; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(piedra);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum()-1);
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    for (int i = 0; i < 5; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(garza);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum());
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    for (int i = 0; i < 3; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(oso);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum());
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    for (int i = 0; i < 5; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(aguila);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum());
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    for (int i = 0; i < 4; i++) {
-        MatchTile matchTile = new MatchTile();
-        matchTile.setTile(salto);
-        matchTile.setMatch(match);
-        matchTile.setCapacity(match.getPlayersNum());
-        matchTile.setOrientation(0);
-        matchTile.setCoordinate(null);
-        createdTiles.add(matchTile);
-    }
-    
-    Collections.shuffle(createdTiles);
-    createdTiles.stream().forEach(mT -> matchTileService.save(mT));
-    
-
-    return new ResponseEntity<>(createdTiles, HttpStatus.CREATED);
-}
-
-
     
 }
 
