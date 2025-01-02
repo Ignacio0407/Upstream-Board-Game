@@ -39,6 +39,11 @@ public class MatchTileService {
         return matchTileRepository.findByMatchId(matchId);
     }
 
+    @Transactional(readOnly = true)
+    public List<MatchTile> findByMatchIdNoCoord(Integer matchId) {
+        return matchTileRepository.findWithNoCoord(matchId);
+    }
+
     @Transactional
     public void deleteMatchTile(Integer id) {
         MatchTile toDelete = findById(id);

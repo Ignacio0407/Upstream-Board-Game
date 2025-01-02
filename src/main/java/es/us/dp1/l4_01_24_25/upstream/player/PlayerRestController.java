@@ -167,6 +167,9 @@ public class PlayerRestController {
         if (jugador == null) {
             throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
         }
+        if (jugador.getEnergy() - energyUsed < 0) {
+            throw new ResourceNotFoundException("No hay suficiente energía", "energía", jugador.getEnergy().toString());
+        }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
         playerService.saveJugador(jugador);
         return new ResponseEntity<>(jugador, HttpStatus.OK);

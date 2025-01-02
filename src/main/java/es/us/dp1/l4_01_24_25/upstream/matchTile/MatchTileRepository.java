@@ -17,4 +17,7 @@ public interface MatchTileRepository extends CrudRepository<MatchTile, Integer>{
     @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId")
     List<MatchTile> findByMatchId(Integer matchId);
 
+    @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId AND mt.coordinate IS NULL")
+    List<MatchTile> findWithNoCoord(Integer matchId);
+
 }

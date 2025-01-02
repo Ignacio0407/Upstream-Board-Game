@@ -215,15 +215,25 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/changephase")
     public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
-        Match p = matchService.getById(matchId);
-        Phase f = p.getPhase();
-        if(f.equals(Phase.CASILLAS)) p.setPhase(Phase.MOVIENDO);
-        else {
-            p.setPhase(Phase.CASILLAS);
-            p.setRound(p.getRound()+1);   
+        Match match = matchService.getById(matchId);
+        Phase phase = match.getPhase();
+        List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
+        List<Player> players = matchService.getPlayersFromGame(matchId);
+        Integer round = match.getRound();
+        if(phase.equals(Phase.CASILLAS)) {
+            List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
+            if (rds.contains(mtNoC.size())) {
+                match.setPhase(Phase.MOVIENDO);
+            }
         }
-        matchService.save(p);
-        return new ResponseEntity<>(p, HttpStatus.OK);
+        else {
+            if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+                match.setPhase(Phase.CASILLAS);
+                match.setRound(round+1);
+            }
+        }
+        matchService.save(match);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/startGame")
