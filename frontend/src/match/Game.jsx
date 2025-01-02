@@ -365,6 +365,7 @@ export default function Game({match}){
         }
 
         // Actualizar el turno en el servidor
+        await patch(`/api/v1/matches/${match.id}/threats/garza`, jwt)
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
         }else{
             const foundTile = gridTiles.find(

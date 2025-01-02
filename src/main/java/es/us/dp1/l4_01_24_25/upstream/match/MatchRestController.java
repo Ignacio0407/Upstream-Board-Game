@@ -43,14 +43,14 @@ public class MatchRestController {
     private final PlayerService playerService;
     private final UserService userService;
     private final MatchTileService matchTileService;
-    private final salmonMatchService sms;
+    private final salmonMatchService salmonMatchService;
 
     public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, salmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
         this.userService = userService;
         this.matchTileService = matchTileService;
-        this.sms = sms;
+        this.salmonMatchService = sms;
     }
 
     @GetMapping
@@ -217,23 +217,10 @@ public class MatchRestController {
     public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
         Match p = matchService.getById(matchId);
         Phase f = p.getPhase();
-        List<MatchTile> mt = matchTileService.findByMatchId(matchId);
-        List<SalmonMatch> sm = sms.getAllFromMatch(matchId);
         if(f.equals(Phase.CASILLAS)) p.setPhase(Phase.MOVIENDO);
         else {
-            List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
-            for(MatchTile g:garzas) {
-                for(SalmonMatch s:sm) {
-                    if(g.getCoordinate().equals(s.getCoordinate())) {
-                        s.setSalmonsNumber(s.getSalmonsNumber()-1);
-                        if(s.getSalmonsNumber().equals(0)) sms.delete(s.getId());
-                        else sms.savePartidaSalmon(s);
-                    }
-                }    
-            }
             p.setPhase(Phase.CASILLAS);
-            p.setRound(p.getRound()+1);
-            
+            p.setRound(p.getRound()+1);   
         }
         matchService.save(p);
         return new ResponseEntity<>(p, HttpStatus.OK);
@@ -274,6 +261,26 @@ public class MatchRestController {
         } else {
             return ResponseEntity.ok(false);
         }
+    }
+
+    @PatchMapping("/{matchId}/threats/garza") 
+    public ResponseEntity<List<SalmonMatch>> energyValid(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
+        List<MatchTile> mt = matchTileService.findByMatchId(matchId);
+        List<SalmonMatch> sm = playerService.getSalmonsByPlayerId(playerId);
+        List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
+            for(MatchTile g:garzas) {
+                for(SalmonMatch salmon:sm) {
+                    if(g.getCoordinate().equals(salmon.getCoordinate())) {
+                        salmon.setSalmonsNumber(salmon.getSalmonsNumber()-1);
+                        if(salmon.getSalmonsNumber().equals(0)) {
+                            salmonMatchService.delete(salmon.getId()); 
+                            sm.remove(salmon);
+                        }
+                        else salmonMatchService.savePartidaSalmon(salmon);
+                    }
+                }    
+            }
+        return ResponseEntity.ok(sm);
     }
 
 }
