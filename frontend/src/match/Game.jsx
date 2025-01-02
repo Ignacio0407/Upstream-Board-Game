@@ -362,7 +362,8 @@ export default function Game({match}){
         }
 
         // Actualizar el turno en el servidor
-        await patch(`/api/v1/matches/${match.id}/threats/garza`, jwt)
+
+        // await patch(`/api/v1/matches/${match.id}/threats/garza`, jwt)
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
         }else{
             console.log("Entra en else")
@@ -390,6 +391,7 @@ export default function Game({match}){
                 await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
             }       
         }
+        await patch(`/api/v1/matches/${match.id}/changephase`)
     } catch (error) {
         console.error("Error updating tile position or advancing turn:", error);
         // Detener ejecución si ocurre un error
