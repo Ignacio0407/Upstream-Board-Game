@@ -218,7 +218,10 @@ public ResponseEntity<List<MatchTile>> createMultipleMatchTiles(@PathVariable("i
     return new ResponseEntity<>(createdTiles, HttpStatus.CREATED);
 }
 
-
+    @GetMapping("/prueba1/{matchId}")
+    public List<MatchTile> getMatchTileCoordinates(@PathVariable("matchId") Integer matchId) {
+        return matchTileService.findByMatchIdNoCoord(matchId);
+    }
     
 }
 

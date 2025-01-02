@@ -7,7 +7,6 @@ import eagleTile from '../static/images/tiles/eagleTile.png'
 import heronTile from '../static/images/tiles/heronTile.png'
 import jumpTile from '../static/images/tiles/jumpTile.png'
 import rockTile from '../static/images/tiles/rockTile.png'
-import seaTile from '../static/images/tiles/seaTile.png'
 import waterTile from '../static/images/tiles/waterTile.png'
 import amarillo1 from '../static/images/salmons/Amarillo_1.png';
 import amarillo2 from '../static/images/salmons/Amarillo_2.png';
@@ -41,7 +40,6 @@ export default function Game({match}){
     const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
     const [gridS, setGridS] = useState(Array(4).fill(null));
     const [myPlayer, setMyPlayer] = useState(null);
-    const [currentPhase, setCurrentPhase] = useState(null);
 
     const getTileImage = (tileP) => {
         if (!tileP) return null;  // Casilla vacia
@@ -86,16 +84,16 @@ export default function Game({match}){
     }
 
     useEffect(() => {
-        if(gridTiles.length > 0 || gridSalmons.length > 0){
+        /*if(gridTiles.length > 0 || gridSalmons.length > 0){
             reloadSalmon();
             reloadTiles();
-        }
-        if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0 && !allDataLoaded) {
-            console.log("players", players)
+        }*/
+        if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            /*console.log("players", players)
             console.log("match", match)
             console.log("salmons", salmons)
             console.log("tilesList ", tilesList)
-            console.log("matchTiles", gridTiles)
+            console.log("matchTiles", gridTiles)*/
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
@@ -108,7 +106,6 @@ export default function Game({match}){
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
             setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            setCurrentPhase(match.phase);
         }
     }, [tilesList, matchTiles]);
 
@@ -202,6 +199,7 @@ export default function Game({match}){
         setGridS(newGridS);
     }, [gridSalmons])
 
+    // No quitar este useEffect
     useEffect(() => {
         const interval = setInterval(() => {
             get(`/api/v1/matchTiles/${match.id}`, jwt)
@@ -217,7 +215,7 @@ export default function Game({match}){
         return () => clearInterval(interval);
     }, [jwt]);
 
-    const reloadSalmon = async () => {
+    /*const reloadSalmon = async () => {
         const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s)])
         const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s)])
         setSalmonAndImages(salmonMatchesNoCoord)
@@ -229,11 +227,11 @@ export default function Game({match}){
         const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t)])
         setTilesAndImages(matchTilesNoCoord)
         setGridTiles(matchTilesWCoord) // Actualiza el estado con los nuevos jugadores
-    };
+    };*/
 
 
-    const changePhase = async () => {
-        if(gridTiles.length === 12 && currentPhase === 'CASILLAS') {
+    /*const changePhase = async () => {
+        if(gridTiles.length === 12 && match.phase === 'CASILLAS' && match.round === 0) {
             try {
                 const response = await patch(`/api/v1/matches/${match.id}/changephase`, jwt)
                 if(response.ok) {
@@ -249,7 +247,7 @@ export default function Game({match}){
 
     useEffect(() => {
         changePhase();
-    }, [gridTiles])
+    }, [gridTiles])*/
 
     if (!allDataLoaded) {
         return <div style={{justifySelf:'center'}}>Loading data</div>;
@@ -268,22 +266,22 @@ export default function Game({match}){
     })
 
     const handleTileClick = (tile) => {
-            if (myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS') {
+            if (myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS') {
                 setSelectedTile(tile);
                 setSelectedSalmon(null)
             }
     }
 
     const handleSalmonClick = (salmon) => {
-        if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player && currentPhase === 'MOVIENDO') {
+        if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player && match.phase === 'MOVIENDO') {
             setSelectedSalmon(salmon);
-            console.log("selectedSalmon",selectedSalmon)
+            //console.log("selectedSalmon",selectedSalmon)
         }
     }
 
     const updateSalmonPosition = async(salmon,x,y) => {
-        console.log("grid", grid)
-        console.log("salmon",salmon[0])
+        //console.log("grid", grid)
+        //console.log("salmon",salmon[0])
         try{
             let energyUsed;
             if(salmon[0].coordinate === null){
@@ -320,7 +318,6 @@ export default function Game({match}){
 
     const updateTilePosition = async (tile, x, y) => {
         try {
-            console.log("dato", tile, x, y)
             const response = await patch(`/api/v1/matchTiles/${tile[0].id}`, jwt, {x,y});
             
             if (!response.ok) {
@@ -354,25 +351,25 @@ export default function Game({match}){
     const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
     try {
-        console.log("salmon seleccionada",selectedSalmon)
-        
         let nextPlayer = players[myPlayer.playerOrder + 1];
         if(selectedSalmon === null){
             await updateTilePosition(selectedTile, x, y);
+            console.log("Entra en primer if")
             setSelectedTile(null);
         if (!nextPlayer) {
             nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
+            console.log("Entra en segundo if")
         }
 
         // Actualizar el turno en el servidor
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
         }else{
+            console.log("Entra en else")
             const foundTile = gridTiles.find(
                 t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
               );
-            console.log("AAAAAAA", foundTile)
-            if(foundTile){
-                console.log("selectedSalmon",selectedSalmon)
+            console.log("Casilla a la que quiero ir", foundTile)
+            if(foundTile){    
             await updateSalmonPosition(selectedSalmon, x, y);
             setSelectedSalmon(null);
             try{
@@ -474,7 +471,7 @@ const calculateSalmonPosition = (index, totalSalmons) => {
             <div key={tilesAndImages[0][0].id}
                 style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                 onClick={() => handleTileClick(tilesAndImages[0])}>
-                    {myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS' && <h2>Pick the tile!</h2>}
+                    {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0])}
@@ -483,7 +480,7 @@ const calculateSalmonPosition = (index, totalSalmons) => {
                         ...getRotationStyle(tilesAndImages[0][0])} 
                         }></img>
                     }
-                    {myPlayer.id === match.actualPlayer && currentPhase === 'CASILLAS' && 
+                    {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && 
                     (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
                         tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
                     && <button onClick={() => handleRotateTile(tilesAndImages[0])}>Rotate Tile</button>}
