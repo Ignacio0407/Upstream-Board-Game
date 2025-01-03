@@ -1,3 +1,4 @@
+import { ColorToRgb } from "../util/ColorParser";
 import { patch } from "../util/fetchers";
 
 export const getTileImage = (tileP, tilesList, images) => {
@@ -51,11 +52,24 @@ export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelec
 export const handleRotateTile = async (tile, jwt) => {
     try {
         const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
-        const response = await patch(`/api/v1/matchTiles/${tile[0].id}/rotation`, jwt, newOrientation);
+        console.log(newOrientation);
+
+        const response = await fetch(`/api/v1/matchTiles/${tile[0].id}/rotation`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${jwt}`,
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newOrientation),
+        });
+
         if (!response.ok) {
-            throw new Error('Error updating tile rotation');            
+            throw new Error('Error updating tile rotation');
         }
-        console.log(response);
+
+        const data = await response.json(); // Si la respuesta incluye un JSON
+        console.log(data);
 
     } catch (error) {
         console.error('Error rotating tile:', error);
@@ -73,8 +87,23 @@ export const generatePlayerList = (players) => {
     return players.map((p) => (
         <tr key={p.id} className="table-row">
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.name}</td>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.color}</td>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.points}</td>
+            <td className="table-cell" style={{
+            padding: '0', // Elimina el padding del `<td>`
+            textAlign: 'center', // Centra el contenido en el `<td>`
+            verticalAlign: 'middle',
+                }}>
+                <div style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    backgroundColor: `${ColorToRgb(p.color)}`,
+                    border: '1px solid #000',
+                    display: 'inline-block', 
+                }}>
+                    
+                </div>
+            </td>   
+            <td className="table-cell" style={{ position: 'relative', padding: '20px', paddingLeft: '55px', paddingRight: '40px'}}>{p.points}</td>
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
                 {p.alive 
                     ? <i className="fa fa-check-circle" style={{ color: 'green' }}></i> 

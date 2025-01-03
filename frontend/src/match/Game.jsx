@@ -22,6 +22,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { get, patch } from '../util/fetchers';
 import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList} from './matchUtil';
+import { ColorToRgb } from '../util/ColorParser';
 
 
 export default function Game({match}){
@@ -326,18 +327,21 @@ const calculateSalmonPosition = (index, totalSalmons) => {
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-            <div className="users-table">
+            <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Name</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Color</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Points</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Alive</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Energy</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Color</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Points</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Alive</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Energy</th>
                     </tr>
                 </thead>
-                <tbody>{playerList}</tbody>
-            </div>
+                <tbody>
+                    {playerList}
+                </tbody>
+            </table>
+
             
 
             {tilesAndImages.length > 0 &&
@@ -401,7 +405,13 @@ const calculateSalmonPosition = (index, totalSalmons) => {
                                     ...position,
                                     transition: 'all 0.3s ease-in-out',
                                     zIndex: 2,
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    borderRadius: '27px',
+                                    
+                                    
+                                    
                                 }}
                                 />
                             );
@@ -420,6 +430,10 @@ const calculateSalmonPosition = (index, totalSalmons) => {
                                 src = {s[1]}
                                 alt=""
                                 onClick={() => handleSalmonClick(s)}
+                                style={{                          
+                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    borderRadius: '40px',}}
                                 />
                                 )
                             ))}

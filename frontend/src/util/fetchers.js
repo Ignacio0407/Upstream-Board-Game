@@ -79,7 +79,7 @@ export const patch = async (uri, jwt, data = null) => {
           Accept: "application/json",
           "Content-Type": "application/json",
       },
-    });
+    })
   } else {
     return fetch(uri, {
       method: "PATCH",
