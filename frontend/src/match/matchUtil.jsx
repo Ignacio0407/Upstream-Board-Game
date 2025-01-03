@@ -51,9 +51,7 @@ export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelec
 export const handleRotateTile = async (tile, jwt) => {
     try {
         const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
-
         const response = await patch(`/api/v1/matchTiles/${tile[0].id}/rotation`, jwt, newOrientation);
-
         if (!response.ok) {
             throw new Error('Error updating tile rotation');            
         }

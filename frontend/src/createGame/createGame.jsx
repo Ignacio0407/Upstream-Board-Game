@@ -58,7 +58,7 @@ export default function CreateGame() {
       .then(response => {
           if (!response.ok) {
               return response.text().then(err => {
-                  throw new Error(`Error al crear la partida: ${err}`);
+                  throw new Error(`Nombre no válido.`);
               });
           }
           return response.json();
