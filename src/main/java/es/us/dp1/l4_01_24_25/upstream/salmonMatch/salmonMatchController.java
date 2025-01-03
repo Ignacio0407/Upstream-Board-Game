@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -31,12 +33,14 @@ public class SalmonMatchController {
     private final salmonMatchService salmonMatchService;
     private final PlayerService playerService;
     private final SalmonService salmonService;
+    private final MatchTileService matchTileService;
 
     @Autowired
-    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService){
+    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService){
         this.salmonMatchService = salmonMatchService;
         this.playerService = playerService;
         this.salmonService = salmonService;
+        this.matchTileService = matchTileService;
     }
 
     @GetMapping("/match/{matchId}")
@@ -64,31 +68,72 @@ public class SalmonMatchController {
         SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
         Player player = salmonMatch.getPlayer();
         Coordinate myCoordinate = salmonMatch.getCoordinate();
-        Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y")); 
+        Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y"));
+        MatchTile destinyTile = matchTileService.findByCoordinate(newCoordinate.x(), newCoordinate.y());
         if (player.getEnergy() == 0) throw new Exception("No energía crack");
         if (myCoordinate == null && newCoordinate.y() != 0) throw new Exception("Solo puedes moverte de uno en uno"); 
         else if (myCoordinate == null) {
+            if (destinyTile.getJumpingSides().contains(0)) player.setEnergy(player.getEnergy() - 2);
+            if (destinyTile.getTile().getType().getType().equals("OSO")) {
+                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); 
+                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); }
+            if (destinyTile.getTile().getType().getType().equals("AGUILA")) {
+                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); }
+            else player.setEnergy(player.getEnergy() - 1);
             salmonMatch.setCoordinate(newCoordinate);
-            player.setEnergy(player.getEnergy() - 1);
         }
         else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
+            MatchTile myTile = matchTileService.findByCoordinate(myCoordinate.x(), myCoordinate.y());
             Coordinate distancia = new Coordinate((newCoordinate.x() - myCoordinate.x()), (newCoordinate.y() - myCoordinate.y()));
             if(distancia.y() < 0) throw new Exception("Solo puedes moverte hacia delante"); 
             if(myCoordinate.x() == 1) {
                 if(myCoordinate.y().equals(newCoordinate.y())) throw new Exception("Solo puedes moverte hacia delante");
-                else{
-                    salmonMatch.setCoordinate(newCoordinate);
+            }
+            if(Math.abs(distancia.x()) == 2 && Math.abs(distancia.y()) == 1) throw new Exception("Este movimiento no está permitido"); 
+                // Si salto a esa casilla
+                else if ( ( ( distancia.x() == 0 && destinyTile.getJumpingSides().contains(1) )
+                        || ( distancia.x() == 1 && destinyTile.getJumpingSides().contains(2) )
+                        || ( distancia.x() == -1 && destinyTile.getJumpingSides().contains(0) ) ) ) {
+                        
+                    if ( ( ( distancia.x() == 0 && myTile.getJumpingSides().contains(4) )
+                        || ( distancia.x() == 1 && myTile.getJumpingSides().contains(5) )
+                        || ( distancia.x() == -1 && myTile.getJumpingSides().contains(3) ) ) ) {
+                            if (player.getEnergy() >= 3) player.setEnergy(player.getEnergy() - 3);
+                            else throw new Exception("¡No tienes los 3 puntos de energía requeridos para este movimiento!"); 
+                    }
+                    else if (player.getEnergy() >= 2) {
+                        if (destinyTile.getTile().getType().getType().equals("OSO")) {
+                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                            if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id);
+                            if (salmonMatchService.getPartidaSalmon(id) != null && myTile.getTile().getType().getType().equals("OSO")) {
+                                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id);
+                            }
+                        }
+                        player.setEnergy(player.getEnergy() - 2);
+                    }
+                    else  throw new Exception("¡No tienes los 2 puntos de energía requeridos para este movimiento!"); 
+                }
+
+                // Si salto desde mi casilla
+                else if ( ( ( distancia.x() == 0 && myTile.getJumpingSides().contains(4) )
+                || ( distancia.x() == 1 && myTile.getJumpingSides().contains(5) )
+                || ( distancia.x() == -1 && myTile.getJumpingSides().contains(3) ) ) ) {
+                    if (player.getEnergy() >= 2) player.setEnergy(player.getEnergy() - 2);
+                    else throw new Exception("¡No tienes los 2 puntos de energía requeridos para este movimiento!"); 
+                }
+
+                else if (destinyTile.getTile().getType().getType().equals("AGUILA")) {
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                    if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id);
                     player.setEnergy(player.getEnergy() - 1);
                 }
-            }
-            else {
-                if(Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new Exception("Este movimiento no está permitido");
                 else {
-                    salmonMatch.setCoordinate(newCoordinate);
                     player.setEnergy(player.getEnergy() - 1);
                 }
+                salmonMatch.setCoordinate(newCoordinate);
             }
-        }
         playerService.saveJugador(player);
         salmonMatchService.savePartidaSalmon(salmonMatch);
         return new ResponseEntity<>(salmonMatch, HttpStatus.OK);

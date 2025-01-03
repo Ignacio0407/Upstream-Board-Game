@@ -23,7 +23,6 @@ import { Client } from '@stomp/stompjs';
 import { get, patch } from '../util/fetchers';
 import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList} from './matchUtil';
 
-
 export default function Game({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser();
@@ -229,8 +228,9 @@ export default function Game({match}){
         //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
         //console.log("energyUsed",energyUsed)
         if (!responseSalmon.ok) {
-            alert('Invalid salmon placement');
-            throw new Error('Invalid salmon placement');
+            const errorMessage = await responseSalmon.text();
+            alert(errorMessage);
+            throw new Error(errorMessage);
         }
         /*else if (!responseEnergy.ok){
             throw new Error('Invalid energy use');
@@ -285,6 +285,7 @@ export default function Game({match}){
             nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
             console.log("Entra en segundo if")
         }
+        setMyPlayer(nextPlayer);
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
         }
         else{
@@ -294,8 +295,18 @@ export default function Game({match}){
               );
             console.log("Casilla a la que quiero ir", foundTile)
             if(foundTile){    
-            await updateSalmonPosition(selectedSalmon, x, y);
-            setSelectedSalmon(null);
+                await updateSalmonPosition(selectedSalmon, x, y);
+                //const currentPlayer = players[myPlayer.playerOrder];
+                const updatePlayer = await get(`/api/v1/players/${match.actualPlayer}`, jwt);
+                const currentPlayer = await updatePlayer.json();
+                if(currentPlayer.energy === 0){
+                    console.log("actual player sin energia")
+                    setMyPlayer(nextPlayer);
+                    await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
+                    await patch(`/api/v1/players/${currentPlayer.id}/regenerateEnergy`, jwt)
+                } 
+                setSelectedSalmon(null);
+            }
             /*try{
                 stompClient.publish({
                     destination: "/app/players",
@@ -303,47 +314,55 @@ export default function Game({match}){
                 });
             //console.log("refreshPlayers",refreshPlayers)
             }catch(error){console.error("Error updating players", error);}*/
-            }
-            const actualPlayer = players.find(p => p.id === match.actualPlayer);
+            /*const actualPlayer = players.find(p => p.id === match.actualPlayer);
             console.log("actualPlayer",actualPlayer)
             if(actualPlayer.energy === 0){
                 console.log("actual player sin energia")
+                setMyPlayer(nextPlayer);
                 await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-            }       
+            }  */     
         }
-        await patch(`/api/v1/matches/${match.id}/changephase`)
-    } catch (error) {
-        console.error("Error updating tile position or advancing turn:", error);
-        // Detener ejecución si ocurre un error
-        return;
-    }
-};
-
-const calculateSalmonPosition = (index, totalSalmons) => {
-    const radius = 35; // Radio del pentágono
-    const centerOffsetX = 90; // Centro X relativo a la casilla (mitad del ancho de la tile)
-    const centerOffsetY = 30; // Centro Y relativo a la casilla (mitad del alto de la tile)
-    
-    // Si solo hay un salmón, colocarlo en el centro
-    if (totalSalmons === 1) {
-      return {
-        left: `${centerOffsetX + 15}px`, // 25 es la mitad del ancho del salmón (50px/2)
-        top: `${centerOffsetY + 10}px`
-      };
-    }
-
-    // Calcular el ángulo para cada posición
-    const angleStep = (2 * Math.PI) / totalSalmons // Usar 5 posiciones como máximo
-    const angle = index * angleStep - Math.PI / 2; // Empezar desde arriba (-90 grados)
-
-    // Calcular las coordenadas X e Y en el pentágono
-    const x = centerOffsetX + radius * Math.cos(angle) + 10;
-    const y = centerOffsetY + radius * Math.sin(angle) + 10;
-
-    return {
-      left: `${x}px`,
-      top: `${y}px`
+            await patch(`/api/v1/matches/${match.id}/changephase`)
+        } catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+            // Detener ejecución si ocurre un error
+            return;
+        }
     };
+
+    const calculateSalmonPosition = (index, totalSalmons) => {
+        const radius = 35; // Radio del pentágono
+        const centerOffsetX = 90; // Centro X relativo a la casilla (mitad del ancho de la tile)
+        const centerOffsetY = 30; // Centro Y relativo a la casilla (mitad del alto de la tile)
+        
+        // Si solo hay un salmón, colocarlo en el centro
+        if (totalSalmons === 1) {
+        return {
+            left: `${centerOffsetX + 15}px`, // 25 es la mitad del ancho del salmón (50px/2)
+            top: `${centerOffsetY + 10}px`
+        };
+        }
+
+        // Calcular el ángulo para cada posición
+        const angleStep = (2 * Math.PI) / totalSalmons // Usar 5 posiciones como máximo
+        const angle = index * angleStep - Math.PI / 2; // Empezar desde arriba (-90 grados)
+
+        // Calcular las coordenadas X e Y en el pentágono
+        const x = centerOffsetX + radius * Math.cos(angle) + 10;
+        const y = centerOffsetY + radius * Math.sin(angle) + 10;
+
+        return {
+        left: `${x}px`,
+        top: `${y}px`
+        };
+  };
+
+  const moveSalmonWithJS = (salmonElement, targetPosition) => {
+    setTimeout(() => {
+        salmonElement.style.transition = "all 0.5s ease-in-out"; // Configura la transición
+        salmonElement.style.left = `${targetPosition.left}px`; // Mueve a la nueva posición horizontal
+        salmonElement.style.top = `${targetPosition.top}px`;   // Mueve a la nueva posición vertical
+    }, 300); // Retardo de 300ms
   };
 
 

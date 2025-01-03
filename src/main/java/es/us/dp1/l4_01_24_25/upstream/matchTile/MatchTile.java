@@ -1,5 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
+import java.util.List;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -28,7 +30,7 @@ public class MatchTile extends BaseEntity {
 
     Integer orientation;
 
-    Move move;
+    List<Integer> jumpingSides;
 
     @Embedded
     Coordinate coordinate;

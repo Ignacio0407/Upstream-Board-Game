@@ -174,5 +174,16 @@ public class PlayerRestController {
         playerService.saveJugador(jugador);
         return new ResponseEntity<>(jugador, HttpStatus.OK);
     }
+
+    @PatchMapping("/{id}/regenerateEnergy")
+    public ResponseEntity<Player> regenerateEnergy(@PathVariable("id") Integer id) throws ResourceNotFoundException, Exception {
+        Player jugador = playerService.getById(id);
+        if (jugador == null) {
+            throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
+        }
+        jugador.setEnergy(5);
+        playerService.saveJugador(jugador);
+        return new ResponseEntity<>(jugador, HttpStatus.OK);
+    }
     
 }

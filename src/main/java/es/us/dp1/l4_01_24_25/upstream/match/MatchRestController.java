@@ -172,15 +172,15 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
-        Match partida = matchService.getById(matchId);
-
-        if (partida == null) {
+        Match match = matchService.getById(matchId);
+        if (match == null) {
             throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         }
         Player j = playerService.getJugadorById(playerId);
-        partida.setActualPlayer(j);
-        matchService.save(partida);
-        return new ResponseEntity<>(partida, HttpStatus.OK);
+        match.setActualPlayer(j);
+        //if (match.getPhase().equals(Phase.MOVIENDO)) match.setSalmonMatches(garzasThreat(matchId, playerId).getBody());
+        matchService.save(match);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/ronda")
@@ -275,8 +275,8 @@ public class MatchRestController {
         }
     }*/
 
-    /*@PatchMapping("/{matchId}/threats/garza") 
-    public ResponseEntity<List<SalmonMatch>> energyValid(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
+    @PatchMapping("/{matchId}/threats/garza") 
+    public ResponseEntity<List<SalmonMatch>> garzasThreat(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
         List<SalmonMatch> sm = playerService.getSalmonsByPlayerId(playerId);
         List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
@@ -293,6 +293,6 @@ public class MatchRestController {
                 }    
             }
         return ResponseEntity.ok(sm);
-    }*/
+    }
 
 }
