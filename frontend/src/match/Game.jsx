@@ -295,7 +295,7 @@ export default function Game({match}){
                 console.log("actual player sin energia")
                 setMyPlayer(nextPlayer);
                 await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-            }*/  */     
+            }*/  
         }
             await patch(`/api/v1/matches/${match.id}/changephase`)
         } catch (error) {
