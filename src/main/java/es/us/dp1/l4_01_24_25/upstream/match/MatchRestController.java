@@ -223,6 +223,8 @@ public class MatchRestController {
         if(phase.equals(Phase.CASILLAS)) {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
             if (rds.contains(mtNoC.size())) {
+                players.stream().forEach(p -> p.setEnergy(5));
+                for(Player p : players) playerService.saveJugador(p);
                 match.setPhase(Phase.MOVIENDO);
             }
         }
