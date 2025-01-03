@@ -18,6 +18,7 @@ export default function Dashboard() {
     const [username, setUsername] = useState("");
     const jwt = tokenService.getLocalAccessToken();
     const [matches, setMatches] = useFetchState([],'/api/v1/matches',jwt);
+    const [originalMatches, setOriginalMatches] = useFetchState([],'/api/v1/matches',jwt);
     const user = tokenService.getUser()
     const [alerts, setAlerts] = useState([]);
     const [message, setMessage] = useState(null);
@@ -114,7 +115,7 @@ export default function Dashboard() {
             <h1 className='welcome'>
             Game Listing for {username}
             </h1>
-            <SearchBar setter={setMatches} uri={"matches"} />
+            <SearchBar setter={setMatches} uri={"matches"} data={originalMatches} />
             <WhiteSpace />
             <div>
             <div className='crear-partida'>
