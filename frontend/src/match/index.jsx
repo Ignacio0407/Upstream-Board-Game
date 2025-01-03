@@ -46,9 +46,7 @@ export default function Match() {
                 },
             }).then(response => {response.json()
                 .then(data => {setMatch(data)
-                })
-        
-    })
+                })})
 }, 500); // Cada 5 segundos
     return () => clearInterval(interval);
 
