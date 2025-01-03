@@ -78,9 +78,18 @@ export const generatePlayerList = (players) => {
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.color}</td>
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.points}</td>
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
-                {p.alive ? <i className="fa fa-check-circle"></i> : <i className="fa fa-times-circle"></i>}
+                {p.alive 
+                    ? <i className="fa fa-check-circle" style={{ color: 'green' }}></i> 
+                    : <i className="fa fa-times-circle" style={{ color: 'red' }}></i>}
             </td>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.energy}</td>
+            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
+                {p.energy > 0 
+                    ? Array.from({ length: p.energy }).map((_, i) => (
+                        <i key={i} className="fa fa-bolt" style={{ color: '#FFD700', marginRight: '5px' }}></i>
+                    )) 
+                    : <i className="fa fa-tired" style={{ color: '#FF8888' }}></i>}
+            </td>
         </tr>
     ));
 };
+
