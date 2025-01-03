@@ -44,6 +44,11 @@ export default function SearchBar( { setter, uri, data } ) {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSearch();
+          }
+        }}
         placeholder = {`Search ${uri}`}
       />
       <button className="search-button" onClick={handleSearch}>
