@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -31,12 +32,14 @@ public class SalmonMatchController {
     private final salmonMatchService salmonMatchService;
     private final PlayerService playerService;
     private final SalmonService salmonService;
+    private final MatchService matchService;
 
     @Autowired
-    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService){
+    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchService matchService) {
         this.salmonMatchService = salmonMatchService;
         this.playerService = playerService;
         this.salmonService = salmonService;
+        this.matchService = matchService;
     }
 
     @GetMapping("/match/{matchId}")
@@ -63,13 +66,21 @@ public class SalmonMatchController {
     public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws Exception {
         SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
         Player player = salmonMatch.getPlayer();
+        Match match = salmonMatch.getMatch();
+        Integer numPlayers = match.getPlayersNum();
+        List<Player> players = playerService.getPlayersByMatch(match.getId());
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y")); 
-        if (player.getEnergy() == 0) throw new Exception("No energía crack");
         if (myCoordinate == null && newCoordinate.y() != 0) throw new Exception("Solo puedes moverte de uno en uno"); 
         else if (myCoordinate == null) {
             salmonMatch.setCoordinate(newCoordinate);
             player.setEnergy(player.getEnergy() - 1);
+            if(player.getEnergy() == 0) {
+                Integer myOrder = player.getPlayerOrder();
+                Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+                match.setActualPlayer(nextPlayer);
+                matchService.save(match);
+            }
         }
         else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
             Coordinate distancia = new Coordinate((newCoordinate.x() - myCoordinate.x()), (newCoordinate.y() - myCoordinate.y()));
@@ -79,6 +90,12 @@ public class SalmonMatchController {
                 else{
                     salmonMatch.setCoordinate(newCoordinate);
                     player.setEnergy(player.getEnergy() - 1);
+                    if(player.getEnergy() == 0) {
+                        Integer myOrder = player.getPlayerOrder();
+                        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+                        match.setActualPlayer(nextPlayer);
+                        matchService.save(match);
+                    }
                 }
             }
             else {
@@ -86,6 +103,12 @@ public class SalmonMatchController {
                 else {
                     salmonMatch.setCoordinate(newCoordinate);
                     player.setEnergy(player.getEnergy() - 1);
+                    if(player.getEnergy() == 0) {
+                        Integer myOrder = player.getPlayerOrder();
+                        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+                        match.setActualPlayer(nextPlayer);
+                        matchService.save(match);
+                    }
                 }
             }
         }

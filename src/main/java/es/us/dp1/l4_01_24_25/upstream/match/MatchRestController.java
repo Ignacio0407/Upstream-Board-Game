@@ -171,15 +171,16 @@ public class MatchRestController {
 
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
-    public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException {
+    public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException, Exception {
         Match partida = matchService.getById(matchId);
-
-        if (partida == null) {
-            throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
-        }
-        Player j = playerService.getJugadorById(playerId);
-        partida.setActualPlayer(j);
-        matchService.save(partida);
+        Integer numPlayers = partida.getPlayersNum();
+        Player p = playerService.getById(playerId);
+        List<Player> players = playerService.getPlayersByMatch(matchId);
+        if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        Integer myOrder = p.getPlayerOrder();
+        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        partida.setActualPlayer(nextPlayer);
+        matchService.save(partida); 
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
