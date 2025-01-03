@@ -1,5 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.statistic;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +38,13 @@ public class AchievementService {
         return result.isPresent()?result.get():null;
     }
 
+    @Transactional(readOnly = true)    
+    public List<Achievement> getByNames(List<String> names) {
+        List<Achievement> result = new LinkedList<>();
+        names.forEach(name -> result.add(repo.findByName(name)));
+        return result.size() == names.size() ? new ArrayList<>(result) : null;
+    }
+
     @Transactional
     public Achievement saveAchievement(@Valid Achievement newAchievement) {
         return repo.save(newAchievement);
@@ -45,11 +54,6 @@ public class AchievementService {
     @Transactional
     public void deleteAchievementById(int id){
         repo.deleteById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public Achievement getAchievementByName(String name){
-        return repo.findByName(name);
     }
     
 

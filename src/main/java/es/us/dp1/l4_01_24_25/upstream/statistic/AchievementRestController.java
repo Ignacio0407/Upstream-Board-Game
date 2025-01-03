@@ -55,6 +55,14 @@ public class AchievementRestController {
 		return new ResponseEntity<>(achievementToGet, HttpStatus.OK);
 	}
 
+	@GetMapping("/names/{names}")
+	public ResponseEntity<List<Achievement>> findByNames(@PathVariable("names") List<String> names){
+		List<Achievement> achievementsToGet = achievementService.getByNames(names);
+		if(achievementsToGet==null)
+			throw new ResourceNotFoundException("Some of the achievements could not be found!");
+		return new ResponseEntity<>(achievementsToGet, HttpStatus.OK);
+	}
+
 	@PostMapping
 	public ResponseEntity<Achievement> create(@RequestBody @Valid Achievement newAchievement) { 
 		Achievement result = achievementService.saveAchievement(newAchievement);
