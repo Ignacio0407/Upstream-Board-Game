@@ -162,13 +162,13 @@ public class PlayerRestController {
     }
 
     @PatchMapping("/{id}/energy")
-    public ResponseEntity<Player> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException {
+    public ResponseEntity<Player> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException, Exception {
         Player jugador = playerService.getById(id);
         if (jugador == null) {
             throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
         }
         if (jugador.getEnergy() - energyUsed < 0) {
-            throw new ResourceNotFoundException("No hay suficiente energía", "energía", jugador.getEnergy().toString());
+            throw new Exception("No hay suficiente energía");
         }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
         playerService.saveJugador(jugador);

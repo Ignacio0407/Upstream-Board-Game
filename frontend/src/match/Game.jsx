@@ -214,7 +214,7 @@ export default function Game({match}){
         //console.log("grid", grid)
         //console.log("salmon",salmon[0])
         try{
-            let energyUsed;
+            /*let energyUsed;
             if(salmon[0].coordinate === null){
                 energyUsed = y+1;
             }else{
@@ -223,25 +223,18 @@ export default function Game({match}){
             //if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
             if (energyUsed > match.actualPlayer.energy) {
                 throw new Error('Not enough energy');
-            }
+            }*/
 
         const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
-        const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, energyUsed);
-        console.log("energyUsed",energyUsed)
+        //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
+        //console.log("energyUsed",energyUsed)
         if (!responseSalmon.ok) {
+            alert('Invalid salmon placement');
             throw new Error('Invalid salmon placement');
         }
-        else if (!responseEnergy.ok){
+        /*else if (!responseEnergy.ok){
             throw new Error('Invalid energy use');
-        }
-        else{
-            console.log("salmon e imagen",responseEnergy, salmonAndImages, salmon, energyUsed)
-            const salmonWithImage = salmonAndImages.find(s => s[0][0].id === salmon[0].id);
-            //console.log("salmonWithImage",salmonWithImage)
-            setSalmonAndImages(prevSalmons =>
-                prevSalmons.map(s => (s[0][0].id === salmon[0].id ? salmonWithImage : s))
-            );   
-        }
+        }*/
     }catch (error){
         throw error;
     }
@@ -258,12 +251,13 @@ export default function Game({match}){
             }
     
             const updatedTile = await response.json();
-            console.log("updatedTile",updatedTile);
-    
+            /*console.log("updatedTile",updatedTile);
+            console.log("tilesAndImages", tilesAndImages)
             const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
             setTilesAndImages(prevTiles =>
                 prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
             );
+            console.log("tileWithImage", tileWithImage)*/
     
             return updatedTile; 
         } catch (error) {
@@ -291,12 +285,9 @@ export default function Game({match}){
             nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
             console.log("Entra en segundo if")
         }
-
-        // Actualizar el turno en el servidor
-
-        // await patch(`/api/v1/matches/${match.id}/threats/garza`, jwt)
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-        }else{
+        }
+        else{
             console.log("Entra en else")
             const foundTile = gridTiles.find(
                 t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
@@ -305,15 +296,13 @@ export default function Game({match}){
             if(foundTile){    
             await updateSalmonPosition(selectedSalmon, x, y);
             setSelectedSalmon(null);
-            try{
+            /*try{
                 stompClient.publish({
                     destination: "/app/players",
                     body: JSON.stringify({ action: "colorChanged" }),
                 });
             //console.log("refreshPlayers",refreshPlayers)
-            }catch(error){
-                console.error("Error updating players", error);
-            }
+            }catch(error){console.error("Error updating players", error);}*/
             }
             const actualPlayer = players.find(p => p.id === match.actualPlayer);
             console.log("actualPlayer",actualPlayer)
