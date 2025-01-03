@@ -338,8 +338,8 @@ const calculateSalmonPosition = (index, totalSalmons) => {
     // Si solo hay un salmón, colocarlo en el centro
     if (totalSalmons === 1) {
       return {
-        left: `${centerOffsetX - 25}px`, // 25 es la mitad del ancho del salmón (50px/2)
-        top: `${centerOffsetY - 25}px`
+        left: `${centerOffsetX + 15}px`, // 25 es la mitad del ancho del salmón (50px/2)
+        top: `${centerOffsetY + 10}px`
       };
     }
 
