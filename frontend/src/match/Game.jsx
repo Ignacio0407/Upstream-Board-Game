@@ -22,6 +22,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { get, patch } from '../util/fetchers';
 import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList} from './matchUtil';
+import { ColorToRgb } from '../util/ColorParser';
 
 export default function Game({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -92,7 +93,7 @@ export default function Game({match}){
         Authorization: `Bearer ${jwt}`
     },
     onConnect: (frame) => {
-        console.log('Connected: ' + frame);
+        //console.log('Connected: ' + frame);
         
         stompClient.subscribe('/topic/salmon', (message) => {
             console.log('Message received: ' + message.body);
@@ -186,25 +187,6 @@ export default function Game({match}){
         return () => clearInterval(interval);
     }, [jwt]);
 
-    /*const changePhase = async () => {
-        if(gridTiles.length === 12 && match.phase === 'CASILLAS' && match.round === 0) {
-            try {
-                const response = await patch(`/api/v1/matches/${match.id}/changephase`, jwt)
-                if(response.ok) {
-                    console.log('Fase cambiada correctamente.');
-                } else {
-                    console.error('Error al cambiar de fase.')
-                }
-            } catch (error) {
-                console.error('Error changing phase', error);
-            }
-        }
-    };
-
-    useEffect(() => {
-        changePhase();
-    }, [gridTiles])*/
-
     if (!allDataLoaded) {
         return <div style={{justifySelf:'center'}}>Loading data</div>;
     }
@@ -223,7 +205,6 @@ export default function Game({match}){
             if (energyUsed > match.actualPlayer.energy) {
                 throw new Error('Not enough energy');
             }*/
-
         const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
         //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
         //console.log("energyUsed",energyUsed)
@@ -236,20 +217,18 @@ export default function Game({match}){
             throw new Error('Invalid energy use');
         }*/
     }catch (error){
-        throw error;
+        throw error.message;
     }
     }
 
     const updateTilePosition = async (tile, x, y) => {
         try {
             const response = await patch(`/api/v1/matchTiles/${tile[0].id}`, jwt, {x,y});
-            
             if (!response.ok) {
                 console.log(x,y)
                 throw new Error('Invalid tile placement');
 
             }
-    
             const updatedTile = await response.json();
             /*console.log("updatedTile",updatedTile);
             console.log("tilesAndImages", tilesAndImages)
@@ -258,7 +237,6 @@ export default function Game({match}){
                 prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
             );
             console.log("tileWithImage", tileWithImage)*/
-    
             return updatedTile; 
         } catch (error) {
             console.error('Error updating tile position:', error);
@@ -280,13 +258,10 @@ export default function Game({match}){
         if(selectedSalmon === null){
             await updateTilePosition(selectedTile, x, y);
             console.log("Entra en primer if")
+            console.log("yea", match.actualPlayer)
             setSelectedTile(null);
-        if (!nextPlayer) {
-            nextPlayer = players[0]; // Volver al primer jugador si se termina la lista
-            console.log("Entra en segundo if")
-        }
         setMyPlayer(nextPlayer);
-        await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
+        await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
         }
         else{
             console.log("Entra en else")
@@ -314,13 +289,13 @@ export default function Game({match}){
                 });
             //console.log("refreshPlayers",refreshPlayers)
             }catch(error){console.error("Error updating players", error);}*/
-            /*const actualPlayer = players.find(p => p.id === match.actualPlayer);
+            /*/*const actualPlayer = players.find(p => p.id === match.actualPlayer);
             console.log("actualPlayer",actualPlayer)
             if(actualPlayer.energy === 0){
                 console.log("actual player sin energia")
                 setMyPlayer(nextPlayer);
                 await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-            }  */     
+            }*/  */     
         }
             await patch(`/api/v1/matches/${match.id}/changephase`)
         } catch (error) {
@@ -371,18 +346,21 @@ export default function Game({match}){
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-            <div className="users-table">
+            <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Name</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Color</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Points</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Alive</th>
-                        <th className="table-row" style={{position: 'relative', padding: '20px'}}>Energy</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Color</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Points</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Alive</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Energy</th>
                     </tr>
                 </thead>
-                <tbody>{playerList}</tbody>
-            </div>
+                <tbody>
+                    {playerList}
+                </tbody>
+            </table>
+
             
 
             {tilesAndImages.length > 0 &&
@@ -391,6 +369,7 @@ export default function Game({match}){
                 style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                 onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}>
                     {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
+                    {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h2>Move your salmons!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
@@ -445,7 +424,13 @@ export default function Game({match}){
                                     ...position,
                                     transition: 'all 0.3s ease-in-out',
                                     zIndex: 2,
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    borderRadius: '27px',
+                                    
+                                    
+                                    
                                 }}
                                 />
                             );
@@ -464,6 +449,10 @@ export default function Game({match}){
                                 src = {s[1]}
                                 alt=""
                                 onClick={() => handleSalmonClick(s)}
+                                style={{                          
+                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    borderRadius: '40px',}}
                                 />
                                 )
                             ))}

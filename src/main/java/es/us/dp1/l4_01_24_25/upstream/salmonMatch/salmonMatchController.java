@@ -18,6 +18,7 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -34,13 +35,15 @@ public class SalmonMatchController {
     private final PlayerService playerService;
     private final SalmonService salmonService;
     private final MatchTileService matchTileService;
+    private final MatchService matchService;
 
     @Autowired
-    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService){
+    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
         this.salmonMatchService = salmonMatchService;
         this.playerService = playerService;
         this.salmonService = salmonService;
         this.matchTileService = matchTileService;
+        this.matchService = matchService;
     }
 
     @GetMapping("/match/{matchId}")
@@ -67,6 +70,9 @@ public class SalmonMatchController {
     public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws Exception {
         SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
         Player player = salmonMatch.getPlayer();
+        Match match = salmonMatch.getMatch();
+        Integer numPlayers = match.getPlayersNum();
+        List<Player> players = playerService.getPlayersByMatch(match.getId());
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y"));
         MatchTile destinyTile = matchTileService.findByCoordinate(newCoordinate.x(), newCoordinate.y());
@@ -128,9 +134,21 @@ public class SalmonMatchController {
                     salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
                     if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id);
                     player.setEnergy(player.getEnergy() - 1);
+                    if(player.getEnergy() == 0) {
+                        Integer myOrder = player.getPlayerOrder();
+                        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+                        match.setActualPlayer(nextPlayer);
+                        matchService.save(match);
+                    }
                 }
                 else {
                     player.setEnergy(player.getEnergy() - 1);
+                    if(player.getEnergy() == 0) {
+                        Integer myOrder = player.getPlayerOrder();
+                        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+                        match.setActualPlayer(nextPlayer);
+                        matchService.save(match);
+                    }
                 }
                 salmonMatch.setCoordinate(newCoordinate);
             }
