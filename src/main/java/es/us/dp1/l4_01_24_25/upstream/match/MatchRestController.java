@@ -251,7 +251,7 @@ public class MatchRestController {
         return new ResponseEntity<>(m, HttpStatus.OK);
     }
 
-    @GetMapping("/{salmon}/moveIsPossible")
+    /*@GetMapping("/{salmon}/moveIsPossible")
     public ResponseEntity<Boolean> moveValid( @PathVariable("salmon") SalmonMatch salmonToMove, @RequestParam("x") int x, @RequestParam("y") int y) {
         Integer xToMove = Math.abs(x - salmonToMove.getCoordinate().x());
         Integer yToMove = Math.abs(y - salmonToMove.getCoordinate().y());
@@ -273,9 +273,9 @@ public class MatchRestController {
         } else {
             return ResponseEntity.ok(false);
         }
-    }
+    }*/
 
-    @PatchMapping("/{matchId}/threats/garza") 
+    /*@PatchMapping("/{matchId}/threats/garza") 
     public ResponseEntity<List<SalmonMatch>> energyValid(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
         List<SalmonMatch> sm = playerService.getSalmonsByPlayerId(playerId);
@@ -293,6 +293,6 @@ public class MatchRestController {
                 }    
             }
         return ResponseEntity.ok(sm);
-    }
+    }*/
 
 }
