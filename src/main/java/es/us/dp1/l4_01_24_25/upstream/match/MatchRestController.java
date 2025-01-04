@@ -276,8 +276,8 @@ public class MatchRestController {
         }
     }*/
 
-    /*@PatchMapping("/{matchId}/threats/garza") 
-    public ResponseEntity<List<SalmonMatch>> energyValid(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
+    @PatchMapping("/{matchId}/threats/garza") 
+    public ResponseEntity<List<SalmonMatch>> garzasThreat(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
         List<SalmonMatch> sm = playerService.getSalmonsByPlayerId(playerId);
         List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
@@ -294,6 +294,6 @@ public class MatchRestController {
                 }    
             }
         return ResponseEntity.ok(sm);
-    }*/
+    }
 
 }

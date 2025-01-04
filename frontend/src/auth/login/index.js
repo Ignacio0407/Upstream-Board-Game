@@ -24,6 +24,7 @@ export default function Login() {
         else return Promise.reject("Invalid login attempt");
       })
       .then(function (data) {
+        console.log(data);
         tokenService.setUser(data);
         tokenService.updateLocalAccessToken(data.token);
         window.location.href = "/dashboard";
