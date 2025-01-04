@@ -66,7 +66,7 @@ public class MatchTileController {
         }
         }
     
-        Boolean positionOccupied = matchTileService.findAll().stream()
+        Boolean positionOccupied = matchTileService.findByMatchId(matchTile.getMatch().getId()).stream()
         .anyMatch(mT -> mT.getCoordinate() != null 
                      && mT.getCoordinate().x() == updates.get("x") 
                      && mT.getCoordinate().y() == updates.get("y"));

@@ -82,10 +82,12 @@ public class SalmonMatchController {
             if (destinyTile.getJumpingSides().contains(0)) player.setEnergy(player.getEnergy() - 2);
             if (destinyTile.getTile().getType().getType().equals("OSO")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); 
-                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); }
+                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); 
+            }
             if (destinyTile.getTile().getType().getType().equals("AGUILA")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); }
+                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); 
+            }
             else player.setEnergy(player.getEnergy() - 1);
             salmonMatch.setCoordinate(newCoordinate);
         }
@@ -141,7 +143,7 @@ public class SalmonMatchController {
                         matchService.save(match);
                     }
                 }
-                else {
+                /*else {
                     player.setEnergy(player.getEnergy() - 1);
                     if(player.getEnergy() == 0) {
                         Integer myOrder = player.getPlayerOrder();
@@ -149,9 +151,15 @@ public class SalmonMatchController {
                         match.setActualPlayer(nextPlayer);
                         matchService.save(match);
                     }
-                }
+                }*/
                 salmonMatch.setCoordinate(newCoordinate);
             }
+        if(player.getEnergy() == 0) {
+            Integer myOrder = player.getPlayerOrder();
+            Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+            match.setActualPlayer(nextPlayer);
+            matchService.save(match);
+        }
         playerService.saveJugador(player);
         salmonMatchService.savePartidaSalmon(salmonMatch);
         return new ResponseEntity<>(salmonMatch, HttpStatus.OK);

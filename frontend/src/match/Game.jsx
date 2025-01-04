@@ -212,13 +212,9 @@ export default function Game({match}){
         //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
         //console.log("energyUsed",energyUsed)
         if (!responseSalmon.ok) {
-            const errorMessage = await responseSalmon.text();
-            alert(errorMessage);
-            throw new Error(errorMessage);
+            alert("Movimiento no válido.");
+            throw new Error("Movimiento no válido.");
         }
-        /*else if (!responseEnergy.ok){
-            throw new Error('Invalid energy use');
-        }*/
     }catch (error){
         throw error.message;
     }
@@ -273,20 +269,6 @@ export default function Game({match}){
             if(foundTile){    
             await updateSalmonPosition(selectedSalmon, x, y);
             setSelectedSalmon(null);
-            /*try{
-                stompClient.publish({
-                    destination: "/app/players",
-                    body: JSON.stringify({ action: "colorChanged" }),
-                });
-            //console.log("refreshPlayers",refreshPlayers)
-            }catch(error){console.error("Error updating players", error);}*/
-            /*/*const actualPlayer = players.find(p => p.id === match.actualPlayer);
-            console.log("actualPlayer",actualPlayer)
-            if(actualPlayer.energy === 0){
-                console.log("actual player sin energia")
-                setMyPlayer(nextPlayer);
-                await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-            }*/  
             }}
             await patch(`/api/v1/matches/${match.id}/changephase`)
         }catch (error) {
