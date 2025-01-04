@@ -51,6 +51,9 @@ export default function Game({match}){
             reloadTiles();
         }*/
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            //console.log("players", tilesAndImages[0][0].id)
+            console.log("match", match)
+            //console.log("actualPlayer", myPlayer)
             /*console.log("players", players)
             console.log("match", match)
             console.log("salmons", salmons)
@@ -254,12 +257,19 @@ export default function Game({match}){
     const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
     try {
-        let nextPlayer = players[myPlayer.playerOrder + 1];
+        console.log("selectedTileCOSASSSS", players, myPlayer)
+        let nextPlayer = 0;
+        if(myPlayer.playerOrder + 1 > players.length - 1){
+            nextPlayer = players[0];
+        }else{
+        nextPlayer = players[myPlayer.playerOrder + 1];
+        }
         if(selectedSalmon === null){
             await updateTilePosition(selectedTile, x, y);
             console.log("Entra en primer if")
             console.log("yea", match.actualPlayer)
             setSelectedTile(null);
+            console.log("nextPlayer",nextPlayer, match)
         setMyPlayer(nextPlayer);
         await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
         }
@@ -367,7 +377,10 @@ export default function Game({match}){
             
             <div key={tilesAndImages[0][0].id}
                 style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
-                onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}>
+                onClick={() =>
+                console.log("Tile clicked:", myPlayer, match) &&
+                handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
+                }>
                     {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h2>Move your salmons!</h2>}
                     <h2>Next tile:</h2>
