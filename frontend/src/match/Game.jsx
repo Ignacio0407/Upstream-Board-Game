@@ -198,16 +198,7 @@ export default function Game({match}){
         //console.log("grid", grid)
         //console.log("salmon",salmon[0])
         try{
-            /*let energyUsed;
-            if(salmon[0].coordinate === null){
-                energyUsed = y+1;
-            }else{
-                energyUsed = Math.abs(salmon[0].coordinate.y - y);
-            }
-            //if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
-            if (energyUsed > match.actualPlayer.energy) {
-                throw new Error('Not enough energy');
-            }*/
+           
         const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
         //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
         //console.log("energyUsed",energyUsed)

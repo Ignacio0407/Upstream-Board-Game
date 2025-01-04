@@ -44,7 +44,7 @@ public class Match extends NamedEntity {
     Integer round;
     @Enumerated(EnumType.STRING)
 	Phase phase;
-	
+
 	@OneToOne
 	@JoinColumn(name="initial_player")
 	@JsonSerialize(using = PlayerSerializer.class)

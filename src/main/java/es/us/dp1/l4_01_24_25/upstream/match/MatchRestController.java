@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
@@ -231,6 +232,30 @@ public class MatchRestController {
         }
         else {
             if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+                
+                List<MatchTile> mt = matchTileService.findByMatchId(matchId);
+                List<SalmonMatch> salmonMatches = match.getSalmonMatches();
+                if(match.getRound() == 0){
+                    for(SalmonMatch sm:salmonMatches) {
+                        if(sm.getCoordinate().equals(null)){
+                            salmonMatchService.delete(sm.getId());
+                        }
+                    }
+                }else{
+                    for(SalmonMatch sm:salmonMatches) {
+                        if(sm.getCoordinate().y().equals(0)){
+                            salmonMatchService.delete(sm.getId());
+                        }
+                    }
+                    for(MatchTile m:mt) {
+                        if(m.getCoordinate().y().equals(0)){
+                            m.setCoordinate(new Coordinate(m.getCoordinate().x(), 99));
+                        }else{
+                            m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
+                        }
+                        matchTileService.save(m);
+                    }
+                }
                 match.setPhase(Phase.CASILLAS);
                 match.setRound(round+1);
             }
@@ -238,6 +263,8 @@ public class MatchRestController {
         matchService.save(match);
         return new ResponseEntity<>(match, HttpStatus.OK);
     }
+
+    
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
@@ -296,4 +323,33 @@ public class MatchRestController {
         return ResponseEntity.ok(sm);
     }
 
+    @PatchMapping("/{matchId}/endRound")
+    public ResponseEntity<Match> endRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match partida = matchService.getById(matchId);
+        List<MatchTile> mt = matchTileService.findByMatchId(matchId);
+        List<SalmonMatch> salmonMatches = partida.getSalmonMatches();
+        if(partida.getRound() == 0){
+            for(SalmonMatch sm:salmonMatches) {
+                if(sm.getCoordinate().equals(null)){
+                    salmonMatchService.delete(sm.getId());
+                }
+            }
+        }else{
+            for(SalmonMatch sm:salmonMatches) {
+                if(sm.getCoordinate().y().equals(0)){
+                    salmonMatchService.delete(sm.getId());
+                }
+            }
+            for(MatchTile m:mt) {
+                if(m.getCoordinate().y().equals(0)){
+                    m.setCoordinate(new Coordinate(m.getCoordinate().x(), 99));
+                }else{
+                    m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
+                }
+                matchTileService.save(m);
+            }
+        }
+        matchService.save(partida);
+        return new ResponseEntity<>(partida, HttpStatus.OK);
+    }
 }
