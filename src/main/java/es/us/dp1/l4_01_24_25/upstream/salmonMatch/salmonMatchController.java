@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
@@ -66,8 +68,14 @@ public class SalmonMatchController {
         return new ResponseEntity<>(salmonMatchService.savePartidaSalmon(salmonMatch), HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        salmonMatchService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/coordinate/{id}")
-    public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws Exception {
+    public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable("id") Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws Exception {
         SalmonMatch salmonMatch = salmonMatchService.getPartidaSalmon(id);
         Player player = salmonMatch.getPlayer();
         Match match = salmonMatch.getMatch();
@@ -82,11 +90,9 @@ public class SalmonMatchController {
             if (destinyTile.getJumpingSides().contains(0)) player.setEnergy(player.getEnergy() - 2);
             if (destinyTile.getTile().getType().getType().equals("OSO")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); 
-                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); 
             }
             if (destinyTile.getTile().getType().getType().equals("AGUILA")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); 
             }
             else player.setEnergy(player.getEnergy() - 1);
             salmonMatch.setCoordinate(newCoordinate);
@@ -161,7 +167,8 @@ public class SalmonMatchController {
             matchService.save(match);
         }
         playerService.saveJugador(player);
-        salmonMatchService.savePartidaSalmon(salmonMatch);
+        if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); 
+        else salmonMatchService.savePartidaSalmon(salmonMatch);
         return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
     }
 
@@ -171,7 +178,7 @@ public class SalmonMatchController {
             Player p = playerService.getJugadorById(playerId);
             Salmon s = salmonService.findAll().stream().filter(sal -> sal.getColor().equals(p.getColor())).toList().get(0);
             Match m = p.getMatch();
-            Coordinate c = new Coordinate(null, null);
+            Coordinate c = new Coordinate(null, null);;
             SalmonMatch r = new SalmonMatch();
             r.setPlayer(p);
             r.setSalmonsNumber(2);
