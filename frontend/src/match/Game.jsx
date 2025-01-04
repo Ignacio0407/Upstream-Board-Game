@@ -257,12 +257,12 @@ export default function Game({match}){
     const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
 
     try {
+        //let nextPlayer = players[myPlayer.playerOrder + 1];
         if(selectedSalmon === null){
             await updateTilePosition(selectedTile, x, y);
             console.log("Entra en primer if")
-            console.log("yea", match.actualPlayer)
             setSelectedTile(null);
-        await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
+            await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
         }
         else{
             console.log("Entra en else")
@@ -271,9 +271,8 @@ export default function Game({match}){
               );
             console.log("Casilla a la que quiero ir", foundTile)
             if(foundTile){    
-                await updateSalmonPosition(selectedSalmon, x, y);
-                setSelectedSalmon(null);
-            }
+            await updateSalmonPosition(selectedSalmon, x, y);
+            setSelectedSalmon(null);
             /*try{
                 stompClient.publish({
                     destination: "/app/players",
@@ -288,9 +287,9 @@ export default function Game({match}){
                 setMyPlayer(nextPlayer);
                 await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
             }*/  
-        }
+            }}
             await patch(`/api/v1/matches/${match.id}/changephase`)
-        } catch (error) {
+        }catch (error) {
             console.error("Error updating tile position or advancing turn:", error);
             // Detener ejecución si ocurre un error
             return;
@@ -323,6 +322,7 @@ export default function Game({match}){
         top: `${y}px`
         };
   };
+
 
     return(
         <div className='gamePage-container'>
