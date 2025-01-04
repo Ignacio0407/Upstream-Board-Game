@@ -52,7 +52,7 @@ export default function Game({match}){
         }*/
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
             //console.log("players", tilesAndImages[0][0].id)
-            console.log("match", match)
+            //console.log("match", match)
             //console.log("actualPlayer", myPlayer)
             /*console.log("players", players)
             console.log("match", match)
@@ -160,11 +160,13 @@ export default function Game({match}){
         const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
         players.forEach((p) => {
             const pSalmons = salmons.filter(s => s.player === p.id);
+            //console.log("pSalomns", pSalmons)
             if(pSalmons.length > 0) {
-                for (let i = 0; i < salmonsPerPlayer; i++) {
+                for (let i = 0; i < pSalmons.length; i++) {
                 newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i], players, salmonImages)]); }
             }})
         setGridS(newGridS);
+        //console.log("gridS", newGridS)
     }, [gridSalmons])
 
     // No quitar este useEffect

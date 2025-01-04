@@ -59,7 +59,7 @@ public class MatchTileController {
             throw new ResourceNotFoundException("MatchTile", "ID", id);
         }
         if(updates.get("y") != 0){
-            MatchTile matchTile2 = matchTileService.findAll().stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
+            MatchTile matchTile2 = matchTileService.findByMatchId(matchTile.getMatch().getId()).stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
