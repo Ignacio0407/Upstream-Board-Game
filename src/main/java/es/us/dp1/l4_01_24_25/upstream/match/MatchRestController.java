@@ -169,18 +169,23 @@ public class MatchRestController {
         }
     }
 
-
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException, Exception {
         Match partida = matchService.getById(matchId);
         Integer numPlayers = partida.getPlayersNum();
         Player p = playerService.getById(playerId);
         List<Player> players = playerService.getPlayersByMatch(matchId);
-        if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         Integer myOrder = p.getPlayerOrder();
-        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        Player nextPlayer = p;
+        if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        if(partida.getPhase().equals(Phase.CASILLAS)) {
+            if(partida.getRound().equals(0)) nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+            }
+        else if(partida.getPhase().equals(Phase.MOVIENDO)) {
+            nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        }
         partida.setActualPlayer(nextPlayer);
-        matchService.save(partida); 
+        matchService.save(partida);
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
@@ -220,7 +225,9 @@ public class MatchRestController {
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
         List<Player> players = matchService.getPlayersFromGame(matchId);
+        Player initialOrder = match.getInitialPlayer();
         Integer round = match.getRound();
+        Integer numPlayers = match.getPlayersNum();
         if(phase.equals(Phase.CASILLAS)) {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
             if (rds.contains(mtNoC.size())) {
@@ -233,6 +240,9 @@ public class MatchRestController {
             if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
                 match.setPhase(Phase.CASILLAS);
                 match.setRound(round+1);
+                Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((initialOrder.getPlayerOrder() + 1)%numPlayers)).toList().get(0);
+                match.setActualPlayer(nextPlayer);
+                match.setInitialPlayer(nextPlayer);
             }
         }
         matchService.save(match);
