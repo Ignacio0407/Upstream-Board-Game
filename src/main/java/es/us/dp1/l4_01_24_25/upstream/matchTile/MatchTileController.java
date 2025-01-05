@@ -59,23 +59,23 @@ public class MatchTileController {
             throw new ResourceNotFoundException("MatchTile", "ID", id);
         }
         if(updates.get("y") != 0){
-            MatchTile matchTile2 = matchTileService.findAll().stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
+            MatchTile matchTile2 = matchTileService.findByMatchId(matchTile.getMatch().getId()).stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
         }
     
-        Boolean positionOccupied = matchTileService.findAll().stream()
+        Boolean positionOccupied = matchTileService.findByMatchId(matchTile.getMatch().getId()).stream()
         .anyMatch(mT -> mT.getCoordinate() != null 
                      && mT.getCoordinate().x() == updates.get("x") 
                      && mT.getCoordinate().y() == updates.get("y"));
 
-    if (positionOccupied) {
-        throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
-    }
+        if (positionOccupied) {
+            throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
+        }
     
-        if(matchTile.getMatch().getRound() == 0 && updates.get("y") > 3){
+        if(matchTile.getMatch().getRound() == 0 && updates.get("y") > 3 || matchTile.getMatch().getRound() == 1 && updates.get("y") > 4){
             throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
              
