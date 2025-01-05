@@ -179,11 +179,18 @@ public class MatchRestController {
         List<Player> players = playerService.getPlayersByMatch(matchId);
         if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         Integer myOrder = p.getPlayerOrder();
-        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        Player nextPlayer = p;
+        if(partida.getPhase().equals(Phase.CASILLAS)) {
+            if(partida.getRound().equals(0)) nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+            }
+        else if(partida.getPhase().equals(Phase.MOVIENDO)) {
+            nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        }
         partida.setActualPlayer(nextPlayer);
         matchService.save(partida); 
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
+
 
     @PatchMapping("/{matchId}/ronda")
     public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
@@ -340,10 +347,11 @@ public class MatchRestController {
     public ResponseEntity<Match> endRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match partida = matchService.getById(matchId);
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
-        
+        List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
         List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(matchId);
         List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
+        Phase phase = partida.getPhase();
 
         
         if(round == 2){ 
@@ -360,26 +368,47 @@ public class MatchRestController {
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y()==0){
                     matchTileService.deleteMatchTile(m.getId());
-                    //m.setCoordinate(new Coordinate(m.getCoordinate().x(), 99));
                 }
-                //matchTileService.save(m);
+            
             }
-        }else if(round>2){
+            matchTileService.findByMatchId(matchId).stream()
+            .filter(mT -> mT.getCoordinate() != null)
+            .forEach(mT -> {
+            Coordinate oldCoord = mT.getCoordinate();
+             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1); // Asumiendo constructor
+             mT.setCoordinate(newCoord); // Actualiza la coordenada
+        });
+        }else if(round>2 && rds.contains(mtNoc.size()) && phase == Phase.CASILLAS){
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
                     salmonMatchService.delete(sm.getId());
+                }else{
+                    //m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
+                    Coordinate oldCoord = sm.getCoordinate();
+                    Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
+                    sm.setCoordinate(newCoord);
+                    salmonMatchService.savePartidaSalmon(sm);
+
                 }
+
             }
+
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y()==0){
                     matchTileService.deleteMatchTile(m.getId());
                     //m.setCoordinate(new Coordinate(m.getCoordinate().x(), 99));
                 }else{
                     //m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
+                    Coordinate oldCoord = m.getCoordinate();
+                    Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
+                    m.setCoordinate(newCoord);
+                    matchTileService.save(m);
+
+                }
                 }
                 //matchTileService.save(m);
             }
-        }
+        
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
