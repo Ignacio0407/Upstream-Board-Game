@@ -363,6 +363,7 @@ export default function Game({match}){
                     ))}
 
                     </div>
+                    {match.round < 2 &&
                     <div className='grid2'>
                     {gridS.map((salmon, index) => (
                         <div key={index} className="grid-item2">    
@@ -383,6 +384,8 @@ export default function Game({match}){
                         </div>
                     ))}
                     </div>
+         }
+
     
                 </div>
     }
