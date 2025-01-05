@@ -227,7 +227,9 @@ export default function Game({match}){
                     await updateSalmonPosition(selectedSalmon, x, y);
                     setSelectedSalmon(null);
                 }}
+                console.log("JWT", jwt)
                 await patch(`/api/v1/matches/${match.id}/changephase`)
+                await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
             }catch (error) {
                 console.error("Error updating tile position or advancing turn:", error);
             }

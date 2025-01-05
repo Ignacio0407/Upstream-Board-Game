@@ -237,8 +237,4 @@ public class SalmonMatchController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
-        salmonMatchService.delete(id);
-    }
 }
