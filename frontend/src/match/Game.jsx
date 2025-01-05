@@ -286,7 +286,6 @@ export default function Game({match}){
             
 
             {tilesAndImages.length > 0 &&
-            
             <div key={tilesAndImages[0][0].id}
                 style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                 onClick={() =>

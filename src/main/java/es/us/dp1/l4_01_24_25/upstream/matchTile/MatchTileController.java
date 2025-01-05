@@ -75,7 +75,8 @@ public class MatchTileController {
             throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
         }
     
-        if(matchTile.getMatch().getRound() == 0 && updates.get("y") > 3 || matchTile.getMatch().getRound() == 1 && updates.get("y") > 4){
+        if((matchTile.getMatch().getRound() == 0 && updates.get("y") > 3) || (matchTile.getMatch().getRound() == 1 && updates.get("y") > 4)
+        || (matchTile.getMatch().getRound() == 6 && updates.get("x") == 1 && updates.get("y") == 5)){
             throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
         }
              
