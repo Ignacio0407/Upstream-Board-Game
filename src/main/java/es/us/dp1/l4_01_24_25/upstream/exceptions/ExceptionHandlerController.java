@@ -90,4 +90,9 @@ public class ExceptionHandlerController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
 	}
 
+	@ExceptionHandler(NoCapacityException.class)
+	public ResponseEntity<?> handleNoCapacityException(NoCapacityException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
 }
