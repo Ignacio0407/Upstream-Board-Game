@@ -291,6 +291,8 @@ export default function Game({match}){
                 onClick={() =>
                 handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
                 }>
+                    {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
+                    {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h2>Move your salmons!</h2>}
                     <h2>Next tile:</h2>
