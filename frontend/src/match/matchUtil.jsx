@@ -46,6 +46,7 @@ export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelec
     if (myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS') {
         setSelectedTile(tile);
         setSelectedSalmon(null);
+        console.log('selected', tile)
     }
 }
 
