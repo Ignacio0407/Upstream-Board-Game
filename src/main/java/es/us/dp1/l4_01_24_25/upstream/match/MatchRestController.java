@@ -1,5 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -172,26 +173,30 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException, Exception {
-        Match partida = matchService.getById(matchId);
-        Integer numPlayers = partida.getPlayersNum();
+        Match match = matchService.getById(matchId);
+        Integer numPlayers = match.getPlayersNum();
         Player p = playerService.getById(playerId);
         List<Player> players = playerService.getPlayersByMatch(matchId);
-        if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        if (match == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         Integer myOrder = p.getPlayerOrder();
         Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
-        partida.setActualPlayer(nextPlayer);
-        matchService.save(partida); 
-        return new ResponseEntity<>(partida, HttpStatus.OK);
+        /*if (match.getPhase().equals(Phase.MOVIENDO)) {
+            List<SalmonMatch> updatedSalmons = garzasThreat(matchId, playerId).getBody();
+            match.setSalmonMatches(updatedSalmons);
+        } */
+        match.setActualPlayer(nextPlayer);
+        matchService.save(match);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/ronda")
     public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match partida = matchService.getById(matchId);
-        if (partida == null) {
+        Match match = matchService.getById(matchId);
+        if (match == null) {
             throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         }
-        partida.setRound(partida.getRound()+1);
-        return new ResponseEntity<>(partida, HttpStatus.OK);
+        match.setRound(match.getRound()+1);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PostMapping("/matchCreator/{userId}")
@@ -279,20 +284,23 @@ public class MatchRestController {
     @PatchMapping("/{matchId}/threats/garza") 
     public ResponseEntity<List<SalmonMatch>> garzasThreat(@PathVariable("matchId") Integer matchId, @RequestParam("playerId") Integer playerId) {
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
-        List<SalmonMatch> sm = playerService.getSalmonsByPlayerId(playerId);
+        List<SalmonMatch> sm = new ArrayList<>(playerService.getSalmonsByPlayerId(playerId)); // Crear una copia
         List<MatchTile> garzas = mt.stream().filter(m -> m.getTile().getType().getType().equals("GARZA")).toList();
-            for(MatchTile g:garzas) {
-                for(SalmonMatch salmon:sm) {
-                    if(g.getCoordinate().equals(salmon.getCoordinate())) {
-                        salmon.setSalmonsNumber(salmon.getSalmonsNumber()-1);
-                        if(salmon.getSalmonsNumber().equals(0)) {
-                            salmonMatchService.delete(salmon.getId()); 
-                            sm.remove(salmon);
-                        }
-                        else salmonMatchService.savePartidaSalmon(salmon);
+        List<SalmonMatch> salmonsToRemove = new ArrayList<>();
+        for(MatchTile g : garzas) {
+            for(SalmonMatch salmon : sm) {
+                if(g.getCoordinate().equals(salmon.getCoordinate())) {
+                    salmon.setSalmonsNumber(salmon.getSalmonsNumber()-1);
+                    if(salmon.getSalmonsNumber().equals(0)) {
+                        salmonMatchService.delete(salmon.getId());
+                        salmonsToRemove.add(salmon);
+                    } else {
+                        salmonMatchService.savePartidaSalmon(salmon);
                     }
-                }    
-            }
+                }
+            }    
+        }
+        sm.removeAll(salmonsToRemove);
         return ResponseEntity.ok(sm);
     }
 

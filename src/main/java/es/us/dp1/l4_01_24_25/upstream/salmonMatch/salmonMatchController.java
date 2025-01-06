@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -79,7 +79,7 @@ public class SalmonMatchController {
         if (player.getEnergy() == 0) throw new Exception("No energía crack");
         if (myCoordinate == null && newCoordinate.y() != 0) throw new Exception("Solo puedes moverte de uno en uno"); 
         else if (myCoordinate == null) {
-            if (destinyTile.getJumpingSides().contains(0)) player.setEnergy(player.getEnergy() - 2);
+            if (destinyTile.getJumpingSides().contains(1)) player.setEnergy(player.getEnergy() - 2);
             if (destinyTile.getTile().getType().getType().equals("OSO")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); 
                 if (salmonMatch.getSalmonsNumber() == 0) salmonMatchService.delete(id); }
