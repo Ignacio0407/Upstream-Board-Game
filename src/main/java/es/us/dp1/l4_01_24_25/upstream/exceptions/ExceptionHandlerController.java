@@ -75,4 +75,24 @@ public class ExceptionHandlerController {
 		return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
 	}
 
+	@ExceptionHandler(InsufficientEnergyException.class)
+	public ResponseEntity<?> handleInsufficientEnergyException(InsufficientEnergyException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+	@ExceptionHandler(OnlyMovingForwardException.class)
+	public ResponseEntity<?> handleOnlyMovingForwardException(OnlyMovingForwardException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+	@ExceptionHandler(NotValidMoveException.class)
+	public ResponseEntity<?> handleNotValidMoveException(NotValidMoveException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
+	@ExceptionHandler(NoCapacityException.class)
+	public ResponseEntity<?> handleNoCapacityException(NoCapacityException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
 }

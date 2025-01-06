@@ -46,19 +46,7 @@ export default function Game({match}){
     const playerList = generatePlayerList(players);
 
     useEffect(() => {
-        /*if(gridTiles.length > 0 || gridSalmons.length > 0){
-            reloadSalmon();
-            reloadTiles();
-        }*/
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-            //console.log("players", tilesAndImages[0][0].id)
-            console.log("match", match)
-            //console.log("actualPlayer", myPlayer)
-            /*console.log("players", players)
-            console.log("match", match)
-            console.log("salmons", salmons)
-            console.log("tilesList ", tilesList)
-            console.log("matchTiles", gridTiles)*/
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
@@ -160,11 +148,13 @@ export default function Game({match}){
         const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
         players.forEach((p) => {
             const pSalmons = salmons.filter(s => s.player === p.id);
+            //console.log("pSalomns", pSalmons)
             if(pSalmons.length > 0) {
-                for (let i = 0; i < salmonsPerPlayer; i++) {
+                for (let i = 0; i < pSalmons.length; i++) {
                 newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i], players, salmonImages)]); }
             }})
         setGridS(newGridS);
+        //console.log("gridS", newGridS)
     }, [gridSalmons])
 
     // No quitar este useEffect
@@ -195,105 +185,54 @@ export default function Game({match}){
     }
 
     const updateSalmonPosition = async(salmon,x,y) => {
-        //console.log("grid", grid)
-        //console.log("salmon",salmon[0])
-        try{
-            /*let energyUsed;
-            if(salmon[0].coordinate === null){
-                energyUsed = y+1;
-            }else{
-                energyUsed = Math.abs(salmon[0].coordinate.y - y);
+        try {
+            const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
+            if (!responseSalmon.ok) {
+                alert("Movimiento no válido.");
             }
-            //if(energyUsed > players.filter(p => p.id === salmon[0].player)[0].energy){
-            if (energyUsed > match.actualPlayer.energy) {
-                throw new Error('Not enough energy');
-            }*/
-        const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
-        //const responseEnergy = await patch(`/api/v1/players/${salmon[0].player}/energy`, jwt, );
-        //console.log("energyUsed",energyUsed)
-        if (!responseSalmon.ok) {
-            const errorMessage = await responseSalmon.text();
-            alert(errorMessage);
-            throw new Error(errorMessage);
+        } catch (error){
+            throw error.message;
         }
-        /*else if (!responseEnergy.ok){
-            throw new Error('Invalid energy use');
-        }*/
-    }catch (error){
-        throw error.message;
-    }
     }
 
     const updateTilePosition = async (tile, x, y) => {
         try {
             const response = await patch(`/api/v1/matchTiles/${tile[0].id}`, jwt, {x,y});
             if (!response.ok) {
-                console.log(x,y)
                 throw new Error('Invalid tile placement');
-
             }
-            const updatedTile = await response.json();
-            /*console.log("updatedTile",updatedTile);
-            console.log("tilesAndImages", tilesAndImages)
-            const tileWithImage = tilesAndImages.find(t => t[0].id === tile.id);
-            setTilesAndImages(prevTiles =>
-                prevTiles.map(t => (t[0].id === tile.id ? tileWithImage : t))
-            );
-            console.log("tileWithImage", tileWithImage)*/
-            return updatedTile; 
         } catch (error) {
             console.error('Error updating tile position:', error);
             throw error; 
         }
     };
 
-    // Actualiza el grid una vez está seleccionada la casilla
     const handleGridClick = async (index) => {
-    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+        const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+        const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+        const x = index % gridWidth;
+        const y = gridHeight - 1 - Math.floor(index / gridWidth)
 
-    // Calcular la coordenada x (columna) y y (fila) con filas invertidas
-    const x = index % gridWidth; // Coordenada x (columna)
-    const y = gridHeight - 1 - Math.floor(index / gridWidth); // Coordenada y invertida (fila)
-
-    try {
-        //let nextPlayer = players[myPlayer.playerOrder + 1];
-        if(selectedSalmon === null){
-            await updateTilePosition(selectedTile, x, y);
-            console.log("Entra en primer if")
-            setSelectedTile(null);
-            await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
-        }
-        else{
-            console.log("Entra en else")
-            const foundTile = gridTiles.find(
-                t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
-              );
-            console.log("Casilla a la que quiero ir", foundTile)
-            if(foundTile){    
-            await updateSalmonPosition(selectedSalmon, x, y);
-            setSelectedSalmon(null);
-            /*try{
-                stompClient.publish({
-                    destination: "/app/players",
-                    body: JSON.stringify({ action: "colorChanged" }),
-                });
-            //console.log("refreshPlayers",refreshPlayers)
-            }catch(error){console.error("Error updating players", error);}*/
-            /*/*const actualPlayer = players.find(p => p.id === match.actualPlayer);
-            console.log("actualPlayer",actualPlayer)
-            if(actualPlayer.energy === 0){
-                console.log("actual player sin energia")
-                setMyPlayer(nextPlayer);
-                await patch(`/api/v1/matches/${match.id}/actualPlayer/${nextPlayer.id}`, jwt);
-            }*/  
-            }}
-            await patch(`/api/v1/matches/${match.id}/changephase`)
-        }catch (error) {
-            console.error("Error updating tile position or advancing turn:", error);
-            // Detener ejecución si ocurre un error
-            return;
-        }
+        try {
+            if(selectedSalmon === null){
+                await updateTilePosition(selectedTile, x, y);
+                setSelectedTile(null);
+                await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
+            }
+            else{
+                const foundTile = gridTiles.find(
+                    t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
+                );
+                if(foundTile){    
+                    await updateSalmonPosition(selectedSalmon, x, y);
+                    setSelectedSalmon(null);
+                }}
+                console.log("JWT", jwt)
+                await patch(`/api/v1/matches/${match.id}/changephase`)
+                await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
+            }catch (error) {
+                console.error("Error updating tile position or advancing turn:", error);
+            }
     };
 
     const calculateSalmonPosition = (index, totalSalmons) => {
@@ -347,13 +286,13 @@ export default function Game({match}){
             
 
             {tilesAndImages.length > 0 &&
-            
             <div key={tilesAndImages[0][0].id}
                 style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
                 onClick={() =>
-                console.log("Tile clicked:", myPlayer, match) &&
                 handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
                 }>
+                    {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
+                    {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h2>Move your salmons!</h2>}
                     <h2>Next tile:</h2>
@@ -425,6 +364,7 @@ export default function Game({match}){
                     ))}
 
                     </div>
+                    {match.round < 2 &&
                     <div className='grid2'>
                     {gridS.map((salmon, index) => (
                         <div key={index} className="grid-item2">    
@@ -445,6 +385,8 @@ export default function Game({match}){
                         </div>
                     ))}
                     </div>
+         }
+
     
                 </div>
     }

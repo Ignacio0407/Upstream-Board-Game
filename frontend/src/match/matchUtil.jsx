@@ -43,10 +43,10 @@ export const getSalmonImage = (salmonTile, players, images) => {
 }
 
 export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelectedSalmon) => {
-    console.log('Tile clicked:', myPlayer, match);
     if (myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS') {
         setSelectedTile(tile);
         setSelectedSalmon(null);
+        console.log('selected', tile)
     }
 }
 
