@@ -43,7 +43,11 @@ export default function Game({match}){
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
-    const playerList = generatePlayerList(players);
+    if (!match.actualPlayer) {
+        const firstPlayerId = players.length > 0 ? players[0].id : null;
+        playerList = generatePlayerList(players, firstPlayerId);
+    }
+    const playerList = generatePlayerList(players, match.actualPlayer);
 
     useEffect(() => {
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
@@ -260,7 +264,7 @@ export default function Game({match}){
         left: `${x}px`,
         top: `${y}px`
         };
-  };
+    };
 
 
     return(
@@ -282,7 +286,6 @@ export default function Game({match}){
                     {playerList}
                 </tbody>
             </table>
-
             
 
             {tilesAndImages.length > 0 &&
@@ -351,11 +354,8 @@ export default function Game({match}){
                                     zIndex: 2,
                                     cursor: 'pointer',
                                     filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
-                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`, // Cambia el color y grosor del borde según necesites
-                                    borderRadius: '27px',
-                                    
-                                    
-                                    
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
+                                    borderRadius: '27px',    
                                 }}
                                 />
                             );
@@ -386,11 +386,9 @@ export default function Game({match}){
                     ))}
                     </div>
          }
-
-    
                 </div>
     }
             </div>
-        )
+    )
 
-    }
+}

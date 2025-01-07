@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -121,7 +120,7 @@ public class MatchTileController {
         }
 
         matchTile.setOrientation(rotation);
-        matchTile.setJumpingSides(matchTile.getJumpingSides().stream().map(side -> side+1).collect(Collectors.toList()));
+        //matchTile.setJumpingSides(matchTile.getJumpingSides().stream().map(side -> side+1).collect(Collectors.toList()));
 
     MatchTile updatedMatchTile = matchTileService.save(matchTile);
 
@@ -152,17 +151,22 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setJumpingSides(new ArrayList<>());
+            //matchTile.setJumpingSides(new ArrayList<>());
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
             matchTile.setTile(piedra);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum()-1);
+            if (match.getPlayersNum() > 2) matchTile.setCapacity(match.getPlayersNum()-1);
+            else matchTile.setCapacity(2);
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setJumpingSides(new ArrayList<>());
+           // matchTile.setJumpingSides(new ArrayList<>());
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -172,7 +176,9 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setJumpingSides(new ArrayList<>());
+            //matchTile.setJumpingSides(new ArrayList<>());
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 3; i++) {
@@ -182,8 +188,10 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1);
-            matchTile.setJumpingSides(ladosSalto);
+            //List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1);
+            //matchTile.setJumpingSides(ladosSalto);
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -193,7 +201,9 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setJumpingSides(new ArrayList<>());
+            //matchTile.setJumpingSides(new ArrayList<>());
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         } 
         for (int i = 0; i < 4; i++) {
@@ -203,8 +213,10 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1); ladosSalto.add(2);
-            matchTile.setJumpingSides(ladosSalto);
+           //List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1); ladosSalto.add(2);
+            //matchTile.setJumpingSides(ladosSalto);
+            matchTile.setSalmonsNumber(0);
+            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }    
         Collections.shuffle(createdTiles);

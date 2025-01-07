@@ -71,7 +71,7 @@ class SalmonMatchControllerTest {
     @Test
     void testFindById_Positive() throws Exception {
         SalmonMatch salmonMatch = new SalmonMatch();
-        when(salmonMatchService.getPartidaSalmon(anyInt())).thenReturn(salmonMatch);
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
 
         mockMvc.perform(get("/api/v1/salmonMatches/1")
                 .with(user("testUser").roles("USER")))
@@ -82,7 +82,7 @@ class SalmonMatchControllerTest {
     @Test
     void testCreate_Positive() throws Exception {
         SalmonMatch salmonMatch = new SalmonMatch();
-        when(salmonMatchService.savePartidaSalmon(any(SalmonMatch.class))).thenReturn(salmonMatch);
+        when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
 
         mockMvc.perform(post("/api/v1/salmonMatches")
                 .with(csrf())
@@ -95,8 +95,8 @@ class SalmonMatchControllerTest {
     @Test
     void testUpdateCoordinate_Positive() throws Exception {
         SalmonMatch salmonMatch = new SalmonMatch();
-        when(salmonMatchService.getPartidaSalmon(anyInt())).thenReturn(salmonMatch);
-        when(salmonMatchService.savePartidaSalmon(any(SalmonMatch.class))).thenReturn(salmonMatch);
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
 
         Map<String, Integer> coordinate = Map.of("x", 5, "y", 10);
 

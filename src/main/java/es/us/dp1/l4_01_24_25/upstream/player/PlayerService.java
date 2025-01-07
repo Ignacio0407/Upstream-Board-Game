@@ -11,7 +11,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 
 @Service
@@ -32,23 +31,28 @@ public class PlayerService {
     @Transactional(readOnly = true)
     public Player getById(Integer id) {
         Optional <Player> op = playerRepository.findById(id);
-        if(!op.isPresent()) return null;
-        return op.get();
+        return optionalToValueOrNull(op);
     }
+
+    @Transactional(readOnly = true)
+    public Player getByName(String name) {
+        Optional <Player> op = Optional.ofNullable(playerRepository.findByName(name));
+        return optionalToValueOrNull(op);
+    }
+
 
     // COMPLETAR MANEJO ERRORES
     @Transactional(readOnly = true)
     public List<Player> getSomeById(List<Integer> ids) {
         List<Player> Jugadores = new LinkedList<>();
-        ids.stream().forEach(id -> Jugadores.add(getJugadorById(id)));
-        //throw new ResourceNotFoundException("Jugadores no encontradas");
+        ids.stream().forEach(id -> Jugadores.add(getById(id)));
         return new ArrayList<>(Jugadores);
     }
 
     @Transactional(readOnly = true)
     public List<Player> getSomeJugadoresByName(List<String> names) {
         List<Player> Jugadores = new LinkedList<>();
-        names.stream().forEach(name -> Jugadores.add(getJugadorByName(name)));
+        names.stream().forEach(name -> Jugadores.add(getByName(name)));
         return new ArrayList<>(Jugadores);
     }
 
@@ -59,23 +63,11 @@ public class PlayerService {
         return jugadores.isEmpty()? new ArrayList<>() : jugadores;
 
     }
-    private Player optionalToValueWithNotFoundException(Optional<Player> op) {
+    private Player optionalToValueOrNull(Optional<Player> op) {
         if (!op.isPresent()) {
-            throw new ResourceNotFoundException("No existe la Jugador indicada");
+            return null;
         }
         return op.get();
-    }
-
-    @Transactional(readOnly = true)
-    public Player getJugadorById(Integer id) {
-        Optional <Player> op = playerRepository.findById(id);
-        return optionalToValueWithNotFoundException(op);
-    }
-
-    @Transactional(readOnly = true)
-    public Player getJugadorByName(String name) {
-        Optional <Player> op = Optional.ofNullable(playerRepository.findByName(name));
-        return optionalToValueWithNotFoundException(op);
     }
 
     @Transactional
@@ -95,14 +87,14 @@ public class PlayerService {
 
     @Transactional
     public void deleteJugadorById(Integer id) {
-        getJugadorById(id); // Si no existe p, ya lanza la excepcion.
+        getById(id); // Si no existe p, ya lanza la excepcion.
         playerRepository.deleteById(id);
 
     }
 
     @Transactional
     public void deleteJugadorByName(String name) {
-        Player p = getJugadorByName(name); // Si no existe p, ya lanza la excepcion.
+        Player p = getByName(name); // Si no existe p, ya lanza la excepcion.
         playerRepository.delete(p);
     }
 
@@ -115,19 +107,19 @@ public class PlayerService {
 
     @Transactional
     public Player updateJugadorById(Player JugadorNueva, Integer idtoUpdate) {
-        Player JugadorToUpdate = getJugadorById(idtoUpdate); // Si no existe p, ya lanza la excepcion.
+        Player JugadorToUpdate = getById(idtoUpdate); // Si no existe p, ya lanza la excepcion.
         return updateJugador(JugadorNueva, JugadorToUpdate);
     }
 
     @Transactional  
     public Player updateJugadorByName(Player JugadorNueva, String nameToUpdate) {
-        Player JugadorToUpdate = getJugadorByName(nameToUpdate); // Si no existe p, ya lanza la excepcion.
+        Player JugadorToUpdate = getByName(nameToUpdate); // Si no existe p, ya lanza la excepcion.
         return updateJugador(JugadorNueva, JugadorToUpdate);
     }
 
 
     @Transactional
-	public Player saveJugador(Player jugador) throws DataAccessException {
+	public Player savePlayer(Player jugador) throws DataAccessException {
 		playerRepository.save(jugador);
 		return jugador;
 	}

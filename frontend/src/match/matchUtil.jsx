@@ -84,9 +84,11 @@ export const getRotationStyle = (tile) => {
     };
 };
 
-export const generatePlayerList = (players) => {
+export const generatePlayerList = (players, actualPlayerId) => {
     return players.map((p) => (
-        <tr key={p.id} className="table-row">
+        <tr key={p.id} className="table-row" style={{
+            backgroundColor: p.id === actualPlayerId ? 'rgba(0, 255, 0, 0.3)' : 'transparent', // Resalta en verde si es el turno
+        }}>
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.name}</td>
             <td className="table-cell" style={{
             padding: '0', // Elimina el padding del `<td>`
