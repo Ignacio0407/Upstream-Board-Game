@@ -6,16 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
+
 
 
 @Service
 public class MatchTileService {
     
     MatchTileRepository matchTileRepository;
+    TileService tileService;
 
     @Autowired
-    public MatchTileService(MatchTileRepository matchTileRepository) {
+    public MatchTileService(MatchTileRepository matchTileRepository, TileService tileService) {
         this.matchTileRepository = matchTileRepository;
+        this.tileService = tileService;
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +66,19 @@ public class MatchTileService {
         return y <= maxAllowedRow;
     }
     
+    public MatchTile eagleToWater(MatchTile toTravel, Match match) {
+        MatchTile agua = new MatchTile();
+        Tile aguaTile = tileService.findById(1).orElse(null);
+        agua.setTile(aguaTile);
+        agua.setMatch(match);
+        agua.setCapacity(toTravel.getCapacity());
+        agua.setOrientation(0);
+        agua.setCoordinate(toTravel.getCoordinate());
+        //matchTile.setJumpingSides(new ArrayList<>());
+        agua.setSalmonsNumber(1);
+        agua.setTimesHasEaten(0);
+        return agua;
+    }
 
 
 }

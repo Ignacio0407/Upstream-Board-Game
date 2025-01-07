@@ -124,27 +124,36 @@ public class SalmonMatchController {
         return toTravel2;
     }
 
-    private void initialMove(MatchTile toTravel, SalmonMatch salmonMatch, Coordinate newCoordinate, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
+
+    private void initialMove(Match match, MatchTile toTravel, SalmonMatch salmonMatch, Coordinate newCoordinate, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
         Coordinate newCoordinate2 = null;
             MatchTile toTravel2 = null;
-            if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) )
+            if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) ) {
                 toTravel2 = tileFullNull(salmonMatch, matchTiles, toTravel2, newCoordinate, newCoordinate2, energyUsed);
+                newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
+            }
             else {
                 if(toTravelType.equals("OSO") && List.of(0, 1).contains(toTravel.getOrientation())) {
                     energyUsed = 2;
                     salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
                 }
                 else if (toTravelType.equals("SALTO") && List.of(0, 1, 5).contains(toTravel.getOrientation())) energyUsed = 2;
-                else if (toTravelType.equals("AGUILA")) salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                else if (toTravelType.equals("AGUILA")) {
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                    toTravel = matchTileService.eagleToWater(toTravel, match);
+                } 
             }
-            if (newCoordinate2 == null && toTravel2 == null) {
+            if (newCoordinate2 == null) {
                 salmonMatch.setCoordinate(newCoordinate); 
                 toTravel.setSalmonsNumber(toTravel.getSalmonsNumber()+1);
+                matchTileService.save(toTravel);
             }
             else if (toTravel2 != null) { 
                 salmonMatch.setCoordinate(newCoordinate2); 
                 toTravel2.setSalmonsNumber(toTravel2.getSalmonsNumber()+1);
+                matchTileService.save(toTravel2);
             }
+            salmonMatchService.save(salmonMatch);
             player.setEnergy(player.getEnergy() - energyUsed);
     }
 
@@ -182,7 +191,7 @@ public class SalmonMatchController {
         throwExceptions(toTravel, salmonsInToTravel, myCoordinate, newCoordinate, player);
         
         if (myCoordinate == null) {
-            initialMove(toTravel, salmonMatch, newCoordinate, matchTiles, toTravelType, player, energyUsed);
+            initialMove(match, toTravel, salmonMatch, newCoordinate, matchTiles, toTravelType, player, energyUsed);
         }
 
         else if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber())) {
@@ -251,7 +260,7 @@ public class SalmonMatchController {
                     }
                     else if (toTravelType.equals("AGUILA")) {
                         salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        toTravel.setTimesHasEaten(1);
+                        toTravel = matchTileService.eagleToWater(toTravel, match);
                     }
                 }
 
@@ -268,6 +277,7 @@ public class SalmonMatchController {
                     }
                     else if (toTravelType.equals("AGUILA")) {
                         salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                        toTravel = matchTileService.eagleToWater(toTravel, match);
                     }
                 }
 
@@ -284,6 +294,7 @@ public class SalmonMatchController {
                     }
                     else if (toTravelType.equals("AGUILA")) {
                         salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                        toTravel = matchTileService.eagleToWater(toTravel, match);
                     }
                 }
                     salmonMatch.setCoordinate(newCoordinate);
@@ -308,6 +319,7 @@ public class SalmonMatchController {
                         }
                         else if (toTravelType.equals("AGUILA")) {
                             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                            toTravel = matchTileService.eagleToWater(toTravel, match);
                         }
                         }
                     
@@ -324,6 +336,7 @@ public class SalmonMatchController {
                         }
                         else if (toTravelType.equals("AGUILA")) {
                             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                            toTravel = matchTileService.eagleToWater(toTravel, match);
                         }  
                     }
                 }
@@ -342,6 +355,7 @@ public class SalmonMatchController {
                         }
                         else if (toTravelType.equals("AGUILA")) {
                             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                            toTravel = matchTileService.eagleToWater(toTravel, match);
                         } 
                     }
                     else if(newCoordinate.x() == myCoordinate.x() - 1) { // Si voy al centro
@@ -357,6 +371,7 @@ public class SalmonMatchController {
                         }
                         else if (toTravelType.equals("AGUILA")) {
                             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                            toTravel = matchTileService.eagleToWater(toTravel, match);
                         } 
                     }
                 }
