@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 
 @Component
-public class MatchSerializer extends JsonSerializer<Match>{
+public class matchSerializer extends JsonSerializer<Match>{
 
     @Override
     public void serialize(Match value, JsonGenerator gen, SerializerProvider serializers)

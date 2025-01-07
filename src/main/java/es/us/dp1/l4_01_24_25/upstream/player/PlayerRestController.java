@@ -24,7 +24,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
@@ -157,7 +157,7 @@ public class PlayerRestController {
     }
 
     @GetMapping("/{id}/salmonMatch")
-    public ResponseEntity<List<SalmonMatch>> findSalmonMatchFromPlayer(Integer playerId) {  
+    public ResponseEntity<List<salmonMatch>> findSalmonMatchFromPlayer(Integer playerId) {  
         return new ResponseEntity<>(playerService.getSalmonsByPlayerId(playerId), HttpStatus.OK);
     }
 
