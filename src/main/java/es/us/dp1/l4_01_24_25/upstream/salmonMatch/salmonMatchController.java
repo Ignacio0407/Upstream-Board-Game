@@ -34,7 +34,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/salmonMatches")
 @SecurityRequirement(name = "bearerAuth")
-public class SalmonMatchController {
+public class salmonMatchController {
 
     private final salmonMatchService salmonMatchService;
     private final PlayerService playerService;
@@ -42,32 +42,31 @@ public class SalmonMatchController {
     private final MatchTileService matchTileService;
     private final MatchService matchService;
 
-    @Autowired
-    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
-        this.salmonMatchService = salmonMatchService;
-        this.playerService = playerService;
-        this.salmonService = salmonService;
-        this.matchTileService = matchTileService;
+    public salmonMatchController(MatchService matchService, MatchTileService matchTileService, PlayerService playerService, salmonMatchService salmonMatchService, SalmonService salmonService) {
         this.matchService = matchService;
+        this.matchTileService = matchTileService;
+        this.playerService = playerService;
+        this.salmonMatchService = salmonMatchService;
+        this.salmonService = salmonService;
     }
 
     @GetMapping("/match/{matchId}")
-    public ResponseEntity<List<SalmonMatch>> findAllFromMatch(@PathVariable Integer matchId) {  
+    public ResponseEntity<List<salmonMatch>> findAllFromMatch(@PathVariable Integer matchId) {  
         return new ResponseEntity<>(salmonMatchService.getAllFromMatch(matchId), HttpStatus.OK);
     }
 
     @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<SalmonMatch>> findAllFromPlayer(@PathVariable Integer playerId) {  
+    public ResponseEntity<List<salmonMatch>> findAllFromPlayer(@PathVariable Integer playerId) {  
         return new ResponseEntity<>(salmonMatchService.getAllFromPlayer(playerId), HttpStatus.OK);
     }
 
     @GetMapping(value="/{id}")
-    public ResponseEntity<SalmonMatch> findById(@PathVariable("id") Integer id){
+    public ResponseEntity<salmonMatch> findById(@PathVariable("id") Integer id){
         return new ResponseEntity<>(salmonMatchService.getById(id), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<SalmonMatch> create(@RequestBody @Valid SalmonMatch salmonMatch) {
+    public ResponseEntity<salmonMatch> create(@RequestBody @Valid salmonMatch salmonMatch) {
         return new ResponseEntity<>(salmonMatchService.save(salmonMatch), HttpStatus.CREATED);
     }
 
@@ -77,7 +76,7 @@ public class SalmonMatchController {
         return ResponseEntity.noContent().build();
     }
 
-    private MatchTile tileFullNull(SalmonMatch salmonMatch, List<MatchTile> matchTiles, MatchTile toTravel2, Coordinate newCoordinate, Coordinate newCoordinate2, Integer energyUsed) {
+    private MatchTile tileFullNull(salmonMatch salmonMatch, List<MatchTile> matchTiles, MatchTile toTravel2, Coordinate newCoordinate, Coordinate newCoordinate2, Integer energyUsed) {
             newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
             Coordinate newCoordinateAux = new Coordinate(newCoordinate2.x(), newCoordinate2.y());
             toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinateAux)).toList().get(0);
@@ -110,7 +109,7 @@ public class SalmonMatchController {
         }
     }
 
-    private MatchTile handleTileFull(Coordinate newCoordinate2, Coordinate newCoordinate, SalmonMatch salmonMatch, MatchTile myTile, 
+    private MatchTile handleTileFull(Coordinate newCoordinate2, Coordinate newCoordinate, salmonMatch salmonMatch, MatchTile myTile, 
         String myCoordinateType, List<MatchTile> matchTiles, List<Integer> from, List<Integer> to, Integer x, Integer y) {
         newCoordinate2 = new Coordinate(newCoordinate.x()+x, newCoordinate.y() + y);
         Coordinate newCoordinateAux = new Coordinate(newCoordinate2.x(), newCoordinate2.y());
@@ -125,7 +124,7 @@ public class SalmonMatchController {
     }
 
 
-    private void initialMove(Match match, MatchTile toTravel, SalmonMatch salmonMatch, Coordinate newCoordinate, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
+    private void initialMove(Match match, MatchTile toTravel, salmonMatch salmonMatch, Coordinate newCoordinate, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
         Coordinate newCoordinate2 = null;
             MatchTile toTravel2 = null;
             if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) ) {
@@ -174,8 +173,8 @@ public class SalmonMatchController {
     }
 
     @PatchMapping("/coordinate/{id}")
-    public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
-        SalmonMatch salmonMatch = salmonMatchService.getById(id);
+    public ResponseEntity<salmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
+        salmonMatch salmonMatch = salmonMatchService.getById(id);
         Player player = salmonMatch.getPlayer();
         Match match = salmonMatch.getMatch();
         List<Player> players = playerService.getPlayersByMatch(match.getId());
@@ -398,7 +397,7 @@ public class SalmonMatchController {
             Salmon salmon = salmonService.findAll().stream().filter(sal -> sal.getColor().equals(player.getColor())).findFirst().get();
             Match match = player.getMatch();
             Coordinate coordinate = new Coordinate(null, null);;
-            SalmonMatch salmonMatch = new SalmonMatch();
+            salmonMatch salmonMatch = new salmonMatch();
             salmonMatch.setPlayer(player);
             salmonMatch.setSalmonsNumber(2);
             salmonMatch.setSpawningNumber(0);

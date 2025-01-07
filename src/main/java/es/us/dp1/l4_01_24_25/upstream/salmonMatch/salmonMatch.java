@@ -9,7 +9,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.PlayerDeserializer;
 import es.us.dp1.l4_01_24_25.upstream.match.PlayerSerializer;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.MatchDeserializer;
-import es.us.dp1.l4_01_24_25.upstream.player.MatchSerializer;
+import es.us.dp1.l4_01_24_25.upstream.player.matchSerializer;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
 import jakarta.persistence.Embedded;
@@ -25,7 +25,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name="salmonMatches")
-public class SalmonMatch extends BaseEntity{
+public class salmonMatch extends BaseEntity{
 
     @ManyToOne
     @JsonSerialize(using = PlayerSerializer.class)
@@ -45,7 +45,7 @@ public class SalmonMatch extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "matches", nullable = false)
-    @JsonSerialize(using = MatchSerializer.class)
+    @JsonSerialize(using = matchSerializer.class)
     @JsonDeserialize(using = MatchDeserializer.class)
     private Match match;
 

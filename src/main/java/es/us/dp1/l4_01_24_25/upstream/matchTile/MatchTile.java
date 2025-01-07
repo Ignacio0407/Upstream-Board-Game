@@ -7,7 +7,7 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.MatchDeserializer;
-import es.us.dp1.l4_01_24_25.upstream.player.MatchSerializer;
+import es.us.dp1.l4_01_24_25.upstream.player.matchSerializer;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -44,7 +44,7 @@ public class MatchTile extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "match_id")
-    @JsonSerialize(using = MatchSerializer.class)
+    @JsonSerialize(using = matchSerializer.class)
     @JsonDeserialize(using = MatchDeserializer.class)
     Match match;
 

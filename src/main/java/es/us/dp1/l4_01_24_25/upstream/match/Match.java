@@ -9,7 +9,7 @@ import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
 import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,7 +64,7 @@ public class Match extends NamedEntity {
 	User matchCreator;
 
 	@OneToMany(mappedBy = "match")
-	private List<SalmonMatch> salmonMatches;
+	private List<salmonMatch> salmonMatches;
 
 
 	public Match() {

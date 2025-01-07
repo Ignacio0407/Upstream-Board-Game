@@ -47,7 +47,7 @@ public class Player extends BaseEntity implements Serializable{
     @JoinColumn(name="user_player")
     User userPlayer;
     
-    @JsonSerialize(using = MatchSerializer.class)
+    @JsonSerialize(using = matchSerializer.class)
     @JsonDeserialize(using = MatchDeserializer.class)
     @ManyToOne
     @JoinColumn(name="partida")
