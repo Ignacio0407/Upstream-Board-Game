@@ -104,7 +104,7 @@ class playerServiceTest {
     void testGetJugadorById_Success() {
         when(jugadorRepository.findById(1)).thenReturn(Optional.of(jugador1));
 
-        Player result = jugadorService.getJugadorById(1);
+        Player result = jugadorService.getById(1);
 
         assertEquals("Jugador1", result.getName());
         verify(jugadorRepository).findById(1);
@@ -115,14 +115,14 @@ class playerServiceTest {
         when(jugadorRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> 
-            jugadorService.getJugadorById(1));
+            jugadorService.getById(1));
     }
 
     @Test
     void testGetJugadorByName_Success() {
         when(jugadorRepository.findByName("Jugador1")).thenReturn(jugador1);
 
-        Player result = jugadorService.getJugadorByName("Jugador1");
+        Player result = jugadorService.getByName("Jugador1");
 
         assertEquals(1, result.getId());
         verify(jugadorRepository).findByName("Jugador1");
@@ -133,7 +133,7 @@ class playerServiceTest {
         when(jugadorRepository.findByName(any())).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> 
-            jugadorService.getJugadorByName("NonExistent"));
+            jugadorService.getByName("NonExistent"));
     }
 
     @Test
@@ -205,7 +205,7 @@ class playerServiceTest {
     void testSaveJugador_Success() {
         when(jugadorRepository.save(any(Player.class))).thenReturn(jugador1);
 
-        Player result = jugadorService.saveJugador(jugador1);
+        Player result = jugadorService.savePlayer(jugador1);
 
         assertEquals("Jugador1", result.getName());
         verify(jugadorRepository).save(jugador1);
@@ -216,7 +216,7 @@ class playerServiceTest {
         when(jugadorRepository.save(any(Player.class))).thenThrow(new DataIntegrityViolationException("Error en la base de datos"));
 
         assertThrows(DataAccessException.class, () -> 
-            jugadorService.saveJugador(jugador1));
+            jugadorService.savePlayer(jugador1));
     }
 
     @Test

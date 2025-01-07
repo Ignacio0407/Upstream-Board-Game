@@ -272,7 +272,7 @@ class MatchRestControllerTest {
 
         // Configura mocks para devolver objetos válidos
         when(matchService.getById(1)).thenReturn(match);
-        when(playerService.getJugadorById(1)).thenReturn(player);
+        when(playerService.getById(1)).thenReturn(player);
         when(matchService.save(any(Match.class))).thenReturn(match);
 
         mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
@@ -297,7 +297,7 @@ class MatchRestControllerTest {
     void testUpdateJugadorActual_PlayerNotFound() throws Exception {
         Match partida = new Match();
         when(matchService.getById(1)).thenReturn(partida);
-        when(playerService.getJugadorById(1))
+        when(playerService.getById(1))
             .thenThrow(new ResourceNotFoundException("Jugador no encontrado"));
 
         mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")

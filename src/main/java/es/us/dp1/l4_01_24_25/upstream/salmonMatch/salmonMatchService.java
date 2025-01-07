@@ -19,14 +19,14 @@ public class salmonMatchService {
     }
 
     @Transactional
-    public SalmonMatch savePartidaSalmon(SalmonMatch partidaSalmon) throws DataAccessException{
+    public SalmonMatch save(SalmonMatch partidaSalmon) throws DataAccessException{
         salmonMatchRepository.save(partidaSalmon);
         return partidaSalmon;
     }
 
     
 	@Transactional(readOnly = true)
-	public SalmonMatch getPartidaSalmon(Integer id) {
+	public SalmonMatch getById(Integer id) {
 		return salmonMatchRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("PartidaSalmon", "id", id));
 	}	
 

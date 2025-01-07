@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +37,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/matches")
+@SuppressWarnings("SizeReplaceableByIsEmpty")
 public class MatchRestController {
     
     private final MatchService matchService;
@@ -173,23 +173,33 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/actualPlayer/{playerId}")
     public ResponseEntity<Match> updateJugadorActual(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) throws ResourceNotFoundException, Exception {
-        Match partida = matchService.getById(matchId);
-        Integer numPlayers = partida.getPlayersNum();
+        Match match = matchService.getById(matchId);
+        Integer numPlayers = match.getPlayersNum();
         Player p = playerService.getById(playerId);
         List<Player> players = playerService.getPlayersByMatch(matchId);
-        if (partida == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        if (match == null || p == null) throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         Integer myOrder = p.getPlayerOrder();
         Player nextPlayer = p;
-        if(partida.getPhase().equals(Phase.CASILLAS)) {
-            if(partida.getRound().equals(0)) nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
+        if(match.getPhase().equals(Phase.CASILLAS)) {
+            if(match.getRound().equals(0)) nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
             }
-        else if(partida.getPhase().equals(Phase.MOVIENDO)) {
+        else if(match.getPhase().equals(Phase.MOVIENDO)) {
             nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).toList().get(0);
         }
-        partida.setActualPlayer(nextPlayer);
-        partida.setInitialPlayer(nextPlayer);
-        matchService.save(partida); 
-        return new ResponseEntity<>(partida, HttpStatus.OK);
+        match.setActualPlayer(nextPlayer);
+        match.setInitialPlayer(nextPlayer);
+        matchService.save(match); 
+        return new ResponseEntity<>(match, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{matchId}/ronda")
+    public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        Match match = matchService.getById(matchId);
+        if (match == null) {
+            throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
+        }
+        match.setRound(match.getRound()+1);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PostMapping("/matchCreator/{userId}")
@@ -224,7 +234,7 @@ public class MatchRestController {
             match.setPhase(Phase.MOVIENDO);
             if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
                 players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.saveJugador(p);
+                for(Player p : players) playerService.savePlayer(p);
                 match.setRound(round+1);
                 players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
                 Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
@@ -235,7 +245,7 @@ public class MatchRestController {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
             if (rds.contains(mtNoC.size())) {
                 players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.saveJugador(p);
+                for(Player p : players) playerService.savePlayer(p);
                 match.setPhase(Phase.MOVIENDO);
             }
         }
@@ -314,7 +324,7 @@ public class MatchRestController {
                     Coordinate oldCoord = sm.getCoordinate();
                     Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
                     sm.setCoordinate(newCoord);
-                    salmonMatchService.savePartidaSalmon(sm);
+                    salmonMatchService.save(sm);
 
                 }
 

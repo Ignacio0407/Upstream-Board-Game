@@ -56,7 +56,7 @@ public class PlayerRestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Player> findJugadorById(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
-        Player p = playerService.getJugadorById(id);
+        Player p = playerService.getById(id);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
@@ -70,7 +70,7 @@ public class PlayerRestController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Player> findJugadorByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
-        Player p = playerService.getJugadorByName(name);
+        Player p = playerService.getByName(name);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
@@ -90,8 +90,8 @@ public class PlayerRestController {
 		List<Integer> idsJugadorsNoBorradas = new LinkedList<>();
         Integer numJugadorsEncontradas = 0;
         for (Integer id : ids) {
-            RestPreconditions.checkNotNull(playerService.getJugadorById(id), "Jugador", "ID", id);
-		if (playerService.getJugadorById(id) != null) {
+            RestPreconditions.checkNotNull(playerService.getById(id), "Jugador", "ID", id);
+		if (playerService.getById(id) != null) {
             numJugadorsEncontradas++;
 		} else
             idsJugadorsNoBorradas.add(id);
@@ -110,8 +110,8 @@ public class PlayerRestController {
     @DeleteMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Object> deleteById(@PathVariable("id") Integer id) throws ErrorMessage {
-		RestPreconditions.checkNotNull(playerService.getJugadorById(id), "Jugador", "ID", id);
-		if (playerService.getJugadorById(id) != null) {
+		RestPreconditions.checkNotNull(playerService.getById(id), "Jugador", "ID", id);
+		if (playerService.getById(id) != null) {
 			playerService.deleteJugadorById(id);
 			return new ResponseEntity<>(new MessageResponse("Jugador borrada"), HttpStatus.OK);
 		} else
@@ -123,7 +123,7 @@ public class PlayerRestController {
     @PutMapping("/{id}")
     public ResponseEntity<Player> updateJugadorById(@PathVariable("id") Integer idToUpdate, 
     @RequestBody @Valid Player jugadorNueva) {
-        RestPreconditions.checkNotNull(playerService.getJugadorById(idToUpdate), "Jugador", "ID", idToUpdate);
+        RestPreconditions.checkNotNull(playerService.getById(idToUpdate), "Jugador", "ID", idToUpdate);
         return new ResponseEntity<>(playerService.updateJugadorById(jugadorNueva,idToUpdate), HttpStatus.OK);
     }
 
@@ -131,7 +131,7 @@ public class PlayerRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Player> createJugador(@RequestBody @Valid Player jugador) throws DataAccessException{
-        return new ResponseEntity<>(playerService.saveJugador(jugador), HttpStatus.OK);
+        return new ResponseEntity<>(playerService.savePlayer(jugador), HttpStatus.OK);
     }
 
     @PostMapping("/match/{id}")
@@ -153,7 +153,7 @@ public class PlayerRestController {
         match.setNumJugadores(match.getPlayersNum() + 1);
         matchService.save(match);
 
-        return new ResponseEntity<>(playerService.saveJugador(p), HttpStatus.OK);
+        return new ResponseEntity<>(playerService.savePlayer(p), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/salmonMatch")
@@ -171,7 +171,7 @@ public class PlayerRestController {
             throw new Exception("No hay suficiente energía");
         }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
-        playerService.saveJugador(jugador);
+        playerService.savePlayer(jugador);
         return new ResponseEntity<>(jugador, HttpStatus.OK);
     }
 
@@ -182,7 +182,7 @@ public class PlayerRestController {
             throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
         }
         jugador.setEnergy(5);
-        playerService.saveJugador(jugador);
+        playerService.savePlayer(jugador);
         return new ResponseEntity<>(jugador, HttpStatus.OK);
     }
     

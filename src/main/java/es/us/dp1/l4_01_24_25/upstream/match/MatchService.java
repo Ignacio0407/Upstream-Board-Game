@@ -47,9 +47,7 @@ public class MatchService {
         List<Player> players = getPlayersFromGame(id);
         return players.size();
     }
-
-    /* Aunque el manejo de errores de operaciones CRUD se realice en el controller, pongo solamente este
-       aquí porque simplifica muchísimo la gestión de errores de bastantes de los métodos implementados. */
+    
     private Match optionalToValueOrNull(Optional<Match> op) {
         if (!op.isPresent()) {
             return null;
