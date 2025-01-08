@@ -70,10 +70,12 @@ public class MatchTileService {
         MatchTile agua = new MatchTile();
         Tile aguaTile = tileService.findById(1).orElse(null);
         agua.setTile(aguaTile);
+        agua.setId(toTravel.getId());
         agua.setMatch(match);
         agua.setCapacity(toTravel.getCapacity());
         agua.setOrientation(0);
         agua.setCoordinate(toTravel.getCoordinate());
+        matchTileRepository.save(agua);
         return agua;
     }
 
