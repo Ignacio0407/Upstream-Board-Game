@@ -228,6 +228,7 @@ public class MatchRestController {
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
         List<Player> players = matchService.getPlayersFromGame(matchId);
+        List<salmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
         Integer round = match.getRound();
         Integer playerN = match.getPlayersNum();
         if(mtNoC.size() == 0) {
@@ -256,6 +257,20 @@ public class MatchRestController {
                 players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
                 Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
                 match.setActualPlayer(ini);
+                List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
+                for(MatchTile h : herons) {
+                    for(salmonMatch s: salmonMatches){
+                        if(s.getCoordinate().equals(h.getCoordinate())){
+                            s.setSalmonsNumber(s.getSalmonsNumber()-1);
+                            if(s.getSalmonsNumber()==0){
+                                salmonMatchService.delete(s.getId());
+                            }else{
+                                salmonMatchService.save(s);
+                            }
+                        }
+                    }   
+                }
+
             }
         }
         matchService.save(match);
