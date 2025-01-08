@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 @Service
-public class salmonMatchService {
+public class SalmonMatchService {
     private final SalmonMatchRepository salmonMatchRepository;
 
     @Autowired
-    public salmonMatchService(SalmonMatchRepository partidaSalmonRepository){
+    public SalmonMatchService(SalmonMatchRepository partidaSalmonRepository){
         
         this.salmonMatchRepository = partidaSalmonRepository;
     }

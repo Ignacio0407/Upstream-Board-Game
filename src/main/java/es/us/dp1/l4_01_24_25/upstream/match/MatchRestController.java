@@ -29,7 +29,7 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
@@ -44,9 +44,9 @@ public class MatchRestController {
     private final PlayerService playerService;
     private final UserService userService;
     private final MatchTileService matchTileService;
-    private final salmonMatchService salmonMatchService;
+    private final SalmonMatchService salmonMatchService;
 
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, salmonMatchService sms) {
+    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
         this.userService = userService;

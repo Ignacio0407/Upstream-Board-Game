@@ -36,19 +36,18 @@ import jakarta.validation.Valid;
 @SecurityRequirement(name = "bearerAuth")
 public class SalmonMatchController {
 
-    private final salmonMatchService salmonMatchService;
+    private final SalmonMatchService salmonMatchService;
     private final PlayerService playerService;
     private final SalmonService salmonService;
     private final MatchTileService matchTileService;
     private final MatchService matchService;
 
-    @Autowired
-    public SalmonMatchController(salmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
-        this.salmonMatchService = salmonMatchService;
-        this.playerService = playerService;
-        this.salmonService = salmonService;
-        this.matchTileService = matchTileService;
+    public SalmonMatchController(MatchService matchService, MatchTileService matchTileService, PlayerService playerService, SalmonMatchService salmonMatchService, SalmonService salmonService) {
         this.matchService = matchService;
+        this.matchTileService = matchTileService;
+        this.playerService = playerService;
+        this.salmonMatchService = salmonMatchService;
+        this.salmonService = salmonService;
     }
 
     @GetMapping("/match/{matchId}")
