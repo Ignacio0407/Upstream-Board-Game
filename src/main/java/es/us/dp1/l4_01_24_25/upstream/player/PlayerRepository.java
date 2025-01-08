@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
-
 @Repository
 public interface  PlayerRepository extends CrudRepository<Player, Integer>{
     
