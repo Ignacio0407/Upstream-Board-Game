@@ -28,7 +28,7 @@ import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
 
-@WebMvcTest(controllers = salmonMatchController.class)
+@WebMvcTest(controllers = SalmonMatchController.class)
 class SalmonMatchControllerTest {
 
     @Autowired
@@ -38,7 +38,7 @@ class SalmonMatchControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private salmonMatchService salmonMatchService;
+    private SalmonMatchService salmonMatchService;
 
     @MockBean
     private PlayerService playerService;
@@ -48,7 +48,7 @@ class SalmonMatchControllerTest {
 
     @Test
     void testFindAllFromMatch_Positive() throws Exception {
-        List<salmonMatch> salmonMatches = Arrays.asList(new salmonMatch(), new salmonMatch());
+        List<SalmonMatch> salmonMatches = Arrays.asList(new SalmonMatch(), new SalmonMatch());
         when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(salmonMatches);
 
         mockMvc.perform(get("/api/v1/salmonMatches/match/1")
@@ -59,7 +59,7 @@ class SalmonMatchControllerTest {
 
     @Test
     void testFindAllFromPlayer_Positive() throws Exception {
-        List<salmonMatch> salmonMatches = Arrays.asList(new salmonMatch(), new salmonMatch());
+        List<SalmonMatch> salmonMatches = Arrays.asList(new SalmonMatch(), new SalmonMatch());
         when(salmonMatchService.getAllFromPlayer(anyInt())).thenReturn(salmonMatches);
 
         mockMvc.perform(get("/api/v1/salmonMatches/player/1")
@@ -70,7 +70,7 @@ class SalmonMatchControllerTest {
 
     @Test
     void testFindById_Positive() throws Exception {
-        salmonMatch salmonMatch = new salmonMatch();
+        SalmonMatch salmonMatch = new SalmonMatch();
         when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
 
         mockMvc.perform(get("/api/v1/salmonMatches/1")
@@ -81,8 +81,8 @@ class SalmonMatchControllerTest {
 
     @Test
     void testCreate_Positive() throws Exception {
-        salmonMatch salmonMatch = new salmonMatch();
-        when(salmonMatchService.save(any(salmonMatch.class))).thenReturn(salmonMatch);
+        SalmonMatch salmonMatch = new SalmonMatch();
+        when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
 
         mockMvc.perform(post("/api/v1/salmonMatches")
                 .with(csrf())
@@ -94,9 +94,9 @@ class SalmonMatchControllerTest {
 
     @Test
     void testUpdateCoordinate_Positive() throws Exception {
-        salmonMatch salmonMatch = new salmonMatch();
+        SalmonMatch salmonMatch = new SalmonMatch();
         when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
-        when(salmonMatchService.save(any(salmonMatch.class))).thenReturn(salmonMatch);
+        when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
 
         Map<String, Integer> coordinate = Map.of("x", 5, "y", 10);
 

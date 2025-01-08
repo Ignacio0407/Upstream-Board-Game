@@ -30,22 +30,22 @@ import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 public class SalmonMatchServiceTest {
     
     @Mock
-    private salmonMatchRepository salmonMatchRepository;
+    private SalmonMatchRepository salmonMatchRepository;
 
     @InjectMocks
-    private salmonMatchService salmonMatchService;
+    private SalmonMatchService salmonMatchService;
 
-    private salmonMatch s1;
-    private salmonMatch s2;
+    private SalmonMatch s1;
+    private SalmonMatch s2;
     private Match m1;
     private Player p1;
 
     @BeforeEach
     void setup() {
-        s1 = new salmonMatch();
+        s1 = new SalmonMatch();
         s1.setId(1);
 
-        s2 = new salmonMatch();
+        s2 = new SalmonMatch();
         s2.setId(2);
 
         m1 = new Match();
@@ -62,10 +62,10 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testSaveSuccess() {
-        salmonMatch s = new salmonMatch();
+        SalmonMatch s = new SalmonMatch();
         when(salmonMatchRepository.save(s)).thenReturn(s);
 
-        salmonMatch result = salmonMatchService.save(s);
+        SalmonMatch result = salmonMatchService.save(s);
 
         assertNotNull(result);
         assertEquals(s, result);
@@ -73,7 +73,7 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testSaveFail() {
-        salmonMatch s = new salmonMatch();
+        SalmonMatch s = new SalmonMatch();
         DataAccessException ex = new DataAccessException("Test exception") {};
         when(salmonMatchRepository.save(s)).thenThrow(ex);
 
@@ -104,10 +104,10 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testGetAllFromMatchSuccess() {
-        List<salmonMatch> expected = List.of(s1,s2);
+        List<SalmonMatch> expected = List.of(s1,s2);
         when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(expected);
 
-        List<salmonMatch> result = salmonMatchService.getAllFromMatch(1);
+        List<SalmonMatch> result = salmonMatchService.getAllFromMatch(1);
 
         assertNotNull(result);
         assertEquals(expected, result);
@@ -116,8 +116,8 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testGetAllFromMatchFail() {
-        List<salmonMatch> expected = List.of(s1,s2, new salmonMatch());
-        List<salmonMatch> result = salmonMatchService.getAllFromMatch(1);
+        List<SalmonMatch> expected = List.of(s1,s2, new SalmonMatch());
+        List<SalmonMatch> result = salmonMatchService.getAllFromMatch(1);
 
         assertNotNull(result);
         assertNotEquals(expected, result);
@@ -128,7 +128,7 @@ public class SalmonMatchServiceTest {
     void testGetAllFromMatchEmpty() {
         when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(new ArrayList<>());
 
-        List<salmonMatch> result = salmonMatchService.getAllFromMatch(1);
+        List<SalmonMatch> result = salmonMatchService.getAllFromMatch(1);
 
         assertEquals(List.of(), result);
         verify(salmonMatchRepository).findAllFromMatch(1);
@@ -136,10 +136,10 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testGetAllFromPlayerSuccess() {
-        List<salmonMatch> expected = List.of(s1,s2);
+        List<SalmonMatch> expected = List.of(s1,s2);
         when(salmonMatchRepository.findAllFromPlayer(1)).thenReturn(expected);
 
-        List<salmonMatch> result = salmonMatchService.getAllFromPlayer(1);
+        List<SalmonMatch> result = salmonMatchService.getAllFromPlayer(1);
 
         assertNotNull(result);
         assertEquals(expected, result);
@@ -148,8 +148,8 @@ public class SalmonMatchServiceTest {
 
     @Test
     void testGetAllFromPlayerFail() {
-        List<salmonMatch> expected = List.of(s1,s2,new salmonMatch());
-        List<salmonMatch> result = salmonMatchService.getAllFromPlayer(1);
+        List<SalmonMatch> expected = List.of(s1,s2,new SalmonMatch());
+        List<SalmonMatch> result = salmonMatchService.getAllFromPlayer(1);
 
         assertNotNull(result);
         assertNotEquals(expected, result);
@@ -160,7 +160,7 @@ public class SalmonMatchServiceTest {
     void testGetAllFromPlayerEmpty() {
         when(salmonMatchRepository.findAllFromPlayer(1)).thenReturn(new ArrayList<>());
 
-        List<salmonMatch> result = salmonMatchService.getAllFromPlayer(1);
+        List<SalmonMatch> result = salmonMatchService.getAllFromPlayer(1);
 
         assertEquals(List.of(), result);
         verify(salmonMatchRepository).findAllFromPlayer(1);

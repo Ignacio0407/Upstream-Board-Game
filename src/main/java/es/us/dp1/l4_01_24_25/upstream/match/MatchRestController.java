@@ -28,8 +28,8 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatch;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
@@ -44,9 +44,9 @@ public class MatchRestController {
     private final PlayerService playerService;
     private final UserService userService;
     private final MatchTileService matchTileService;
-    private final salmonMatchService salmonMatchService;
+    private final SalmonMatchService salmonMatchService;
 
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, salmonMatchService sms) {
+    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
         this.userService = userService;
@@ -228,7 +228,7 @@ public class MatchRestController {
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
         List<Player> players = matchService.getPlayersFromGame(matchId);
-        List<salmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
+        List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
         Integer round = match.getRound();
         Integer playerN = match.getPlayersNum();
         if(mtNoC.size() == 0) {
@@ -259,7 +259,7 @@ public class MatchRestController {
                 match.setActualPlayer(ini);
                 List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
                 for(MatchTile h : herons) {
-                    for(salmonMatch s: salmonMatches){
+                    for(SalmonMatch s: salmonMatches){
                         if(s.getCoordinate().equals(h.getCoordinate())){
                             s.setSalmonsNumber(s.getSalmonsNumber()-1);
                             if(s.getSalmonsNumber()==0){
@@ -298,21 +298,21 @@ public class MatchRestController {
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
         List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
         List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(matchId);
-        List<salmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
+        List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
         Phase phase = partida.getPhase();
 
         if(round == 2){ 
-            List<salmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
-            for (salmonMatch sm: mtInOcean) { 
+            List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
+            for (SalmonMatch sm: mtInOcean) { 
                 eliminarSalmon(sm.getId());
             }
            
         }
 
         else if (round > 2 && mtNoc.size() == 0){
-            List<salmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 7)).toList();
-            for(salmonMatch sm:mtOutOfPosition) {
+            List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 7)).toList();
+            for(SalmonMatch sm:mtOutOfPosition) {
                 eliminarSalmon(sm.getId());
             } 
             for(MatchTile m:mt) {
@@ -331,7 +331,7 @@ public class MatchRestController {
         }
         
         else if(round>2 && rds.contains(mtNoc.size()) && phase == Phase.CASILLAS){
-            for(salmonMatch sm:salmonMatches) {
+            for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
                     salmonMatchService.delete(sm.getId());
                 }else{
