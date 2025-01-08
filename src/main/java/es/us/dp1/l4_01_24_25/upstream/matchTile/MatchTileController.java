@@ -151,9 +151,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            //matchTile.setJumpingSides(new ArrayList<>());
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -164,9 +161,6 @@ public class MatchTileController {
             else matchTile.setCapacity(2);
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-           // matchTile.setJumpingSides(new ArrayList<>());
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -176,9 +170,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            //matchTile.setJumpingSides(new ArrayList<>());
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 3; i++) {
@@ -188,10 +179,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            //List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1);
-            //matchTile.setJumpingSides(ladosSalto);
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -201,9 +188,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            //matchTile.setJumpingSides(new ArrayList<>());
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         } 
         for (int i = 0; i < 4; i++) {
@@ -213,10 +197,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-           //List<Integer> ladosSalto = new ArrayList<>(); ladosSalto.add(0); ladosSalto.add(1); ladosSalto.add(2);
-            //matchTile.setJumpingSides(ladosSalto);
-            matchTile.setSalmonsNumber(0);
-            matchTile.setTimesHasEaten(0);
             createdTiles.add(matchTile);
         }    
         Collections.shuffle(createdTiles);
