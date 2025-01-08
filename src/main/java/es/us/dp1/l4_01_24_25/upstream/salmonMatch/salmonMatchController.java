@@ -102,7 +102,8 @@ public class salmonMatchController {
 
         if (myCoordinate == null && newCoordinate.y() != 0) throw new NotValidMoveException("Solo puedes moverte de uno en uno"); 
 
-        // Si salgo desde el desove.
+
+        // Si salgo desde el mar.
         else if (myCoordinate == null) {
             if(toTravelType.equals("OSO") && List.of(0, 1).contains(toTravel.getOrientation())) {
                 energyUsed = 2;
@@ -111,6 +112,12 @@ public class salmonMatchController {
             else if(toTravelType.equals("SALTO") && List.of(0, 1, 5).contains(toTravel.getOrientation())) {
                 energyUsed = 2;
             }
+
+            
+            else if(toTravelType.equals("AGUILA")) {
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+            toTravel = matchTileService.eagleToWater(toTravel, match);
+        } 
         }
 
         // Si ya estoy en el tablero.
@@ -125,6 +132,11 @@ public class salmonMatchController {
 
             if(List.of(0, 2).contains(myCoordinate.x()) && Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new NotValidMoveException("Este movimiento no está permitido");    
 
+            
+            if(toTravelType.equals("AGUILA")) {
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+            toTravel = matchTileService.eagleToWater(toTravel, match);
+        } 
             // Si subo, independientemente de dónde esté.
             if(newCoordinate.y() == myCoordinate.y() + 1 && myCoordinate.x() == newCoordinate.x()) { 
                 if(myCoordinateType.equals("OSO") && List.of(3,4).contains(myTile.getOrientation()) || 
