@@ -11,7 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.salmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 
 @Service
 public class PlayerService {
@@ -137,9 +137,5 @@ public class PlayerService {
         });
 		return jugadoresFallidas;
 	}
-
-    public List<salmonMatch> getSalmonsByPlayerId(Integer playerId) { 
-        return playerRepository.findSalmonMatchesByPlayer(playerId);
-    }
 
 }
