@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 
 @Service
@@ -103,6 +104,12 @@ public class MatchService {
         return update(partidaNueva, partidaToUpdate);
     }
 
+    @Transactional(readOnly = true)
+    public List<MatchTile> getHeronWithCoordsFromGame(Integer gameId){
+
+        return matchRepository.findHeronWithCoordFromGame(gameId);
+
+    }
 
     @Transactional
 	public Match save(Match partida) {
