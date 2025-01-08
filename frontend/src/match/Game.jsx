@@ -258,7 +258,7 @@ export default function Game({match}){
         const angleStep = (2 * Math.PI) / totalSalmons // Usar 5 posiciones como máximo
         const angle = index * angleStep - Math.PI / 2; // Empezar desde arriba (-90 grados)
 
-        // Calcular las coordenadas X e Y en el pentágono
+        // Calcular las coordenadas X e Y en el hexagono
         const x = centerOffsetX + radius * Math.cos(angle) + 10;
         const y = centerOffsetY + radius * Math.sin(angle) + 10;
 
@@ -331,7 +331,7 @@ export default function Game({match}){
                             src={cell.tile.image}
                             alt=""
                             style={{ 
-                            width: '150px', 
+                            width: '250px',
                             ...getRotationStyle(cell.tile.data)
                             }}
                         />

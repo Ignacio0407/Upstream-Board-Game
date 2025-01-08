@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,6 +42,7 @@ public class SalmonMatchController {
     private final MatchTileService matchTileService;
     private final MatchService matchService;
 
+    @Autowired
     public SalmonMatchController(MatchService matchService, MatchTileService matchTileService, PlayerService playerService, SalmonMatchService salmonMatchService, SalmonService salmonService) {
         this.matchService = matchService;
         this.matchTileService = matchTileService;
@@ -96,13 +98,12 @@ public class SalmonMatchController {
 
     }
 
-    private void rechargeEnergy(Player player, Match match, List<Player> players, Integer numPlayers, MatchTile toTravel) {
+    private void rechargeEnergy(Player player, Match match, List<Player> players, Integer numPlayers) {
         if (player.getEnergy() == 0) {
             Integer myOrder = player.getPlayerOrder();
             Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1) % numPlayers)).findFirst().get();
             player.setEnergy(5);
             match.setActualPlayer(nextPlayer);
-            matchTileService.save(toTravel);
             playerService.savePlayer(player);
             matchService.save(match);
         }
@@ -122,10 +123,56 @@ public class SalmonMatchController {
         return toTravel2;
     }
 
+    private Coordinate newCoordinateToTravel(Coordinate newCoordinate, Integer x, Integer y) {
+        return new Coordinate(newCoordinate.x()+x, newCoordinate.y() + y);
+    }
 
-    private void initialMove(Match match, MatchTile toTravel, SalmonMatch salmonMatch, Coordinate newCoordinate, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
+    private ResponseEntity<SalmonMatch> tileFullMove(Match match, Coordinate myCoordinate, Coordinate newCoordinate, SalmonMatch salmonMatch, List<MatchTile> matchTiles, MatchTile toTravel, List<Player> players, Player player, Integer numPlayers) {
+        MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().get();
+        String myCoordinateType = myTile.getTile().getType().getType();
         Coordinate newCoordinate2 = null;
-            MatchTile toTravel2 = null;
+        MatchTile toTravel2 = null;
+        if (null != myCoordinate.x()) switch (myCoordinate.x()) {
+            case 1 -> {
+                // Si estoy en el centro
+                if (myCoordinate.y().equals(newCoordinate.y())) throw new NotValidMoveException("Solo puedes moverte hacia delante");
+                else if (newCoordinate.x().equals(myCoordinate.x())) { // Si me quedo en el centro
+                    toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                }
+            }
+            case 0 -> {
+                // Si estoy en la izquierda
+                if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
+                    toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                } else if (newCoordinate.x() == myCoordinate.x() + 1) { // Si voy al centro
+                    toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
+                }
+            }
+            case 2 -> {
+                // Si estoy en la derecha
+                if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
+                    toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                } else if (newCoordinate.x() == myCoordinate.x() - 1) { // Si voy al centro
+                    toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
+                }
+            }
+            default -> {
+                toTravel2 = toTravel;
+                newCoordinate2 = newCoordinate;
+            }
+        }
+        salmonMatch.setCoordinate(newCoordinate2);
+        player.setEnergy(player.getEnergy() - 3);
+        rechargeEnergy(player, match, players, numPlayers);
+        playerService.savePlayer(player);
+        if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
+        else salmonMatchService.delete(salmonMatch.getId());
+        return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
+}
+
+
+    /*private void initialMove(Match match, MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, Coordinate newCoordinate, Coordinate newCoordinate2, List<MatchTile> matchTiles, String toTravelType, Player player, Integer energyUsed) {
+            
             if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) ) {
                 toTravel2 = tileFullNull(salmonMatch, matchTiles, toTravel2, newCoordinate, newCoordinate2, energyUsed);
                 newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
@@ -141,19 +188,7 @@ public class SalmonMatchController {
                     toTravel = matchTileService.eagleToWater(toTravel, match);
                 } 
             }
-            if (newCoordinate2 == null) {
-                salmonMatch.setCoordinate(newCoordinate); 
-                toTravel.setSalmonsNumber(toTravel.getSalmonsNumber()+1);
-                matchTileService.save(toTravel);
-            }
-            else if (toTravel2 != null) { 
-                salmonMatch.setCoordinate(newCoordinate2); 
-                toTravel2.setSalmonsNumber(toTravel2.getSalmonsNumber()+1);
-                matchTileService.save(toTravel2);
-            }
-            salmonMatchService.save(salmonMatch);
-            player.setEnergy(player.getEnergy() - energyUsed);
-    }
+    } */
 
     private Boolean osoBoolean(MatchTile myTile, MatchTile toTravel, String myCoordinateType, String toTravelType, List<Integer> from, List<Integer> to, String andOr) {
         if (andOr.equals("or")) {
@@ -166,7 +201,7 @@ public class SalmonMatchController {
         }
     }
 
-    private Boolean salto(MatchTile myTile, MatchTile toTravel, String myCoordinateType, String toTravelType, List<Integer> from, List<Integer> to) {
+    private Boolean saltoBoolean(MatchTile myTile, MatchTile toTravel, String myCoordinateType, String toTravelType, List<Integer> from, List<Integer> to) {
         return myCoordinateType.equals("SALTO") && from.contains(myTile.getOrientation()) ||
             toTravelType.equals("SALTO") && to.contains(toTravel.getOrientation());
     }
@@ -185,209 +220,107 @@ public class SalmonMatchController {
         String toTravelType = toTravel.getTile().getType().getType();
         Integer salmonsInToTravel =  salmonMatchService.getAllFromMatch(match.getId()).stream().filter(s -> s.getCoordinate() != null && s.getCoordinate().equals(newCoordinate)).toList().size();
         Integer energyUsed = 1;
-
-        throwExceptions(toTravel, salmonsInToTravel, myCoordinate, newCoordinate, player);
+        Coordinate newCoordinate2 = null;
+        MatchTile toTravel2 = null;
         
+        throwExceptions(toTravel, salmonsInToTravel, myCoordinate, newCoordinate, player);
+
+        // Si salgo desde el mar.
         if (myCoordinate == null) {
-            initialMove(match, toTravel, salmonMatch, newCoordinate, matchTiles, toTravelType, player, energyUsed);
-        }
-
-        else if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber())) {
-            MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().get();
-            String myCoordinateType = myTile.getTile().getType().getType();
-            Coordinate newCoordinate2 = null;
-            MatchTile toTravel2 = null;
-            if (null != myCoordinate.x()) switch (myCoordinate.x()) {
-                case 1 -> {
-                    // Si estoy en el centro
-                    if (myCoordinate.y().equals(newCoordinate.y())) throw new NotValidMoveException("Solo puedes moverte hacia delante");
-                    else if (newCoordinate.x().equals(myCoordinate.x())) { // Si me quedo en el centro
-                        toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
-                    }
-                }
-                case 0 -> {
-                    // Si estoy en la izquierda
-                    if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
-                        toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
-                    } else if (newCoordinate.x() == myCoordinate.x() + 1) { // Si voy al centro
-                        toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
-                    }
-                }
-                case 2 -> {
-                    // Si estoy en la derecha
-                    if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
-                        toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
-                    } else if (newCoordinate.x() == myCoordinate.x() - 1) { // Si voy al centro
-                        toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
-                    }
-                }
-                default -> {
-                    toTravel2 = toTravel;
-                    newCoordinate2 = newCoordinate;
-                }
+            //initialMove(match, toTravel, toTravel2, salmonMatch, newCoordinate, newCoordinate2, matchTiles, toTravelType, player, energyUsed);
+            if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) ) {
+                toTravel2 = tileFullNull(salmonMatch, matchTiles, toTravel2, newCoordinate, newCoordinate2, energyUsed);
+                newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
+                energyUsed = 3;
             }
-            salmonMatch.setCoordinate(newCoordinate2);
-            player.setEnergy(player.getEnergy() - 3);
-            rechargeEnergy(player, match, players, numPlayers, toTravel2);
-            playerService.savePlayer(player);
-            if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
-            else salmonMatchService.delete(salmonMatch.getId());
-            return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
+            else {
+                if(toTravelType.equals("OSO") && List.of(0, 1).contains(toTravel.getOrientation())) {
+                    energyUsed = 2;
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                }
+                else if (toTravelType.equals("SALTO") && List.of(0, 1, 5).contains(toTravel.getOrientation())) energyUsed = 2;
+                else if (toTravelType.equals("AGUILA")) {
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+                    toTravel = matchTileService.eagleToWater(toTravel, match);
+                } 
+            }
         }
 
+        // Si ya estoy en el tablero.
         else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
-            MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().get();
+            MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).toList().get(0);
             String myCoordinateType = myTile.getTile().getType().getType();
             Coordinate distancia = new Coordinate((newCoordinate.x() - myCoordinate.x()), (newCoordinate.y() - myCoordinate.y()));
             
             if(distancia.y() < 0) throw new NotValidMoveException("Solo puedes moverte hacia delante"); 
 
-            if(myCoordinate.x() == 1) { // Si estoy en el centro
-                if(myCoordinate.y().equals(newCoordinate.y())) throw new NotValidMoveException("Solo puedes moverte hacia delante");
+            if(myCoordinate.y().equals(newCoordinate.y()) && myCoordinate.x().equals(1)) throw new NotValidMoveException("Solo puedes moverte hacia delante");
 
-                if(newCoordinate.x().equals(0)) { // Si me muevo a la izquierda
-                    if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3), List.of(0,5), "or")) {
-                        energyUsed = 2;
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3), List.of(0,5), "and")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        }
-                    }
-                    else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(1,2,3), List.of(0,4,5))) {
-                        energyUsed = 2;
-                    }
-                    else if (toTravelType.equals("AGUILA")) {
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        toTravel = matchTileService.eagleToWater(toTravel, match);
-                    }
-                }
+            if(List.of(0, 2).contains(myCoordinate.x()) && Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new NotValidMoveException("Este movimiento no está permitido");    
 
-                else if(newCoordinate.x().equals(myCoordinate.x())) { // Si me quedo en el centro
-                    if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "or")) {
-                        energyUsed = 2;
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "and")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        }
-                    }
-                    else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3,4), List.of(0,1,5))) {
-                        energyUsed = 2;
-                    }
-                    else if (toTravelType.equals("AGUILA")) {
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        toTravel = matchTileService.eagleToWater(toTravel, match);
-                    }
-                }
 
-                else if(newCoordinate.x().equals(2)) { // Si me muevo a la derecha
-                    if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(4,4), List.of(1,2), "or")) {
-                        energyUsed = 2;
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(4,4), List.of(1,2), "and")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() -1);
-                        }
-                    }
-                    else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4,5), List.of(0,1,2))) {
-                        energyUsed = 2;
-                    }
-                    else if (toTravelType.equals("AGUILA")) {
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                        toTravel = matchTileService.eagleToWater(toTravel, match);
-                    }
-                }
-                    salmonMatch.setCoordinate(newCoordinate);
-                    player.setEnergy(player.getEnergy() - energyUsed);
-                    toTravel.setSalmonsNumber(toTravel.getSalmonsNumber()+1);                
+            if(toTravelType.equals("AGUILA")) {
+                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                toTravel = matchTileService.eagleToWater(toTravel, match);
+            } 
+            // Si subo, independientemente de dónde esté.
+            if(newCoordinate.y() == myCoordinate.y() + 1 && myCoordinate.x().equals(newCoordinate.x())) { 
+                if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "or")) {
+                salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+                energyUsed = 2;    
+            }
+            else if(saltoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3,4), List.of(0,1,5))) {
+                salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                energyUsed = 2;    
+            }    
             }
 
-            else { // Si estoy en uno de los lados
-                if(Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new NotValidMoveException("Este movimiento no está permitido");    
-                
-                if(myCoordinate.x() == 0) { // Si estoy en la izquierda
-                    if(newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
-                        if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "or")) {
-                            energyUsed = 2;
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "and")) {
-                                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            }
-                        }
-                        else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3,4), List.of(0,1,5))) {
-                            energyUsed = 2;
-                        }
-                        else if (toTravelType.equals("AGUILA")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            toTravel = matchTileService.eagleToWater(toTravel, match);
-                        }
-                        }
-                    
-                    else if(newCoordinate.x() == myCoordinate.x() + 1) { // Si voy al centro
-                        if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(4,5), List.of(1,2), "or")) {
-                            energyUsed = 2;
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(4,5), List.of(1,2), "and")) {
-                                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            }
-                        }
-                        else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4,5), List.of(0,1,2))) {
-                            energyUsed = 2;
-                        }
-                        else if (toTravelType.equals("AGUILA")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            toTravel = matchTileService.eagleToWater(toTravel, match);
-                        }  
-                    }
+            // Si me muevo a la derecha, independientemente de donde esté.
+            else if(newCoordinate.x().equals(myCoordinate.x() + 1)) {
+                if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(4,5), List.of(1,2), "or")) {
+                        salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+                        energyUsed = 2;
                 }
-
-                else if(myCoordinate.x() == 2) { // Si estoy en la derecha
-                    if(newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
-                        if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "or")) {
-                            energyUsed = 2;
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4), List.of(0,1), "and")) {
-                                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            }
-                        }
-                        else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3,4), List.of(0,1,5))) {
-                            energyUsed = 2;
-                        }
-                        else if (toTravelType.equals("AGUILA")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            toTravel = matchTileService.eagleToWater(toTravel, match);
-                        } 
-                    }
-                    else if(newCoordinate.x() == myCoordinate.x() - 1) { // Si voy al centro
-                        if(osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3), List.of(0,5), "or")) {
-                            energyUsed = 2;
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            if (osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3), List.of(0,5), "and")) {
-                                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            }
-                        }
-                        else if(salto(myTile, toTravel, myCoordinateType, toTravelType, List.of(1,2,3), List.of(0,4,5))) {
-                            energyUsed = 2;
-                        }
-                        else if (toTravelType.equals("AGUILA")) {
-                            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
-                            toTravel = matchTileService.eagleToWater(toTravel, match);
-                        } 
-                    }
-                }
-                    salmonMatch.setCoordinate(newCoordinate);
-                    player.setEnergy(player.getEnergy() - energyUsed);
-                    toTravel.setSalmonsNumber(toTravel.getSalmonsNumber()+1);
+                else if(saltoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(3,4,5), List.of(0,1,2))) {
+                    salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    energyUsed = 2;
+                }           
             }
-        }
+
+            // Si me muevo a la izquierda, independientemente de donde esté.
+            else if(newCoordinate.x().equals(myCoordinate.x()-1)) {
+                    if(myCoordinateType.equals("OSO") && List.of(2,3).contains(myTile.getOrientation()) || 
+                    toTravelType.equals("OSO") && List.of(0,5).contains(toTravel.getOrientation())) {
+                        osoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(2,3), List.of(0,5), "or");
+                        salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+                        energyUsed = 2;
+                    }
+                    else if(saltoBoolean(myTile, toTravel, myCoordinateType, toTravelType, List.of(1,2,3), List.of(0,4,5))) {
+                        salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                        energyUsed = 2;
+                    }
+                }
+            }
 
         else throw new NotValidMoveException("Solo puedes moverte de uno en uno"); 
-        rechargeEnergy(player, match, players, numPlayers, toTravel);
-        playerService.savePlayer(player);
-        matchTileService.save(toTravel);
+
+        if (newCoordinate2 == null) {
+            salmonMatch.setCoordinate(newCoordinate); 
+            toTravel.setSalmonsNumber(toTravel.getSalmonsNumber()+1);
+            matchTileService.save(toTravel);
+        }
+        else if (toTravel2 != null) { 
+            salmonMatch.setCoordinate(newCoordinate2); 
+            toTravel2.setSalmonsNumber(toTravel2.getSalmonsNumber()+1);
+            matchTileService.save(toTravel2);
+        }
+        player.setEnergy(player.getEnergy() - energyUsed);
+        playerService.savePlayer(player); 
+        rechargeEnergy(player, match, players, numPlayers);
         if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
         else salmonMatchService.delete(salmonMatch.getId());
         return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
     }
-
 
     @PostMapping("/player/{playerId}")
     public void create(@PathVariable("playerId") Integer playerId) {

@@ -24,9 +24,9 @@
     margin-left: 550px;
     margin-top: 50px;
     width: 800px;
-    height: 1200px;
+    height:2000px;
     border-radius: 10px;
-    background-color:  #1e95a2;
+    /*background-color:  #1e95a2;*/
     border: solid;
 }
 
@@ -54,41 +54,39 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
-    height: 75%;
+    height: 80%;
     background-color:  #3A6B76;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 110px;
 }
 
 .grid2 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    height: 25%;
+    height: 20%;
     justify-self: flex-end;
     background-color:  #193963;
 }
 
 .grid-item {
-    color: white;
-    padding: 0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    border-radius: 5px;
-    margin-top: 10px;
-    border: solid #2a554f;
+  height: 230px;
+  width: 250px;
+  aspect-ratio: 1/cos(30deg);
+  clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
+  background: #3B8686;
   }
 
-.grid-item:nth-child(3n +2){
+.grid-item:nth-child(3n + 2){
   transform: translateY(5px)
-
 }
 
 .grid-item:nth-child(3n + 1) {
-  transform: translateY(20px);
+  transform: translateY(120px);
 }
 .grid-item:nth-child(3n + 3) {
-  transform: translateY(20px);
+  transform: translateY(120px);
 }
 
 .grid-item2 {
