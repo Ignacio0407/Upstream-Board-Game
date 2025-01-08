@@ -74,9 +74,6 @@ public class MatchTileService {
         agua.setCapacity(toTravel.getCapacity());
         agua.setOrientation(0);
         agua.setCoordinate(toTravel.getCoordinate());
-        //matchTile.setJumpingSides(new ArrayList<>());
-        agua.setSalmonsNumber(1);
-        agua.setTimesHasEaten(0);
         return agua;
     }
 
