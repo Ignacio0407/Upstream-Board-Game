@@ -228,7 +228,7 @@ public class MatchRestController {
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
         List<Player> players = matchService.getPlayersFromGame(matchId);
-        List<salmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
+        List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
         Integer round = match.getRound();
         Integer playerN = match.getPlayersNum();
         if(mtNoC.size() == 0) {
