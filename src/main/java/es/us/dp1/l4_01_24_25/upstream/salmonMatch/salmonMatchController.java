@@ -59,6 +59,12 @@ public class SalmonMatchController {
         return new ResponseEntity<>(salmonMatchService.getAllFromMatch(matchId), HttpStatus.OK);
     }
 
+    
+    @GetMapping("/match/{matchId}/spawn")
+    public ResponseEntity<List<SalmonMatch>> findAllFromMatchInSpawn(@PathVariable Integer matchId) {  
+        return new ResponseEntity<>(salmonMatchService.getSalmonsInSpawnFromGame(matchId), HttpStatus.OK);
+    }
+
     @GetMapping("/player/{playerId}")
     public ResponseEntity<List<SalmonMatch>> findAllFromPlayer(@PathVariable Integer playerId) {  
         return new ResponseEntity<>(salmonMatchService.getAllFromPlayer(playerId), HttpStatus.OK);
@@ -218,4 +224,77 @@ public class SalmonMatchController {
         }
     }
 
+    @PatchMapping("/enterSpawn/{id}")
+    public ResponseEntity<SalmonMatch> enterSpawn(@PathVariable Integer id) {
+        SalmonMatch salmonMatch = salmonMatchService.getById(id);
+        Player player = salmonMatch.getPlayer();
+        Match match = salmonMatch.getMatch();
+        List<Player> players = playerService.getPlayersByMatch(match.getId());
+        Integer numPlayers = match.getPlayersNum();
+        Coordinate myCoordinate = salmonMatch.getCoordinate();
+        Coordinate newCoordinate = new Coordinate(1,5);
+        Coordinate updateCoordinate = new Coordinate(1, 21);
+        Integer energyUsed = 1;
+        MatchTile myTile = matchTileService.findByMatchId(match.getId()).stream()
+            .filter(m -> salmonMatch.getCoordinate().equals(m.getCoordinate())).findFirst().orElse(null);
+        String tileType = myTile.getTile().getType().getType();
+
+        if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
+        // Para subir 
+        if(newCoordinate.y() == myCoordinate.y() + 1 && myCoordinate.x() == newCoordinate.x()) { 
+            if(tileType.equals("OSO") && List.of(3,4).contains(myTile.getOrientation())) {
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+            energyUsed = 2;    
+        }
+    
+        else if(tileType.equals("SALTO") && List.of(2,3,4).contains(myTile.getOrientation())) {
+            energyUsed = 2;    
+        }
+    }
+        // Si vengo desde la izquierda
+        else if(newCoordinate.x().equals(myCoordinate.x() + 1)) { 
+            if(tileType.equals("OSO") && List.of(4,5).contains(myTile.getOrientation())) {
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                    energyUsed = 2;    
+            }
+            else if(tileType.equals("SALTO") && List.of(3,4,5).contains(myTile.getOrientation())) {
+                energyUsed = 2;    
+            }
+        }
+
+        // Vengo de la derecha
+        else if(newCoordinate.x().equals(myCoordinate.x() - 1)){
+            if(tileType.equals("OSO") && List.of(2,3).contains(myTile.getOrientation())) {
+                salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                energyUsed = 2;    
+        }
+            else if(tileType.equals("SALTO") && List.of(1,2,3).contains(myTile.getOrientation())) {
+                energyUsed = 2;    
+            }
+
+        }
+
+        salmonMatch.setCoordinate(updateCoordinate);
+        player.setEnergy(player.getEnergy() - energyUsed);
+
+    }
+
+    
+    if(player.getEnergy() == 0) {
+        Integer myOrder = player.getPlayerOrder();
+        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).findFirst().orElse(null);
+        match.setActualPlayer(nextPlayer);
+        matchService.save(match);
+    }
+    
+    playerService.savePlayer(player);
+    if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
+    else salmonMatchService.delete(salmonMatch.getId());
+    return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
+
+    }
+
 }
+
+    
+

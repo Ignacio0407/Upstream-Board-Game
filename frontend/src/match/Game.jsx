@@ -37,10 +37,12 @@ export default function Game({match}){
     const [salmonAndImages, setSalmonAndImages] = useState([]);
     const [gridTiles, setGridTiles] = useState([]);
     const [gridSalmons, setGridSalmons] = useState([]);
+    const [spawnSalmons, setSpawnSalmons] = useState([]);
     const [selectedTile, setSelectedTile] = useState(null);
     const [selectedSalmon, setSelectedSalmon] = useState(null);
     const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
     const [gridS, setGridS] = useState(Array(4).fill(null));
+    const [gridD, setGridD] = useState(Array(5).fill(null));
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
@@ -64,6 +66,7 @@ export default function Game({match}){
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
             setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
+            console.log(gridD);
         }
     }, [tilesList, matchTiles]);
 
@@ -139,11 +142,15 @@ export default function Game({match}){
         });
     
         gridSalmons.forEach((salmon) => {
+            if(salmon[0].coordinate.y < 6){
             const index = (gridHeight - 1 - salmon[0].coordinate.y) * gridWidth + salmon[0].coordinate.x;
+            
             newGrid[index].salmons.push({
                 data: salmon[0],
                 image: salmon[1]
+
             });
+        }
         });
         setGrid(newGrid);
     }, [gridTiles, gridSalmons]);    
@@ -162,6 +169,17 @@ export default function Game({match}){
         //console.log("gridS", newGridS)
     }, [gridSalmons])
 
+    useEffect(() => {
+        const newGridD = Array(5).fill(null).map(() => []);
+        setGridD(newGridD);
+        if(spawnSalmons.length > 0) {
+            for (let i = 0; i < spawnSalmons.length; i++) {
+            const index = spawnSalmons[i].coordinate.y - 21 + 4;
+            newGridD[index].push([spawnSalmons[i], getSalmonImage(spawnSalmons[i], players, salmonImages)]); }
+        }
+        setGridD(newGridD)
+    }, [spawnSalmons])
+
     // No quitar este useEffect
     useEffect(() => {
         const interval = setInterval(() => {
@@ -174,6 +192,11 @@ export default function Game({match}){
             .then(response => response.json())
             .then(data => setSalmons(data))
             .catch(error => console.error('Error fetching salmons:', error));
+           
+            get(`/api/v1/salmonMatches/match/${match.id}/spawn`, jwt)
+            .then(response => response.json())
+            .then(data => setSpawnSalmons(data))
+            .catch(error => console.error('Error fetching spawn salmons:', error));
 
             get(`/api/v1/players/match/${match.id}`, jwt)
             .then(response => response.json())
@@ -201,6 +224,19 @@ export default function Game({match}){
             throw error.message;
         }
     }
+    
+    const updateSpawn = async(salmon) => {
+        try {
+            const responseSalmon = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon[0].id}`, jwt);
+            if (!responseSalmon.ok) {
+                alert("Movimiento no válido.");
+                console.log("Error actualizando salmon", responseSalmon)
+            }
+        } catch (error){
+            console.log("Error actualizando salmon", error)
+            throw error.message;
+        }
+    }
 
     const updateTilePosition = async (tile, x, y) => {
         try {
@@ -213,6 +249,8 @@ export default function Game({match}){
             throw error; 
         }
     };
+
+
 
     const handleGridClick = async (index) => {
         const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
@@ -230,10 +268,14 @@ export default function Game({match}){
                 const foundTile = gridTiles.find(
                     t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
                 );
-                if(foundTile || (x === 1 && y === 5 && match.round >= 6)){    
+                if(foundTile){    
                     await updateSalmonPosition(selectedSalmon, x, y);
                     setSelectedSalmon(null);
+                }else if(x === 1 && y === 5 && match.round >= 6){
+                    await updateSpawn(selectedSalmon);        
+                    setSelectedSalmon(null);
                 }
+
                 }
                 console.log("JWT", jwt)
                 await patch(`/api/v1/matches/${match.id}/changephase`)
@@ -321,7 +363,22 @@ export default function Game({match}){
             {gridS[0].length > 0 && 
                 <div className='game-container'>
                     {match.round >= 6 && <div className='grid3'>
-                        <img src={spawningTile} alt='' className='img-desove'></img>
+                        {gridD.map((salmon, index) => (
+                        <div key={index} className="grid-item3">    
+                            {salmon.map((s, i) => (
+                                (s[0].coordinate.y > 20 && 
+                                <img
+                                src = {s[1]}
+                                alt=""
+                                style={{                          
+                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    borderRadius: '40px',}}
+                                />
+                                )
+                            ))}
+                        </div>
+                    ))}
                     </div>}
                     <div className={match.round < 2 && match.round < 6 ? 'grid1' : 'grid1-100'}>
                     {grid.map((cell, index) => (
