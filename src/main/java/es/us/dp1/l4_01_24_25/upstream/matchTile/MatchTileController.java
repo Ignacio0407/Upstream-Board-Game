@@ -151,7 +151,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -162,7 +161,6 @@ public class MatchTileController {
             else matchTile.setCapacity(2);
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -172,7 +170,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 3; i++) {
@@ -182,7 +179,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }
         for (int i = 0; i < 5; i++) {
@@ -192,7 +188,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         } 
         for (int i = 0; i < 4; i++) {
@@ -202,7 +197,6 @@ public class MatchTileController {
             matchTile.setCapacity(match.getPlayersNum());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }    
         Collections.shuffle(createdTiles);

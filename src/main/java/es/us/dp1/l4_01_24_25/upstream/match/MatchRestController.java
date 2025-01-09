@@ -310,13 +310,13 @@ public class MatchRestController {
            
         }
 
-        else if (round > 2 && mtNoc.size() == 0){
-            List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 7)).toList();
+        else if (round > 7 && mtNoc.size() == 0){
+            List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
             for(SalmonMatch sm:mtOutOfPosition) {
                 eliminarSalmon(sm.getId());
             } 
             for(MatchTile m:mt) {
-                if(m.getCoordinate().y() == (round - 7)){
+                if(m.getCoordinate().y() == (round - 8)){
                     matchTileService.deleteMatchTile(m.getId());
                 }
             
@@ -331,6 +331,7 @@ public class MatchRestController {
         }
         
         else if(round>2 && rds.contains(mtNoc.size()) && phase == Phase.CASILLAS){
+
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
                     salmonMatchService.delete(sm.getId());

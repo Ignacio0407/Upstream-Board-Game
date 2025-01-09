@@ -8,6 +8,7 @@ import heronTile from '../static/images/tiles/heronTile.png'
 import jumpTile from '../static/images/tiles/jumpTile.png'
 import rockTile from '../static/images/tiles/rockTile.png'
 import waterTile from '../static/images/tiles/waterTile.png'
+import spawningTile from '../static/images/tiles/spawningTile.png'
 import amarillo1 from '../static/images/salmons/Amarillo_1.png';
 import amarillo2 from '../static/images/salmons/Amarillo_2.png';
 import blanco1 from '../static/images/salmons/Blanco_1.png';
@@ -229,10 +230,11 @@ export default function Game({match}){
                 const foundTile = gridTiles.find(
                     t => t.some(tile => tile.coordinate?.x === x && tile.coordinate?.y === y)
                 );
-                if(foundTile){    
+                if(foundTile || (x === 1 && y === 5 && match.round >= 6)){    
                     await updateSalmonPosition(selectedSalmon, x, y);
                     setSelectedSalmon(null);
-                }}
+                }
+                }
                 console.log("JWT", jwt)
                 await patch(`/api/v1/matches/${match.id}/changephase`)
                 await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
@@ -318,7 +320,10 @@ export default function Game({match}){
 
             {gridS[0].length > 0 && 
                 <div className='game-container'>
-                    <div className='grid1'>
+                    {match.round >= 6 && <div className='grid3'>
+                        <img src={spawningTile} alt='' className='img-desove'></img>
+                    </div>}
+                    <div className={match.round < 2 && match.round < 6 ? 'grid1' : 'grid1-100'}>
                     {grid.map((cell, index) => (
                     <div 
                         key={index} 
