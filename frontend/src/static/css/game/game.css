@@ -67,7 +67,10 @@
     grid-template-rows: 1fr;
     height: 20%;
     justify-self: flex-end;
-    background-color:  #193963;
+    background-image: url('../../images/tiles/seaTile.png');
+    background-position: center;
+    background-size: cover;
+    background-color:  #3A6B76;
 }
 
 .grid-item {
@@ -98,7 +101,6 @@
     font-size: 18px;
     border-radius: 5px;
     margin-top: 10px;
-    border: solid #2a554f;
 }
 
 .grid-item2 img {
