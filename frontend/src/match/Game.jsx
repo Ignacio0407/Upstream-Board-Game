@@ -66,7 +66,7 @@ export default function Game({match}){
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
             setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            console.log(gridD);
+            //console.log(gridD);
         }
     }, [tilesList, matchTiles]);
 
@@ -250,8 +250,6 @@ export default function Game({match}){
         }
     };
 
-
-
     const handleGridClick = async (index) => {
         const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
         const gridHeight = 6; // Altura de la cuadrícula (número de filas)
@@ -419,7 +417,7 @@ export default function Game({match}){
                                     cursor: 'pointer',
                                     filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
                                     border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
-                                    borderRadius: '27px',    
+                                    borderRadius: '40px',    
                                 }}
                                 />
                             );
