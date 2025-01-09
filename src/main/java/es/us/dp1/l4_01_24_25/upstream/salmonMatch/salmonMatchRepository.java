@@ -7,17 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface salmonMatchRepository extends CrudRepository<salmonMatch, Integer>{
+public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integer>{
     
     @SuppressWarnings("null")
     @Override
-    Optional<salmonMatch> findById(Integer id);
+    Optional<SalmonMatch> findById(Integer id);
 
-    List<salmonMatch> findAll();
+    List<SalmonMatch> findAll();
     
-    @Query("SELECT sm from salmonMatch sm WHERE sm.match.id = :matchId")
-    List<salmonMatch> findAllFromMatch(@Param("matchId") Integer matchId);
+    @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId")
+    List<SalmonMatch> findAllFromMatch(@Param("matchId") Integer matchId);
 
-    @Query("SELECT sm from salmonMatch sm WHERE sm.player.id = :playerId")
-    List<salmonMatch> findAllFromPlayer(@Param("playerId") Integer playerId);
+    @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId")
+    List<SalmonMatch> findAllFromPlayer(@Param("playerId") Integer playerId);
 }
