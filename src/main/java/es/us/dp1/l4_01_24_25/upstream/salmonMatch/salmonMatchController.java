@@ -230,7 +230,9 @@ public class SalmonMatchController {
             //initialMove(match, toTravel, toTravel2, salmonMatch, newCoordinate, newCoordinate2, matchTiles, toTravelType, player, energyUsed);
             if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber()) ) {
                 toTravel2 = tileFullNull(salmonMatch, matchTiles, toTravel2, newCoordinate, newCoordinate2, energyUsed);
-                newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
+                if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                    newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
+                else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
                 energyUsed = 3;
             }
             else {
@@ -258,6 +260,51 @@ public class SalmonMatchController {
 
             if(List.of(0, 2).contains(myCoordinate.x()) && Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new NotValidMoveException("Este movimiento no está permitido");    
 
+            if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber())) {
+                energyUsed = 3;
+                if (null != myCoordinate.x()) switch (myCoordinate.x()) {
+                    case 1 -> {
+                        // Si estoy en el centro
+                        if (myCoordinate.y().equals(newCoordinate.y())) throw new NotValidMoveException("Solo puedes moverte hacia delante");
+                        else if (newCoordinate.x().equals(myCoordinate.x())) { // Si me quedo en el centro
+                            toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                            if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                                newCoordinate2 = newCoordinateToTravel(newCoordinate, 0, 1);
+                            else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
+                        }
+                    }
+                    case 0 -> {
+                        // Si estoy en la izquierda
+                        if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
+                            toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                            if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                                newCoordinate2 = newCoordinateToTravel(newCoordinate, 0, 1);
+                            else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
+                        } else if (newCoordinate.x() == myCoordinate.x() + 1) { // Si voy al centro
+                            toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
+                            if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                                newCoordinate2 = newCoordinateToTravel(newCoordinate, 1, 1);
+                            else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
+                        }
+                    }
+                    case 2 -> {
+                        // Si estoy en la derecha
+                        if (newCoordinate.y() == myCoordinate.y() + 1) { // Si subo
+                            toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                            if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                                newCoordinate2 = newCoordinateToTravel(newCoordinate, 0, 1);
+                            else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
+                        } else if (newCoordinate.x() == myCoordinate.x() - 1) { // Si voy al centro
+                            toTravel2 = handleTileFull(newCoordinate2, newCoordinate, salmonMatch, myTile, myCoordinateType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
+                            if (!toTravel2.getCapacity().equals(toTravel.getSalmonsNumber())) 
+                                newCoordinate2 = newCoordinateToTravel(newCoordinate, -1, 1);
+                            else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
+                        }
+                    }
+                    default -> {
+                    }
+                }
+            }
 
             if(toTravelType.equals("AGUILA")) {
                 salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);

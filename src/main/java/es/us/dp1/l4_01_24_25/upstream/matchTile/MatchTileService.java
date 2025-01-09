@@ -69,12 +69,13 @@ public class MatchTileService {
     public MatchTile eagleToWater(MatchTile toTravel, Match match) {
         MatchTile agua = new MatchTile();
         Tile aguaTile = tileService.findById(1).orElse(null);
-        agua.setTile(aguaTile);
         agua.setId(toTravel.getId());
-        agua.setMatch(match);
         agua.setCapacity(toTravel.getCapacity());
         agua.setOrientation(0);
+        agua.setSalmonsNumber(0);
         agua.setCoordinate(toTravel.getCoordinate());
+        agua.setTile(aguaTile);
+        agua.setMatch(match);
         matchTileRepository.save(agua);
         return agua;
     }
