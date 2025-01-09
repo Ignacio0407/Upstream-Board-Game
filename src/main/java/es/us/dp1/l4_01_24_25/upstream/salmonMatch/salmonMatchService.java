@@ -45,4 +45,16 @@ public class SalmonMatchService {
     public void delete(Integer id) throws DataAccessException {
         salmonMatchRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<SalmonMatch> getSalmonsInSpawnFromGame(Integer matchId) {
+
+        List<SalmonMatch> sm = salmonMatchRepository.findFromGameInSpawn(matchId);
+
+        if(sm == null){
+            sm = List.of();
+        }
+
+        return sm;
+    }
 }
