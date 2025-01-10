@@ -46,11 +46,12 @@ export default function Game({match}){
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
+    let playerList = [];
     if (!match.actualPlayer) {
         const firstPlayerId = players.length > 0 ? players[0].id : match.matchCreator;
         playerList = generatePlayerList(players, firstPlayerId);
     }
-    const playerList = generatePlayerList(players, match.actualPlayer);
+    playerList = generatePlayerList(players, match.actualPlayer);
 
     useEffect(() => {
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
