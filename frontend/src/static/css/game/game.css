@@ -95,7 +95,7 @@
 .grid-item2 {
   color: white;
     padding: 0px;
-    display: flex;
+    display: grid;
     align-items: center;
     justify-content: center;
     font-size: 18px;
