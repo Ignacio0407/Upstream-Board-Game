@@ -28,6 +28,8 @@ public class MatchTile extends BaseEntity {
 
     Integer orientation;
 
+    Integer salmonsNumber;
+
     @Embedded
     Coordinate coordinate;
 

@@ -12,7 +12,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import startGame from '../util/startGame';
 import endGame from '../util/endGame';
-import ColorHandler from '../util/colorHandler';
+import ColorHandler from '../util/ColorHandler';
 export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
@@ -154,7 +154,12 @@ stompClient.activate();
         {playerList}
         </Table>
        
-        <div className='lobbyUtilContainer'>
+        <div className='lobbyUtilContainer' tabIndex={0} 
+        onKeyDown={(e) => {
+            if (e.key === "Enter" && match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug >= 1) {
+                startingGame();
+            }
+        }}>
         {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=1 &&
         <Button color='success' onClick={startingGame} className='buttonStart'>
             Iniciar

@@ -47,7 +47,7 @@ export default function Game({match}){
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
     if (!match.actualPlayer) {
-        const firstPlayerId = players.length > 0 ? players[0].id : null;
+        const firstPlayerId = players.length > 0 ? players[0].id : match.matchCreator;
         playerList = generatePlayerList(players, firstPlayerId);
     }
     const playerList = generatePlayerList(players, match.actualPlayer);
@@ -66,7 +66,7 @@ export default function Game({match}){
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
             setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            console.log(gridD);
+            //console.log(gridD);
         }
     }, [tilesList, matchTiles]);
 
@@ -223,9 +223,10 @@ export default function Game({match}){
         try {
             const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
             if (!responseSalmon.ok) {
-                alert("Movimiento no válido.");
-                console.log("Error actualizando salmon", responseSalmon)
-            }
+                const errorData = await responseSalmon.json(); // Parsea el cuerpo de la respuesta
+                alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
+                console.log("Error actualizando salmón:", errorData);
+            }            
         } catch (error){
             console.log("Error actualizando salmon", error)
             throw error.message;
@@ -388,7 +389,7 @@ export default function Game({match}){
                                     handleSalmonClick([salmon.data, salmon.image]);
                                 }}
                                 style={{
-                                    width: '50px',
+                                    width: '80px',
                                     position: 'absolute',
                                     ...position,
                                     transition: 'all 0.3s ease-in-out',
@@ -396,7 +397,7 @@ export default function Game({match}){
                                     cursor: 'pointer',
                                     filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
                                     border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
-                                    borderRadius: '27px',    
+                                    borderRadius: '40px',    
                                 }}
                                 />
                             );

@@ -71,4 +71,27 @@ public class SalmonMatchService {
         return sm;
     }
 
+<<<<<<< HEAD:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/salmonMatchService.java
 }
+=======
+    @Transactional(readOnly = true)
+    public List<SalmonMatch> getSalmonsFromPlayerInSpawn(Integer playerId){
+        List<SalmonMatch> sm = salmonMatchRepository.findAllFromPlayerInSpawn(playerId);
+        if(sm == null) sm = List.of();
+        return sm;
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getPointsFromASalmonInSpawn(Integer salmonMatchId){
+        SalmonMatch sm = salmonMatchRepository.findById(salmonMatchId).get();
+        Integer puntuaje = 0;
+        if(sm.getCoordinate().y() > 20){
+         
+        puntuaje = sm.getCoordinate().y() - 20;
+    }
+        return puntuaje;
+    }
+
+
+}
+>>>>>>> main:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/SalmonMatchService.java

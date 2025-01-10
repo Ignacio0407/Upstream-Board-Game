@@ -17,6 +17,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +34,11 @@ public class SalmonMatch extends BaseEntity{
 	@JsonDeserialize(using = PlayerDeserializer.class)
     Player player;
     
+    @Min(0)
+    @Max(5)
     Integer salmonsNumber;
+    @Min(0)
+    @Max(5)
     Integer spawningNumber;
     @Embedded
     Coordinate coordinate;
