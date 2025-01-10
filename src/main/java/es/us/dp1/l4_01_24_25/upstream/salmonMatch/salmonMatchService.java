@@ -33,13 +33,24 @@ public class SalmonMatchService {
     
 	@Transactional(readOnly = true)
 	public List<SalmonMatch> getAllFromMatch(Integer matchId) {
-		return salmonMatchRepository.findAllFromMatch(matchId);
+		List<SalmonMatch> res = salmonMatchRepository.findAllFromMatch(matchId);
+        if(res == null) res = List.of();
+        return res;
 	}
     
     @Transactional()
 	public List<SalmonMatch> getAllFromPlayer(Integer playerId) {
-		return salmonMatchRepository.findAllFromPlayer(playerId);
+		List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayer(playerId);
+        if(res == null) res = List.of();
+        return res;
 	}
+
+    @Transactional
+    public List<SalmonMatch> getAllFromPlayerInSea(Integer playerId) {
+        List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayerInSea(playerId);
+        if(res == null) res = List.of();
+        return res;
+    }
 
     @Transactional
     public void delete(Integer id) throws DataAccessException {
@@ -48,13 +59,16 @@ public class SalmonMatchService {
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> getSalmonsInSpawnFromGame(Integer matchId) {
-
         List<SalmonMatch> sm = salmonMatchRepository.findFromGameInSpawn(matchId);
-
-        if(sm == null){
-            sm = List.of();
-        }
-
+        if(sm == null) sm = List.of();
         return sm;
     }
+
+    @Transactional
+    public List<SalmonMatch> getSalmonsInSea(Integer matchId) {
+        List<SalmonMatch> sm = salmonMatchRepository.findWithNoCoord(matchId);
+        if(sm == null) sm = List.of();
+        return sm;
+    }
+
 }

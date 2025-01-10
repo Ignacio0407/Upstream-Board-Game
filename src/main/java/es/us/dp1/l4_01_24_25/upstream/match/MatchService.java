@@ -12,16 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
 
 @Service
 public class MatchService {
         
     MatchRepository matchRepository;
+    MatchTileRepository matchTileRepository;
+    SalmonMatchRepository salmonMatchRepository;
 
     @Autowired
-    public MatchService(MatchRepository matchRepository) {
+    public MatchService(MatchRepository matchRepository, MatchTileRepository matchTileRepository, SalmonMatchRepository salmonMatchRepository) {
         this.matchRepository = matchRepository;
+        this.matchTileRepository = matchTileRepository;
+        this.salmonMatchRepository = salmonMatchRepository;
     }
     
     @Transactional(readOnly = true)
@@ -116,5 +123,17 @@ public class MatchService {
 		matchRepository.save(partida);
 		return partida;
 	}
+
+    @Transactional
+    public void checkGameHasFinished(Integer matchId) {
+        Match match = matchRepository.findById(matchId).get();
+        List<MatchTile> tiles = matchTileRepository.findByMatchId(matchId);
+        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromMatch(matchId);
+        List<SalmonMatch> noCoord = salmonMatchRepository.findWithNoCoord(matchId);
+        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty())) {
+            match.setState(State.FINALIZADA);
+            save(match);
+        }
+    }
     
 }

@@ -22,7 +22,7 @@ import verde2 from '../static/images/salmons/Verde_2.png';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { get, patch } from '../util/fetchers';
-import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList} from './matchUtil';
+import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition } from './matchUtil';
 import { ColorToRgb } from '../util/ColorParser';
 
 export default function Game({match}){
@@ -171,10 +171,17 @@ export default function Game({match}){
 
     useEffect(() => {
         const newGridD = Array(5).fill(null).map(() => []);
+        const coords = {
+            21: 4,
+            22: 3,
+            23: 2,
+            24: 1,
+            25: 0
+        }; 
         setGridD(newGridD);
         if(spawnSalmons.length > 0) {
             for (let i = 0; i < spawnSalmons.length; i++) {
-            const index = spawnSalmons[i].coordinate.y - 21 + 4;
+            const index = coords[spawnSalmons[i].coordinate.y]
             newGridD[index].push([spawnSalmons[i], getSalmonImage(spawnSalmons[i], players, salmonImages)]); }
         }
         setGridD(newGridD)
@@ -250,8 +257,6 @@ export default function Game({match}){
         }
     };
 
-
-
     const handleGridClick = async (index) => {
         const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
         const gridHeight = 6; // Altura de la cuadrícula (número de filas)
@@ -284,34 +289,6 @@ export default function Game({match}){
                 console.error("Error updating tile position or advancing turn:", error);
             }
     };
-
-    const calculateSalmonPosition = (index, totalSalmons) => {
-        const radius = 35; // Radio del pentágono
-        const centerOffsetX = 90; // Centro X relativo a la casilla (mitad del ancho de la tile)
-        const centerOffsetY = 30; // Centro Y relativo a la casilla (mitad del alto de la tile)
-        
-        // Si solo hay un salmón, colocarlo en el centro
-        if (totalSalmons === 1) {
-        return {
-            left: `${centerOffsetX + 15}px`, // 25 es la mitad del ancho del salmón (50px/2)
-            top: `${centerOffsetY + 10}px`
-        };
-        }
-
-        // Calcular el ángulo para cada posición
-        const angleStep = (2 * Math.PI) / totalSalmons // Usar 5 posiciones como máximo
-        const angle = index * angleStep - Math.PI / 2; // Empezar desde arriba (-90 grados)
-
-        // Calcular las coordenadas X e Y en el hexagono
-        const x = centerOffsetX + radius * Math.cos(angle) + 10;
-        const y = centerOffsetY + radius * Math.sin(angle) + 10;
-
-        return {
-        left: `${x}px`,
-        top: `${y}px`
-        };
-    };
-
 
     return(
         <div className='gamePage-container'>

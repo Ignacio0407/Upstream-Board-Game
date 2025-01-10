@@ -26,6 +26,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -118,8 +119,6 @@ public class SalmonMatchController {
             else if(toTravelType.equals("SALTO") && List.of(0, 1, 5).contains(toTravel.getOrientation())) {
                 energyUsed = 2;
             }
-
-            
             else if(toTravelType.equals("AGUILA")) {
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
             toTravel = matchTileService.eagleToWater(toTravel, match);
@@ -141,51 +140,98 @@ public class SalmonMatchController {
             if(toTravelType.equals("AGUILA")) {
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
             toTravel = matchTileService.eagleToWater(toTravel, match);
-        } 
-            // Si subo, independientemente de dónde esté.
-            if(newCoordinate.y() == myCoordinate.y() + 1 && myCoordinate.x() == newCoordinate.x()) { 
-                if(myCoordinateType.equals("OSO") && List.of(3,4).contains(myTile.getOrientation()) || 
-            toTravelType.equals("OSO") && List.of(0,1).contains(toTravel.getOrientation())) {
-                salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
-                energyUsed = 2;    
-            }
-            else if(myCoordinateType.equals("SALTO") && List.of(2,3,4).contains(myTile.getOrientation()) ||
-            toTravelType.equals("SALTO") && List.of(0,1,5).contains(toTravel.getOrientation())) {
-                salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
-                energyUsed = 2;    
-            }
-                
-            }
-
-            // Si me muevo a la derecha, independientemente de donde esté.
-            else if(newCoordinate.x().equals(myCoordinate.x() + 1)) {
-                if(myCoordinateType.equals("OSO") && List.of(4,5).contains(myTile.getOrientation()) || 
-                    toTravelType.equals("OSO") && List.of(1,2).contains(toTravel.getOrientation())) {
-                        salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+            } 
+            
+            // SI SUBO
+            if(newCoordinate.x().equals(myCoordinate.x()) && newCoordinate.y().equals(myCoordinate.y()+1)) {
+                Boolean cond1 = toTravelType.equals("OSO") && List.of(0,1).contains(toTravel.getOrientation());
+                Boolean cond2 = toTravelType.equals("SALTO") && List.of(0,1,5).contains(toTravel.getOrientation());
+                if(myCoordinateType.equals("OSO")) {
+                    if(List.of(3,4).contains(myTile.getOrientation())) {
                         energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
                     }
-                    else if(myCoordinateType.equals("SALTO") && List.of(3,4,5).contains(myTile.getOrientation()) ||
-                    toTravelType.equals("SALTO") && List.of(0,1,2).contains(toTravel.getOrientation())) {
-                        salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
-                        energyUsed = 2;
-                    }    
-                    
-            }
-
-            // Si me muevo a la izquierda, independientemente de donde esté.
-            else if(newCoordinate.x().equals(myCoordinate.x()-1)) {
-                    if(myCoordinateType.equals("OSO") && List.of(2,3).contains(myTile.getOrientation()) || 
-                    toTravelType.equals("OSO") && List.of(0,5).contains(toTravel.getOrientation())) {
-                        salmonMatch.setSalmonsNumber((myCoordinateType.equals(toTravelType))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
-                        energyUsed = 2;
-                    }
-                    else if(myCoordinateType.equals("SALTO") && List.of(1,2,3).contains(myTile.getOrientation()) ||
-                    toTravelType.equals("SALTO") && List.of(0,4,5).contains(toTravel.getOrientation())) {
-                        salmonMatch.setSalmonsNumber((myCoordinateType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
-                        energyUsed = 2;
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
                     }
                 }
+                else if(myCoordinateType.equals("SALTO")) {
+                    if(List.of(2,3,4).contains(myTile.getOrientation())) {
+                        energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                }
+                else {
+                    if(cond1 || cond2) energyUsed = 2;
+                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
             }
+
+            // SI VOY A LA IZQUIERDA
+            if(newCoordinate.x().equals(myCoordinate.x()-1)) {
+                Boolean cond1 = toTravelType.equals("OSO") && List.of(0,5).contains(toTravel.getOrientation());
+                Boolean cond2 = toTravelType.equals("SALTO") && List.of(0,4,5).contains(toTravel.getOrientation());
+                if(myCoordinateType.equals("OSO")) {
+                    if(List.of(2,3).contains(myTile.getOrientation())) {
+                        energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+                    }
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                    }
+                }
+                else if(myCoordinateType.equals("SALTO")) {
+                    if(List.of(1,2,3).contains(myTile.getOrientation())) {
+                        energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                }
+                else {
+                    if(cond1 || cond2) energyUsed = 2;
+                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
+            }
+
+            // SI VOY A LA DERECHA
+            if(newCoordinate.x().equals(myCoordinate.x()+1)) {
+                Boolean cond1 = toTravelType.equals("OSO") && List.of(1,2).contains(toTravel.getOrientation());
+                Boolean cond2 = toTravelType.equals("SALTO") && List.of(0,1,2).contains(toTravel.getOrientation());
+                if(myCoordinateType.equals("OSO")) {
+                    if(List.of(4,5).contains(myTile.getOrientation())) {
+                        energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
+                    }
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                    }
+                }
+                else if(myCoordinateType.equals("SALTO")) {
+                    if(List.of(3,4,5).contains(myTile.getOrientation())) {
+                        energyUsed = 2;
+                        salmonMatch.setSalmonsNumber((toTravelType.equals("OSO"))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                    else {
+                        if(cond1 || cond2) energyUsed = 2;
+                        salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                    }
+                }
+                else {
+                    if(cond1 || cond2) energyUsed = 2;
+                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
+            }
+        }
 
         else throw new NotValidMoveException("Solo puedes moverte de uno en uno"); 
 
@@ -203,6 +249,7 @@ public class SalmonMatchController {
         matchTileService.save(toTravel);
         if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
         else salmonMatchService.delete(salmonMatch.getId());
+        matchService.checkGameHasFinished(match.getId());
         return new ResponseEntity<>(salmonMatch, HttpStatus.OK);
     }
 

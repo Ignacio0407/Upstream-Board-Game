@@ -42,7 +42,9 @@ public class MatchTileService {
 
     @Transactional(readOnly = true)
     public List<MatchTile> findByMatchId(Integer matchId) {
-        return matchTileRepository.findByMatchId(matchId);
+        List<MatchTile> res = matchTileRepository.findByMatchId(matchId);
+        if(res == null) res = List.of();
+        return res;
     }
 
     @Transactional(readOnly = true)
