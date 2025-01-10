@@ -268,7 +268,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
             Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
             match.setActualPlayer(ini);
-            List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
+            /*List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
             for(MatchTile h : herons) {
                 for(SalmonMatch s: salmonMatches){
                     if(s.getCoordinate().equals(h.getCoordinate())){
@@ -280,8 +280,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                         }
                     }
                 }   
-            }
-
+            } */
         }
     }
     matchService.checkGameHasFinished(matchId);
