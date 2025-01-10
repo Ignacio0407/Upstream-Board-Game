@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,7 @@ public class MatchRestController {
     private final MatchTileService matchTileService;
     private final SalmonMatchService salmonMatchService;
 
+    @Autowired
     public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
@@ -222,48 +224,68 @@ public class MatchRestController {
     return new ResponseEntity<>(m, HttpStatus.CREATED);
 }
 
-    @PatchMapping("/{matchId}/changephase")
-    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
-        Match match = matchService.getById(matchId);
-        Phase phase = match.getPhase();
-        List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
-        List<Player> players = matchService.getPlayersFromGame(matchId);
-        List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
-        Integer round = match.getRound();
-        Integer playerN = match.getPlayersNum();
-        if(mtNoC.size() == 0) {
-            match.setPhase(Phase.MOVIENDO);
-            if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-                players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.savePlayer(p);
-                match.setRound(round+1);
-                players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
-                Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
-                match.setActualPlayer(ini);
+@PatchMapping("/{matchId}/changephase")
+public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
+    Match match = matchService.getById(matchId);
+    Phase phase = match.getPhase();
+    List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
+    List<Player> players = matchService.getPlayersFromGame(matchId);
+    List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId).stream().filter(s -> s.getCoordinate() != null).toList();
+    Integer round = match.getRound();
+    Integer playerN = match.getPlayersNum();
+    if(mtNoC.size() == 0) {
+        match.setPhase(Phase.MOVIENDO);
+        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+            List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.getSalmonsInSpawnFromGame(matchId);
+            if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
+                List<SalmonMatch> salmonMatchesInSpawnExceptLast = salmonMatchesInSpawn.stream().filter(s -> s.getCoordinate().y() < 25).toList();
+                salmonMatchesInSpawnExceptLast.stream().forEach(s -> {
+                s.setCoordinate(new Coordinate(s.getCoordinate().x(), s.getCoordinate().y() + 1));
+                salmonMatchService.save(s);});
             }
+            players.stream().forEach(p -> p.setEnergy(5));
+            for(Player p : players) playerService.savePlayer(p);
+            match.setRound(round+1);
+            players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
+            Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
+            match.setActualPlayer(ini);
         }
-        else if(phase.equals(Phase.CASILLAS)) {
-            List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
-            if (rds.contains(mtNoC.size())) {
-                players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.savePlayer(p);
-                match.setPhase(Phase.MOVIENDO);
-            }
-        }
-        else {
-            if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-                match.setPhase(Phase.CASILLAS);
-                match.setRound(round+1);
-                players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
-                Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
-                match.setActualPlayer(ini);
-            }
-        }
-        matchService.save(match);
-        return new ResponseEntity<>(match, HttpStatus.OK);
     }
+    else if(phase.equals(Phase.CASILLAS)) {
+        List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
+        if (rds.contains(mtNoC.size())) {
+            players.stream().forEach(p -> p.setEnergy(5));
+            for(Player p : players) playerService.savePlayer(p);
+            match.setPhase(Phase.MOVIENDO);
+        }
+    }
+    else {
+        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+            match.setPhase(Phase.CASILLAS);
+            match.setRound(round+1);
+            players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
+            Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
+            match.setActualPlayer(ini);
+            List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
+            for(MatchTile h : herons) {
+                for(SalmonMatch s: salmonMatches){
+                    if(s.getCoordinate().equals(h.getCoordinate())){
+                        s.setSalmonsNumber(s.getSalmonsNumber()-1);
+                        if(s.getSalmonsNumber()==0){
+                            salmonMatchService.delete(s.getId());
+                        }else{
+                            salmonMatchService.save(s);
+                        }
+                    }
+                }   
+            }
 
-    
+        }
+    }
+    matchService.checkGameHasFinished(matchId);
+    matchService.save(match);
+    return new ResponseEntity<>(match, HttpStatus.OK);
+    }
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
@@ -349,7 +371,29 @@ public class MatchRestController {
     }
 
 
+
     private void deleteSalmon(Integer id){
         salmonMatchService.delete(id);
     }
+
+
+    
+    @PatchMapping("/finalscore/{id}")
+    public ResponseEntity<Match> finalScore(@PathVariable Integer id) {
+        List<Player> players = playerService.getPlayersByMatch(id);
+        Match match = matchService.getById(id);
+        for(Player p : players){
+            List<SalmonMatch> files = salmonMatchService.getSalmonsFromPlayerInSpawn(p.getId());
+            if(!files.isEmpty()){
+            Integer totalPoints = 0;
+            Integer salmonPoints = files.stream().mapToInt(s -> salmonMatchService.getPointsFromASalmonInSpawn(s.getId())).sum();
+            Integer filePoints = files.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
+            totalPoints = salmonPoints + filePoints;
+            p.setPoints(totalPoints);
+            playerService.savePlayer(p);
+        }
+        }
+        return new ResponseEntity<>(match, HttpStatus.OK);
+    }
+
 }
