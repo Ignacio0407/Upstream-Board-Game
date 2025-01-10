@@ -213,8 +213,6 @@ public class SalmonMatchController {
             MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
             String myCoordinateType = myTile.getTile().getType().getType();
             Coordinate distancia = new Coordinate((newCoordinate.x() - myCoordinate.x()), (newCoordinate.y() - myCoordinate.y()));
-            myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
-            matchTileService.save(myTile);
             
             if(distancia.y() < 0) throw new NotValidMoveException("Solo puedes moverte hacia delante"); 
 
