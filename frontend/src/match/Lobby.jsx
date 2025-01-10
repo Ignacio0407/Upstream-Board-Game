@@ -154,7 +154,12 @@ stompClient.activate();
         {playerList}
         </Table>
        
-        <div className='lobbyUtilContainer'>
+        <div className='lobbyUtilContainer' tabIndex={0} 
+        onKeyDown={(e) => {
+            if (e.key === "Enter" && match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug >= 1) {
+                startingGame();
+            }
+        }}>
         {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=1 &&
         <Button color='success' onClick={startingGame} className='buttonStart'>
             Iniciar

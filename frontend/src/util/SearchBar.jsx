@@ -24,9 +24,8 @@ export default function SearchBar( { setter, uri, data } ) {
       fetchById(input, uri)
         .then(response => setter([response.data]))
         .catch(error => console.error(error));
-    } else if (input.includes(",") || input.includes(" ")) {
-      const delimiter = input.includes(",") ? "," : " ";
-      const namesArray = input.split(delimiter).map(name => name.trim());
+    } else if (input.includes(",")) {
+      const namesArray = input.split(",").map(name => name.trim());
       fetchByNames(namesArray, uri)
         .then(response => setter(response.data))
         .catch(error => console.error(error));
