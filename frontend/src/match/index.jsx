@@ -4,6 +4,7 @@ import useFetchState from "../util/useFetchState";
 import getIdFromUrl from "../util/getIdFromUrl";
 import Lobby from "./Lobby"
 import Game from "./Game"
+import EndGame from './EndGame';
 export default function Match() { 
 
     const jwt = tokenService.getLocalAccessToken();
@@ -70,9 +71,9 @@ export default function Match() {
     }
 
 
-    return(
+    return(        
+        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : match.state === "FINALIZADA" ? <EndGame match={match}></EndGame> : <Game match={match}></Game>
         
-        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : <Game match={match}></Game>
     )
 
 

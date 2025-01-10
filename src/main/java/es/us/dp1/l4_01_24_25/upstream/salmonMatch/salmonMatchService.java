@@ -33,7 +33,9 @@ public class SalmonMatchService {
     
 	@Transactional(readOnly = true)
 	public List<SalmonMatch> getAllFromMatch(Integer matchId) {
-		return salmonMatchRepository.findAllFromMatch(matchId);
+		List<SalmonMatch> res = salmonMatchRepository.findAllFromMatch(matchId);
+        if(res == null) res = List.of();
+        return res;
 	}
     
     @Transactional()
@@ -48,13 +50,34 @@ public class SalmonMatchService {
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> getSalmonsInSpawnFromGame(Integer matchId) {
-
         List<SalmonMatch> sm = salmonMatchRepository.findFromGameInSpawn(matchId);
-
-        if(sm == null){
-            sm = List.of();
-        }
-
+        if(sm == null) sm = List.of();
         return sm;
     }
+
+    @Transactional
+    public List<SalmonMatch> getSalmonsInSea(Integer matchId) {
+        List<SalmonMatch> sm = salmonMatchRepository.findWithNoCoord(matchId);
+        if(sm == null) sm = List.of();
+        return sm;
+    }
+
+    @Transactional(readOnly = true)
+    public List<SalmonMatch> getSalmonsFromPlayerInSpawn(Integer playerId){
+        List<SalmonMatch> sm = salmonMatchRepository.findAllFromPlayerInSpawn(playerId);
+        if(sm == null) sm = List.of();
+        return sm;
+    }
+
+    @Transactional(readOnly = true)
+    public Integer getPointsFromASalmonInSpawn(Integer salmonMatchId){
+        SalmonMatch sm = salmonMatchRepository.findById(salmonMatchId).get();
+        Integer puntuaje = 0;
+        if(sm.getCoordinate().y() > 20){
+         
+        puntuaje = sm.getCoordinate().y() - 20;
+    }
+        return puntuaje;
+    }
+
 }
