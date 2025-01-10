@@ -31,12 +31,8 @@ public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integ
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate IS NULL")
     List<SalmonMatch> findWithNoCoord(Integer matchId);
-<<<<<<< HEAD:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/salmonMatchRepository.java
-}
-=======
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId AND sm.coordinate.y > 20")
     List<SalmonMatch> findAllFromPlayerInSpawn(@Param("playerId") Integer playerId);
 
 }
->>>>>>> main:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/SalmonMatchRepository.java
