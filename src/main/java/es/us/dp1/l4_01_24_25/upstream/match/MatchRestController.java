@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NonSkipableTurnException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
@@ -224,6 +225,7 @@ public class MatchRestController {
     return new ResponseEntity<>(m, HttpStatus.CREATED);
 }
 
+
 @PatchMapping("/{matchId}/changephase")
 public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId) {
     Match match = matchService.getById(matchId);
@@ -284,6 +286,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     }
     matchService.checkGameHasFinished(matchId);
     matchService.save(match);
+
     return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
@@ -369,15 +372,11 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         }
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
-
-
-
+    
     private void deleteSalmon(Integer id){
         salmonMatchService.delete(id);
     }
 
-
-    
     @PatchMapping("/finalscore/{id}")
     public ResponseEntity<Match> finalScore(@PathVariable Integer id) {
         List<Player> players = playerService.getPlayersByMatch(id);

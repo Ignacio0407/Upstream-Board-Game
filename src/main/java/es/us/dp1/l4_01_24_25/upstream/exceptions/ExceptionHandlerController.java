@@ -95,4 +95,9 @@ public class ExceptionHandlerController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
 	}
 
+	@ExceptionHandler(NonSkipableTurnException.class)
+	public ResponseEntity<?> handleNonSkipableTurnException(NoCapacityException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+	}
+
 }

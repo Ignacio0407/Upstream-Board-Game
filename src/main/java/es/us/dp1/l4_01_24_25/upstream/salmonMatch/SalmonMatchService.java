@@ -40,8 +40,17 @@ public class SalmonMatchService {
     
     @Transactional()
 	public List<SalmonMatch> getAllFromPlayer(Integer playerId) {
-		return salmonMatchRepository.findAllFromPlayer(playerId);
+		List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayer(playerId);
+        if(res == null) res = List.of();
+        return res;
 	}
+
+    @Transactional
+    public List<SalmonMatch> getAllFromPlayerInSea(Integer playerId) {
+        List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayerInSea(playerId);
+        if(res == null) res = List.of();
+        return res;
+    }
 
     @Transactional
     public void delete(Integer id) throws DataAccessException {
@@ -62,6 +71,9 @@ public class SalmonMatchService {
         return sm;
     }
 
+<<<<<<< HEAD:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/salmonMatchService.java
+}
+=======
     @Transactional(readOnly = true)
     public List<SalmonMatch> getSalmonsFromPlayerInSpawn(Integer playerId){
         List<SalmonMatch> sm = salmonMatchRepository.findAllFromPlayerInSpawn(playerId);
@@ -82,3 +94,4 @@ public class SalmonMatchService {
 
 
 }
+>>>>>>> main:src/main/java/es/us/dp1/l4_01_24_25/upstream/salmonMatch/SalmonMatchService.java
