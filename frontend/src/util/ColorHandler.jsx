@@ -1,5 +1,5 @@
 import React from 'react';
-import ColorPickerModal from '../util/ColorPickerModal';
+import ColorPickerModal from './ColorPickerModal';
 
 export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged, stompClient }) {
     async function handleColorChange(color) {

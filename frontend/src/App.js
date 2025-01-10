@@ -19,7 +19,7 @@ import AchievementEdit from "./achievements/achievementEdit";
 import Dashboard from "./dashboard/dashboard"
 import CreateGame from "./createGame/createGame";
 import Rules from "./rules/rules";
-import Match from "./match"
+import Match from "./match/Match"
 
 
 function ErrorFallback({ error, resetErrorBoundary }) {

@@ -359,7 +359,7 @@ public class SalmonMatchController {
                 }
             }
             myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
-                    matchTileService.save(myTile);
+            matchTileService.save(myTile);
         }
 
         else throw new NotValidMoveException("Solo puedes moverte de uno en uno"); 

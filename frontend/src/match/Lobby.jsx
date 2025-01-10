@@ -12,7 +12,7 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import startGame from '../util/startGame';
 import endGame from '../util/endGame';
-import ColorHandler from '../util/colorHandler';
+import ColorHandler from '../util/ColorHandler';
 export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
