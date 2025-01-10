@@ -30,4 +30,5 @@ public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integ
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId AND sm.coordinate.y > 20")
     List<SalmonMatch> findAllFromPlayerInSpawn(@Param("playerId") Integer playerId);
+
 }

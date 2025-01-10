@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,7 @@ public class MatchRestController {
     private final MatchTileService matchTileService;
     private final SalmonMatchService salmonMatchService;
 
+    @Autowired
     public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
@@ -280,29 +282,29 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
 
         }
     }
-    matchService.save(match);
     matchService.checkGameHasFinished(matchId);
+    matchService.save(match);
     return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match m = matchService.getById(matchId);
-        List<Player> p = playerService.getPlayersByMatch(matchId);
+        Match match = matchService.getById(matchId);
+        List<Player> player = playerService.getPlayersByMatch(matchId);
 
-        m.setState(State.EN_CURSO);
-        m.setActualPlayer(p.get(0));
-        m.setInitialPlayer(p.get(0));
-        m.setNumJugadores(p.size());
-        matchService.save(m);
-        return new ResponseEntity<>(m, HttpStatus.OK);
+        match.setState(State.EN_CURSO);
+        match.setActualPlayer(player.get(0));
+        match.setInitialPlayer(player.get(0));
+        match.setNumJugadores(player.size());
+        matchService.save(match);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/endRound")
     public ResponseEntity<Match> endRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match partida = matchService.getById(matchId);
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
-        List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
+        List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
         List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(matchId);
         List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
@@ -311,7 +313,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         if(round == 2){ 
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
-                eliminarSalmon(sm.getId());
+                deleteSalmon(sm.getId());
             }
            
         }
@@ -319,7 +321,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         else if (round > 7 && mtNoc.size() == 0){
             List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
             for(SalmonMatch sm:mtOutOfPosition) {
-                eliminarSalmon(sm.getId());
+                deleteSalmon(sm.getId());
             } 
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y() == (round - 8)){
@@ -331,12 +333,12 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             .filter(mT -> mT.getCoordinate() != null)
             .forEach(mT -> {
             Coordinate oldCoord = mT.getCoordinate();
-             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1); // Asumiendo constructor
-             mT.setCoordinate(newCoord); // Actualiza la coordenada
+             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
+             mT.setCoordinate(newCoord);
         });
         }
         
-        else if(round>2 && rds.contains(mtNoc.size()) && phase == Phase.CASILLAS){
+        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.CASILLAS){
 
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
@@ -349,7 +351,6 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                     salmonMatchService.save(sm);
 
                 }
-
             }
 
             for(MatchTile m:mt) {
@@ -366,11 +367,12 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                 }
             }
         }
-        
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
-    private void eliminarSalmon(Integer id){
+
+
+    private void deleteSalmon(Integer id){
         salmonMatchService.delete(id);
     }
 
