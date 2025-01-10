@@ -216,9 +216,10 @@ export default function Game({match}){
         try {
             const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon[0].id}`, jwt, {x,y});
             if (!responseSalmon.ok) {
-                alert("Movimiento no válido.");
-                console.log("Error actualizando salmon", responseSalmon)
-            }
+                const errorData = await responseSalmon.json(); // Parsea el cuerpo de la respuesta
+                alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
+                console.log("Error actualizando salmón:", errorData);
+            }            
         } catch (error){
             console.log("Error actualizando salmon", error)
             throw error.message;

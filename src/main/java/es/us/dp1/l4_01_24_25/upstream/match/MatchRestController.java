@@ -257,20 +257,6 @@ public class MatchRestController {
                 players.stream().forEach(p -> p.setPlayerOrder((p.getPlayerOrder()+1)%playerN));
                 Player ini = players.stream().filter(p -> p.getPlayerOrder().equals(0)).toList().get(0);
                 match.setActualPlayer(ini);
-                List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(matchId);
-                for(MatchTile h : herons) {
-                    for(SalmonMatch s: salmonMatches){
-                        if(s.getCoordinate().equals(h.getCoordinate())){
-                            s.setSalmonsNumber(s.getSalmonsNumber()-1);
-                            if(s.getSalmonsNumber()==0){
-                                salmonMatchService.delete(s.getId());
-                            }else{
-                                salmonMatchService.save(s);
-                            }
-                        }
-                    }   
-                }
-
             }
         }
         matchService.save(match);
@@ -281,22 +267,22 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match m = matchService.getById(matchId);
-        List<Player> p = playerService.getPlayersByMatch(matchId);
+        Match match = matchService.getById(matchId);
+        List<Player> player = playerService.getPlayersByMatch(matchId);
 
-        m.setState(State.EN_CURSO);
-        m.setActualPlayer(p.get(0));
-        m.setInitialPlayer(p.get(0));
-        m.setNumJugadores(p.size());
-        matchService.save(m);
-        return new ResponseEntity<>(m, HttpStatus.OK);
+        match.setState(State.EN_CURSO);
+        match.setActualPlayer(player.get(0));
+        match.setInitialPlayer(player.get(0));
+        match.setNumJugadores(player.size());
+        matchService.save(match);
+        return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/endRound")
     public ResponseEntity<Match> endRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match partida = matchService.getById(matchId);
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
-        List<Integer> rds = List.of(17, 14, 11, 8, 5, 2);
+        List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
         List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(matchId);
         List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
@@ -305,7 +291,7 @@ public class MatchRestController {
         if(round == 2){ 
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
-                eliminarSalmon(sm.getId());
+                deleteSalmon(sm.getId());
             }
            
         }
@@ -313,7 +299,7 @@ public class MatchRestController {
         else if (round > 7 && mtNoc.size() == 0){
             List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
             for(SalmonMatch sm:mtOutOfPosition) {
-                eliminarSalmon(sm.getId());
+                deleteSalmon(sm.getId());
             } 
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y() == (round - 8)){
@@ -325,12 +311,12 @@ public class MatchRestController {
             .filter(mT -> mT.getCoordinate() != null)
             .forEach(mT -> {
             Coordinate oldCoord = mT.getCoordinate();
-             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1); // Asumiendo constructor
-             mT.setCoordinate(newCoord); // Actualiza la coordenada
+             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
+             mT.setCoordinate(newCoord);
         });
         }
         
-        else if(round>2 && rds.contains(mtNoc.size()) && phase == Phase.CASILLAS){
+        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.CASILLAS){
 
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
@@ -343,7 +329,6 @@ public class MatchRestController {
                     salmonMatchService.save(sm);
 
                 }
-
             }
 
             for(MatchTile m:mt) {
@@ -360,12 +345,11 @@ public class MatchRestController {
                 }
             }
         }
-        
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
 
 
-    private void eliminarSalmon(Integer id){
+    private void deleteSalmon(Integer id){
         salmonMatchService.delete(id);
     }
 }

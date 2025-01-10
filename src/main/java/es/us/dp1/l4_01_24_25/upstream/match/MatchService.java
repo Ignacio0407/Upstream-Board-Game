@@ -106,9 +106,7 @@ public class MatchService {
 
     @Transactional(readOnly = true)
     public List<MatchTile> getHeronWithCoordsFromGame(Integer gameId){
-
         return matchRepository.findHeronWithCoordFromGame(gameId);
-
     }
 
     @Transactional
