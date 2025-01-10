@@ -7,8 +7,6 @@ export default function ColorPickerModal({ onColorSelect , takenColors}) {
     const [isVisible, setIsVisible] = useState(true);
     const [selectedColor, setSelectedColor] = useState(null);
     
-
-    // Array de colores disponibles
     const colors = ['#FFFF00', '#FF0000', '#008F39', '#572364', '#FFFFFF'];
 
     // Maneja la selección de color cuando se hace clic en un botón
@@ -16,7 +14,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}) {
         
         if (!takenColors.includes(color)) {
             setSelectedColor(color); // Guarda el color seleccionado si está disponible
-            console.log(`Color seleccionado: ${color}`); // Muestra el color seleccionado en consola
+            console.log(`Color seleccionado: ${color}`);
             console.log(takenColors);
         }
           
@@ -32,7 +30,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}) {
         }
     };
 
-    if (!isVisible) return null; // No renderizar nada si el modal no es visible
+    if (!isVisible) return null;
 
     return (
         <div style={styles.modalOverlay}>
