@@ -121,7 +121,8 @@ public class SalmonMatchController {
     }
 
     private void changePlayer(Player player, Match match, List<Player> players, Integer numPlayers) {
-        List<SalmonMatch> salmonMatchesFromPlayer = salmonMatchService.getAllFromPlayerInRiver(player.getId());
+        Integer myOrder = player.getPlayerOrder();
+        List<SalmonMatch> salmonMatchesFromPlayer = salmonMatchService.getAllFromMatch(player.getId());
         List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(match.getId());
         for(MatchTile h : herons) {
             for(SalmonMatch s: salmonMatchesFromPlayer){
@@ -137,6 +138,9 @@ public class SalmonMatchController {
             }   
         }
         playerService.savePlayer(player);
+        matchService.save(match);
+        Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).findFirst().orElse(null);
+        match.setActualPlayer(nextPlayer);
         matchService.save(match);
     }
 
