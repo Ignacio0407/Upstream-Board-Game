@@ -198,6 +198,12 @@ public class SalmonMatchController {
                 if (!toTravel2.getCapacity().equals(toTravel2.getSalmonsNumber())) {
                     energyUsed = 3;
                     newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
+                    if (toTravel2.getTile().getType().getType().equals("AGUILA")) {
+                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                        toTravel2 = matchTileService.eagleToWater(toTravel2, match);
+                        if (salmonMatch.getSalmonsNumber().equals(0)) 
+                            salmonMatchService.delete(salmonMatch.getId());
+                    }
                 }
                 else throw new NotValidMoveException("¡La casilla siguiente también está llena!");
             }
@@ -258,7 +264,14 @@ public class SalmonMatchController {
                         }
                     else throw new NotValidMoveException("¡La casilla adyacente está llena y no se puede saltar a otra!");
                 if (newCoordinate2 != null) {
-                    if (player.getEnergy() < 3) throw new NotValidMoveException("¡Necesitas 3 puntos de energía para saltar una casilla llena!");
+                    if (player.getEnergy() < 3) 
+                        throw new NotValidMoveException("¡Necesitas 3 puntos de energía para saltar una casilla llena!");
+                    if (toTravel2.getTile().getType().getType().equals("AGUILA")) {
+                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                        toTravel2 = matchTileService.eagleToWater(toTravel2, match);
+                        if (salmonMatch.getSalmonsNumber().equals(0)) 
+                            salmonMatchService.delete(salmonMatch.getId());
+                    }
                     myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
                     matchTileService.save(myTile);
                     return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
