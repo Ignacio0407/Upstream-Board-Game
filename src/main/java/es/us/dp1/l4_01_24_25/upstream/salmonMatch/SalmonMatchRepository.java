@@ -20,6 +20,9 @@ public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integ
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId")
     List<SalmonMatch> findAllFromMatch(@Param("matchId") Integer matchId);
 
+    @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate IS NOT NULL AND sm.coordinate.y < 20")
+    List<SalmonMatch> findAllFromMatchInRiver(@Param("matchId") Integer matchId);
+
     @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId")
     List<SalmonMatch> findAllFromPlayer(@Param("playerId") Integer playerId);
 
@@ -28,6 +31,9 @@ public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integ
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate.y > 20")
     List<SalmonMatch> findFromGameInSpawn(@Param("matchId") Integer matchId);
+
+    @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId AND sm.coordinate IS NOT NULL AND sm.coordinate.y < 20")
+    List<SalmonMatch> findAllFromPlayerInRiver(@Param("playerId") Integer playerId);
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate IS NULL")
     List<SalmonMatch> findWithNoCoord(Integer matchId);
