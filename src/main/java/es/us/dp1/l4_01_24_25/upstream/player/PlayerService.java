@@ -10,14 +10,19 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
+
 @Service
 public class PlayerService {
         
     PlayerRepository playerRepository;
+    SalmonMatchRepository salmonMatchRepository;
 
 
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, SalmonMatchRepository salmonMatchRepository) {
         this.playerRepository = playerRepository;
+        this.salmonMatchRepository = salmonMatchRepository;
     }
     
     @Transactional(readOnly = true)
@@ -60,6 +65,14 @@ public class PlayerService {
         return jugadores.isEmpty()? new ArrayList<>() : jugadores;
 
     }
+
+    @Transactional(readOnly = true)
+    public List<Player> getAlivePlayersByMatch(Integer id) {
+        List<Player> jugadores = playerRepository.findAlivePlayersByMatch(id);
+        if(jugadores == null) return List.of();
+        return jugadores;
+    }
+
     private Player optionalToValueOrNull(Optional<Player> op) {
         if (!op.isPresent()) {
             return null;
@@ -134,5 +147,13 @@ public class PlayerService {
         });
 		return jugadoresFallidas;
 	}
+
+    @Transactional
+    public void checkPlayerIsAlive(Integer playerId) {
+        Player player = playerRepository.findById(playerId).get();
+        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
+        if(salmons.isEmpty()) { player.setAlive(false); player.setEnergy(0); player.setPlayerOrder(10); }
+        playerRepository.save(player);
+    }
 
 }

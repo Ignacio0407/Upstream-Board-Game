@@ -49,6 +49,10 @@
   margin-left: 830px;
 }
 
+.game-turn {
+  margin-left: 1700px;
+}
+
 
 .grid1 {
     display: grid;

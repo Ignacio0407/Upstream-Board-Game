@@ -44,6 +44,20 @@ public class SalmonMatchService {
 	}
 
     @Transactional
+    public List<SalmonMatch> getAllFromPlayerInRiver(Integer playerId) {
+        List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayerInRiver(playerId);
+        if(res == null) res = List.of();
+        return res;
+    }
+
+    @Transactional
+    public List<SalmonMatch> getAllFromPlayerInSea(Integer playerId) {
+        List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayerInSea(playerId);
+        if(res == null) res = List.of();
+        return res;
+    }
+
+    @Transactional
     public void delete(Integer id) throws DataAccessException {
         salmonMatchRepository.deleteById(id);
     }

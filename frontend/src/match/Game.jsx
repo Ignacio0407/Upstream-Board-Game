@@ -172,14 +172,7 @@ export default function Game({match}){
 
     useEffect(() => {
         const newGridD = Array(5).fill(null).map(() => []);
-        const coords = {
-            21: 4,
-            22: 3,
-            23: 2,
-            24: 1,
-            25: 0
-        }; 
-        setGridD(newGridD);
+        const coords = {21: 4, 22: 3, 23: 2, 24: 1, 25: 0}; 
         if(spawnSalmons.length > 0) {
             for (let i = 0; i < spawnSalmons.length; i++) {
             const index = coords[spawnSalmons[i].coordinate.y]
@@ -269,7 +262,7 @@ export default function Game({match}){
             if(selectedSalmon === null){
                 await updateTilePosition(selectedTile, x, y);
                 setSelectedTile(null);
-                await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
+                //await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
             }
             else{
                 const foundTile = gridTiles.find(
@@ -285,8 +278,8 @@ export default function Game({match}){
 
                 }
                 console.log("JWT", jwt)
-                await patch(`/api/v1/matches/${match.id}/changephase`)
-                await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
+                await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayer}`, jwt)
+                //await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
             }catch (error) {
                 console.error("Error updating tile position or advancing turn:", error);
             }
@@ -297,6 +290,7 @@ export default function Game({match}){
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
+            {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
             <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -322,7 +316,6 @@ export default function Game({match}){
                     {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
                     {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
                     {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
-                    {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h2>Move your salmons!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}

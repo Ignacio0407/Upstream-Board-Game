@@ -14,6 +14,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
 
@@ -23,12 +24,14 @@ public class MatchService {
     MatchRepository matchRepository;
     MatchTileRepository matchTileRepository;
     SalmonMatchRepository salmonMatchRepository;
+    PlayerRepository playerRepository;
 
     @Autowired
-    public MatchService(MatchRepository matchRepository, MatchTileRepository matchTileRepository, SalmonMatchRepository salmonMatchRepository) {
+    public MatchService(MatchRepository matchRepository, MatchTileRepository matchTileRepository, SalmonMatchRepository salmonMatchRepository, PlayerRepository playerRepository) {
         this.matchRepository = matchRepository;
         this.matchTileRepository = matchTileRepository;
         this.salmonMatchRepository = salmonMatchRepository;
+        this.playerRepository = playerRepository;
     }
     
     @Transactional(readOnly = true)
@@ -130,10 +133,35 @@ public class MatchService {
         List<MatchTile> tiles = matchTileRepository.findByMatchId(matchId);
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromMatch(matchId);
         List<SalmonMatch> noCoord = salmonMatchRepository.findWithNoCoord(matchId);
-        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty())) {
+        List<Player> players = playerRepository.findPlayersByMatch(matchId);
+        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) || players.stream().allMatch(p -> p.getAlive() == false)) {
             match.setState(State.FINALIZADA);
             save(match);
         }
+    }
+
+    @Transactional
+    public void changePlayerOrder(Integer matchId) {
+        Match match = matchRepository.findById(matchId).get();
+        List<Player> players = playerRepository.findAlivePlayersByMatch(matchId);
+        Integer playersN = players.size();
+        players.stream().forEach(p -> {p.setPlayerOrder((p.getPlayerOrder() - 1 + playersN)%playersN); playerRepository.save(p);});
+        Player ini = players.stream().filter(p -> p.getPlayerOrder() == 0).findFirst().get();
+        match.setActualPlayer(ini);
+        save(match);
+    }
+
+    @Transactional
+    public void changePlayerTurn(Integer playerId) {
+        Player player = playerRepository.findById(playerId).get();
+        Match match = player.getMatch();
+        List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId());
+        Integer myOrder = player.getPlayerOrder();
+        Integer nPlayers = players.size();
+        Player nextPlayer = players.stream().filter(p -> p.getPlayerOrder().equals((myOrder+1)%nPlayers)).findFirst().get();
+        if(match.getPhase().equals(Phase.MOVIENDO) && player.getEnergy().equals(0)) match.setActualPlayer(nextPlayer);
+        if(match.getPhase().equals(Phase.CASILLAS)) match.setActualPlayer(nextPlayer);
+        save(match);
     }
     
 }
