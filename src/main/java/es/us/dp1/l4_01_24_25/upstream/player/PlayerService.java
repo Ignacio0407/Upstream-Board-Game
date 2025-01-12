@@ -18,6 +18,7 @@ public class PlayerService {
         
     PlayerRepository playerRepository;
     SalmonMatchRepository salmonMatchRepository;
+    
 
 
     public PlayerService(PlayerRepository playerRepository, SalmonMatchRepository salmonMatchRepository) {
@@ -149,11 +150,52 @@ public class PlayerService {
 	}
 
     @Transactional
-    public void checkPlayerIsAlive(Integer playerId) {
+    public void setPlayerDead(Integer playerId) {
         Player player = playerRepository.findById(playerId).get();
-        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
-        if(salmons.isEmpty()) { player.setAlive(false); player.setEnergy(0); player.setPlayerOrder(10); }
+        player.setAlive(false);
+        player.setEnergy(0); 
+        player.setPlayerOrder(10); 
         playerRepository.save(player);
     }
+
+    @Transactional
+    public Boolean checkPlayerFinished(Integer playerId) {
+        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
+        Boolean res = false;
+    
+        // Verifica si la lista no está vacía y contiene elementos que cumplen la condición
+        if (!salmons.isEmpty() && 
+            salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20)) {
+            res = true;
+        }
+    
+        return res;
+    }
+    
+
+    @Transactional
+    public Boolean checkPlayerIsAlive(Integer playerId) {
+        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
+        Boolean res = false;
+        if(salmons.isEmpty()) { res = true;}
+        
+        return res;
+
+    }
+
+    @Transactional
+    public Boolean checkPlayerNoEnergy(Integer playerId){
+        Player player = playerRepository.findById(playerId).get();
+        Boolean res = false;
+        if(player.getEnergy() == 0){
+            res = true;
+        }
+        return res;
+
+    }
+
+
+
+
 
 }
