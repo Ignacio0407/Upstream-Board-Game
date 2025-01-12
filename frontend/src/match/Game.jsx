@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from "react-router-dom";
 import tokenService from '../services/token.service'
 import useFetchState from "../util/useFetchState";
 import '../static/css/game/game.css'
@@ -52,9 +53,16 @@ export default function Game({match}){
         playerList = generatePlayerList(players, firstPlayerId);
     }
     playerList = generatePlayerList(players, match.actualPlayer);
+    
+    const location = useLocation();
+    const spectatorIds = location.state?.spectatorIds || []; // Obtener la lista de espectadores
+
+    // Comprobar si el usuario actual está en la lista de espectadores
+    const isCurrentUserSpectator = spectatorIds.includes(user.id);
 
     useEffect(() => {
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            console.log("match", match)
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
@@ -290,7 +298,7 @@ export default function Game({match}){
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-            {myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
+            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
             <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -315,7 +323,7 @@ export default function Game({match}){
                 }>
                     {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
                     {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
-                    {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
@@ -324,7 +332,7 @@ export default function Game({match}){
                         ...getRotationStyle(tilesAndImages[0][0])} 
                         }></img>
                     }
-                    {myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && 
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && 
                     (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
                         tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
                     && <button onClick={() => handleRotateTile(tilesAndImages[0], jwt)}>Rotate Tile</button>}

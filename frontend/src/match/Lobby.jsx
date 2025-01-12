@@ -160,7 +160,7 @@ stompClient.activate();
                 startingGame();
             }
         }}>
-        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=1 &&
+        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=2 &&
         <Button color='success' onClick={startingGame} className='buttonStart'>
             Iniciar
         </Button>}
