@@ -47,12 +47,19 @@ public class UserAchievementService {
     }
 
     @Transactional
-    public UserAchievement findByUandA(User u, Achievement a) throws ResourceNotFoundException{
-        User pu = userRepository.findById(u.getId()).get();
-        Achievement pa = achievementRepository.findById(a.getId()).get();
-        if(pu != null && pa != null) return userAchievementRepository.findRepeatedUserAchievement(u, a);
-        else throw new ResourceNotFoundException("Usuario con id: " + u.getId() + " o logro con id: " + a.getId() + "no encontrados");
+    public UserAchievement findByUandA(User u, Achievement a) throws ResourceNotFoundException {
+    if (u == null || a == null) {
+        throw new ResourceNotFoundException("Usuario o logro no pueden ser nulos.");
     }
+
+        User pu = userRepository.findById(u.getId()).orElseThrow(() -> 
+        new ResourceNotFoundException("Usuario con id: " + u.getId() + " no encontrado"));
+        Achievement pa = achievementRepository.findById(a.getId()).orElseThrow(() -> 
+        new ResourceNotFoundException("Logro con id: " + a.getId() + " no encontrado"));
+
+    return userAchievementRepository.findRepeatedUserAchievement(pu, pa);
+}
+
 
     @Transactional
     public void checkAndUnlockAchievements(Integer userId) {
