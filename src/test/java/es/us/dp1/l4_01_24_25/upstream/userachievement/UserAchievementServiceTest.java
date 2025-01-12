@@ -23,7 +23,9 @@ import org.springframework.dao.DataAccessException;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
+import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementRepository;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserRepository;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
@@ -33,6 +35,10 @@ public class UserAchievementServiceTest {
     
     @Mock
     private UserAchievementRepository userAchievementRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private AchievementRepository achievementRepository;
 
     @InjectMocks
     private UserAchievementService userAchievementService;
@@ -181,19 +187,28 @@ public class UserAchievementServiceTest {
     @Test
     void testGetUserAchievementByUandAThrowsException() {
         ResourceNotFoundException ex = new ResourceNotFoundException("");
+
+        when(userRepository.findById(u1.getId())).thenReturn(Optional.of(u1));
+        when(achievementRepository.findById(a1.getId())).thenReturn(Optional.of(a1));
         when(userAchievementRepository.findRepeatedUserAchievement(u1, a1)).thenThrow(ex);
 
-        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findRepeatedUserAchievement(u1, a1));
+        assertThrows(ResourceNotFoundException.class, () -> userAchievementService.findByUandA(u1, a1));
+        verify(achievementRepository, times(1)).findById(u1.getId());
+        verify(userRepository, times(1)).findById(a1.getId());
         verify(userAchievementRepository, times(1)).findRepeatedUserAchievement(u1, a1);
     }
 
     @Test
     void testGetUserAchievementByUandAReturnsNull() {
+        when(userRepository.findById(u1.getId())).thenReturn(Optional.of(u1));
+        when(achievementRepository.findById(a1.getId())).thenReturn(Optional.of(a1));
         when(userAchievementRepository.findRepeatedUserAchievement(u1, a1)).thenReturn(null);
 
-        UserAchievement result = userAchievementRepository.findRepeatedUserAchievement(u1, a1);
+        UserAchievement result = userAchievementService.findByUandA(u1, a1);
 
         assertEquals(null, result);
+        verify(achievementRepository, times(1)).findById(u1.getId());
+        verify(userRepository, times(1)).findById(a1.getId());
         verify(userAchievementRepository, times(1)).findRepeatedUserAchievement(u1, a1);
     }
 
