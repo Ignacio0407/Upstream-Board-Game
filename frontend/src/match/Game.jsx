@@ -25,6 +25,7 @@ import { Client } from '@stomp/stompjs';
 import { get, patch } from '../util/fetchers';
 import { getTileImage, getSalmonImage, handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition } from './matchUtil';
 import { ColorToRgb } from '../util/ColorParser';
+import Chat from '../chat/Chat'
 
 export default function Game({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -429,10 +430,11 @@ export default function Game({match}){
                         </div>
                     ))}
                     </div>
-         }
+                    }
                 </div>
-    }
-            </div>
+            }
+        {/* <Chat match={match} players={players} currentPlayer={myPlayer} /> */}
+    </div>
     )
 
 }
