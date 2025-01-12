@@ -212,6 +212,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
     List<Player> players = playerService.getAlivePlayersByMatch(matchId);
     Integer round = match.getRound();
+
     if(mtNoC.size() == 0) {
         match.setPhase(Phase.MOVIENDO);
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
@@ -238,14 +239,24 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         if (match.getRound() == 0 && mtNoC.size() != 17) matchService.changePlayerTurn(playerId);
     }
     else {
-        matchService.changePlayerTurn(playerId);
-        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-            match.setPhase(Phase.CASILLAS);
-            match.setRound(round+1);
-            matchService.changePlayerOrder(matchId);
+        if(playerService.checkPlayerNoEnergy(playerId)){
+            matchService.changePlayerTurn(playerId);
         }
+
+    }
+
+
+
+    if(playerService.checkPlayerIsAlive(playerId)){
+        playerService.setPlayerDead(playerId);
+        matchService.changePlayerTurn(playerId);
+        
     }
     matchService.checkGameHasFinished(matchId);
+    if(playerService.checkPlayerFinished(playerId)){
+        matchService.changePlayerTurn(playerId);
+        
+    }
     endRound(matchId);
     matchService.save(match);
 

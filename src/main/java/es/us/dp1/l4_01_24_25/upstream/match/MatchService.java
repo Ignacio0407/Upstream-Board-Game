@@ -146,8 +146,6 @@ public class MatchService {
         List<Player> players = playerRepository.findAlivePlayersByMatch(matchId);
         Integer playersN = players.size();
         players.stream().forEach(p -> {p.setPlayerOrder((p.getPlayerOrder() - 1 + playersN)%playersN); playerRepository.save(p);});
-        Player ini = players.stream().filter(p -> p.getPlayerOrder() == 0).findFirst().get();
-        match.setActualPlayer(ini);
         save(match);
     }
 
@@ -158,10 +156,16 @@ public class MatchService {
         List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId());
         Integer myOrder = player.getPlayerOrder();
         Integer nPlayers = players.size();
+        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+            match.setPhase(Phase.CASILLAS);
+            match.setRound(match.getRound()+1);
+            changePlayerOrder(match.getId());
+        }
         Player nextPlayer = players.stream().filter(p -> p.getPlayerOrder().equals((myOrder+1)%nPlayers)).findFirst().get();
-        if(match.getPhase().equals(Phase.MOVIENDO) && player.getEnergy().equals(0)) match.setActualPlayer(nextPlayer);
-        if(match.getPhase().equals(Phase.CASILLAS)) match.setActualPlayer(nextPlayer);
+        match.setActualPlayer(nextPlayer);
         save(match);
     }
+
+
     
 }
