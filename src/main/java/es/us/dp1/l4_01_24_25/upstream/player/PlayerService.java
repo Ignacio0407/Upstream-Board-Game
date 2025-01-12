@@ -159,6 +159,14 @@ public class PlayerService {
     }
 
     @Transactional
+    public void setPlayerNoEnergy(Integer playerId) {
+        Player player = playerRepository.findById(playerId).get();
+        player.setEnergy(0);
+        playerRepository.save(player);
+
+    }
+
+    @Transactional
     public Boolean checkPlayerFinished(Integer playerId) {
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
         Boolean res = false;
@@ -174,7 +182,7 @@ public class PlayerService {
     
 
     @Transactional
-    public Boolean checkPlayerIsAlive(Integer playerId) {
+    public Boolean checkPlayerIsDead(Integer playerId) {
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
         Boolean res = false;
         if(salmons.isEmpty()) { res = true;}

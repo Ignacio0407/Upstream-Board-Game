@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -141,28 +142,65 @@ public class MatchService {
     }
 
     @Transactional
-    public void changePlayerOrder(Integer matchId) {
+    public void changeInitialPlayer(Integer matchId) {
         Match match = matchRepository.findById(matchId).get();
-        List<Player> players = playerRepository.findAlivePlayersByMatch(matchId);
-        Integer playersN = players.size();
-        players.stream().forEach(p -> {p.setPlayerOrder((p.getPlayerOrder() - 1 + playersN)%playersN); playerRepository.save(p);});
-        save(match);
+        List<Player> players = playerRepository.findAlivePlayersByMatch(matchId).stream()
+            .sorted(Comparator.comparing(Player::getPlayerOrder))
+            .toList();
+        
+        Integer initialOrder = match.getInitialPlayer().getPlayerOrder();
+        int currentIndex = players.indexOf(players.stream()
+            .filter(player -> player.getPlayerOrder().equals(initialOrder))
+            .findFirst()
+            .get());
+    
+        int nextIndex = (currentIndex + 1) % players.size();
+    
+        Player nextInitialPlayer = players.get(nextIndex);
+
+        match.setInitialPlayer(nextInitialPlayer);
+        matchRepository.save(match); 
     }
+    
 
     @Transactional
     public void changePlayerTurn(Integer playerId) {
         Player player = playerRepository.findById(playerId).get();
         Match match = player.getMatch();
-        List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId());
+        List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId()).stream()
+        .sorted(Comparator.comparing(Player::getPlayerOrder))
+        .toList();
         Integer myOrder = player.getPlayerOrder();
-        Integer nPlayers = players.size();
-        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-            match.setPhase(Phase.CASILLAS);
-            match.setRound(match.getRound()+1);
-            changePlayerOrder(match.getId());
+        if(match.getRound() > 6){
+            List<Player> playersFinished = playerRepository.findAlivePlayersByMatch(match.getId()).stream()
+                .filter(p -> salmonMatchRepository.findAllFromPlayer(p.getId()).stream().allMatch(s -> s.getCoordinate().y()>20)).toList();
+            if(playersFinished.contains(player)){
+                List<Player> copyPlayer = new ArrayList<>(players);
+                copyPlayer.add(player);
+                copyPlayer.stream().sorted(Comparator.comparing(Player:: getPlayerOrder));
+                players = copyPlayer;
+            }
         }
-        Player nextPlayer = players.stream().filter(p -> p.getPlayerOrder().equals((myOrder+1)%nPlayers)).findFirst().get();
+
+
+        Integer nPlayers = players.size();
+        List<MatchTile> tilesNoCoord = matchTileRepository.findWithNoCoord(match.getId());
+        if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+            if(!tilesNoCoord.isEmpty()) match.setPhase(Phase.CASILLAS); match.setRound(match.getRound()+1);
+            changeInitialPlayer(match.getId());
+            match.setActualPlayer(match.getInitialPlayer());
+        }else{
+            int currentIndex = players.indexOf(players.stream()
+            .filter(p -> p.getPlayerOrder().equals(myOrder))
+            .findFirst()
+            .get());
+    
+        int nextIndex = (currentIndex + 1) % nPlayers;
+        Player nextPlayer = players.get(nextIndex);
         match.setActualPlayer(nextPlayer);
+        }
+       
+        
         save(match);
     }
 

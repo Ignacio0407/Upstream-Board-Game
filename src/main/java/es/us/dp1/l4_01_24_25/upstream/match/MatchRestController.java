@@ -210,11 +210,21 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     Player player = playerService.getById(playerId);
     Phase phase = match.getPhase();
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
-    List<Player> players = playerService.getAlivePlayersByMatch(matchId);
+    List<Player> players = playerService.getAlivePlayersByMatch(matchId).stream()
+    .filter(p -> !salmonMatchService.getAllFromPlayerInRiver(p.getId()).isEmpty() || !salmonMatchService.getAllFromPlayerInSea(p.getId()).isEmpty()).toList();
     Integer round = match.getRound();
 
-    if(mtNoC.size() == 0) {
+    if(mtNoC.size() == 0 && phase == Phase.CASILLAS){
+        players.stream().forEach(p -> p.setEnergy(5));
+        for(Player p : players) playerService.savePlayer(p);
         match.setPhase(Phase.MOVIENDO);
+        match.setActualPlayer(match.getInitialPlayer());
+    }
+    else if(mtNoC.size() == 0) {
+        match.setPhase(Phase.MOVIENDO);
+        if(playerService.checkPlayerNoEnergy(playerId)){
+            matchService.changePlayerTurn(playerId);
+        }
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
             List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.getSalmonsInSpawnFromGame(matchId);
             if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
@@ -234,29 +244,34 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             players.stream().forEach(p -> p.setEnergy(5));
             for(Player p : players) playerService.savePlayer(p);
             match.setPhase(Phase.MOVIENDO);
-            match.setActualPlayer(players.stream().filter(p -> p.getPlayerOrder().equals(0)).findFirst().get());
+            match.setActualPlayer(match.getInitialPlayer());
         }
         if (match.getRound() == 0 && mtNoC.size() != 17) matchService.changePlayerTurn(playerId);
     }
     else {
-        if(playerService.checkPlayerNoEnergy(playerId)){
-            matchService.changePlayerTurn(playerId);
-        }
-
+     if (playerService.checkPlayerNoEnergy(playerId)) {
+        matchService.changePlayerTurn(playerId); 
     }
 
 
+    }
 
-    if(playerService.checkPlayerIsAlive(playerId)){
+    if (playerService.checkPlayerIsDead(playerId)) { 
+        matchService.changePlayerTurn(playerId);
         playerService.setPlayerDead(playerId);
-        matchService.changePlayerTurn(playerId);
         
+    } else if (playerService.checkPlayerFinished(playerId)) {
+        playerService.setPlayerNoEnergy(playerId); 
+        matchService.changePlayerTurn(playerId);
     }
+    /**
+     * Muere (sigue teniendo energia)
+     * Muere (se queda justo sin energia)
+     * Termina (sigue teniendo energia)
+     * Termina (no tiene mas energia)
+     */
+
     matchService.checkGameHasFinished(matchId);
-    if(playerService.checkPlayerFinished(playerId)){
-        matchService.changePlayerTurn(playerId);
-        
-    }
     endRound(matchId);
     matchService.save(match);
 
@@ -289,7 +304,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
                 deleteSalmon(sm.getId());
-                playerService.checkPlayerIsAlive(sm.getPlayer().getId());
+                playerService.checkPlayerIsDead(sm.getPlayer().getId());
             }
            
         }
@@ -298,7 +313,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
             for(SalmonMatch sm:mtOutOfPosition) {
                 deleteSalmon(sm.getId());
-                playerService.checkPlayerIsAlive(sm.getPlayer().getId());
+                playerService.checkPlayerIsDead(sm.getPlayer().getId());
             } 
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y() == (round - 8)){
@@ -306,13 +321,6 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                 }
             
             }
-            matchTileService.findByMatchId(matchId).stream()
-            .filter(mT -> mT.getCoordinate() != null)
-            .forEach(mT -> {
-            Coordinate oldCoord = mT.getCoordinate();
-             Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
-             mT.setCoordinate(newCoord);
-        });
         }
         
         else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.CASILLAS){
@@ -320,7 +328,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
                     salmonMatchService.delete(sm.getId());
-                    playerService.checkPlayerIsAlive(sm.getPlayer().getId());
+                    playerService.checkPlayerIsDead(sm.getPlayer().getId());
                 }else{
                     //m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
                     Coordinate oldCoord = sm.getCoordinate();
