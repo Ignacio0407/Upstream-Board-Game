@@ -16,6 +16,7 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
 
@@ -26,13 +27,15 @@ public class MatchService {
     MatchTileRepository matchTileRepository;
     SalmonMatchRepository salmonMatchRepository;
     PlayerRepository playerRepository;
+    PlayerService playerService;
 
     @Autowired
-    public MatchService(MatchRepository matchRepository, MatchTileRepository matchTileRepository, SalmonMatchRepository salmonMatchRepository, PlayerRepository playerRepository) {
+    public MatchService(MatchRepository matchRepository, MatchTileRepository matchTileRepository, SalmonMatchRepository salmonMatchRepository, PlayerRepository playerRepository, PlayerService playerService) {
         this.matchRepository = matchRepository;
         this.matchTileRepository = matchTileRepository;
         this.salmonMatchRepository = salmonMatchRepository;
         this.playerRepository = playerRepository;
+        this.playerService = playerService;
     }
     
     @Transactional(readOnly = true)
@@ -137,7 +140,7 @@ public class MatchService {
         List<Player> players = playerRepository.findPlayersByMatch(matchId);
         List<SalmonMatch> inRiver = salmonMatchRepository.findAllFromMatchInRiver(matchId);
         if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) || players.stream().allMatch(p -> p.getAlive() == false)
-        || (match.getRound() > 6 && inRiver.isEmpty())) {
+        || (match.getRound() > 6 && inRiver.isEmpty()) || players.stream().allMatch(p -> playerService.checkPlayerFinished(p.getId()))) {
             match.setState(State.FINALIZADA);
             save(match);
         }
