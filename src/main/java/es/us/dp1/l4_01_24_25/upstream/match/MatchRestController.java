@@ -277,8 +277,8 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
      * Termina (no tiene mas energia)
      */
 
-    matchService.checkGameHasFinished(matchId);
     endRound(matchId);
+    matchService.checkGameHasFinished(matchId);
     matchService.save(match);
 
     return new ResponseEntity<>(match, HttpStatus.OK);
@@ -313,7 +313,9 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             }
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                Boolean finished = playerService.checkPlayerFinished(p.getId());
                 if (dead) playerService.setPlayerDead(p.getId());
+                if (finished) playerService.setPlayerNoEnergy(p.getId());
             }
         }
 
@@ -330,7 +332,9 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             }
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                Boolean finished = playerService.checkPlayerFinished(p.getId());
                 if (dead) playerService.setPlayerDead(p.getId());
+                if (finished) playerService.setPlayerNoEnergy(p.getId());
             }
         }
         
@@ -365,7 +369,9 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             }
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                Boolean finished = playerService.checkPlayerFinished(p.getId());
                 if (dead) playerService.setPlayerDead(p.getId());
+                if (finished) playerService.setPlayerNoEnergy(p.getId());
             }
         }
         return new ResponseEntity<>(partida, HttpStatus.OK);
