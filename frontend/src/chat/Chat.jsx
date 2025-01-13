@@ -3,6 +3,7 @@ import { get, post } from '../util/fetchers';
 import tokenService from '../services/token.service';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { ColorToRgb } from '../util/ColorParser';
 
 const Chat = ({ match, players, currentPlayer }) => {
   const [messages, setMessages] = useState([]);
