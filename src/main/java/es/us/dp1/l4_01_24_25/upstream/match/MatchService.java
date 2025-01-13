@@ -135,7 +135,9 @@ public class MatchService {
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromMatch(matchId);
         List<SalmonMatch> noCoord = salmonMatchRepository.findWithNoCoord(matchId);
         List<Player> players = playerRepository.findPlayersByMatch(matchId);
-        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) || players.stream().allMatch(p -> p.getAlive() == false)) {
+        List<SalmonMatch> inRiver = salmonMatchRepository.findAllFromMatchInRiver(matchId);
+        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) || players.stream().allMatch(p -> p.getAlive() == false)
+        || (match.getRound() > 6 && inRiver.isEmpty())) {
             match.setState(State.FINALIZADA);
             save(match);
         }
@@ -167,24 +169,25 @@ public class MatchService {
     public void changePlayerTurn(Integer playerId) {
         Player player = playerRepository.findById(playerId).get();
         Match match = player.getMatch();
-        List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId()).stream()
-        .sorted(Comparator.comparing(Player::getPlayerOrder))
-        .toList();
+        List<Player> players = playerRepository.findAlivePlayersByMatch(match.getId()).stream().sorted(Comparator.comparing(Player::getPlayerOrder)).toList();
         Integer myOrder = player.getPlayerOrder();
+        Integer nPlayers = players.size();
+        List<MatchTile> tilesNoCoord = matchTileRepository.findWithNoCoord(match.getId());
         if(match.getRound() > 6){
             List<Player> playersFinished = playerRepository.findAlivePlayersByMatch(match.getId()).stream()
                 .filter(p -> salmonMatchRepository.findAllFromPlayer(p.getId()).stream().allMatch(s -> s.getCoordinate().y()>20)).toList();
-            if(playersFinished.contains(player)){
-                List<Player> copyPlayer = new ArrayList<>(players);
-                copyPlayer.add(player);
-                copyPlayer.stream().sorted(Comparator.comparing(Player:: getPlayerOrder));
-                players = copyPlayer;
-            }
+            Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
+            Integer nextIndex = (currentIndex + 1) % nPlayers;
+            Player nextPlayer = players.get(nextIndex);
+            while(playersFinished.contains(nextPlayer)) {
+                nextIndex = (nextIndex + 1) % nPlayers;
+                nextPlayer = players.get(nextIndex);
+                if(player == nextPlayer && salmonMatchRepository.findAllFromPlayer(playerId).stream().allMatch(s -> s.getCoordinate().y() > 20)) match.setState(State.FINALIZADA); 
+            }   
+            match.setActualPlayer(nextPlayer);
         }
 
-
-        Integer nPlayers = players.size();
-        List<MatchTile> tilesNoCoord = matchTileRepository.findWithNoCoord(match.getId());
+        else {
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
             if(!tilesNoCoord.isEmpty()) match.setPhase(Phase.CASILLAS); match.setRound(match.getRound()+1);
             changeInitialPlayer(match.getId());
@@ -199,6 +202,7 @@ public class MatchService {
         Player nextPlayer = players.get(nextIndex);
         match.setActualPlayer(nextPlayer);
         }
+    }
        
         
         save(match);

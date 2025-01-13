@@ -186,7 +186,6 @@ public class PlayerService {
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
         Boolean res = false;
         if(salmons.isEmpty()) { res = true;}
-        
         return res;
 
     }

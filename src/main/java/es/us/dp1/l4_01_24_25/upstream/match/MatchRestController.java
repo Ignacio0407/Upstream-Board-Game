@@ -1,9 +1,11 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -34,6 +36,8 @@ import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
@@ -47,14 +51,16 @@ public class MatchRestController {
     private final UserService userService;
     private final MatchTileService matchTileService;
     private final SalmonMatchService salmonMatchService;
+    private final UserAchievementService userAchievementService;
 
     @Autowired
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms) {
+    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms, UserAchievementService userAchievementService) {
         this.matchService = partidaService;
         this.playerService = jugadorService;
         this.userService = userService;
         this.matchTileService = matchTileService;
         this.salmonMatchService = sms;
+        this.userAchievementService = userAchievementService;
     }
 
     @GetMapping
@@ -299,14 +305,16 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
         Phase phase = partida.getPhase();
-
+        List<Player> players = playerService.getPlayersByMatch(matchId);
         if(round == 2){ 
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
                 deleteSalmon(sm.getId());
-                playerService.checkPlayerIsDead(sm.getPlayer().getId());
             }
-           
+            for(Player p : players) {
+                Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                if (dead) playerService.setPlayerDead(p.getId());
+            }
         }
 
         else if (round > 7 && mtNoc.size() == 0){
@@ -319,7 +327,10 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                 if(m.getCoordinate().y() == (round - 8)){
                     matchTileService.deleteMatchTile(m.getId());
                 }
-            
+            }
+            for(Player p : players) {
+                Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                if (dead) playerService.setPlayerDead(p.getId());
             }
         }
         
@@ -352,6 +363,10 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                     matchTileService.save(m);
                 }
             }
+            for(Player p : players) {
+                Boolean dead = playerService.checkPlayerIsDead(p.getId());
+                if (dead) playerService.setPlayerDead(p.getId());
+            }
         }
         return new ResponseEntity<>(partida, HttpStatus.OK);
     }
@@ -365,15 +380,26 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         List<Player> players = playerService.getPlayersByMatch(id);
         Match match = matchService.getById(id);
         for(Player p : players){
+            User u = p.getUserPlayer();
             List<SalmonMatch> files = salmonMatchService.getSalmonsFromPlayerInSpawn(p.getId());
+            u.setPlayedgames(u.getPlayedgames() + 1);
             if(!files.isEmpty()){
             Integer totalPoints = 0;
             Integer salmonPoints = files.stream().mapToInt(s -> salmonMatchService.getPointsFromASalmonInSpawn(s.getId())).sum();
             Integer filePoints = files.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
             totalPoints = salmonPoints + filePoints;
             p.setPoints(totalPoints);
+            u.setTotalpoints(u.getTotalpoints() + totalPoints);
+            }
+            userService.saveUser(u);
             playerService.savePlayer(p);
+            userAchievementService.checkAndUnlockAchievements(p.getId());
         }
+        Optional<Player> winner = players.stream().max(Comparator.comparing(Player::getPoints));
+        if(winner.isPresent()) {
+            User winnerUser = winner.get().getUserPlayer();
+            winnerUser.setVictories(winnerUser.getVictories() + 1);
+            userService.saveUser(winnerUser);
         }
         return new ResponseEntity<>(match, HttpStatus.OK);
     }
