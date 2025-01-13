@@ -92,3 +92,26 @@ export const patch = async (uri, jwt, data = null) => {
     });
   }
 }
+
+export const post = async (uri, jwt, data = null) => {
+  if (!data) {
+    return fetch(uri, {
+      method: "POST",
+      headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+      },
+    })
+  } else {
+    return fetch(uri, {
+      method: "POST",
+      headers: {
+          Authorization: `Bearer ${jwt}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data)
+    });
+  }
+}

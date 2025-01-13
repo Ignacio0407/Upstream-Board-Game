@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -15,15 +17,31 @@ public class MessageService {
     
     @Autowired
     private MessageRepository messageRepository;
+    @Autowired
+    private PlayerRepository playerRepository;
+    @Autowired
+    private MatchRepository matchRepository;
     
-    @Transactional
-    public Message createMessage(Player player, Match match, String content) {
+    /*@Transactional
+    public Message createMessage2(Player player, Match match, String content) {
         Message message = new Message();
         message.setPlayer(player);
         message.setMatch(match);
         message.setContent(content);
         message.setCreatedAt(LocalDateTime.now());
         message.setDeleted(false);
+        return messageRepository.save(message);
+    } */
+
+    @Transactional
+    public Message createMessage(Integer playerId, Integer matchId, String content) {
+        Player player = playerRepository.findById(playerId)
+            .orElseThrow(() -> new RuntimeException("Player not found"));
+            
+        Match match = matchRepository.findById(matchId)
+            .orElseThrow(() -> new RuntimeException("Match not found"));
+            
+        Message message = new Message(player, match, content);
         return messageRepository.save(message);
     }
     

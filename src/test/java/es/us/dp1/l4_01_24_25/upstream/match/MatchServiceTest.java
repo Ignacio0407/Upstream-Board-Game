@@ -19,27 +19,52 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileRepository;
+import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
+
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unused")
 class MatchServiceTest {
 
     @Mock
-    private MatchRepository partidaRepository;
+    private MatchRepository matchRepository;
+
+    @Mock
+    private MatchTileRepository matchTileRepository;
+
+    @Mock
+    private SalmonMatchRepository salmonMatchRepository;
+
+    @Mock
+    private PlayerRepository playerRepository;
 
     @InjectMocks
-    private MatchService partidaService;
+    private MatchService matchService;
 
-    private Match partida1;
-    private Match partida2;
+    private Match match1;
+    private Match match2;
 
     @BeforeEach
     void setup() {
-        partida1 = new Match();
-        partida1.setId(1);
-        partida1.setName("Partida1");
+        match1 = new Match();
+        match1.setId(1);
+        match1.setName("Match1");
+        match1.setPassword("password1");
+        match1.setState(State.ESPERANDO);
+        match1.setPlayersNum(2);
+        match1.setRound(1);
+        match1.setPhase(Phase.CASILLAS);
 
-        partida2 = new Match();
-        partida2.setId(2);
-        partida2.setName("Partida2");
+        match2 = new Match();
+        match2.setId(2);
+        match2.setName("Match2");
+        match2.setPassword("password2");
+        match2.setState(State.EN_CURSO);
+        match2.setPlayersNum(3);
+        match2.setRound(2);
+        match2.setPhase(Phase.MOVIENDO);
     }
 
     @Nested
@@ -47,93 +72,100 @@ class MatchServiceTest {
     class GetOperationsTests {
         
         @Test
-        void testGetAllPartidas() {
-            // Given
-            List<Match> expectedPartidas = Arrays.asList(partida1, partida2);
-            when(partidaRepository.findAll()).thenReturn(expectedPartidas);
+        void testGetAllMatches() {
+            List<Match> expectedMatches = Arrays.asList(match1, match2);
+            when(matchRepository.findAll()).thenReturn(expectedMatches);
 
-            // When
-            List<Match> result = partidaService.getAll();
+            List<Match> result = matchService.getAll();
 
-            // Then
-            assertEquals(expectedPartidas, result);
-            verify(partidaRepository).findAll();
+            assertEquals(expectedMatches, result);
+            verify(matchRepository).findAll();
         }
 
         @Test
-        void testGetPartidaById_Success() {
-            // Given
-            when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
+        void testGetMatchById_Success() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
 
-            // When
-            Match result = partidaService.getById(1);
+            Match result = matchService.getById(1);
 
-            // Then
             assertNotNull(result);
-            assertEquals(partida1.getName(), result.getName());
-            verify(partidaRepository).findById(1);
+            assertEquals(match1.getName(), result.getName());
+            verify(matchRepository).findById(1);
         }
 
         @Test
-        void testGetPartidaById_NotFound() {
-            // Given
-            when(partidaRepository.findById(99)).thenReturn(Optional.empty());
+        void testGetMatchById_NotFound() {
+            when(matchRepository.findById(99)).thenReturn(Optional.empty());
 
-            // When
-            Match result = partidaService.getById(99);
+            Match result = matchService.getById(99);
 
-            // Then
             assertNull(result);
-            verify(partidaRepository).findById(99);
+            verify(matchRepository).findById(99);
         }
 
         @Test
-        void testGetPartidaByName_Success() {
-            // Given
-            when(partidaRepository.findByName("Partida1")).thenReturn(partida1);
+        void testGetMatchByName_Success() {
+            when(matchRepository.findByName("Match1")).thenReturn(match1);
 
-            // When
-            Match result = partidaService.geByName("Partida1");
+            Match result = matchService.getByName("Match1");
 
-            // Then
             assertNotNull(result);
-            assertEquals(partida1.getName(), result.getName());
-            verify(partidaRepository).findByName("Partida1");
+            assertEquals(match1.getName(), result.getName());
+            verify(matchRepository).findByName("Match1");
         }
 
         @Test
-        void testGetPartidaByName_NotFound() {
-            // Given
-            when(partidaRepository.findByName("NonExistent")).thenReturn(null);
+        void testGetMatchByName_NotFound() {
+            when(matchRepository.findByName("NonExistent")).thenReturn(null);
 
-            // When
-            Match result = partidaService.geByName("NonExistent");
+            Match result = matchService.getByName("NonExistent");
 
-            // Then
             assertNull(result);
-            verify(partidaRepository).findByName("NonExistent");
+            verify(matchRepository).findByName("NonExistent");
         }
 
         @Test
-        void testGetSomePartidasByName_Success() {
-            // Given
-            List<String> names = Arrays.asList("Partida1", "Partida2");
-            when(partidaRepository.findByName("Partida1")).thenReturn(partida1);
-            when(partidaRepository.findByName("Partida2")).thenReturn(partida2);
+        void testGetPlayersFromMatch_Success() {
+            Player player1 = new Player();
+            player1.setId(1);
+            Player player2 = new Player();
+            player2.setId(2);
 
-            // When
-            List<Match> result = partidaService.getSomeByName(names);
+            List<Player> players = List.of(player1, player2);
+            when(matchRepository.findPlayersFromGame(1)).thenReturn(players);
 
-            // Then
+            List<Player> result = matchService.getPlayersFromGame(1);
+
             assertEquals(2, result.size());
-            assertEquals("Partida1", result.get(0).getName());
-            assertEquals("Partida2", result.get(1).getName());
+            assertEquals(players, result);
+            verify(matchRepository).findPlayersFromGame(1);
+        }
+
+        @Test
+        void testGetPlayersFromMatch_Empty() {
+            when(matchRepository.findPlayersFromGame(99)).thenReturn(List.of());
+
+            List<Player> result = matchService.getPlayersFromGame(99);
+
+            assertEquals(0, result.size());
+            verify(matchRepository).findPlayersFromGame(99);
         }
     }
 
     @Nested
     @DisplayName("POST Operations Tests")
     class PostOperationsTests {
+        
+        @Test
+        void testSaveMatch() {
+            when(matchRepository.save(any(Match.class))).thenReturn(match1);
+
+            Match result = matchService.save(match1);
+
+            assertNotNull(result);
+            assertEquals(match1.getName(), result.getName());
+            verify(matchRepository).save(match1);
+        }
     }
 
     @Nested
@@ -141,31 +173,31 @@ class MatchServiceTest {
     class PutOperationsTests {
         
         @Test
-        void testUpdatePartidaById_Success() {
-            // Given
-            Match updatedPartida = new Match();
-            //updatedPartida.setNumJugadores(5);
-            updatedPartida.setName("UpdatedPartida");
-            when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
-            when(partidaRepository.save(any(Match.class))).thenReturn(updatedPartida);
+        void testUpdateMatchById_Success() {
+            Match updatedMatch = new Match();
+            updatedMatch.setName("UpdatedMatch");
 
-            // When
-            Match result = partidaService.updateById(updatedPartida, 1);
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
+            when(matchRepository.save(any(Match.class))).thenReturn(updatedMatch);
 
-            // Then
+            Match result = matchService.updateById(updatedMatch, 1);
+
             assertNotNull(result);
-            assertEquals(updatedPartida.getName(), result.getName());
-            verify(partidaRepository).save(any(Match.class));
+            assertEquals("UpdatedMatch", result.getName());
+            verify(matchRepository).save(any(Match.class));
         }
 
         @Test
-        void testUpdatePartidaById_NotFound() {
-            // Given
-            when(partidaRepository.findById(99)).thenReturn(Optional.empty());
+        void testUpdateMatchById_NotFound() {
+            Match updatedMatch = new Match();
+            updatedMatch.setName("UpdatedMatch");
 
-            // When/Then
-            assertNull(partidaService.updateById(partida1, 99));
-            verify(partidaRepository).findById(99);
+            when(matchRepository.findById(99)).thenReturn(Optional.empty());
+
+            Match result = matchService.updateById(updatedMatch, 99);
+
+            assertNull(result);
+            verify(matchRepository).findById(99);
         }
     }
 
@@ -174,39 +206,69 @@ class MatchServiceTest {
     class DeleteOperationsTests {
         
         @Test
-        void testDeleteAllPartidas() {
-            // When
-            partidaService.deleteAll();
+        void testDeleteAllMatches() {
+            matchService.deleteAll();
 
-            // Then
-            verify(partidaRepository).deleteAll();
+            verify(matchRepository).deleteAll();
         }
 
         @Test
-        void testDeletePartidaById_Success() {
-            // Given
-            when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
+        void testDeleteMatchById_Success() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
 
-            // When
-            partidaService.deletePartidaById(1);
+            matchService.deletePartidaById(1);
 
-            // Then
-            verify(partidaRepository).deleteById(1);
+            verify(matchRepository).deleteById(1);
         }
 
         @Test
-        void testDeleteSomePartidasById_Success() {
-            // Given
-            List<Integer> ids = Arrays.asList(1, 2);
-            when(partidaRepository.findById(1)).thenReturn(Optional.of(partida1));
-            when(partidaRepository.findById(2)).thenReturn(Optional.of(partida2));
+        void testDeleteSomeMatchesById() {
+            List<Integer> ids = List.of(1, 2);
 
-            // When
-            partidaService.deleteSomeById(ids);
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
+            when(matchRepository.findById(2)).thenReturn(Optional.of(match2));
 
-            // Then
-            verify(partidaRepository).deleteById(1);
-            verify(partidaRepository).deleteById(2);
+            matchService.deleteSomeById(ids);
+
+            verify(matchRepository).deleteById(1);
+            verify(matchRepository).deleteById(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("Custom Methods Tests")
+    class CustomMethodsTests {
+        
+        @Test
+        void testCheckGameHasFinished() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
+            when(matchTileRepository.findByMatchId(1)).thenReturn(List.of());
+            when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(List.of());
+            when(playerRepository.findPlayersByMatch(1)).thenReturn(List.of());
+
+            matchService.checkGameHasFinished(1);
+
+            assertEquals(State.FINALIZADA, match1.getState());
+            verify(matchRepository).save(match1);
+        }
+
+        @Test
+        void testChangePlayerTurn() {
+            Player player = new Player();
+            player.setId(1);
+            player.setPlayerOrder(0);
+            player.setEnergy(5);
+            player.setAlive(true);
+            match1.setActualPlayer(player);
+            player.setMatch(match1);
+
+            when(playerRepository.findById(1)).thenReturn(Optional.of(player));
+            when(playerRepository.findAlivePlayersByMatch(1)).thenReturn(List.of(player));
+
+            matchService.changePlayerTurn(1);
+
+            assertNotNull(match1.getActualPlayer());
+            verify(matchRepository).save(match1);
         }
     }
 }

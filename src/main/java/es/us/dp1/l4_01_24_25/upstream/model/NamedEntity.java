@@ -29,7 +29,7 @@ import jakarta.validation.constraints.Size;
 @MappedSuperclass
 public class NamedEntity extends BaseEntity {
 
-    @Size(min = 2, max = 50)
+    @Size(min = 3, max = 50)
 	@Column(name = "name", unique = true)
 	private String name;
 

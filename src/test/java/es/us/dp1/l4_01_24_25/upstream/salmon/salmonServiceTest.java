@@ -25,7 +25,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 
 @ExtendWith(MockitoExtension.class)
-class SalmonServiceTest {
+public class SalmonServiceTest {
 
     @Mock
     private SalmonRepository salmonRepository;

@@ -27,7 +27,7 @@ import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
 @ExtendWith(MockitoExtension.class)
-class MatchTileServiceTest {
+public class MatchTileServiceTest {
 
     @Mock
     private MatchTileRepository matchTileRepository;

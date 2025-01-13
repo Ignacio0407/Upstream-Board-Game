@@ -42,7 +42,7 @@ public class MatchService {
     @Transactional(readOnly = true)
     public List<Match> getSomeByName(List<String> names) {
         List<Match> partidas = new LinkedList<>();
-        names.stream().forEach(name -> partidas.add(geByName(name)));
+        names.stream().forEach(name -> partidas.add(getByName(name)));
         return new ArrayList<>(partidas);
     }
 
@@ -73,7 +73,7 @@ public class MatchService {
     }
 
     @Transactional(readOnly = true)
-    public Match geByName(String name) {
+    public Match getByName (String name) {
         Optional <Match> op = Optional.ofNullable(matchRepository.findByName(name));
         return optionalToValueOrNull(op);
     }

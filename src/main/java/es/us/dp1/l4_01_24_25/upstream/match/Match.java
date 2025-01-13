@@ -41,6 +41,7 @@ public class Match extends NamedEntity {
 	@Min(0)
 	@Max(5)
 	Integer playersNum;
+	@Min(0)
     Integer round;
     @Enumerated(EnumType.STRING)
 	Phase phase;

@@ -35,5 +35,11 @@ public class Message extends BaseEntity {
 
     private boolean deleted;
 
+    public Message(Player player, Match match, String content) {
+        this.player = player;
+        this.match = match;
+        this.content = content;
+        this.createdAt = LocalDateTime.now();
+    }
 
 }

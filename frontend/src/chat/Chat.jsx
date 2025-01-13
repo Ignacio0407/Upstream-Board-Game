@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { patch } from '../util/fetchers';
+import { get, post } from '../util/fetchers';
 import tokenService from '../services/token.service';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -28,6 +28,21 @@ const Chat = ({ match, players, currentPlayer }) => {
   });
 
   useEffect(() => {
+    // Cargar mensajes existentes al montar el componente
+    const loadExistingMessages = async () => {
+      try {
+        const response = await get(`/api/v1/messages/match/${match.id}`, jwt);
+        const data = await response.json();
+        setMessages(data);
+        scrollToBottom();
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    };
+
+    loadExistingMessages();
+
+    // Configurar WebSocket
     stompClient.onConnect = () => {
       console.log('Connected to WebSocket for Chat');
       stompClient.subscribe(`/topic/chat/${match.id}`, (message) => {
@@ -47,14 +62,13 @@ const Chat = ({ match, players, currentPlayer }) => {
     if (!newMessage.trim()) return;
 
     try {
-      const messagePayload = {
-        content: newMessage,
-        player: currentPlayer,
-        match: { id: match.id },
+      const messageRequest = {
+        playerId: currentPlayer.id,
+        matchId: match.id,
+        content: newMessage
       };
 
-      const response = await patch('api/v1/messages', jwt, messagePayload);
-      if (!response.ok) throw new Error('Error sending message');
+      await post('/api/v1/messages', jwt, messageRequest);
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -85,13 +99,13 @@ const Chat = ({ match, players, currentPlayer }) => {
       boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
       zIndex: 1000,
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column'
     }}>
       <div className="chat-header" style={{
         padding: '10px',
         borderBottom: '1px solid #eee',
         backgroundColor: '#f8f9fa',
-        borderRadius: '8px 8px 0 0',
+        borderRadius: '8px 8px 0 0'
       }}>
         <h3 style={{ margin: 0, fontSize: '16px' }}>Chat de la partida</h3>
       </div>
@@ -102,14 +116,14 @@ const Chat = ({ match, players, currentPlayer }) => {
         padding: '10px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px',
+        gap: '8px'
       }}>
         {messages.map((message) => (
           <div 
             key={message.id} 
             style={{
               alignSelf: message.player.id === currentPlayer.id ? 'flex-end' : 'flex-start',
-              maxWidth: '80%',
+              maxWidth: '80%'
             }}
           >
             <div style={{
@@ -118,13 +132,13 @@ const Chat = ({ match, players, currentPlayer }) => {
               padding: '8px 12px',
               borderRadius: '12px',
               position: 'relative',
-              boxShadow: `0 1px 2px ${getPlayerColor(message.player.id)}40`,
+              boxShadow: `0 1px 2px ${getPlayerColor(message.player.id)}40`
             }}>
               <div style={{
                 fontSize: '12px',
                 fontWeight: 'bold',
                 marginBottom: '4px',
-                color: message.player.id === currentPlayer.id ? 'white' : getPlayerColor(message.player.id),
+                color: message.player.id === currentPlayer.id ? 'white' : getPlayerColor(message.player.id)
               }}>
                 {message.player.user.username}
               </div>
@@ -138,7 +152,7 @@ const Chat = ({ match, players, currentPlayer }) => {
         padding: '10px',
         borderTop: '1px solid #eee',
         display: 'flex',
-        gap: '8px',
+        gap: '8px'
       }}>
         <input
           type="text"
@@ -149,7 +163,7 @@ const Chat = ({ match, players, currentPlayer }) => {
             padding: '8px',
             border: '1px solid #ddd',
             borderRadius: '4px',
-            fontSize: '14px',
+            fontSize: '14px'
           }}
           placeholder="Escribe un mensaje..."
         />
@@ -161,7 +175,7 @@ const Chat = ({ match, players, currentPlayer }) => {
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer',
+            cursor: 'pointer'
           }}
         >
           Enviar

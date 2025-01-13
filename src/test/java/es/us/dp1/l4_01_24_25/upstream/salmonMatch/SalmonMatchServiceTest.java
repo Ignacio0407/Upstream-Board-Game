@@ -25,7 +25,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 
 @ExtendWith(MockitoExtension.class)
-class SalmonMatchServiceTest {
+public class SalmonMatchServiceTest {
 
     @Mock
     private SalmonMatchRepository salmonMatchRepository;

@@ -130,12 +130,12 @@ public class PlayerRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Player> createJugador(@RequestBody @Valid Player jugador) throws DataAccessException{
-        return new ResponseEntity<>(playerService.savePlayer(jugador), HttpStatus.OK);
+        return new ResponseEntity<>(playerService.savePlayer(jugador), HttpStatus.CREATED);
     }
 
     @PostMapping("/match/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Player> createJugadorInMatch(@PathVariable("id") Integer matchId,@RequestBody @Valid Map<String,String> requestBody) throws DataAccessException{
+    public ResponseEntity<Player> createPlayerInMatch(@PathVariable("id") Integer matchId,@RequestBody Map<String,String> requestBody) throws DataAccessException{
         String idUser = requestBody.getOrDefault("user", "");
         User user = userService.findUser(Integer.valueOf(idUser));
         String color = requestBody.getOrDefault("color", "");
@@ -152,7 +152,7 @@ public class PlayerRestController {
         match.setNumJugadores(match.getPlayersNum() + 1);
         matchService.save(match);
 
-        return new ResponseEntity<>(playerService.savePlayer(p), HttpStatus.OK);
+        return new ResponseEntity<>(playerService.savePlayer(p), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/energy")
@@ -162,7 +162,7 @@ public class PlayerRestController {
             throw new ResourceNotFoundException("Jugador no encontrada", "id", id.toString());
         }
         if (jugador.getEnergy() - energyUsed < 0) {
-            throw new Exception("No hay suficiente energía");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         jugador.setEnergy(jugador.getEnergy() - energyUsed);
         playerService.savePlayer(jugador);
