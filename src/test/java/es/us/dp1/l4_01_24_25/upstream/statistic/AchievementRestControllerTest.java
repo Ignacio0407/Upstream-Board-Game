@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,7 @@ class AchievementRestControllerTest {
     void testFindByName_Negative() throws Exception {
         when(achievementService.getByName("234")).thenReturn(null);
 
-        mockMvc.perform(get("/api/v1/achievements/1"))
+        mockMvc.perform(get("/api/v1/achievements/name/234"))
             .andExpect(status().isNotFound());
     }
 
@@ -186,6 +187,26 @@ class AchievementRestControllerTest {
             .with(user("testUser").roles("ADMIN"))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(achievement)))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser("user")
+    void testFindByNames_Positive() throws Exception {
+        List<Achievement> achievements = Arrays.asList(new Achievement(), new Achievement());
+        when(achievementService.getByNames(anyList())).thenReturn(achievements);
+
+        mockMvc.perform(get("/api/v1/achievements/names/name1,name2"))
+            .andExpect(status().isOk())
+            .andExpect(content().json(objectMapper.writeValueAsString(achievements)));
+    }
+
+    @Test
+    @WithMockUser("user")
+    void testFindByNames_Negative() throws Exception {
+        when(achievementService.getByNames(anyList())).thenReturn(null);
+
+        mockMvc.perform(get("/api/v1/achievements/names/name1,name2"))
             .andExpect(status().isNotFound());
     }
 }

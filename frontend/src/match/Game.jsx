@@ -433,7 +433,7 @@ export default function Game({match}){
                     }
                 </div>
             }
-        {/* <Chat match={match} players={players} currentPlayer={myPlayer} /> */}
+        {<Chat match={match} players={players} currentPlayer={myPlayer} />}
     </div>
     )
 

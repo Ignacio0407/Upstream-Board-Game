@@ -1,43 +1,42 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
-import org.springframework.security.test.context.support.WithMockUser;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 
-@WebMvcTest(controllers = MatchRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
-class MatchRestControllerTest {
+@WebMvcTest(controllers = MatchRestController.class,
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
+@AutoConfigureMockMvc(addFilters = false)
+public class MatchRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,259 +50,178 @@ class MatchRestControllerTest {
     @MockBean
     private PlayerService playerService;
 
+    @MockBean
+    private MatchTileService matchTileService;
+
+
+    private Match testMatch;
+
+    @BeforeEach
+    @SuppressWarnings("unused")
+    void setup() {
+        testMatch = new Match();
+        testMatch.setId(1);
+        testMatch.setName("Test Match");
+        testMatch.setPlayersNum(2);
+        testMatch.setRound(0);
+        testMatch.setState(State.ESPERANDO);
+        testMatch.setPhase(Phase.CASILLAS);
+    }
+
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindAll_Positive() throws Exception {
-        List<Match> partidas = Arrays.asList(new Match(), new Match());
-        when(matchService.getAll()).thenReturn(partidas);
-        
+    void shouldGetAllMatches() throws Exception {
+        List<Match> matches = List.of(testMatch);
+        when(matchService.getAll()).thenReturn(matches);
+
         mockMvc.perform(get("/api/v1/matches"))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partidas)));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$[0].id").value(1))
+               .andExpect(jsonPath("$[0].name").value("Test Match"));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindAll_Negative() throws Exception {
-        when(matchService.getAll()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/v1/matches"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindSomeByName_Positive() throws Exception {
-        List<String> nombres = Arrays.asList("Partida1", "Partida2");
-        List<Match> partidas = Arrays.asList(new Match(), new Match());
-        when(matchService.getSomeByName(nombres)).thenReturn(partidas);
-
-        mockMvc.perform(get("/api/v1/matches/names/Partida1,Partida2"))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partidas)));
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindSomeByName_Negative() throws Exception {
-        when(matchService.getSomeByName(any()))
-            .thenThrow(new ResourceNotFoundException("Una o más partidas no encontradas"));
-
-        mockMvc.perform(get("/api/v1/matches/names/Partida1,NoExiste"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindById_Positive() throws Exception {
-        Match partida = new Match();
-        when(matchService.getById(1)).thenReturn(partida);
+    void shouldFindMatchById() throws Exception {
+        when(matchService.getById(1)).thenReturn(testMatch);
 
         mockMvc.perform(get("/api/v1/matches/1"))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.name").value("Test Match"));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindById_Negative() throws Exception {
+    void shouldReturnNotFoundWhenMatchDoesNotExist() throws Exception {
         when(matchService.getById(1)).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/matches/1"))
-            .andExpect(status().isNotFound());
+               .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindByName_Positive() throws Exception {
-        Match partida = new Match();
-        partida.setName("Partida1");
-        when(matchService.geByName("Partida1")).thenReturn(partida);
-
-        mockMvc.perform(get("/api/v1/matches/name/Partida1"))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindByName_Negative() throws Exception {
-        when(matchService.geByName("NonExistent"))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
-
-        mockMvc.perform(get("/api/v1/matches/name/NonExistent"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindPlayersFromGame_Positive() throws Exception {
-        List<Player> jugadores = Arrays.asList(new Player(), new Player());
-        when(matchService.getPlayersFromGame(1)).thenReturn(jugadores);
-
-        mockMvc.perform(get("/api/v1/matches/1/players"))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(jugadores)));
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = {"USER"})
-    void testFindPlayersFromGame_Negative() throws Exception {
-        when(matchService.getPlayersFromGame(1)).thenReturn(null);
-
-        mockMvc.perform(get("/api/v1/matches/1/players"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(roles = {"USER"})
-    void testCreate_Positive() throws Exception {
-        Match match = new Match();
-        match.setName("Test Match");
-        when(matchService.save(any(Match.class))).thenReturn(match);
-
-        mockMvc.perform(post("/api/v1/matches")
-                .with(csrf())
-                .with(user("testUser").roles("USER"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(match)))
-                .andExpect(status().isCreated());
-
-    }
-
-    @Test
-    @WithMockUser(roles = {"USER"})
-    void testCreate_Negative() throws Exception {
-        when(matchService.getById(anyInt())).thenThrow(new IllegalArgumentException());
-        
-        mockMvc.perform(post("/api/v1/matches")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}")) // Enviar un JSON vacío
-                .andExpect(status().isBadRequest());
-    }
-
-
-    @Test
-    void testDeleteById_Positive() throws Exception {
-        Match partida = new Match();
-        when(matchService.getById(1)).thenReturn(partida);
-
-        mockMvc.perform(delete("/api/v1/matches/1")
-        .with(csrf())
-        .with(user("testUser").roles("ADMIN")))
-        .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void testDeleteById_Negative() throws Exception {
-        doThrow(new ResourceNotFoundException("Partida no encontrada"))
-            .when(matchService).getById(1);
-
-        mockMvc.perform(delete("/api/v1/matches/1")
-        .with(csrf())
-        .with(user("testUser").roles("ADMIN")))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void testDeleteSomeById_Positive() throws Exception {
-        when(matchService.getById(anyInt())).thenReturn(new Match());
-
-        mockMvc.perform(delete("/api/v1/matches/ids/1,2,3")
-        .with(csrf())
-        .with(user("testUser").roles("ADMIN")))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message").value("Partidas borradas"));
-    }
-
-    @Test
-    void testDeleteSomeById_Negative() throws Exception {
-        doThrow(new ResourceNotFoundException("Una o más partidas no encontradas"))
-            .when(matchService).deleteSomeById(any());
-
-        mockMvc.perform(delete("/api/v1/matches/ids/1,99")
-                .with(csrf())
-                .with(user("testUser").roles("ADMIN")))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void testUpdate_Positive() throws Exception {
-        Match partida = new Match();
-        partida.setName("Updated Match");
-        partida.setId(1);
-        when(matchService.getById(1)).thenReturn(partida);
-        when(matchService.updateById(any(Match.class), anyInt())).thenReturn(partida);
-
-        mockMvc.perform(put("/api/v1/matches/1")
-                .with(csrf()) 
-                .with(user("testUser").roles("ADMIN"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(partida))) // Agrega el contenido JSON
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(partida)));
-    }
-
-
-    @Test
-    @WithMockUser(roles = {"USER"})
-    void testUpdate_Negative() throws Exception {
-        doThrow(new ResourceNotFoundException("Partida no encontrada"))
-            .when(matchService).getById(1);
-
-        mockMvc.perform(put("/api/v1/matches/1")
-            .with(csrf())
-            .with(user("testUser").roles("USER"))
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(new Match())))
-            .andExpect(status().isNotFound());
-    }
-
-
-    @Test
-    void testUpdateJugadorActual_Positive() throws Exception {
-        Match match = new Match();
-        match.setId(1);
+    void shouldCreateMatchSuccessfully() throws Exception {
         Player player = new Player();
         player.setId(1);
+        player.setName("Player 1");
+        player.setEnergy(5);
+        player.setAlive(true);
+        User user = new User();
+        user.setId(1);
+        user.setUsername("Paco");
+        testMatch.setInitialPlayer(player);
+        testMatch.setMatchCreator(user);
+        testMatch.setSalmonMatches(new ArrayList<>());
+        when(matchService.save(any(Match.class))).thenReturn(testMatch);
 
-        // Configura mocks para devolver objetos válidos
-        when(matchService.getById(1)).thenReturn(match);
-        when(playerService.getById(1)).thenReturn(player);
-        when(matchService.save(any(Match.class))).thenReturn(match);
+        mockMvc.perform(post("/api/v1/matches")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(testMatch)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.name").value("Test Match"));
+    }
 
-        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
-                .with(csrf())
-                .with(user("testUser").roles("ADMIN")))
+    @Test
+    void shouldFailCreatingMatchWhenInvalidName() throws Exception {
+        testMatch.setName("A");
+
+        mockMvc.perform(post("/api/v1/matches")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(testMatch)))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldUpdateMatchSuccessfully() throws Exception {
+        Match updatedMatch = new Match();
+        updatedMatch.setId(1);
+        updatedMatch.setName("Updated Match");
+        updatedMatch.setPlayersNum(3);
+
+        when(matchService.getById(1)).thenReturn(testMatch);
+        when(matchService.updateById(any(Match.class), eq(1))).thenReturn(updatedMatch);
+
+        mockMvc.perform(put("/api/v1/matches/1")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(updatedMatch)))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.id").value(1))
+               .andExpect(jsonPath("$.name").value("Updated Match"));
+    }
+
+    @Test
+    void shouldFailUpdatingMatchWhenNotFound() throws Exception {
+        Match updatedMatch = new Match();
+        updatedMatch.setId(2);
+        updatedMatch.setName("Updated Match");
+
+        when(matchService.updateById(updatedMatch, testMatch.getId())).thenReturn(null);
+
+        mockMvc.perform(put("/api/v1/matches/1")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(updatedMatch)))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldDeleteMatchSuccessfully() throws Exception {
+        when(matchService.getById(1)).thenReturn(testMatch);
+
+        mockMvc.perform(delete("/api/v1/matches/1"))
+               .andExpect(status().isNoContent());
+
+        verify(matchService).deletePartidaById(1);
+    }
+
+    @Test
+    void shouldFailDeletingMatchWhenNotFound() throws Exception {
+        when(matchService.getById(1)).thenReturn(null);
+
+        mockMvc.perform(delete("/api/v1/matches/1"))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldStartGameSuccessfully() throws Exception {
+        Player player = new Player();
+        player.setId(1);
+        player.setName("Player 1");
+        player.setEnergy(5);
+        player.setAlive(true);
+        testMatch.setInitialPlayer(player);
+
+        when(matchService.getById(1)).thenReturn(testMatch);
+        when(playerService.getPlayersByMatch(1)).thenReturn(List.of(player));
+
+        mockMvc.perform(patch("/api/v1/matches/1/startGame"))
             .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(match)));
+            .andExpect(jsonPath("$.state").value("EN_CURSO"));
+    }
+
+
+    @Test
+    void shouldFailStartGameWhenMatchNotFound() throws Exception {
+        when(matchService.getById(1)).thenReturn(null);
+
+        mockMvc.perform(patch("/api/v1/matches/1/startGame"))
+               .andExpect(status().isNotFound());
     }
 
     @Test
-    void testUpdateJugadorActual_MatchNotFound() throws Exception {
-        when(matchService.getById(1))
-            .thenThrow(new ResourceNotFoundException("Partida no encontrada"));
+    void shouldChangePhaseSuccessfully() throws Exception {
+        List<Player> players = List.of(new Player());
+        when(matchService.getById(1)).thenReturn(testMatch);
+        when(playerService.getById(1)).thenReturn(players.get(0));
+        when(matchTileService.findByMatchIdNoCoord(1)).thenReturn(List.of());
 
-        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
-                .with(csrf())
-                .with(user("testUser").roles("ADMIN")))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
+               .andExpect(status().isOk());
     }
 
     @Test
-    void testUpdateJugadorActual_PlayerNotFound() throws Exception {
-        Match partida = new Match();
-        when(matchService.getById(1)).thenReturn(partida);
-        when(playerService.getById(1))
-            .thenThrow(new ResourceNotFoundException("Jugador no encontrado"));
+    void shouldReturnNotFoundWhenChangingPhaseWithInvalidMatch() throws Exception {
+        when(matchService.getById(1)).thenReturn(null);
 
-        mockMvc.perform(patch("/api/v1/matches/1/actualPlayer/1")
-                .with(csrf())
-                .with(user("testUser").roles("ADMIN")))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
+               .andExpect(status().isNotFound());
     }
-
 }

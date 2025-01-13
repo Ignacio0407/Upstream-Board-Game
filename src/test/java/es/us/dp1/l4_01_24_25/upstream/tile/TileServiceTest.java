@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.casilla;
+package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,12 +17,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
-import es.us.dp1.l4_01_24_25.upstream.tile.TileRepository;
-import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
 @ExtendWith(MockitoExtension.class)
-class casillaServiceTest {
+public class TileServiceTest {
 
     @Mock
     private TileRepository casillaRepository;

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.NonSkipableTurnException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
@@ -98,19 +97,11 @@ public class MatchRestController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<Match> findByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
-        Match p = matchService.geByName(name);
+        Match p = matchService.getByName(name);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(p, HttpStatus.OK);
-    }
-
-
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-    public void deleteAll() {
-        matchService.deleteAll();
     }
 
     @DeleteMapping(value = "{id}")
@@ -165,15 +156,15 @@ public class MatchRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Match> create(@RequestBody @Valid Match partida) {
+    public ResponseEntity<Match> create(@RequestBody @Valid Match match) {
         try {
-            if (partida == null || partida.getName() == null) {
+            if (match == null || match.getName() == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            if (partida.getName().length() < 3 || partida.getName().length() > 50) {
+            if (match.getName().length() < 3 || match.getName().length() > 50) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(matchService.save(partida), HttpStatus.CREATED);
+            return new ResponseEntity<>(matchService.save(match), HttpStatus.CREATED);
         } catch (DataAccessException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -212,7 +203,8 @@ public class MatchRestController {
 
 @PatchMapping("/{matchId}/changephase/{playerId}")
 public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
-    Match match = matchService.getById(matchId);
+    Match match = matchService.getById(matchId); 
+    if (match == null) throw new ResourceNotFoundException("Ha habido problemas encontrando la partida");
     Player player = playerService.getById(playerId);
     Phase phase = match.getPhase();
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
@@ -259,9 +251,6 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         matchService.changePlayerTurn(playerId); 
     }
 
-
-    }
-
     if (playerService.checkPlayerIsDead(playerId)) { 
         matchService.changePlayerTurn(playerId);
         playerService.setPlayerDead(playerId);
@@ -287,6 +276,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match match = matchService.getById(matchId);
+        if (match == null) throw new ResourceNotFoundException("Ha habido un error encontrando la partida");
         List<Player> player = playerService.getPlayersByMatch(matchId);
 
         match.setState(State.EN_CURSO);

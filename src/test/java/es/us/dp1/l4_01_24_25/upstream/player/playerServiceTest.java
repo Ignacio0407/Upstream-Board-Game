@@ -25,7 +25,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
-class PlayerServiceTest {
+public class PlayerServiceTest {
 
     @Mock
     private PlayerRepository playerRepository;

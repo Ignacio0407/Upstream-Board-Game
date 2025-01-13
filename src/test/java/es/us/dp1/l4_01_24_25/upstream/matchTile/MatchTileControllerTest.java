@@ -34,13 +34,11 @@ import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
-import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
-import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @WebMvcTest(controllers = MatchTileController.class,
     excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
 @AutoConfigureMockMvc(addFilters = false)
-class MatchTileControllerTest {
+public class MatchTileControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,35 +55,19 @@ class MatchTileControllerTest {
     @MockBean
     private MatchService matchService;
 
-    @MockBean
-    private UserService userService;
-
     private MatchTile testMatchTile;
     private Match testMatch;
     private Tile testTile;
-    private TileType testType;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setup() {
-        testMatch = new Match();
-        testMatch.setId(1);
-        testMatch.setPlayersNum(2);
-        testMatch.setRound(0);
-
-        testTile = new Tile();
-        testTile.setId(1);
-        testType = new TileType();
-        testType.setType("AGUA");
-        testTile.setType(testType);
-
         testMatchTile = new MatchTile();
         testMatchTile.setId(1);
-        testMatchTile.setMatch(testMatch);
-        testMatchTile.setTile(testTile);
         testMatchTile.setOrientation(0);
         testMatchTile.setCapacity(2);
         testMatchTile.setSalmonsNumber(0);
-        testMatchTile.setCoordinate(new Coordinate(null, null));
+        testMatchTile.setCoordinate(new Coordinate(0, 0));  
     }
 
     @Test
@@ -100,22 +82,36 @@ class MatchTileControllerTest {
 
     @Test
     void shouldUpdateMatchTileSuccessfully() throws Exception {
+        // Setup match
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(0);
+        match.setNumJugadores(2);
+        testMatchTile.setMatch(match);
+
         Map<String, Integer> updates = new HashMap<>();
         updates.put("x", 1);
         updates.put("y", 1);
 
         when(matchTileService.findById(1)).thenReturn(testMatchTile);
-        when(matchTileService.findByMatchId(any())).thenReturn(new ArrayList<>());
+        when(matchTileService.findByMatchId(1)).thenReturn(new ArrayList<>());
         when(matchTileService.save(any(MatchTile.class))).thenReturn(testMatchTile);
 
         mockMvc.perform(patch("/api/v1/matchTiles/1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(updates)))
-               .andExpect(status().isOk());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updates)))
+            .andExpect(status().isOk());
     }
 
     @Test
     void shouldFailUpdateMatchTileWhenPositionOccupied() throws Exception {
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(0);
+        testMatchTile.setMatch(match);
+        testTile = new Tile();
+        testTile.setId(1);
+
         Map<String, Integer> updates = new HashMap<>();
         updates.put("x", 1);
         updates.put("y", 1);
@@ -127,9 +123,9 @@ class MatchTileControllerTest {
         when(matchTileService.findByMatchId(any())).thenReturn(List.of(occupyingTile));
 
         mockMvc.perform(patch("/api/v1/matchTiles/1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(updates)))
-               .andExpect(status().isInternalServerError());
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updates)))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -175,21 +171,29 @@ class MatchTileControllerTest {
 
     @Test
     void shouldCreateMultipleMatchTiles() throws Exception {
-        when(tileService.findById(1)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(2)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(3)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(4)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(5)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(6)).thenReturn(Optional.of(testTile));
+        testMatch = new Match();
+        testMatch.setId(1);
+        testMatch.setNumJugadores(2);
+        testTile = new Tile();
+        testTile.setId(1);
+
         when(matchService.getById(1)).thenReturn(testMatch);
+        for(int i = 1; i <= 6; i++) {
+            when(tileService.findById(i)).thenReturn(Optional.of(testTile));
+        }
         when(matchTileService.save(any(MatchTile.class))).thenReturn(testMatchTile);
 
         mockMvc.perform(post("/api/v1/matchTiles/createMatchTiles/1"))
-               .andExpect(status().isCreated());
+            .andExpect(status().isCreated());
     }
 
     @Test
     void shouldFailCreateMultipleMatchTilesWhenMatchNotFound() throws Exception {
+        testMatch = new Match();
+        testMatch.setId(1);
+        testMatch.setNumJugadores(2);
+        testTile = new Tile();
+        testTile.setId(1);
         when(tileService.findById(1)).thenReturn(Optional.of(testTile));
         when(tileService.findById(2)).thenReturn(Optional.of(testTile));
         when(matchService.getById(1)).thenReturn(null);

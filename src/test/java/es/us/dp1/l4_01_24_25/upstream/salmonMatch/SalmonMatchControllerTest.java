@@ -25,11 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
-import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
 
 @WebMvcTest(controllers = SalmonMatchController.class)
-class SalmonMatchControllerTest {
+public class SalmonMatchControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,12 +37,6 @@ class SalmonMatchControllerTest {
 
     @MockBean
     private SalmonMatchService salmonMatchService;
-
-    @MockBean
-    private PlayerService playerService;
-
-    @MockBean
-    private SalmonService salmonService;
 
     @Test
     void testFindAllFromMatch_Positive() throws Exception {
