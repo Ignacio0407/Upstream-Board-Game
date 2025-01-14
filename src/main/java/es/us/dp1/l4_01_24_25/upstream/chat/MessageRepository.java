@@ -17,15 +17,15 @@ public interface MessageRepository extends CrudRepository<Message, Integer> {
     @Override
     Optional<Message> findById(@Param("id") Integer id);
 
-    @Query("SELECT m FROM Message m WHERE m.match.id = :matchId AND m.deleted = false ORDER BY m.createdAt")
+    @Query("SELECT m FROM Message m WHERE m.match.id = :matchId ORDER BY m.createdAt")
     List<Message> findAllMessagesByMatchId(@Param("matchId") Integer matchId);
     
-    @Query("SELECT m FROM Message m WHERE m.player.userPlayer.id = :userId AND m.deleted = false ORDER BY m.createdAt DESC")
+    @Query("SELECT m FROM Message m WHERE m.player.userPlayer.id = :userId ORDER BY m.createdAt DESC")
     List<Message> findAllMessagesFromUser(@Param("userId") Integer userId);
     
     @Query("SELECT DISTINCT m.match FROM Message m WHERE m.player.userPlayer.id = :userId")
     List<Match> findAllChatsFromUser(@Param("userId") Integer userId);
     
-    @Query("SELECT m FROM Message m WHERE m.match.id = :matchId AND m.createdAt > :timestamp AND m.deleted = false ORDER BY m.createdAt")
+    @Query("SELECT m FROM Message m WHERE m.match.id = :matchId AND m.createdAt > :timestamp ORDER BY m.createdAt")
     List<Message> findNewMessages(@Param("matchId") Integer matchId, @Param("timestamp") LocalDateTime timestamp);
 }

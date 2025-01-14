@@ -30,13 +30,11 @@ public class MessageRepositoryTest {
         Message message1 = new Message();
         message1.setMatch(new Match());
         message1.getMatch().setId(matchId);
-        message1.setDeleted(false);
         message1.setCreatedAt(LocalDateTime.now());
 
         Message message2 = new Message();
         message2.setMatch(new Match());
         message2.getMatch().setId(matchId);
-        message2.setDeleted(false);
         message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
 
         List<Message> messages = new ArrayList<>();
@@ -68,14 +66,12 @@ public class MessageRepositoryTest {
         message1.setPlayer(new Player());
         message1.getPlayer().setUserPlayer(new User());
         message1.getPlayer().getUserPlayer().setId(userId);
-        message1.setDeleted(false);
         message1.setCreatedAt(LocalDateTime.now());
 
         Message message2 = new Message();
         message2.setPlayer(new Player());
         message2.getPlayer().setUserPlayer(new User());
         message2.getPlayer().getUserPlayer().setId(userId);
-        message2.setDeleted(false);
         message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
 
         List<Message> messages = new ArrayList<>();
@@ -137,13 +133,11 @@ public class MessageRepositoryTest {
         Message message1 = new Message();
         message1.setMatch(new Match());
         message1.getMatch().setId(matchId);
-        message1.setDeleted(false);
         message1.setCreatedAt(LocalDateTime.now().minusMinutes(3));
 
         Message message2 = new Message();
         message2.setMatch(new Match());
         message2.getMatch().setId(matchId);
-        message2.setDeleted(false);
         message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
 
         List<Message> messages = new ArrayList<>();

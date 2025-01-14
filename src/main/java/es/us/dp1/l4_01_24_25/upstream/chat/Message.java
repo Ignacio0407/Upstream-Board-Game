@@ -33,8 +33,6 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "match_id", nullable = false)
     private Match match;
 
-    private boolean deleted;
-
     public Message(Player player, Match match, String content) {
         this.player = player;
         this.match = match;
