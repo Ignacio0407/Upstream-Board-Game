@@ -135,15 +135,35 @@
 
 .grid-item3 {
   color: white;
-    padding: 0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    border-radius: 5px;
-    margin-top: 10px;
-    border: solid #2a554f;
+  padding: 0px;
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Centra los elementos verticalmente */
+  justify-content: space-between; /* Espacia los elementos: uno al centro y otro a la derecha */
+  font-size: 18px;
+  border-radius: 5px;
+  margin-top: 10px;
+  border: solid #2a554f;
+  height: auto;
+  position: relative; /* Necesario para posicionar `.desove-points` */
 }
+
+.desove-points {
+  position: absolute; /* Permite posicionarlo respecto a `.grid-item3` */
+  right: 10px; /* Pegado al borde derecho */
+  margin-right: 0; /* Sin margen adicional */
+  top: 50%; /* Centra verticalmente */
+  transform: translateY(-50%); /* Ajusta el centro */
+  font-size: 30px;
+}
+
+.salmons-containerSpawn{
+  flex: 1; /* Ocupa el espacio restante en el centro */
+  display: flex;
+  justify-content: center; /* Centra horizontalmente el contenido interno */
+  align-items: center; /* Centra verticalmente el contenido interno */
+}
+
 
 .grid-item2 img {
   width: 80px; 

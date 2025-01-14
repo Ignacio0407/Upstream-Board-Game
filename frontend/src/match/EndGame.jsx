@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import tokenService from '../services/token.service';
 import { get, patch } from '../util/fetchers';
 import useFetchState from '../util/useFetchState';
@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 export default function EndGame({ match }) {
     const jwt = tokenService.getLocalAccessToken();
     const [playersWithPoints, setPlayersWithPoints] = useFetchState([]);
-     const navigate = useNavigate();
+    const [initialized, setInitialized] = useState(false);
+    const navigate = useNavigate();
 
     const fetchPlayers = async () => {
         const playersResponse = await get(`/api/v1/matches/${match.id}/players`, jwt);
@@ -21,9 +22,16 @@ export default function EndGame({ match }) {
     };
 
     useEffect(() => {
-        patch(`/api/v1/matches/finalscore/${match.id}`, jwt);
-        fetchPlayers();
-    }, [match.id, jwt]);
+        if (!initialized) {
+            const initialize = async () => {
+                await patch(`/api/v1/matches/finalscore/${match.id}`, jwt);
+                await fetchPlayers();
+                setInitialized(true);
+            };
+    
+            initialize();
+        }
+    }, [initialized, match.id, jwt]);
 
     const getPodiumStyle = (index) => {
         switch (index) {
