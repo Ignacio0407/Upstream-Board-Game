@@ -59,12 +59,10 @@ public class MessageServiceTest {
         message1 = new Message(testPlayer, testMatch, "Test message 1");
         message1.setId(1);
         message1.setCreatedAt(LocalDateTime.now());
-        message1.setDeleted(false);
         
         message2 = new Message(testPlayer, testMatch, "Test message 2");
         message2.setId(2);
         message2.setCreatedAt(LocalDateTime.now().minusMinutes(5));
-        message2.setDeleted(false);
     }
 
     @Nested
@@ -184,12 +182,10 @@ public class MessageServiceTest {
         @Test
         void testDeleteMessage_Success() {
             when(messageRepository.findById(1)).thenReturn(Optional.of(message1));
-            when(messageRepository.save(any(Message.class))).thenReturn(message1);
 
             messageService.deleteMessage(1);
 
-            assertTrue(message1.isDeleted());
-            verify(messageRepository).save(message1);
+            verify(messageRepository).delete(message1);
         }
 
         @Test

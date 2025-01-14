@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
@@ -62,21 +63,20 @@ public class MessageService {
     @Transactional
     public Message createMessage(Integer playerId, Integer matchId, String content) {
         Player player = playerRepository.findById(playerId)
-            .orElseThrow(() -> new RuntimeException("Player not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
             
         Match match = matchRepository.findById(matchId)
-            .orElseThrow(() -> new RuntimeException("Match not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
             
         Message message = new Message(player, match, content);
         return messageRepository.save(message);
     }
-    
+
     @Transactional
     public void deleteMessage(Integer messageId) {
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new RuntimeException("Message not found"));
-        message.setDeleted(true);
-        messageRepository.save(message);
+        messageRepository.delete(message);
     }
 
 }

@@ -49,11 +49,7 @@ public class MessageController {
             messagingTemplate.convertAndSend("/topic/chat/" + request.getMatchId(), message);
             return ResponseEntity.ok(message);
         } catch (ResourceNotFoundException ex) {
-            // Este bloque ya maneja los 404
             throw ex;
-        } catch (Exception ex) {
-            // Captura cualquier otra excepción inesperada y retorna un 500
-            return ResponseEntity.status(500).body(null); // o puedes agregar un mensaje de error más informativo
         }
     }
     

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.match.Phase;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
+import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
@@ -37,6 +41,9 @@ public class MessageControllerTest {
 
     @MockBean
     private MessageService messageService;
+
+    @MockBean
+    private MessageRepository messageRepository;
 
     @MockBean
     private PlayerService playerService;
@@ -58,10 +65,25 @@ public class MessageControllerTest {
     public void setUp() {
         player = new Player();
         player.setId(1);
-        player.setName("player1");
+        player.setName("Player 1");
+        player.setEnergy(5);
+        player.setColor(Color.ROJO);
+        player.setPlayerOrder(0);
+        player.setAlive(true);
+        player.setPoints(0);
+        // userPlayer can be null for basic tests unless specifically needed
         match = new Match();
         match.setId(1);
-        match.setName("Match 1");
+        match.setPlayersNum(2);
+        match.setState(State.EN_CURSO); 
+        match.setRound(1);
+        match.setPhase(Phase.MOVIENDO);
+        match.setActualPlayer(player);
+        match.setInitialPlayer(player);
+        match.setPassword("testpass");
+        match.setSalmonMatches(new ArrayList<>());
+        player.setMatch(match);
+        
         messageRequest = new MessageRequest();
         messageRequest.setPlayerId(1);
         messageRequest.setMatchId(1);
@@ -75,7 +97,8 @@ public class MessageControllerTest {
         
         when(playerService.getById(1)).thenReturn(player);
         when(matchService.getById(1)).thenReturn(match);
-        when(messageService.createMessage(player.getId(), match.getId(), "Hello, World!")).thenReturn(createdMessage);
+        when(messageService.createMessage(1, 1, "Hello, World!")).thenReturn(createdMessage);
+        when(messageRepository.save(any(Message.class))).thenReturn(createdMessage);
         
         mockMvc.perform(post("/api/v1/messages")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +116,7 @@ public class MessageControllerTest {
         mockMvc.perform(post("/api/v1/messages")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(messageRequest)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
