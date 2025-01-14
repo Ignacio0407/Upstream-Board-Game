@@ -70,15 +70,16 @@ Por ejemplo, para la pantalla de visualización de métricas del usuario en un h
 
 ![Descomposición en componentes de la interfaz de estadísticas](https://github.com/gii-is-DP1/react-petclinic/assets/756431/12b36c37-39ed-422e-b8d9-56c94753cbdc)
 
-  - App – Componente principal de la aplicación
-    - $\color{orange}{\textsf{NavBar – Barra de navegación lateral}}$
-      - $\color{darkred}{\textsf{[ NavButton ]. Muestra un botón de navegación con un icono asociado.}}$
-    - $\color{darkblue}{\textsf{UserNotificationArea – Área de notificaciones e identificación del usuario actual}}$
-    - $\color{blue}{\textsf{MetricsBar – En este componente se muestran las métricas principales del juego. Se mostrarán 4 métricas: partidas jugadas, puntos logrados, tiempo total, y cartas jugadas.}}$
-      - $\color{darkgreen}{\textsf{[ MetricWell ] – Proporciona el valor y el incremento semanal de una métrica concreta. }}$
-    - $\color{purple}{\textsf{GamesEvolutionChart – Muestra la tendencia de evolución en ellos últimos 4 meses en cuanto a partida jugadas, ganadas, perdidas y abandonadas.}}$
-    - $\color{yellow}{\textsf{PopularCardsChart – Muestra la proporción de las N (parámetro de configuración) cartas más jugadas en el juego por el jugador.}}$
-    - $\color{red}{\textsf{FrequentCoPlayersTable – Muestra los jugadores  con los que más se  ha jugado (de M en M donde M es un parámetro definido por la configuración del componente). Concretamente, se mostrarán la el nombre, la fecha de la última partida, la localización del jugador el porcentaje de partidas jugadas por ambos en las que el usuario ha ganado y si el jugador es amigo o no del usuario.}}$
+  - **App** – Componente principal de la aplicación
+    - <span style="color: orange;"><b>NavBar</b></span> – Barra de navegación lateral
+      - <span style="color: darkred;"><b>[NavButton]</b></span> – Muestra un botón de navegación con un icono asociado.
+    - <span style="color: darkblue;"><b>UserNotificationArea</b></span> – Área de notificaciones e identificación del usuario actual
+    - <span style="color: blue;"><b>MetricsBar</b></span> – En este componente se muestran las métricas principales del juego. Se mostrarán 4 métricas: partidas jugadas, puntos logrados, tiempo total, y cartas jugadas.
+      - <span style="color: darkgreen;"><b>[MetricWell]</b></span> – Proporciona el valor y el incremento semanal de una métrica concreta.
+    - <span style="color: purple;"><b>GamesEvolutionChart</b></span> – Muestra la tendencia de evolución en los últimos 4 meses en cuanto a partidas jugadas, ganadas, perdidas y abandonadas.
+    - <span style="color: yellow;"><b>PopularCardsChart</b></span> – Muestra la proporción de las N (parámetro de configuración) cartas más jugadas en el juego por el jugador.
+    - <span style="color: red;"><b>FrequentCoPlayersTable</b></span> – Muestra los jugadores con los que más se ha jugado (de M en M, donde M es un parámetro definido por la configuración del componente). Concretamente, se mostrarán el nombre, la fecha de la última partida, la localización del jugador, el porcentaje de partidas jugadas por ambos en las que el usuario ha ganado, y si el jugador es amigo o no del usuario.
+
 
 ## Documentación de las APIs
 Se considerará parte del documento de diseño del sistema la documentación generada para las APIs, que debe incluir como mínimo, una descripción general de las distintas APIs/tags  proporcionadas. Una descripción de los distintos endpoints y operaciones soportadas. Y la especificación de las políticas de seguridad especificadas para cada endpoint y operación. Por ejemplo: “la operación POST sobre el endpoint /api/v1/game, debe realizarse por parte de un usuario autenticado como Player”.
@@ -116,7 +117,7 @@ En las normas del juego no se dice nada sobre como escoger el color de los salmo
 *Alternativa 1.a*: Que el color se asigne aleatoriamente al jugador.
 
 *Ventajas:*
-•	No hay que peleas entre jugadores por el color del salmón.
+•	No hay peleas entre jugadores por el color del salmón.
 
 *Inconvenientes:*
 •	Si tienes alguna preferencia de color, no puedes elegirlo y dependes de la suerte.
@@ -275,14 +276,14 @@ ahorramos código y tiempo.
 ### Decisión 6: El jugador que creó la partida se sale de la partida
 #### Descripción del problema:
 
-Al tener en cuenta quién fue el creador de la partida para asignar el orden en la partida, si este jugaodr sale no esta claro quien pasaría a ser el jugador inicial.
+Al tener en cuenta quién fue el creador de la partida para asignar el orden en la partida, si este jugaodr sale, no está claro quien pasaría a ser el jugador inicial.
 
 #### Alternativas de solución evaluadas:
 
 *Alternativa 6.a*: Se asigna aleatoriamente.
 
 *Ventajas:*
-•	Hay algún tipo de ordén en cuanto a quien empieza.
+•	Hay algún tipo de orden en cuanto a quien empieza.
 
 *Inconvenientes:*
 •	Es aleatorio.
@@ -299,12 +300,38 @@ Al tener en cuenta quién fue el creador de la partida para asignar el orden en 
 *Justificación de la solución adoptada*
 Hemos decidido que una partida no se cancela porque el jugador que la creó se salga de esta, si esto ocurre, el primer jugador que entró en esta tras su creación quedará con el rol de creador de la partida. Esto se ha decidido porque en la pantalla en la que se ven los nombres de los jugadores, estos se ven en ordén de entrada en la partida, asi que al salirse el primero (jugador que creó la partida) el resto sube de posición.
 
+### Decisión 7: Movimiento de los salmones durante la partida
+#### Descripción del problema:
+Al principio, el movimiento del salmón era de una coordenada a otro, pero esto no permitía saber qué había por medio (para ello tendríamos que haber creado un grafo en base a las coordenadas de las casillas con JGraphT, lo que habría añadido muchísima complejidad innecesaria al juego)
+
+*Alternativa 7.a*: Mover a una coordenada elegida.
+
+*Ventajas:*
+•	El juego es mucho más ágil al tener que hacer menos llamadas al backend para moverse.
+
+*Inconvenientes:*
+•	Es imposible saber por qué casillas ha pasado el salmón y, si, por tanto, debería haber visto reducido su número de salmones, o sea, si la amenaza de alguna casilla se lo habría comido, por lo que no se puede jugar al juego, al no seguir las reglas.
+
+*Alternativa 7.b*: El salmón se mueve de casilla en casilla, de 1 en 1.
+
+*Ventajas:*
+
+• Podemos saber la casilla a la que salta el salmón, lo que posibilita saber la energía a gastar, las amenzas de la siguiente casilla...  
+• Ayuda al jugador a planificar mejor su jugada y a perderse menos
+
+
+*Inconvenientes:*
+•	El juego es más lento al realizar una llamada al backend para avanzar una casilla.
+
+*Justificación de la solución adoptada*
+Hemos decidido que los salmones se muevan de uno en uno, ya que facilita mucho la programación para las amenazas y los saltos, y no da sensación de lentitud a la partida.
+
 ## Refactorizaciones aplicadas
 
 Si ha hecho refactorizaciones en su código, puede documentarlas usando el siguiente formato:
 
 ### Refactorización X: 
-En esta refactorización añadimos un mapa de parámtros a la partida para ayudar a personalizar la información precalculada de la que partimos en cada fase del juego.
+En esta refactorización añadimos un mapa de parámetros a la partida para ayudar a personalizar la información precalculada de la que partimos en cada fase del juego.
 #### Estado inicial del código
 ```Java 
 class Animal
@@ -322,3 +349,198 @@ código fuente en java, jsx o javascript
 _Ej: Era difícil añadir información para implementar la lógica de negocio en cada una de las fases del juego (en nuestro caso varía bastante)_
 #### Ventajas que presenta la nueva versión del código respecto de la versión original
 _Ej: Ahora podemos añadir arbitrariamente los datos que nos hagan falta al contexto de la partida para que sea más sencillo llevar a cabo los turnos y jugadas_
+
+### Refactorización 2 (Ignacio): 
+En esta refactorización se cambió una gran parte del backend a inglés para tenerlo todo en el mismo idioma. Se ha realizado lo ejemplificado con cada entidad, y se han renombrado a inglés varios métodos de controladores, servicios y repositorios.
+#### Estado inicial del código
+```Java 
+public class PartidaCasilla extends BaseEntity {
+
+    Integer capacidad;
+
+    Integer orientacion;
+
+    Coordinate coordinate;
+
+    @JsonSerialize(using = CasillaSerializer.class)
+    @JsonDeserialize(using = CasillaDeserializer.class)
+    @ManyToOne
+    Casilla casilla;
+
+    @ManyToOne
+    @JoinColumn(name = "partida_id")
+    @JsonSerialize(using = PartidaSerializer.class)
+    @JsonDeserialize(using = PartidaDeserializer.class)
+    Partida Partida;
+
+}
+``` 
+
+#### Estado del código refactorizado
+
+```
+public class MatchTile extends BaseEntity {
+
+    Integer capacity;
+
+    Integer orientation;
+
+    Integer salmonsNumber;
+
+    @Embedded
+    Coordinate coordinate;
+
+    @JsonSerialize(using = TileSerializer.class)
+    @JsonDeserialize(using = TileDeserializer.class)
+    @ManyToOne
+    Tile tile;
+
+    @ManyToOne
+    @JoinColumn(name = "match_id")
+    @JsonSerialize(using = matchSerializer.class)
+    @JsonDeserialize(using = MatchDeserializer.class)
+    Match match;
+
+}
+```
+#### Problema que nos hizo realizar la refactorización
+Era difícil encontrar los nombres de las cosas, ya que muchos estaban en español pero algunos estaban en inglés.
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+Ahora está todo mucho más uniforme y se encuentran fácilmente los nombres de propiedades, métodos...
+
+### Refactorización 3 (Ignacio): 
+En esta refactorización se cambió la construcción o inicialización del grid en el frontend
+#### Estado inicial del código
+```jsx 
+useEffect(() => {
+        // Construir el nuevo estado del grid basado en gridTiles
+        const newGrid = Array(18).fill(null).map(() => []); // Crea una cuadrícula vacía de 18 espacios
+        const gridWidth = 3; // Ancho de la cuadrícula (número columnas)
+        const gridHeight = 6; // Altura de la cuadrícula (número filas)
+        // Asignar las tiles con coordenadas al grid
+        gridTiles.forEach((tile) => {
+            // Convertir las coordenadas (x, y) en un índice del grid
+            const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x;
+            const image = tile[1]; // Obtener la imagen asociada al tile
+            newGrid[index].push([tile, image,"tile"]); // Asignar la tile con su imagen al grid 
+        });
+
+            gridSalmons.forEach((salmon) => {
+                const index = (gridHeight - 1 - salmon[0].coordinate.y) * gridWidth + salmon[0].coordinate.x;
+                const image = salmon[1]; // Obtener la imagen asociada al salmon
+                newGrid[index].push(salmon,image,"salmon")
+            });
+            setGrid(newGrid);
+            //console.log(grid)
+        }, [gridTiles,gridSalmons]);
+        
+
+// La renderización, hubo otros 
+{gridS[0].length > 0 && 
+            <div className='game-container'>
+                <div className='grid1'>
+                {grid.map((cell, index) => (
+                    <div key={index} onClick={() => handleGridClick(index)} className="grid-item"> 
+                        {cell.map((element, i) => (
+
+                            <img 
+                            key = {i}
+                            src = {element[1]}
+                            alt=""
+                            style={
+                        element[2] === "tile"
+                        ? { width: '150px', ...getRotationStyle(element[0][0]) }
+                        : { width: '50px',position: 'absolute',top:`${9*i}px`, margin:0} // Superponer salmons
+                }
+/>
+                        ))}
+                    </div>
+                ))}
+                </div>
+``` 
+
+#### Estado del código refactorizado
+
+```
+useEffect(() => {
+        const newGrid = Array(18).fill(null).map(() => ({
+            tile: null, 
+            salmons: [] 
+        }));
+    
+        const gridWidth = 3;
+        const gridHeight = 6;
+    
+        gridTiles.forEach((tile) => {
+            const index = (gridHeight - 1 - tile[0].coordinate.y) * gridWidth + tile[0].coordinate.x;
+            newGrid[index].tile = {
+                data: tile[0],
+                image: tile[1]
+            };
+        });
+    
+        gridSalmons.forEach((salmon) => {
+            const index = (gridHeight - 1 - salmon[0].coordinate.y) * gridWidth + salmon[0].coordinate.x;
+            newGrid[index].salmons.push({
+                data: salmon[0],
+                image: salmon[1]
+            });
+        });
+        setGrid(newGrid);
+    }, [gridTiles, gridSalmons]); 
+    
+    
+// La parte de la renderización cambiada
+{gridS[0].length > 0 && 
+                <div className='game-container'>
+                    <div className='grid1'>
+                    {grid.map((cell, index) => (
+                    <div 
+                        key={index} 
+                        onClick={() => handleGridClick(index)} 
+                        className="grid-item"
+                        style={{ position: 'relative' }}
+                    >
+                        {cell.tile && (
+                        <img 
+                            src={cell.tile.image}
+                            alt=""
+                            style={{ 
+                            width: '150px', 
+                            ...getRotationStyle(cell.tile.data)
+                            }}
+                        />
+                        )}
+
+                        {cell.salmons && cell.salmons.map((salmon, sIndex) => {
+                            const position = calculateSalmonPosition(sIndex, cell.salmons.length);
+                            return (
+                                <img
+                                key={`salmon-${index}-${sIndex}`}
+                                src={salmon.image}
+                                alt=""
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSalmonClick([salmon.data, salmon.image]);
+                                }}
+                                style={{
+                                    width: '50px',
+                                    position: 'absolute',
+                                    ...position,
+                                    transition: 'all 0.3s ease-in-out',
+                                    zIndex: 2,
+                                    cursor: 'pointer'
+                                }}
+                                />
+                            );
+                            })}
+                    </div>
+                    ))}
+
+                    </div>
+```
+#### Problema que nos hizo realizar la refactorización
+Era imposible mover los salmones una vez entraban en el tablero, o sea, cuando solo se habían movido una vez
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+Ahora se pueden mover los salmones en el tablero
+
