@@ -1,0 +1,25 @@
+.search-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-bar {
+    width: 200px; /* Tamaño pequeño */
+    padding: 5px;
+    border: 2px solid #00BFFF; /* Borde celeste */
+    border-radius: 15px; /* Esquinas redondeadas */
+    outline: none;
+  }
+  
+  .search-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-left: -35px; /* Ajustar para que la lupa se superponga al borde del input */
+  }
+  
+  .search-button .fa-search {
+    font-size: 16px;
+    color: #13d2e779; /* Color de la lupa */
+  }
+  

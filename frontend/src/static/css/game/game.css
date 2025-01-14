@@ -1,0 +1,236 @@
+.rotarFicha {
+    transform: rotate(60deg);
+}
+
+.gamePage-container {
+    position: relative;
+    text-align: center;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/upStreamFondo.jpg');
+    background-size: cover;
+    /* 
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    */
+  }
+
+.game-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    margin-left: 550px;
+    margin-top: 50px;
+    width: 800px;
+    height:2000px;
+    border-radius: 10px;
+    /*background-color:  #1e95a2;*/
+    border: solid;
+}
+
+.game-title {
+  position: absolute;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 30px;
+}
+
+.game-name {
+  margin-left: 1208px;
+}
+
+.game-round {
+  margin-left: 552px;
+}
+
+.game-phase {
+  margin-left: 830px;
+}
+
+.game-turn {
+  margin-left: 1700px;
+}
+
+
+.grid1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    height: 80%;
+    background-color:  #3A6B76;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 110px;
+}
+
+.grid1-100 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+  height: 100%;
+  background-color:  #3A6B76;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 110px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    height: 20%;
+    justify-self: flex-end;
+    background-image: url('../../images/tiles/seaTile.png');
+    background-position: center;
+    background-size: cover;
+    background-color:  #3A6B76;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+  height: 20%;
+  background-color:  #193963;
+}
+
+.img-desove {
+  height: 90%;
+  width: 80%;
+  object-fit: cover;
+  justify-self: center;
+}
+
+.grid-item {
+  height: 230px;
+  width: 250px;
+  aspect-ratio: 1/cos(30deg);
+  clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
+  background: #3B8686;
+  }
+
+.grid-item:nth-child(3n + 2){
+  transform: translateY(5px)
+}
+
+.grid-item:nth-child(3n + 1) {
+  transform: translateY(120px);
+}
+.grid-item:nth-child(3n + 3) {
+  transform: translateY(120px);
+}
+
+.grid-item2 {
+  color: white;
+    padding: 0px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.grid-item3 {
+  color: white;
+  padding: 0px;
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Centra los elementos verticalmente */
+  justify-content: space-between; /* Espacia los elementos: uno al centro y otro a la derecha */
+  font-size: 18px;
+  border-radius: 5px;
+  margin-top: 10px;
+  border: solid #2a554f;
+  height: auto;
+  position: relative; /* Necesario para posicionar `.desove-points` */
+}
+
+.desove-points {
+  position: absolute; /* Permite posicionarlo respecto a `.grid-item3` */
+  right: 10px; /* Pegado al borde derecho */
+  margin-right: 0; /* Sin margen adicional */
+  top: 50%; /* Centra verticalmente */
+  transform: translateY(-50%); /* Ajusta el centro */
+  font-size: 30px;
+}
+
+.salmons-containerSpawn{
+  flex: 1; /* Ocupa el espacio restante en el centro */
+  display: flex;
+  justify-content: center; /* Centra horizontalmente el contenido interno */
+  align-items: center; /* Centra verticalmente el contenido interno */
+}
+
+
+.grid-item2 img {
+  width: 80px; 
+  height: auto;
+  margin: 2px; 
+  transition: transform 0.2s ease-in-out;
+}
+
+.grid-item3 img {
+  width: 50px; 
+  height: 50px;
+  margin: 2px; 
+  transition: transform 0.2s ease-in-out;
+}
+
+.grid-item2 img:hover {
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+.grid-item2 span {
+  position: relative;
+  bottom: 5px;
+  font-size: 12px;
+  color: #333;
+}
+
+.users-table {
+    position: absolute;
+    height: 50%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 1000px;
+}
+
+.table-row {
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid black;
+}
+
+.table-cell {
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid black;
+}
+
+.tiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centra las casillas en el contenedor */
+    /* 
+    padding: 10px;
+    align-items: flex-end;
+    */
+  }
+
+.tile-image {
+  position: relative;
+  bottom: -850px; /* Ajusta la distancia desde la parte inferior de la página */
+  right: 20px; /* Ajusta la distancia desde el lado derecho de la página */
+  width: 150px; /* Tamaño de la imagen */
+}
