@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,31 @@ public class MessageService {
         return messageRepository.save(message);
     } */
 
+    public Message findById(Integer id) {
+        return messageRepository.findById(id).orElseGet(null);
+    }
+
+    public List<Message> getMatchMessages(Integer matchId) {
+        try {
+            List<Message> messages = messageRepository.findAllMessagesByMatchId(matchId);
+            return messages == null ? new ArrayList<>() : messages;
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching messages for match " + matchId, e);
+        }
+    }    
+    
+    public List<Message> getUserMessages(Integer userId) {
+        return messageRepository.findAllMessagesFromUser(userId);
+    }
+    
+    public List<Match> getUserChats(Integer userId) {
+        return messageRepository.findAllChatsFromUser(userId);
+    }
+    
+    public List<Message> getNewMessages(Integer matchId, LocalDateTime since) {
+        return messageRepository.findNewMessages(matchId, since);
+    }
+
     @Transactional
     public Message createMessage(Integer playerId, Integer matchId, String content) {
         Player player = playerRepository.findById(playerId)
@@ -46,30 +72,11 @@ public class MessageService {
     }
     
     @Transactional
-    public void deleteMessage(Long messageId) {
+    public void deleteMessage(Integer messageId) {
         Message message = messageRepository.findById(messageId)
             .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setDeleted(true);
         messageRepository.save(message);
     }
-    
-    public List<Message> getMatchMessages(Long matchId) {
-        try {
-            return messageRepository.findAllMessagesByMatchId(matchId);
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching messages for match " + matchId, e);
-        }
-    }    
-    
-    public List<Message> getUserMessages(Long userId) {
-        return messageRepository.findAllMessagesFromUser(userId);
-    }
-    
-    public List<Match> getUserChats(Long userId) {
-        return messageRepository.findAllChatsFromUser(userId);
-    }
-    
-    public List<Message> getNewMessages(Long matchId, LocalDateTime since) {
-        return messageRepository.findNewMessages(matchId, since);
-    }
+
 }

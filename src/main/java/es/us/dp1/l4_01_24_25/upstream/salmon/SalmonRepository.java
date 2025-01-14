@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@SuppressWarnings("override")
 public interface  SalmonRepository extends  CrudRepository<Salmon, Integer>{
     List<Salmon> findAll();
     Optional<Salmon> findById(int id);

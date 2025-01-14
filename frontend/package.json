@@ -40,11 +40,11 @@
     "msw": "^1.2.1",
     "nth-check": "^2.1.1",
     "prettier": "^2.8.8",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "source-map-loader": "^4.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start --host 0.0.0.0 --disable-host-check",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "coverage": "react-scripts test --coverage --watchAll --collectCoverageFrom='!src/{index,reportWebVitals,error-page,App}.{js,jsx}'",

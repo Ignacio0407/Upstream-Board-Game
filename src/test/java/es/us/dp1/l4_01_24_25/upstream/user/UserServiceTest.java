@@ -16,10 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 
-//@DataJpaTest(includeFilters = @ComponentScan.Filter(Service.class))
 @SpringBootTest
 @AutoConfigureTestDatabase
-class UserServiceTests {
+public class UserServiceTest {
 
 	@Autowired
 	private UserService userService;

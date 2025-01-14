@@ -27,6 +27,7 @@ import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unused")
 public class MatchTileServiceTest {
 
     @Mock
@@ -40,13 +41,13 @@ public class MatchTileServiceTest {
 
     private MatchTile matchTile1;
     private MatchTile matchTile2;
-    private Match partidaTest;
+    private Match testMatch;
     private Tile waterTile;
 
     @BeforeEach
     void setup() {
-        partidaTest = new Match();
-        partidaTest.setId(1);
+        testMatch = new Match();
+        testMatch.setId(1);
 
         waterTile = new Tile();
         waterTile.setId(1);
@@ -54,7 +55,7 @@ public class MatchTileServiceTest {
         matchTile1 = new MatchTile();
         matchTile1.setId(1);
         matchTile1.setCapacity(2);
-        matchTile1.setMatch(partidaTest);
+        matchTile1.setMatch(testMatch);
         matchTile1.setCoordinate(new Coordinate(1,1));
         matchTile1.setOrientation(1);
         matchTile1.setSalmonsNumber(2);
@@ -62,7 +63,7 @@ public class MatchTileServiceTest {
         matchTile2 = new MatchTile();
         matchTile2.setId(2);
         matchTile2.setCapacity(2);
-        matchTile2.setMatch(partidaTest);
+        matchTile2.setMatch(testMatch);
     }
 
     @Nested
@@ -189,7 +190,7 @@ public class MatchTileServiceTest {
             when(tileService.findById(1)).thenReturn(Optional.of(waterTile));
             when(matchTileRepository.save(any(MatchTile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            MatchTile result = matchTileService.eagleToWater(matchTile1, partidaTest);
+            MatchTile result = matchTileService.eagleToWater(matchTile1, testMatch);
 
             assertNotNull(result);
             assertEquals(matchTile1.getId(), result.getId());
@@ -197,7 +198,7 @@ public class MatchTileServiceTest {
             assertEquals(0, result.getOrientation());
             assertEquals(0, result.getSalmonsNumber());
             assertEquals(waterTile, result.getTile());
-            assertEquals(partidaTest, result.getMatch());
+            assertEquals(testMatch, result.getMatch());
             verify(matchTileRepository).save(any(MatchTile.class));
             verify(tileService).findById(1);
         }
@@ -207,7 +208,7 @@ public class MatchTileServiceTest {
             when(tileService.findById(1)).thenReturn(Optional.empty());
             when(matchTileRepository.save(any(MatchTile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            MatchTile result = matchTileService.eagleToWater(matchTile1, partidaTest);
+            MatchTile result = matchTileService.eagleToWater(matchTile1, testMatch);
 
             assertNotNull(result);
             assertNull(result.getTile());

@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@SuppressWarnings("override")
 public interface MatchTileRepository extends CrudRepository<MatchTile, Integer>{
 
     List<MatchTile> findAll();

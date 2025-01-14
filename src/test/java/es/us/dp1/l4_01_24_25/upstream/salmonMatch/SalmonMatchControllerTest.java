@@ -1,114 +1,323 @@
 package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NoCapacityException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.match.Phase;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
+import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
+import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
-@WebMvcTest(controllers = SalmonMatchController.class)
+@WebMvcTest(controllers = SalmonMatchController.class,
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
+@AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("unused")
 public class SalmonMatchControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private SalmonMatchService salmonMatchService;
+    @MockBean
+    private PlayerService playerService;
+    @MockBean
+    private SalmonService salmonService;
+    @MockBean
+    private MatchTileService matchTileService;
+    @MockBean
+    private MatchService matchService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private SalmonMatchService salmonMatchService;
+    private SalmonMatch salmonMatch;
+    private Player player;
+    private Match match;
+    private MatchTile matchTile;
+    private Salmon salmon;
+    private Tile tile;
 
-    @Test
-    void testFindAllFromMatch_Positive() throws Exception {
-        List<SalmonMatch> salmonMatches = Arrays.asList(new SalmonMatch(), new SalmonMatch());
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(salmonMatches);
+    @BeforeEach
+    void setup() {
+        player = new Player();
+        player.setId(1);
+        player.setName("Player 1");
+        player.setEnergy(5);
+        player.setColor(Color.ROJO);
+        player.setPlayerOrder(0);
+        player.setAlive(true);
+        player.setPoints(0);
+        // userPlayer can be null for basic tests unless specifically needed
 
-        mockMvc.perform(get("/api/v1/salmonMatches/match/1")
-                .with(user("testUser").roles("USER")))
-            .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(salmonMatches)));
+        match = new Match();
+        match.setId(1);
+        match.setPlayersNum(2);
+        match.setState(State.EN_CURSO); 
+        match.setRound(1);
+        match.setPhase(Phase.MOVIENDO);
+        match.setActualPlayer(player);
+        match.setInitialPlayer(player);
+        match.setPassword("testpass");
+        match.setSalmonMatches(new ArrayList<>());
+
+        player.setMatch(match);
+
+        tile = new Tile();
+        tile.setId(1);
+        tile.setImage("AGUA");
+        TileType tileType = new TileType();
+        tileType.setType("AGUA");
+        tile.setType(tileType);
+
+        matchTile = new MatchTile();
+        matchTile.setId(1);
+        matchTile.setTile(tile);
+        matchTile.setCoordinate(new Coordinate(1, 0));
+        matchTile.setCapacity(2);
+        matchTile.setSalmonsNumber(0);
+        matchTile.setOrientation(0);
+        matchTile.setMatch(match);
+
+        salmon = new Salmon();
+        salmon.setId(1);
+        salmon.setColor(Color.ROJO);
+        salmon.setImage("rojo2");
+
+        salmonMatch = new SalmonMatch();
+        salmonMatch.setId(1);
+        salmonMatch.setPlayer(player);
+        salmonMatch.setMatch(match);
+        salmonMatch.setSalmon(salmon);
+        salmonMatch.setSalmonsNumber(2);
+        salmonMatch.setCoordinate(new Coordinate(null, null));
+
+        match.getSalmonMatches().add(salmonMatch);
     }
 
     @Test
-    void testFindAllFromPlayer_Positive() throws Exception {
-        List<SalmonMatch> salmonMatches = Arrays.asList(new SalmonMatch(), new SalmonMatch());
-        when(salmonMatchService.getAllFromPlayer(anyInt())).thenReturn(salmonMatches);
+    void shouldFindAllFromMatch() throws Exception {
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch));
 
-        mockMvc.perform(get("/api/v1/salmonMatches/player/1")
-                .with(user("testUser").roles("USER")))
+        mockMvc.perform(get("/api/v1/salmonMatches/match/1"))
             .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(salmonMatches)));
+            .andExpect(jsonPath("$[0].id").value(1));
     }
 
     @Test
-    void testFindById_Positive() throws Exception {
-        SalmonMatch salmonMatch = new SalmonMatch();
+    void shouldFindAllFromMatchInSpawn() throws Exception {
+        when(salmonMatchService.getSalmonsInSpawnFromGame(anyInt())).thenReturn(List.of(salmonMatch));
+
+        mockMvc.perform(get("/api/v1/salmonMatches/match/1/spawn"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void shouldFindById() throws Exception {
         when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
 
-        mockMvc.perform(get("/api/v1/salmonMatches/1")
-                .with(user("testUser").roles("USER")))
+        mockMvc.perform(get("/api/v1/salmonMatches/1"))
             .andExpect(status().isOk())
-            .andExpect(content().json(objectMapper.writeValueAsString(salmonMatch)));
+            .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
-    void testCreate_Positive() throws Exception {
-        SalmonMatch salmonMatch = new SalmonMatch();
+    void shouldCreateSalmonMatch() throws Exception {
         when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
 
         mockMvc.perform(post("/api/v1/salmonMatches")
-                .with(csrf())
-                .with(user("testUser").roles("USER"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(salmonMatch)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(salmonMatch)))
             .andExpect(status().isCreated());
     }
 
     @Test
-    void testUpdateCoordinate_Positive() throws Exception {
-        SalmonMatch salmonMatch = new SalmonMatch();
-        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
-        when(salmonMatchService.save(any(SalmonMatch.class))).thenReturn(salmonMatch);
+    void shouldDeleteSalmonMatch() throws Exception {
+        mockMvc.perform(delete("/api/v1/salmonMatches/1"))
+            .andExpect(status().isNoContent());
+    }
 
-        Map<String, Integer> coordinate = Map.of("x", 5, "y", 10);
+    @Test
+    void shouldUpdateCoordinateFromSea() throws Exception {
+        // Setup for move from sea
+        salmonMatch.setCoordinate(null);
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(playerService.getPlayersByMatch(anyInt())).thenReturn(List.of(player));
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(match.getSalmonMatches());
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
         mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
-                .with(csrf())
-                .with(user("testUser").roles("USER"))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(coordinate)))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
             .andExpect(status().isOk());
     }
 
     @Test
-    void testCreatePlayerSalmonMatches_Positive() throws Exception {
-        Player p = new Player();
-        p.setColor(Color.ROJO);
-        p.setId(1);
+    void shouldFailUpdateCoordinateNoEnergy() throws Exception {
+        player.setEnergy(0);
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
 
-        mockMvc.perform(post("/api/v1/salmonMatches/player/1")
-                .with(csrf())
-                .with(user("testUser").roles("USER")))
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof InsufficientEnergyException));
+    }
+
+    @Test
+    void shouldFailUpdateCoordinateNoCapacity() throws Exception {
+        matchTile.setSalmonsNumber(2);
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch, salmonMatch, salmonMatch));
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoCapacityException));
+    }
+
+    @Test
+    void shouldFailUpdateCoordinateInvalidMove() throws Exception {
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 1); // Moving backwards
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isBadRequest())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotValidMoveException));
+    }
+
+    @Test
+    void shouldHandleOsoBearEncounter() throws Exception {
+        TileType osoType = new TileType();
+        osoType.setType("OSO");
+        tile.setType(osoType);
+        matchTile.setOrientation(0);
+        
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(playerService.getPlayersByMatch(anyInt())).thenReturn(List.of(player));
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.salmonsNumber").value(1)); // Expect salmon number to decrease
+    }
+
+    @Test
+    void shouldHandleEagleEncounter() throws Exception {
+        TileType eagleType = new TileType();
+        eagleType.setType("AGUILA");
+        tile.setType(eagleType);
+        
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(matchTileService.eagleToWater(any(), any())).thenReturn(matchTile);
+        when(playerService.getPlayersByMatch(anyInt())).thenReturn(List.of(player));
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.salmonsNumber").value(1));
+    }
+
+    @Test
+    void shouldHandleJumpTile() throws Exception {
+        TileType jumpType = new TileType();
+        jumpType.setType("SALTO");
+        tile.setType(jumpType);
+        matchTile.setOrientation(0);
+        
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(playerService.getPlayersByMatch(anyInt())).thenReturn(List.of(player));
+        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+
+        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(newCoord)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.salmonsNumber").value(2)); // Salmon number shouldn't change
+    }
+
+    @Test
+    void shouldHandleEnterSpawn() throws Exception {
+        salmonMatch.setCoordinate(new Coordinate(1, 4));
+        when(salmonMatchService.getById(anyInt())).thenReturn(salmonMatch);
+        when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
+        when(playerService.getPlayersByMatch(anyInt())).thenReturn(List.of(player));
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/enterSpawn/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.coordinate.y").value(21));
+    }
+
+    @Test
+    void shouldCreateSalmonMatchesForPlayer() throws Exception {
+        when(playerService.getById(anyInt())).thenReturn(player);
+        when(salmonService.findAll()).thenReturn(List.of(salmon));
+
+        mockMvc.perform(post("/api/v1/salmonMatches/player/1"))
             .andExpect(status().isOk());
     }
 }

@@ -7,14 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
-
 public interface SalmonMatchRepository extends CrudRepository<SalmonMatch, Integer>{
 
     @SuppressWarnings("null")
     @Override
     Optional<SalmonMatch> findById(Integer id);
 
+    @SuppressWarnings("override")
     List<SalmonMatch> findAll();
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId")

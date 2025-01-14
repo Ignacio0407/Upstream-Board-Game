@@ -63,7 +63,7 @@ export default function Game({match}){
 
     useEffect(() => {
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-            console.log("match", match)
+            //console.log("match", match)
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
@@ -87,8 +87,13 @@ export default function Game({match}){
     };
     
     const handleSalmonClick = (salmon) => {
+        console.log("My player id", myPlayer.id);
+        console.log("match.actualPlayer", match.actualPlayer);
+        console.log("salmon[0].player", salmon[0].player)
+        console.log("Soy el salmon", salmon)
         if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player && match.phase === 'MOVIENDO') {
             setSelectedSalmon(salmon);
+            console.log("Selected salmon", salmon)
         }
     }
 
@@ -266,7 +271,7 @@ export default function Game({match}){
         const gridHeight = 6; // Altura de la cuadrícula (número de filas)
         const x = index % gridWidth;
         const y = gridHeight - 1 - Math.floor(index / gridWidth)
-
+        console.log("Selected salmon", selectedSalmon)
         try {
             if(selectedSalmon === null){
                 await updateTilePosition(selectedTile, x, y);
@@ -389,6 +394,8 @@ export default function Game({match}){
                                 alt=""
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    console.log("Clicked salmon data:", salmon.data);
+                                    console.log("Clicked salmon image:", salmon.image);
                                     handleSalmonClick([salmon.data, salmon.image]);
                                 }}
                                 style={{

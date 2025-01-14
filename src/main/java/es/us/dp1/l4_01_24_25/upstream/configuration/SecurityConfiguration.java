@@ -27,6 +27,7 @@ public class SecurityConfiguration {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
+    @SuppressWarnings("unused")
     private static final String ADMIN = "ADMIN";
 
     @Bean

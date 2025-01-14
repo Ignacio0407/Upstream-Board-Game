@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
@@ -31,14 +30,11 @@ public class UserAchievementRestController {
     private final UserAchievementService userAchievementService;
     private final UserService userService;
     private final AchievementService achievementService;
-    private final AchievementChecker achievementChecker;
-
     @Autowired
     public UserAchievementRestController(UserAchievementService userAchievementService, UserService userService, AchievementService achievementService, AchievementChecker achievementChecker) {
         this.userAchievementService = userAchievementService;
         this.userService = userService;
         this.achievementService = achievementService;
-        this.achievementChecker = achievementChecker;
     }
 
     @GetMapping
@@ -69,7 +65,6 @@ public class UserAchievementRestController {
         UserAchievement repeated = userAchievementService.findByUandA(u, a);
         if(repeated != null) throw new Exception(); 
         userAchievementService.saveUA(ua);
-        //achievementChecker.checkAchievements();
         return new ResponseEntity<>(ua, HttpStatus.CREATED);
     }
 

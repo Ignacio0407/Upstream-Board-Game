@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AchievementRepository extends CrudRepository<Achievement, Integer>{
     
+    @SuppressWarnings("override")
     List<Achievement> findAll();
     
     public Achievement findByName(String name);
