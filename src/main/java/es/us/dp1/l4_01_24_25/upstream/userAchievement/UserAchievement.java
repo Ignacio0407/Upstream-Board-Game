@@ -7,7 +7,6 @@ import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
 import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
-import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

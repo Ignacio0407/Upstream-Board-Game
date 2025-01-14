@@ -34,11 +34,8 @@ import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 
-/**
- * Test class for the {@link VetController}
- */
 @WebMvcTest(controllers = UserRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
-class UserControllerTests {
+public class UserControllerTest {
 
 	private static final int TEST_USER_ID = 1;
 	private static final int TEST_AUTH_ID = 1;
@@ -64,6 +61,7 @@ class UserControllerTests {
 	private User user, logged;
 
 	@BeforeEach
+        @SuppressWarnings("unused")
 	void setup() {
 		auth = new Authorities();
 		auth.setId(TEST_AUTH_ID);

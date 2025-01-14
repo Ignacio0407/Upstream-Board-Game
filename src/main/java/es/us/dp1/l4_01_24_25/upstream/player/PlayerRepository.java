@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@SuppressWarnings("override")
 public interface  PlayerRepository extends CrudRepository<Player, Integer>{
     
     List<Player> findAll();

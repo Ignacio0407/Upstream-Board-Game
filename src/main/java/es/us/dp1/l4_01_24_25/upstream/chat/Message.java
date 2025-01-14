@@ -42,4 +42,8 @@ public class Message extends BaseEntity {
         this.createdAt = LocalDateTime.now();
     }
 
+    public Message() {
+        this.createdAt = LocalDateTime.now();
+    }
+
 }

@@ -15,6 +15,7 @@ public interface UserAchievementRepository extends CrudRepository<UserAchievemen
 
     Optional<UserAchievement> findById(Integer id);
 
+    @SuppressWarnings("override")
     List<UserAchievement> findAll();
 
     @Query("SELECT ua FROM UserAchievement ua WHERE ua.user = :u AND ua.achievement = :a")

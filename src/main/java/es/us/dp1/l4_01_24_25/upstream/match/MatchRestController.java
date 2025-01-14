@@ -35,7 +35,6 @@ import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
@@ -104,6 +103,14 @@ public class MatchRestController {
             return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("ADMIN")
+    public void deleteAll() {
+        matchService.deleteAll();
+    }
+
     @DeleteMapping(value = "{id}")
 	@ResponseStatus(HttpStatus.OK)
     @PreAuthorize("ADMIN")
@@ -156,15 +163,15 @@ public class MatchRestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Match> create(@RequestBody @Valid Match match) {
+    public ResponseEntity<Match> create(@RequestBody @Valid Match partida) {
         try {
-            if (match == null || match.getName() == null) {
+            if (partida == null || partida.getName() == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            if (match.getName().length() < 3 || match.getName().length() > 50) {
+            if (partida.getName().length() < 3 || partida.getName().length() > 50) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(matchService.save(match), HttpStatus.CREATED);
+            return new ResponseEntity<>(matchService.save(partida), HttpStatus.CREATED);
         } catch (DataAccessException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -203,9 +210,8 @@ public class MatchRestController {
 
 @PatchMapping("/{matchId}/changephase/{playerId}")
 public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
-    Match match = matchService.getById(matchId); 
-    if (match == null) throw new ResourceNotFoundException("Ha habido problemas encontrando la partida");
-    Player player = playerService.getById(playerId);
+    Match match = matchService.getById(matchId);
+    if (match == null) throw new ResourceNotFoundException("Ha habido un problema encontrando la partida");
     Phase phase = match.getPhase();
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
     List<Player> players = playerService.getAlivePlayersByMatch(matchId).stream()
@@ -225,7 +231,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         }
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
             List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.getSalmonsInSpawnFromGame(matchId);
-            if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
+            if(!salmonMatchesInSpawn.isEmpty()) {
                 List<SalmonMatch> salmonMatchesInSpawnExceptLast = salmonMatchesInSpawn.stream().filter(s -> s.getCoordinate().y() < 25).toList();
                 salmonMatchesInSpawnExceptLast.stream().forEach(s -> {
                 s.setCoordinate(new Coordinate(s.getCoordinate().x(), s.getCoordinate().y() + 1));
@@ -249,6 +255,9 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     else {
      if (playerService.checkPlayerNoEnergy(playerId)) {
         matchService.changePlayerTurn(playerId); 
+    }
+
+
     }
 
     if (playerService.checkPlayerIsDead(playerId)) { 
@@ -276,7 +285,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match match = matchService.getById(matchId);
-        if (match == null) throw new ResourceNotFoundException("Ha habido un error encontrando la partida");
+        if (match == null) throw new ResourceNotFoundException("Ha habido un problema encontrando la partida");
         List<Player> player = playerService.getPlayersByMatch(matchId);
 
         match.setState(State.EN_CURSO);
@@ -380,7 +389,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             List<SalmonMatch> files = salmonMatchService.getSalmonsFromPlayerInSpawn(p.getId());
             u.setPlayedgames(u.getPlayedgames() + 1);
             if(!files.isEmpty()){
-            Integer totalPoints = 0;
+            Integer totalPoints;
             Integer salmonPoints = files.stream().mapToInt(s -> salmonMatchService.getPointsFromASalmonInSpawn(s.getId())).sum();
             Integer filePoints = files.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
             totalPoints = salmonPoints + filePoints;

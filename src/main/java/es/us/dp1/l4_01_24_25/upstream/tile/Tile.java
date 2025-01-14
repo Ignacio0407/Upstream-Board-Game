@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "tile")
 public class Tile extends BaseEntity {
     String image;
