@@ -138,13 +138,13 @@ public class MatchService {
         List<SalmonMatch> salmons = salmonMatchRepository.findAllFromMatch(matchId);
         List<SalmonMatch> noCoord = salmonMatchRepository.findWithNoCoord(matchId);
         List<Player> players = playerRepository.findPlayersByMatch(matchId);
-        List<SalmonMatch> inRiver = salmonMatchRepository.findAllFromMatchInRiver(matchId);
-        if(tiles.isEmpty() || salmons.isEmpty() || (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) || players.stream().allMatch(p -> p.getAlive() == false)
-        || (match.getRound() > 6 && inRiver.isEmpty()) || players.stream().allMatch(p -> playerService.checkPlayerFinished(p.getId()))) {
+        if(tiles.isEmpty() || salmons.isEmpty() ||  (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) ||  players.stream().allMatch(p -> p.getAlive() == false)
+         || players.stream().allMatch(p -> playerService.checkPlayerFinished(p.getId()))) {
             match.setState(State.FINALIZADA);
             save(match);
         }
     }
+
 
     @Transactional
     public void changeInitialPlayer(Integer matchId) {
@@ -182,11 +182,18 @@ public class MatchService {
             Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
             Integer nextIndex = (currentIndex + 1) % nPlayers;
             Player nextPlayer = players.get(nextIndex);
-            while(playersFinished.contains(nextPlayer)) {
+            while (playersFinished.contains(nextPlayer)) {
                 nextIndex = (nextIndex + 1) % nPlayers;
                 nextPlayer = players.get(nextIndex);
-                if(player == nextPlayer && salmonMatchRepository.findAllFromPlayer(playerId).stream().allMatch(s -> s.getCoordinate().y() > 20)) match.setState(State.FINALIZADA); 
-            }   
+                if (nextPlayer.equals(player)) {
+                    // Validar condiciones adicionales antes de finalizar el juego
+                    if (salmonMatchRepository.findAllFromPlayer(playerId).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
+                        match.setState(State.FINALIZADA);
+                        break;
+                    }
+                }
+            }
+            
             match.setActualPlayer(nextPlayer);
         }
 

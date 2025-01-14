@@ -351,6 +351,7 @@ export default function Game({match}){
                     {match.round >= 6 && <div className='grid3'>
                         {gridD.map((salmon, index) => (
                         <div key={index} className="grid-item3">    
+                            <div className='salmons-containerSpawn'>
                             {salmon.map((s, i) => (
                                 (s[0].coordinate.y > 20 && 
                                 <img
@@ -361,8 +362,15 @@ export default function Game({match}){
                                     border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
                                     borderRadius: '40px',}}
                                 />
+                               
+                                
                                 )
                             ))}
+                             
+                             </div>
+                             <div key={index} className='desove-points'>
+                                {5 - index} 
+                             </div>
                         </div>
                     ))}
                     </div>}
