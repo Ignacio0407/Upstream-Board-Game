@@ -93,25 +93,29 @@ export const patch = async (uri, jwt, data = null) => {
   }
 }
 
-export const post = async (uri, jwt, data = null) => {
-  if (!data) {
-    return fetch(uri, {
-      method: "POST",
-      headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-      },
-    })
-  } else {
-    return fetch(uri, {
-      method: "POST",
-      headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data)
+export const post = async (uri, jwt, data) => {
+  const response = await fetch(uri, {
+    method: "POST",
+    headers: {
+      'Authorization': `Bearer ${jwt}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  // Agregar logging para debug
+  console.log('Request payload:', JSON.stringify(data));
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    console.error('Response error:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorData
     });
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-}
+  
+  return response.json(); // Parse la respuesta JSON
+};

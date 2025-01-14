@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,44 +31,43 @@ public class SalmonControllerTest {
     @MockBean
     private SalmonService salmonService;
 
-    @Test
-    void testFindAll_Positive() throws Exception {
-        List<Salmon> salmons = Arrays.asList(new Salmon(), new Salmon());
+    @ParameterizedTest
+    @CsvSource({
+        "2, '[{},{}]', 1",
+        "0, '[]', 0"
+    })
+    void testFindAll(int expectedSize, String expectedJsonResponse, int salmonCount) throws Exception {
+        List<Salmon> salmons = salmonCount > 0 ? Arrays.asList(new Salmon(), new Salmon()) : List.of();
         when(salmonService.findAll()).thenReturn(salmons);
 
         mockMvc.perform(get("/api/v1/salmons"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json("[{},{}]"));
+            .andExpect(content().json(expectedJsonResponse));
     }
 
-    @Test
-    void testFindAll_Empty() throws Exception {
-        when(salmonService.findAll()).thenReturn(List.of());
-
-        mockMvc.perform(get("/api/v1/salmons"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json("[]"));
-    }
-
-    @Test
-    void testFindById_Positive() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "1, '{}', true",  // Recurso encontrado, se espera un JSON vacío
+        "999, null, false"  // Recurso no encontrado, no se espera cuerpo
+    })
+    void testFindById(int id, String expectedJsonResponse, boolean exists) throws Exception {
         Salmon salmon = new Salmon();
-        when(salmonService.findById(1)).thenReturn(Optional.of(salmon));
+        if (exists) {
+            when(salmonService.findById(id)).thenReturn(Optional.of(salmon));
+        } else {
+            when(salmonService.findById(id)).thenReturn(Optional.empty());
+        }
 
-        mockMvc.perform(get("/api/v1/salmons/1"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json("{}"));
+        if (exists) {
+            mockMvc.perform(get("/api/v1/salmons/" + id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(expectedJsonResponse));
+        } else {
+            mockMvc.perform(get("/api/v1/salmons/" + id))
+                .andExpect(status().isNotFound());  // Verifica el 404 sin cuerpo
+        }
     }
 
-    @Test
-    void testFindById_NotFound() throws Exception {
-        when(salmonService.findById(1)).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/v1/salmons/1"))
-            .andExpect(status().isNotFound());
-    }
 }
-

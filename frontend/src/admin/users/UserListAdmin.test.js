@@ -22,7 +22,7 @@ describe('UserListAdmin', () => {
         const admin1 = await screen.findByRole('cell', { 'name': 'admin1' });
         expect(admin1).toBeInTheDocument();
 
-        const owners = await screen.findAllByRole('row', {},);
+        const owners = await screen.findAllByRole('row');
         expect(owners).toHaveLength(3);
     });
 
@@ -38,5 +38,13 @@ describe('UserListAdmin', () => {
         expect(alert).toBeInTheDocument();
 
         window.confirm = jsdomConfirm;
+    });
+
+    test('add user link works correctly', () => {
+        render(<UserListAdmin />);
+        const addUserButton = screen.getByRole('link', { name: /Add User/i });
+        expect(addUserButton).toBeInTheDocument();
+        userEvent.click(addUserButton);
+        expect(window.location.pathname).toBe('/users/new');
     });
 });

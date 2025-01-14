@@ -114,12 +114,32 @@ Como usuario y administrador quiero que el sistema me permita crear una partida 
 Como usuario y administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
 ![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
+ ### HU-(ISSUE#329): Usar barrra de búsqueda ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/329])
+ Como usuario quiero btener una barra de búsqueda en los listados de datos.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+
  ### HU-(ISSUE#160): Buscar partida por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/160])
- Como usuario quiero buscar partidas disponibles por su nombre.
+ Como usuario quiero buscar una partida por su nombre.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+  ### HU-(ISSUE#331): Buscar logro por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/331])
+ Como usuario quiero buscar un logro disponible por su nombre.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+ ### HU-(ISSUE#330): Buscar partidas por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/330])
+ Como usuario quiero buscar varias partidas por sus nombres.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+ ### HU-(ISSUE#332): Buscar logros por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/332])
+ Como usuario quiero buscar varias logros por sus nombres.
  ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
 
  ### HU-(ISSUE#152): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/152])
  Como jugador dentro de una partida quiero poder colocar una casilla en el tablero.
+ ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
+ 
+  ### HU-(ISSUE#328): Mover salmones durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/328])
+ Como jugador dentro de una partida quiero mover los salmones.
  ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
 
  ### HU-(ISSUE#162): Elegir color ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/162])
@@ -148,6 +168,10 @@ Como usuario y administrador quiero que el sistema me permita listar las diferen
 
  ### HU-(ISSUE#168): Borrar una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/168])
  Como administrador, quiero poder borrar partidas de la lista. (HU implementada con el proyecto base).
+ ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
+ 
+ ### HU-(ISSUE#334): Chatear con los jugadores durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/334])
+ Como jugador, quiero poder chatear con el resto de jugadores que estén jugando conmigo  una partida
  ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
 
 ## Diagrama conceptual del sistema

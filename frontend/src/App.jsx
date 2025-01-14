@@ -16,8 +16,8 @@ import SwaggerDocs from "./public/swagger";
 import DeveloperList from "./developers/developers";
 import AchievementList from "./achievements/achievementList";
 import AchievementEdit from "./achievements/achievementEdit";
-import Dashboard from "./dashboard/dashboard"
-import CreateGame from "./createGame/createGame";
+import Dashboard from "./dashboard/Dashboard"
+import CreateGame from "./createGame/CreateGame";
 import Rules from "./rules/rules";
 import Match from "./match/Match"
 

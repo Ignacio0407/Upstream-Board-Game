@@ -1,5 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,20 +41,27 @@ public class MessageController {
         this.userService = userService;
         this.matchService = matchService;
     }
-    
+
     @PostMapping
-    public ResponseEntity<Message> createMessage(@RequestBody MessageRequest request) {
+    public ResponseEntity<Message> createMessage(@RequestBody MessageRequest request) throws FileNotFoundException {
         try {
-            if (playerService.getById(request.getPlayerId()) == null) throw new ResourceNotFoundException("Ha habido un error encontrando al jugador");
-            if (matchService.getById(request.getMatchId()) == null) throw new ResourceNotFoundException("Ha habido un error encontrando la partida");
-            
+            // Redirigir la salida a un archivo de log
+            System.setOut(new PrintStream(new FileOutputStream("app.log")));
+
+            // Ahora los mensajes se imprimen en "app.log"
+            System.out.println("Soy request: " + request);
+
             Message message = messageService.createMessage(request.getPlayerId(), request.getMatchId(), request.getContent());
+            
+            System.out.println("Soy el mensaje: " + message);
+            
             messagingTemplate.convertAndSend("/topic/chat/" + request.getMatchId(), message);
             return ResponseEntity.ok(message);
-        } catch (ResourceNotFoundException ex) {
+        } catch (ResourceNotFoundException | IllegalArgumentException ex) {
             throw ex;
         }
     }
+
     
     @DeleteMapping("/{messageId}")
     public ResponseEntity<Void> deleteMessage(@PathVariable Integer messageId) {
