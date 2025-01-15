@@ -48,12 +48,7 @@ export default function Game({match}){
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
-    let playerList = [];
-    if (!match.actualPlayer) {
-        const firstPlayerId = players.length > 0 ? players[0].id : match.matchCreator;
-        playerList = generatePlayerList(players, firstPlayerId);
-    }
-    playerList = generatePlayerList(players, match.actualPlayer);
+    const playerList = generatePlayerList(players, match.actualPlayer);
     
     const location = useLocation();
     const spectatorIds = location.state?.spectatorIds || []; // Obtener la lista de espectadores

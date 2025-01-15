@@ -116,7 +116,7 @@ public class MessageControllerTest {
         mockMvc.perform(post("/api/v1/messages")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(messageRequest)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test

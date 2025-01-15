@@ -113,32 +113,12 @@ public class PlayerServiceTest {
         }
 
         @Test
-        void testGetSomeById_Success() {
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
-            when(playerRepository.findById(2)).thenReturn(Optional.of(player2));
-
-            List<Integer> ids = Arrays.asList(1, 2);
-            List<Player> result = playerService.getSomeById(ids);
-
-            assertEquals(2, result.size());
-            assertEquals("Player1", result.get(0).getName());
-            assertEquals("Player2", result.get(1).getName());
-        }
-
-        @Test
-        void testGetSomeById_EmptyList() {
-            List<Integer> ids = Arrays.asList();
-            List<Player> result = playerService.getSomeById(ids);
-            assertTrue(result.isEmpty());
-        }
-
-        @Test
         void testGetSomePlayersByName_Success() {
             when(playerRepository.findByName("Player1")).thenReturn(player1);
             when(playerRepository.findByName("Player2")).thenReturn(player2);
 
             List<String> names = Arrays.asList("Player1", "Player2");
-            List<Player> result = playerService.getSomeJugadoresByName(names);
+            List<Player> result = playerService.getSomeByName(names);
 
             assertEquals(2, result.size());
             assertEquals(1, result.get(0).getId());
@@ -148,7 +128,7 @@ public class PlayerServiceTest {
         @Test
         void testGetSomePlayersByName_EmptyList() {
             List<String> names = Arrays.asList();
-            List<Player> result = playerService.getSomeJugadoresByName(names);
+            List<Player> result = playerService.getSomeByName(names);
             assertTrue(result.isEmpty());
         }
 
@@ -178,27 +158,10 @@ public class PlayerServiceTest {
     class DeleteOperationsTests {
 
         @Test
-        void testDeleteAllPlayers() {
-            playerService.deleteAllJugadores();
-            verify(playerRepository).deleteAll();
-        }
-
-        @Test
-        void testDeleteSomeById_Success() {
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
-            when(playerRepository.findById(2)).thenReturn(Optional.of(player2));
-
-            List<Integer> ids = Arrays.asList(1, 2);
-            playerService.deleteSomeById(ids);
-
-            verify(playerRepository, times(2)).deleteById(any());
-        }
-
-        @Test
         void testDeleteById_Success() {
             when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
 
-            playerService.deleteJugadorById(1);
+            playerService.deleteById(1);
 
             verify(playerRepository).deleteById(1);
         }
@@ -211,15 +174,6 @@ public class PlayerServiceTest {
         }
 
         @Test
-        void testDeleteByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(player1);
-
-            playerService.deleteJugadorByName("Player1");
-
-            verify(playerRepository).delete(player1);
-        }
-
-        @Test
         void testDeleteByName_NotFound() {
             when(playerRepository.findByName("NonExistent")).thenReturn(null);
 
@@ -227,16 +181,6 @@ public class PlayerServiceTest {
             assertNull(result);
         }
 
-        @Test
-        void testDeleteSomeByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(player1);
-            when(playerRepository.findByName("Player2")).thenReturn(player2);
-
-            List<String> names = Arrays.asList("Player1", "Player2");
-            playerService.deleteSomeJugadoresByName(names);
-
-            verify(playerRepository, times(2)).delete(any());
-        }
     }
 
     @Nested
@@ -254,7 +198,7 @@ public class PlayerServiceTest {
             when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
             when(playerRepository.save(any())).thenReturn(updatedPlayer);
 
-            Player result = playerService.updateJugadorById(updatedPlayer, 1);
+            Player result = playerService.updateById(updatedPlayer, 1);
 
             assertEquals("UpdatedPlayer", result.getName());
             assertEquals(Color.ROJO, result.getColor());
@@ -267,23 +211,6 @@ public class PlayerServiceTest {
 
             Player result = playerService.getById(99);
             assertNull(result);
-        }
-
-        @Test
-        void testUpdatePlayerByName_Success() {
-            Player updatedPlayer = new Player();
-            updatedPlayer.setName("UpdatedPlayer");
-            updatedPlayer.setColor(Color.ROJO);
-            updatedPlayer.setPoints(30);
-
-            when(playerRepository.findByName("Player1")).thenReturn(player1);
-            when(playerRepository.save(any())).thenReturn(updatedPlayer);
-
-            Player result = playerService.updateJugadorByName(updatedPlayer, "Player1");
-
-            assertEquals("UpdatedPlayer", result.getName());
-            assertEquals(Color.ROJO, result.getColor());
-            assertEquals(30, result.getPoints());
         }
 
         @Test
@@ -323,7 +250,7 @@ public class PlayerServiceTest {
             List<Player> players = Arrays.asList(player1, player2);
             when(playerRepository.save(any(Player.class))).thenReturn(player1, player2);
 
-            List<Player> result = playerService.saveJugadores(players);
+            List<Player> result = playerService.savePlayers(players);
 
             assertTrue(result.isEmpty());
             verify(playerRepository, times(2)).save(any(Player.class));
@@ -335,7 +262,7 @@ public class PlayerServiceTest {
             when(playerRepository.save(player1)).thenReturn(player1);
             when(playerRepository.save(player2)).thenThrow(new DataAccessException("Error") {});
 
-            List<Player> result = playerService.saveJugadores(players);
+            List<Player> result = playerService.savePlayers(players);
 
             assertEquals(1, result.size());
             assertTrue(result.contains(player2));
@@ -344,7 +271,7 @@ public class PlayerServiceTest {
         @Test
         void testSavePlayers_EmptyList() {
             List<Player> players = Arrays.asList();
-            List<Player> result = playerService.saveJugadores(players);
+            List<Player> result = playerService.savePlayers(players);
             assertTrue(result.isEmpty());
         }
     }

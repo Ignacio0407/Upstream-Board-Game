@@ -6,6 +6,7 @@ import "../../static/css/admin/adminPage.css";
 import deleteFromList from "../../util/deleteFromList";
 import getErrorModal from "../../util/getErrorModal";
 import useFetchState from "../../util/useFetchState";
+import SearchBar from "../../util/SearchBar"
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -19,6 +20,7 @@ export default function UserListAdmin() {
     setMessage,
     setVisible
   );
+  const [originalUsers, setOriginalUsers] = useFetchState([],`/api/v1/users`,jwt,setMessage,setVisible);
   const [alerts, setAlerts] = useState([]);
 
   const userList = users.map((user) => {
@@ -63,6 +65,7 @@ export default function UserListAdmin() {
 
   return (
     <div className="admin-page-container">
+    <SearchBar setter={setUsers} uri={"users"} data={originalUsers}/>
       <h1 className="text-center">Users</h1>
       {alerts.map((a) => a.alert)}
       {modal}

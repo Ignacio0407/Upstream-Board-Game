@@ -378,7 +378,7 @@ public class PartidaCasilla extends BaseEntity {
 
 #### Estado del código refactorizado
 
-```
+``` java
 public class MatchTile extends BaseEntity {
 
     Integer capacity;
@@ -411,7 +411,7 @@ Ahora está todo mucho más uniforme y se encuentran fácilmente los nombres de 
 ### Refactorización 3 (Ignacio): 
 En esta refactorización se cambió la construcción o inicialización del grid en el frontend
 #### Estado inicial del código
-```jsx 
+```javascript 
 useEffect(() => {
         // Construir el nuevo estado del grid basado en gridTiles
         const newGrid = Array(18).fill(null).map(() => []); // Crea una cuadrícula vacía de 18 espacios
@@ -461,7 +461,7 @@ useEffect(() => {
 
 #### Estado del código refactorizado
 
-```
+``` javascript
 useEffect(() => {
         const newGrid = Array(18).fill(null).map(() => ({
             tile: null, 
@@ -544,3 +544,56 @@ Era imposible mover los salmones una vez entraban en el tablero, o sea, cuando s
 #### Ventajas que presenta la nueva versión del código respecto de la versión original
 Ahora se pueden mover los salmones en el tablero
 
+
+### Refactorización 4 (Ignacio): 
+En esta refactorización se cambió significativamente botonPlay, pasando a llamarse BotonLink y ser un componente React.
+#### Estado inicial del código
+```javascript
+/**
+ * Crea un botón con color y texto que redirecciona a una pantalla al ser pulsado. Usa Button y Link
+ * @param {string} color - color del botón.
+ * @param {string} direction - dirección a la que redirecciona.
+ * @param {string} text - texto del botón.
+ */
+export default function botonPlay(color, direction, text) {
+    return (
+      <>
+        <Button color={color} > 
+        <Link 
+          to={direction} className="btn sm"                
+          style={{ textDecoration: "none" }}>{text}
+        </Link> 
+        </Button>
+      </>
+    )  
+  }
+``` 
+
+#### Estado del código refactorizado
+
+```javascript
+/**
+ * Crea un botón con color y texto que redirecciona a una pantalla al ser pulsado. Usa Button y Link
+ * @param {boolean} outline - define si el color del botón se aplicará al borde o al interior. Por defecto false.
+ * @param {string} color - color del botón. Por defecto blanco
+ * @param {string} direction - dirección a la que redirecciona.
+ * @param {string} text - texto del botón.
+ * @param {string} colorTexto - Opcional. color del texto del botón. Por defecto blanco
+ */
+export default function BotonLink({outline=false, color= "white", direction, text, colorTexto = "white"}) {
+    return (
+      <>
+        <Button outline={outline} color={color} > 
+        <Link 
+          to={direction} className="btn sm"                
+          style={{ textDecoration: "none", color: {colorTexto} }}>{text}
+        </Link> 
+        </Button>
+      </>
+    )  
+  }
+```
+#### Problema que nos hizo realizar la refactorización
+Era un nombre un poco tonto y sobre todo, era una función javascript en vez de un componente React, pero devolvía una renderización de react, lo que era un poco confuso
+#### Ventajas que presenta la nueva versión del código respecto de la versión original
+Ahora es más correcto al ser un componente react el que renderiza en vez de una función javascript, además de tener un nombre más significativo.

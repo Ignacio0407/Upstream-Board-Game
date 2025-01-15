@@ -1,12 +1,10 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,14 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/v1/messages")
@@ -29,34 +26,33 @@ public class MessageController {
     
     private final MessageService messageService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final PlayerService playerService;
     private final UserService userService;
     private final MatchService matchService;
 
     @Autowired
-    public MessageController(MessageService messageService, SimpMessagingTemplate messagingTemplate, PlayerService playerService, UserService userService, MatchService matchService) {
+    public MessageController(MessageService messageService, SimpMessagingTemplate messagingTemplate, UserService userService, MatchService matchService) {
         this.messageService = messageService;
         this.messagingTemplate = messagingTemplate;
-        this.playerService = playerService;
         this.userService = userService;
         this.matchService = matchService;
     }
 
-    @PostMapping
-    public ResponseEntity<Message> createMessage(@RequestBody MessageRequest request) throws FileNotFoundException {
+    @PostMapping("/{matchId}/{playerId}/{message}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Message> createMessage(@PathVariable Integer matchId, @PathVariable Integer playerId, @PathVariable String message) {
         try {
-            // Redirigir la salida a un archivo de log
-            System.setOut(new PrintStream(new FileOutputStream("app.log")));
+            System.out.println("Request received: matchId=" + matchId + ", playerId=" + playerId + ", message=" + message);
 
-            // Ahora los mensajes se imprimen en "app.log"
-            System.out.println("Soy request: " + request);
+            if (playerId == null || matchId == null || message == null || message.isBlank()) {
+                throw new ResourceNotFoundException("Ha habido un problema recibiendo parámetros");
+            }
 
-            Message message = messageService.createMessage(request.getPlayerId(), request.getMatchId(), request.getContent());
-            
-            System.out.println("Soy el mensaje: " + message);
-            
-            messagingTemplate.convertAndSend("/topic/chat/" + request.getMatchId(), message);
-            return ResponseEntity.ok(message);
+            Message createdMessage = messageService.createMessage(playerId, matchId, message);
+            System.out.println("Message created: " + createdMessage);
+
+            // Enviar mensaje al WebSocket
+            messagingTemplate.convertAndSend("/topic/chat/" + matchId, createdMessage);
+            return ResponseEntity.ok(createdMessage);
         } catch (ResourceNotFoundException | IllegalArgumentException ex) {
             throw ex;
         }

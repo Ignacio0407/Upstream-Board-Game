@@ -67,7 +67,7 @@ public class MatchTileControllerTest {
         testMatchTile.setOrientation(0);
         testMatchTile.setCapacity(2);
         testMatchTile.setSalmonsNumber(0);
-        testMatchTile.setCoordinate(new Coordinate(0, 0));  
+        testMatchTile.setCoordinate(new Coordinate(null, null));  
     }
 
     @Test
@@ -82,7 +82,6 @@ public class MatchTileControllerTest {
 
     @Test
     void shouldUpdateMatchTileSuccessfully() throws Exception {
-        // Setup match
         Match match = new Match();
         match.setId(1);
         match.setRound(0);
@@ -90,8 +89,7 @@ public class MatchTileControllerTest {
         testMatchTile.setMatch(match);
 
         Map<String, Integer> updates = new HashMap<>();
-        updates.put("x", 1);
-        updates.put("y", 1);
+        updates.put("x", 0); updates.put("y", 0);
 
         when(matchTileService.findById(1)).thenReturn(testMatchTile);
         when(matchTileService.findByMatchId(1)).thenReturn(new ArrayList<>());
@@ -113,11 +111,11 @@ public class MatchTileControllerTest {
         testTile.setId(1);
 
         Map<String, Integer> updates = new HashMap<>();
-        updates.put("x", 1);
-        updates.put("y", 1);
+        updates.put("x", 0);
+        updates.put("y", 0);
 
         MatchTile occupyingTile = new MatchTile();
-        occupyingTile.setCoordinate(new Coordinate(1, 1));
+        occupyingTile.setCoordinate(new Coordinate(0, 0));
         
         when(matchTileService.findById(1)).thenReturn(testMatchTile);
         when(matchTileService.findByMatchId(any())).thenReturn(List.of(occupyingTile));
@@ -125,8 +123,70 @@ public class MatchTileControllerTest {
         mockMvc.perform(patch("/api/v1/matchTiles/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updates)))
-            .andExpect(status().isInternalServerError());
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.message").value("Ya existe una MatchTile en las coordenadas especificadas."));
     }
+
+    @Test
+    void shouldFailWhenMatchTileNotFound() throws Exception {
+        Map<String, Integer> updates = new HashMap<>();
+        updates.put("x", 1);
+        updates.put("y", 1);
+
+        when(matchTileService.findById(1)).thenReturn(null); // Simula que el MatchTile no existe
+
+        mockMvc.perform(patch("/api/v1/matchTiles/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updates)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("MatchTile not found with ID: '1'"));
+    }
+
+    @Test
+    void shouldFailWhenMatchTileInSameRoundNotFound() throws Exception {
+        // Setup match y matchTile
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(1);  // Se asegura de que la ronda sea 1
+        testMatchTile.setMatch(match);
+
+        Map<String, Integer> updates = new HashMap<>();
+        updates.put("x", 1);
+        updates.put("y", 1); // Cambia las coordenadas a y=1
+
+        // Simula que no se encuentra un MatchTile con las coordenadas dadas
+        when(matchTileService.findById(1)).thenReturn(testMatchTile);
+        when(matchTileService.findByMatchId(1)).thenReturn(new ArrayList<>());
+        
+        mockMvc.perform(patch("/api/v1/matchTiles/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updates)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("No se puede actualizar el MatchTile en esta ronda not found with ID: '1'"));
+    }
+
+    @Test
+    void shouldFailWhenUpdateNotAllowedInCurrentRound() throws Exception {
+        // Setup match y matchTile
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(0);  // Ronda 0
+        testMatchTile.setMatch(match);
+
+        Map<String, Integer> updates = new HashMap<>();
+        updates.put("x", 0);
+        updates.put("y", 4);  // Coordenadas no permitidas en ronda 0
+
+        when(matchTileService.findById(1)).thenReturn(testMatchTile);
+        when(matchTileService.findByMatchId(1)).thenReturn(new ArrayList<>());
+
+        mockMvc.perform(patch("/api/v1/matchTiles/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updates)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("No se puede actualizar el MatchTile en esta ronda not found with ID: '1'"));
+    }
+
 
     @Test
     void shouldGetMatchTilesByMatchId() throws Exception {
