@@ -76,32 +76,52 @@ Como usuario quiero que el sistema me permita crear partidas para que otros juga
  ### HU-004: Crear partidas como administrador
 Como administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignándole un nombre y una contraseña, añadiéndose a la lista de partidas disponibles.
 
+![](/docs/mockups/Mockup%20Crear%20Partida.png)
+
  ### HU-005: Listar partidas como usuario
 Como usuario quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
+
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
  ### HU-006: Listar partidas como administrador
 Como administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
 
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
+
  ### HU-007: Unirse a partidas como usuario
 Como usuario quiero que el sistema me permita unirme partidas para jugar con otros jugadores.
+
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
  ### HU-008: Unirse a partidas como administrador
 Como administrador quiero que el sistema me permita unirme partidas para jugar con otros jugadores.
 
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
+
  ### HU-009: Buscar partida por nombre
 Como usuario quiero buscar partidas disponibles por su nombre.
+
+![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
 
  ### HU-010: Elegir color
 Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
 
+![](/docs/mockups/Mockup&20Elegir%20Color.png)
+
  ### HU-011: Ver jugadores
 Como jugador dentro de una lobby, quiero poder ver quién está en la partida conmigo.
+
+![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
 
  ### HU-012: Iniciar partida
 Como jugador dentro de una lobby, quiero poder iniciar la partida.
 
+![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+
  ### HU-013: Abandonar partida
 Como jugador dentro de una lobby, quiero poder abandonar la lobby.
+
+![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
 
  ### HU-014: Borrar una partida
 Como administrador, quiero poder borrar partidas de la lista.
@@ -109,29 +129,47 @@ Como administrador, quiero poder borrar partidas de la lista.
  ### HU-015: Listar logros
 Como usuario quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
 
+![](/docs/mockups/Mockup%20Listar%20Logros.png)
+
  ### HU-016: Listar logros
 Como administrador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
+
+![](/docs/mockups/Mockup%20Listar%20Logros.png)
 
  ### HU-017: Crear logros
 Como administrador quiero que el sistema me permita crear logros, añadiendo valores a cada campo.
 
+![](/docs/mockups/Mockup%20Listar%20Logros.png)
+
  ### HU-018: Modificar logros
 Como administrador quiero que el sistema me permita modificar logros, ajustando cada parámetro del logro a mi gusto.
+
+![](/docs/mockups/Mockup%20Listar%20Logros.png)
 
  ### HU-019: Eliminar logros
 Como administrador quiero que el sistema me permita modificar eliminar logros, borrándolos de la base de datos.
 
+![](/docs/mockups/Mockup%20Listar%20Logros.png)
+
  ### HU-020: Ver logros desbloqueados
 Como usuario, quiero poder diferenciar los logros que tengo desbloqueados del resto de logros.
+
+![](/docs/mockups/Mockup%20Listar%20Logros&20Desbloqueados.png)
 
  ### HU-021: Ver las reglas
 Como usuario, quiero consultar las reglas del juego.
 
+![](/docs/mockups/Mockup%20Ver%20Reglas.png)
+
  ### HU-022: Listar usuarios
 Como administrador quiero que el sistema me permita listar todos los usuarios del juego registrados además de ver sus nombres y roles.
 
+![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
+
  ### HU-023: Crear un usuario
 Como administrador quiero que el sistema me permita crear un nuevo usuario, especificando su nombre, contraseña y rol, eligiendo entre jugador o administrador.
+
+![](/docs/mockups/Mockup&20Crear%20Usuarios.png)
 
  ### HU-024: Modificar perfil como usuario
 Como usuario quiero que el sistema me permita modificar mis datos de usuario, ya sea mi nombre o contraseña.
@@ -139,20 +177,27 @@ Como usuario quiero que el sistema me permita modificar mis datos de usuario, ya
  ### HU-025: Modificar un usuario como administrador
 Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol.
 
+![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
+
  ### HU-026: Eliminar un usuario
 Como administrador quiero que el sistema me permita eliminar usuarios, borrándolos de la base de datos.
+
+![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
 
  ### HU-027: Listar desarrolladores
 Como administrador y usuario quiero que el sistema me permita listar todas las personas que han participado en el desarrollo del juego, junto con información básica de cada uno.
 
- ### HU-028: Elegir color
-Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
+![](/docs/mockups/Mockup%20Listar&20Desarrolladores.png)
 
  ### HU-029: Colocar losetas
 Como jugador dentro de una partida iniciada, quiero poder poner losetas en el tablero cuando sea mi turno.
 
+![](/docs/mockups/Mockup%20Partida.jpg)
+
  ### HU-030: Mover fichas de salmón
 Como jugador dentro de una partida iniciada, quiero poder mover mis salmones, ya sea saltando o nadando.
+
+![](/docs/mockups/Mockup%20Partida%20(2).jpg)
 
  ### HU-031: Recuento de puntos
 Como jugador en una partida iniciada quiero que se recuenten los puntos de todos los jugadores al terminar para designar un ganador.
