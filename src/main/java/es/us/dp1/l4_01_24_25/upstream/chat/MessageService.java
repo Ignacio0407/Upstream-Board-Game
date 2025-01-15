@@ -62,13 +62,6 @@ public class MessageService {
 
     @Transactional
     public Message createMessage(Integer playerId, Integer matchId, String content) {
-        if (playerId == null) {
-            if (matchId == null)
-                throw new IllegalArgumentException("Match ID and PlayerId must not be null");
-            throw new IllegalArgumentException("Player ID and Match ID must not be null");  
-        }
-        if (matchId == null)
-            throw new IllegalArgumentException("Match ID must not be null");  
 
         Player player = playerRepository.findById(playerId)
             .orElseThrow(() -> new ResourceNotFoundException("Player not found"));

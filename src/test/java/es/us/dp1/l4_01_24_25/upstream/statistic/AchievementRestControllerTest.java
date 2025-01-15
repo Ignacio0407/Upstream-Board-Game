@@ -33,7 +33,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 
-@WebMvcTest(controllers = AchievementRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
+@WebMvcTest(controllers = AchievementRestController.class, 
+excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, 
+classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
 class AchievementRestControllerTest {
 
     @Autowired

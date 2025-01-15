@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @RestController
@@ -28,24 +29,24 @@ public class MessageController {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserService userService;
     private final MatchService matchService;
+    private final PlayerService playerService;
 
     @Autowired
-    public MessageController(MessageService messageService, SimpMessagingTemplate messagingTemplate, UserService userService, MatchService matchService) {
+    public MessageController(MessageService messageService, SimpMessagingTemplate messagingTemplate, UserService userService, MatchService matchService, PlayerService playerService) {
         this.messageService = messageService;
         this.messagingTemplate = messagingTemplate;
         this.userService = userService;
         this.matchService = matchService;
+        this.playerService = playerService;
     }
 
     @PostMapping("/{matchId}/{playerId}/{message}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Message> createMessage(@PathVariable Integer matchId, @PathVariable Integer playerId, @PathVariable String message) {
-        try {
             System.out.println("Request received: matchId=" + matchId + ", playerId=" + playerId + ", message=" + message);
 
-            if (playerId == null || matchId == null || message == null || message.isBlank()) {
-                throw new ResourceNotFoundException("Ha habido un problema recibiendo parámetros");
-            }
+            if (playerService.getById(playerId) == null) throw new ResourceNotFoundException("Error encontrando al jugador");
+            if (matchService.getById(matchId) == null) throw new ResourceNotFoundException("Error encontrando al jugador");
 
             Message createdMessage = messageService.createMessage(playerId, matchId, message);
             System.out.println("Message created: " + createdMessage);
@@ -53,11 +54,7 @@ public class MessageController {
             // Enviar mensaje al WebSocket
             messagingTemplate.convertAndSend("/topic/chat/" + matchId, createdMessage);
             return ResponseEntity.ok(createdMessage);
-        } catch (ResourceNotFoundException | IllegalArgumentException ex) {
-            throw ex;
         }
-    }
-
     
     @DeleteMapping("/{messageId}")
     public ResponseEntity<Void> deleteMessage(@PathVariable Integer messageId) {

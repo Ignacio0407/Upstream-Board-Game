@@ -68,7 +68,7 @@ const Chat = ({ match, players, currentPlayer }) => {
     } catch (error) {
         console.error('Error sending message:', error);
     }
-};
+  };
     
 
   const scrollToBottom = () => {

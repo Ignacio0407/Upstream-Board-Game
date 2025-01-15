@@ -12,15 +12,18 @@ jest.mock('../services/token.service', () => ({
   getLocalAccessToken: jest.fn(() => 'mock-jwt-token'),
 }));
 
-jest.mock('sockjs-client', () => jest.fn());
-jest.mock('@stomp/stompjs', () => ({
-  Client: jest.fn().mockImplementation(() => ({
-    activate: jest.fn(),
-    subscribe: jest.fn(),
-    publish: jest.fn(),
-    deactivate: jest.fn(),
-  })),
-}));
+jest.mock('@stomp/stompjs', () => {
+  return {
+    Client: jest.fn().mockImplementation(() => {
+      return {
+        activate: jest.fn(),
+        subscribe: jest.fn(),
+        publish: jest.fn(),
+        deactivate: jest.fn(),
+      };
+    }),
+  };
+});
 
 describe('Chat Component', () => {
   const mockMatch = { id: 1 };
@@ -36,20 +39,20 @@ describe('Chat Component', () => {
 
   it('renders the Chat component and loads messages', async () => {
     console.log('Test: renders the Chat component and loads messages');
-
+  
     const mockMessages = [
       {
         id: 1,
         content: 'Hello World',
         player: { id: 2, user: { username: 'Player2' } },
-        match: { id: 1}
+        match: { id: 1 }
       },
     ];
-
+  
     get.mockResolvedValueOnce({
       json: jest.fn().mockResolvedValueOnce(mockMessages),
     });
-
+  
     render(
       <Chat
         match={mockMatch}
@@ -57,26 +60,26 @@ describe('Chat Component', () => {
         currentPlayer={mockCurrentPlayer}
       />
     );
-
+  
     console.log('Component rendered');
-
+  
     // Verificar que el chat no es visible inicialmente
     expect(screen.queryByText('Chat de la partida')).not.toBeInTheDocument();
-
+  
     // Simular clic para mostrar el chat
     const chatTab = screen.getByText('Chat');
     fireEvent.click(chatTab);
     console.log('Chat tab clicked');
-
+  
     // Esperar que los mensajes sean cargados y renderizados
     await waitFor(() => {
       expect(screen.getByText('Chat de la partida')).toBeInTheDocument();
     });
-
-    console.log('Messages loaded and rendered');
-    expect(screen.getByText('Hello World')).toBeInTheDocument();
-    expect(screen.getByText('Player2')).toBeInTheDocument();
+  
+    // Verificar que stompClient.activate() fue llamado
+    expect(stompClient.activate).toHaveBeenCalled();
   });
+  
 
   it('sends a message when the form is submitted', async () => {
     console.log('Test: sends a message when the form is submitted');

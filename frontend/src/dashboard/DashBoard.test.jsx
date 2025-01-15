@@ -1,3 +1,9 @@
+import React from 'react';
+import Dashboard from "./Dashboard";
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom'; // Para mockear navegación
+import Dashboard from '../components/Dashboard';
+
 jest.mock('sockjs-client', () => jest.fn());
 jest.mock('@stomp/stompjs', () => ({
   Client: jest.fn().mockImplementation(() => ({
@@ -6,12 +12,6 @@ jest.mock('@stomp/stompjs', () => ({
     deactivate: jest.fn(),
   })),
 }));
-
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom'; // Para mockear navegación
-import Dashboard from '../components/Dashboard';
-import tokenService from '../services/token.service';
 
 // Mock de tokenService para simular autenticación
 jest.mock('../services/token.service', () => ({

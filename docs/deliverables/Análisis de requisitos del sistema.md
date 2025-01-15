@@ -172,7 +172,10 @@ Como usuario y administrador quiero que el sistema me permita listar las diferen
  
  ### HU-(ISSUE#334): Chatear con los jugadores durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/334])
  Como jugador, quiero poder chatear con el resto de jugadores que estén jugando conmigo  una partida
- ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
+ 
+ ### HU-(ISSUE#338): Rotar casillas durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/338])
+ Como jugador, quiero poder rotar las casillas para colocarlas donde quiera
+ 
 
 ## Diagrama conceptual del sistema
 

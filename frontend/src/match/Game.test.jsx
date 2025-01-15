@@ -1,4 +1,5 @@
 import React from 'react';
+import Game from "./Game";
 import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { Client } from '@stomp/stompjs';
