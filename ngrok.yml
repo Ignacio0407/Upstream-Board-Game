@@ -1,0 +1,6 @@
+authtoken: "2rfuENLr97X34rWWnTQCyo5suVf_337kdYPYmLmhrxYPZCVyN"
+tunnels:
+  spring-app:
+    proto: http
+    addr: 8080
+    bind_tls: true

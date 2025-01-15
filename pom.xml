@@ -35,7 +35,7 @@
 
         <!-- ngrok configuration -->
         <ngrok.enabled>true</ngrok.enabled>
-        <ngrok.authToken>2raCOjKpzccWhsxJaKBjT77vzzH_65CninXtKJNs9VKNyS7wU</ngrok.authToken>
+        <ngrok.authToken>2rfuENLr97X34rWWnTQCyo5suVf_337kdYPYmLmhrxYPZCVyN</ngrok.authToken>
 
     </properties>
 

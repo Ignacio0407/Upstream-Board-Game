@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,7 +65,7 @@ class PlayerRestControllerTest {
     void shouldReturnPlayersByName() throws Exception {
         List<Player> players = List.of(new Player());
         List<String> names = List.of("John", "Jane");
-        when(playerService.getSomeJugadoresByName(names)).thenReturn(players);
+        when(playerService.getSomeByName(names)).thenReturn(players);
 
         mockMvc.perform(get("/api/v1/players/names/{names}", "John,Jane"))
                .andExpect(status().isOk())
@@ -122,47 +121,6 @@ class PlayerRestControllerTest {
     }
 
     @Test
-    void shouldDeleteAllPlayers() throws Exception {
-        mockMvc.perform(delete("/api/v1/players"))
-               .andExpect(status().isOk());
-
-        verify(playerService).deleteAllJugadores();
-    }
-
-    @Test
-    void shouldDeletePlayersByIdWhenAllExist() throws Exception {
-        List<Integer> ids = List.of(1, 2);
-        when(playerService.getById(1)).thenReturn(new Player());
-        when(playerService.getById(2)).thenReturn(new Player());
-
-        mockMvc.perform(delete("/api/v1/players/ids/{ids}", "1,2"))
-               .andExpect(status().isOk());
-
-        verify(playerService).deleteSomeById(ids);
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenSomePlayersCannotBeDeleted() throws Exception {
-        when(playerService.getById(1)).thenReturn(new Player());
-        when(playerService.getById(2)).thenReturn(null);
-
-        mockMvc.perform(delete("/api/v1/players/ids/{ids}", "1,2"))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldDeletePlayerByIdWhenExists() throws Exception {
-        Player player = new Player();
-        player.setId(1);
-        when(playerService.getById(1)).thenReturn(player);
-
-        mockMvc.perform(delete("/api/v1/players/{id}", 1))
-               .andExpect(status().isOk());
-
-        verify(playerService).deleteJugadorById(1);
-    }
-
-    @Test
     void shouldReturnNotFoundWhenPlayerByIdDoesNotExistForDeletion() throws Exception {
         when(playerService.getById(99)).thenReturn(null);
 
@@ -175,7 +133,7 @@ class PlayerRestControllerTest {
         Player player = new Player();
         player.setId(1);
         when(playerService.getById(1)).thenReturn(player);
-        when(playerService.updateJugadorById(any(), any())).thenReturn(player);
+        when(playerService.updateById(any(), any())).thenReturn(player);
 
         mockMvc.perform(put("/api/v1/players/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)

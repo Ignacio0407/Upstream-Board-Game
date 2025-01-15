@@ -120,7 +120,7 @@ public class SalmonMatchController {
         return new Coordinate(newCoordinate.x()+x, newCoordinate.y() + y);
     }
 
-    private void changePlayer(Player player, Match match, List<Player> players, Integer numPlayers) {
+    private void herons(Player player, Match match, List<Player> players, Integer numPlayers) {
         List<SalmonMatch> salmonMatchesFromPlayer = salmonMatchService.getAllFromPlayerInRiver(player.getId());
         List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(match.getId());
         for(MatchTile h : herons) {
@@ -147,7 +147,7 @@ public class SalmonMatchController {
         matchTileService.save(toTravel);
         player.setEnergy(player.getEnergy() - energyUsed);
         if (player.getEnergy() == 0) {
-            changePlayer(player, match, players, numPlayers);
+            herons(player, match, players, numPlayers);
         }
         playerService.savePlayer(player);
         if (salmonMatch.getSalmonsNumber() > 0) {

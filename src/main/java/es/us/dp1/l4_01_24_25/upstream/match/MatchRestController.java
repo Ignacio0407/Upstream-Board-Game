@@ -212,6 +212,7 @@ public class MatchRestController {
 @PatchMapping("/{matchId}/changephase/{playerId}")
 public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
     Match match = matchService.getById(matchId);
+    if (match == null) throw new ResourceNotFoundException("No se ha podido encontrar la partida");
     Player player = playerService.getById(playerId);
     Phase phase = match.getPhase();
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);

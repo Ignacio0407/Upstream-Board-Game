@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchById, fetchByName, fetchByNames } from '../util/fetchers'; // Cambia a la ruta 
+import { fetchById, fetchByName, fetchByNames } from '../util/fetchers';
 import '../static/css/others/SearchBar.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 

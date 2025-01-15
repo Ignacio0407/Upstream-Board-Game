@@ -9,7 +9,7 @@ import '../static/css/chat/chat.css'
 const Chat = ({ match, players, currentPlayer }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [isChatVisible, setIsChatVisible] = useState(false); // Controla si el chat está visible
+  const [isChatVisible, setIsChatVisible] = useState(false); 
   const chatContainerRef = useRef(null);
   const jwt = tokenService.getLocalAccessToken();
   const socket = new SockJS('http://localhost:8080/ws-upstream');
@@ -57,22 +57,19 @@ const Chat = ({ match, players, currentPlayer }) => {
     if (!newMessage.trim()) return;
 
     try {
-      const messageRequest = {
-        playerId: Number(currentPlayer.id),
-        matchId: Number(match.id),
-        content: newMessage
-      };
 
-      console.log("playerId manda mensaje", currentPlayer.id);
-      console.log("matchId", match.id)
-      console.log("new message", newMessage)
+      const playerId = currentPlayer.id;
+      const matchId = match.id
 
-      await post('/api/v1/messages', jwt, messageRequest);
-      setNewMessage('');
+      const url = `/api/v1/messages/${matchId}/${playerId}/${encodeURIComponent(newMessage)}`;
+
+      await post(url, jwt);
+        setNewMessage('');
     } catch (error) {
-      console.error('Error sending message:', error);
+        console.error('Error sending message:', error);
     }
-  };
+};
+    
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -87,10 +84,7 @@ const Chat = ({ match, players, currentPlayer }) => {
 
   return (
     <div className="chat-wrapper">
-      <div
-        className="chat-tab"
-        onClick={() => setIsChatVisible((prev) => !prev)}
-      >
+      <div className="chat-tab" onClick={() => setIsChatVisible((prev) => !prev)}>
         Chat
       </div>
 
@@ -101,7 +95,7 @@ const Chat = ({ match, players, currentPlayer }) => {
           </div>
 
           <div className="chat-messages" ref={chatContainerRef}>
-            {messages.map((message) => (
+            {messages && messages.map((message) => (
               <div
                 key={message.id}
                 className={`chat-message ${
@@ -113,7 +107,7 @@ const Chat = ({ match, players, currentPlayer }) => {
                     className="message-username"
                     style={{ color: getPlayerColor(message.player.id) }}
                   >
-                    {message.player.user.username}
+                    {message.player.name}
                   </span>
                   <p>{message.content}</p>
                 </div>

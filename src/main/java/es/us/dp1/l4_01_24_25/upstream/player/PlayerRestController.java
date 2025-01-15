@@ -1,7 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,17 +43,17 @@ public class PlayerRestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Player>> findAllJugadors() {
+    public ResponseEntity<List<Player>> findAll() {
         return new ResponseEntity<>(playerService.getJugadores(), HttpStatus.OK);
     }
 
     @GetMapping("/names/{names}")
-    public ResponseEntity<List<Player>> findSomeJugadorsByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
-        return new ResponseEntity<>(playerService.getSomeJugadoresByName(names), HttpStatus.OK);
+    public ResponseEntity<List<Player>> findSomeByName (@PathVariable("names") List<String> names) throws ResourceNotFoundException {
+        return new ResponseEntity<>(playerService.getSomeByName(names), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Player> findJugadorById(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+    public ResponseEntity<Player> findById (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
         Player p = playerService.getById(id);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
@@ -63,12 +62,12 @@ public class PlayerRestController {
     }
 
     @GetMapping("/match/{id}")
-    public ResponseEntity<List<Player>> findJugadoresByPartidaId(@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+    public ResponseEntity<List<Player>> findPlayersByMatchId (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
         return new ResponseEntity<>(playerService.getPlayersByMatch(id), HttpStatus.OK);
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<Player> findJugadorByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
+    public ResponseEntity<Player> findByName (@PathVariable("name")  String name) throws ResourceNotFoundException {
         Player p = playerService.getByName(name);
         if (p == null)
             return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
@@ -76,43 +75,13 @@ public class PlayerRestController {
             return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
-
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteAllJugadors() {
-        playerService.deleteAllJugadores();
-    }
-
-    @DeleteMapping(value = "/ids/{ids}")
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<Object> deleteSomeById(@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
-		List<Integer> idsJugadorsNoBorradas = new LinkedList<>();
-        Integer numJugadorsEncontradas = 0;
-        for (Integer id : ids) {
-            RestPreconditions.checkNotNull(playerService.getById(id), "Jugador", "ID", id);
-		if (playerService.getById(id) != null) {
-            numJugadorsEncontradas++;
-		} else
-            idsJugadorsNoBorradas.add(id);
-        }
-        if (numJugadorsEncontradas == ids.size()) {
-            playerService.deleteSomeById(ids);
-            return new ResponseEntity<>(new MessageResponse("Jugadors borradas"), HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>(idsJugadorsNoBorradas, HttpStatus.NOT_FOUND);
-            // new ErrorMessage(422, new Date(), "La Jugador no pudo ser borrada", "Probablemente no existiese")
-        }
-        
-	}
-
     @DeleteMapping(value = "/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Object> deleteById(@PathVariable("id") Integer id) throws ErrorMessage {
 		RestPreconditions.checkNotNull(playerService.getById(id), "Jugador", "ID", id);
 		if (playerService.getById(id) != null) {
-			playerService.deleteJugadorById(id);
-			return new ResponseEntity<>(new MessageResponse("Jugador borrada"), HttpStatus.OK);
+			playerService.deleteById(id);
+			return new ResponseEntity<>(new MessageResponse("Jugador borrada"), HttpStatus.NO_CONTENT);
 		} else
 			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
             "La Jugador no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
@@ -120,16 +89,16 @@ public class PlayerRestController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<Player> updateJugadorById(@PathVariable("id") Integer idToUpdate, 
+    public ResponseEntity<Player> updateById (@PathVariable("id") Integer idToUpdate, 
     @RequestBody @Valid Player jugadorNueva) {
         RestPreconditions.checkNotNull(playerService.getById(idToUpdate), "Jugador", "ID", idToUpdate);
-        return new ResponseEntity<>(playerService.updateJugadorById(jugadorNueva,idToUpdate), HttpStatus.OK);
+        return new ResponseEntity<>(playerService.updateById(jugadorNueva,idToUpdate), HttpStatus.OK);
     }
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Player> createJugador(@RequestBody @Valid Player jugador) throws DataAccessException{
+    public ResponseEntity<Player> create(@RequestBody @Valid Player jugador) throws DataAccessException{
         return new ResponseEntity<>(playerService.savePlayer(jugador), HttpStatus.CREATED);
     }
 

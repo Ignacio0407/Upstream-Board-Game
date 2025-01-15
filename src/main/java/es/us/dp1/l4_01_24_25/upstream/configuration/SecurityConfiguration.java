@@ -54,7 +54,7 @@ public class SecurityConfiguration {
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/plan")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/users/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/usersachievements/unlockrules/**")).permitAll()
-                .requestMatchers(AntPathRequestMatcher.antMatcher("/ws-upstream/**")).authenticated() // Asegúrate de que esta línea esté presente
+                .requestMatchers(AntPathRequestMatcher.antMatcher("/ws-upstream/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/local/ws-upstream/**")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).permitAll()
