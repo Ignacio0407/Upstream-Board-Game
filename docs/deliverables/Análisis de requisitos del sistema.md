@@ -131,10 +131,10 @@ Como usuario quiero que el sistema me permita listar logros, independientemente 
 
 ![](/docs/mockups/Mockup%20Listar%20Logros.png)
 
- ### HU-016: Listar logros
+ ### HU-016: Listar logros admin
 Como administrador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
 
-![](/docs/mockups/Mockup%20Listar%20Logros.png)
+![](/docs/mockups/Mockup%20Admin%20Listar%20Logros.png)
 
  ### HU-017: Crear logros
 Como administrador quiero que el sistema me permita crear logros, añadiendo valores a cada campo.
@@ -192,7 +192,7 @@ Como administrador y usuario quiero que el sistema me permita listar todas las p
  ### HU-029: Colocar losetas
 Como jugador dentro de una partida iniciada, quiero poder poner losetas en el tablero cuando sea mi turno.
 
-![](/docs/mockups/Mockup%20Partida.jpg)
+![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
 
  ### HU-030: Mover fichas de salmón
 Como jugador dentro de una partida iniciada, quiero poder mover mis salmones, ya sea saltando o nadando.
