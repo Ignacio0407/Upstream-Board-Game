@@ -56,123 +56,140 @@ Jugador : Una vez registrados y logueados, los jugadores podrán unirse, crear, 
 
 Administradores: Los administradores, tras registrarse y loguearse, podrán realizar las mismas acciones que los jugadores además de tener la capacidad de crear logros, listar jugadores, listar las partidas jugadas y visualizar los desarrolladores del proyecto. 
 
-## Historias de Usuario -> Visual, lo que puede hacer el usuario.
+## Historias de Usuario
 
- ### HU-(ISSUE#65): Iniciar sesión ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/65])
-Como usuario quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas. (HU implementada con el proyecto base).
+ ### HU-001: Iniciar sesión
+Como usuario quiero que el sistema me permita iniciar sesión para que guarde mis datos y me permita poder jugar partidas.
 
 ![](/docs/mockups/Mockup%20Inicio%20de%20Sesion.png)
 
- ### HU-(ISSUE#70): Registrarse ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/70])
-Como usuario quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión posteriormente. (HU implementada con el proyecto base).
+ ### HU-002: Registrarse
+Como usuario quiero que el sistema me permita registrarme, guardando mis datos para permitirme iniciar sesión posteriormente.
 
 ![](/docs/mockups/Mockup%20Registrarse.png)
 
- ### HU-(ISSUE#62): Jugar partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/62])
-Como jugador quiero que el sistema me permita jugar partidas, bien sea creándolas o uniéndome a ellas.
-![](/docs/mockups/Mockup%20Pantalla%20Inicial.png)
+ ### HU-003: Crear partidas como usuario
+Como usuario quiero que el sistema me permita crear partidas para que otros jugadores se unan, asignándole un nombre y una contraseña, añadiéndose a la lista de partidas disponibles.
 
- ### HU-(ISSUE#66): Listar logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/66])
-Como jugador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
-![](/docs/mockups//Mockup%20Listar%20Logros.png)
-
- ### HU-(ISSUE#37): Listar y crear logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/37])
-Como administrador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales, y crear logros, añadiendo los valores que quiera a cada campo, estando así 
-disponible para todos los jugadores y administradores.
-![](/docs/mockups/Mockup%20Admin%20Logros.png)
-
- ### HU-(ISSUE#37): Modificar y eliminar logros ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/37])
-Como administrador quiero que el sistema me permita modificar logros, ajustando cada parámetro del logro a mi gusto, y 
-eliminar logros, borrándolos de la base de datos, haciendo así que el logro deje de estar disponible para el resto de 
-jugadores y administradores.
-![](/docs/mockups/Mockup%20Admin%20Logros.png)
-
- ### HU-(ISSUE#67): Listar usuarios ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/67])
-Como administrador quiero que el sistema me permita listar todos los usuarios del juego registrados además de ver 
-sus nombres y sus roles. (HU implementada con el proyecto base).
-![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
-
- ### HU-(ISSUE#68): Crear un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
-Como administrador quiero que el sistema me permita crear un nuevo usuario, especificando su nombre, contraseña
-y rol, eligiendo entre jugador o administrador. (HU implementada con el proyecto base).
-![](/docs/mockups/Mockup%20Crear%20Usuarios.png)
-
- ### HU-(ISSUE#68): Modificar y eliminar un usuario ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/68])
-Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol, y eliminar usuarios, borrándolos de la base de datos. (HU implementada con el proyecto base).
-![](/docs/mockups/Mockup%20Listar%20Usuarios.png)
-
- ### HU-(ISSUE#69): Listar desarrolladores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/69])
-Como administrador y usuario quiero que el sistema me permita listar todas las personas que han participado en el desarrollo
-del juego, junto con información básica de cada uno de ellos. (HU implementada con el proyecto base).
-![](/docs/mockups/Mockup%20Listar%20Desarrolladores.png)
-
- ### HU-(ISSUE#71): Crear una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/71])
-Como usuario y administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignandole un nombre y una contraseña, añadiendose a la lista de partidas disponibles.
 ![](/docs/mockups/Mockup%20Crear%20Partida.png)
 
- ### HU-(ISSUE#72): Listar y unirse a partidas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/72])
-Como usuario y administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
-![](/docs/mockups/Mockup%20LIstar%20Partidas.png)
+ ### HU-004: Crear partidas como administrador
+Como administrador quiero que el sistema me permita crear una partida para que otros jugadores se unan, asignándole un nombre y una contraseña, añadiéndose a la lista de partidas disponibles.
 
- ### HU-(ISSUE#329): Usar barrra de búsqueda ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/329])
- Como usuario quiero btener una barra de búsqueda en los listados de datos.
- ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ ### HU-005: Listar partidas como usuario
+Como usuario quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
 
- ### HU-(ISSUE#160): Buscar partida por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/160])
- Como usuario quiero buscar una partida por su nombre.
- ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
- 
-  ### HU-(ISSUE#331): Buscar logro por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/331])
- Como usuario quiero buscar un logro disponible por su nombre.
- ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
- 
- ### HU-(ISSUE#330): Buscar partidas por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/330])
- Como usuario quiero buscar varias partidas por sus nombres.
- ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
- 
- ### HU-(ISSUE#332): Buscar logros por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/332])
- Como usuario quiero buscar varias logros por sus nombres.
- ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ ### HU-006: Listar partidas como administrador
+Como administrador quiero que el sistema me permita listar las diferentes partidas disponibles para unirme a ellas.
 
- ### HU-(ISSUE#152): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/152])
- Como jugador dentro de una partida quiero poder colocar una casilla en el tablero.
- ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
- 
-  ### HU-(ISSUE#328): Mover salmones durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/328])
- Como jugador dentro de una partida quiero mover los salmones.
- ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
+ ### HU-007: Unirse a partidas como usuario
+Como usuario quiero que el sistema me permita unirme partidas para jugar con otros jugadores.
 
- ### HU-(ISSUE#162): Elegir color ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/162])
- Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
- ![](/docs/mockups/Mockup%20Elegir%20Color.png)
+ ### HU-008: Unirse a partidas como administrador
+Como administrador quiero que el sistema me permita unirme partidas para jugar con otros jugadores.
 
- ### HU-(ISSUE#163): Ver jugadores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/163])
- Como jugador dentro de una lobby, quiero poder ver quién está en la partida conmigo.
- ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
- 
- ### HU-(ISSUE#164): Iniciar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/164])
- Como jugador dentro de una lobby, quiero poder iniciar la partida.
- ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+ ### HU-009: Buscar partida por nombre
+Como usuario quiero buscar partidas disponibles por su nombre.
 
- ### HU-(ISSUE#165): Abandonar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/165])
- Como jugador dentro de una lobby, quiero poder abandonar la lobby.
- ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+ ### HU-010: Elegir color
+Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
 
- ### HU-(ISSUE#166): Ver logros desbloqueados ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/166])
- Como usuario, quiero poder diferenciar los logros que tengo desbloqueados del resto de logros.
- ![](/docs/mockups/Mockup%20Listar%20Logros%20Desbloqueados.png)
+ ### HU-011: Ver jugadores
+Como jugador dentro de una lobby, quiero poder ver quién está en la partida conmigo.
 
- ### HU-(ISSUE#167): Ver las reglas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/167])
- Como usuario, quiero consultar las reglas del juego. 
- ![](/docs/mockups/Mockup%20Ver%20Reglas.png)
+ ### HU-012: Iniciar partida
+Como jugador dentro de una lobby, quiero poder iniciar la partida.
 
- ### HU-(ISSUE#168): Borrar una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/168])
- Como administrador, quiero poder borrar partidas de la lista. (HU implementada con el proyecto base).
- ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
- 
- ### HU-(ISSUE#334): Chatear con los jugadores durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/334])
- Como jugador, quiero poder chatear con el resto de jugadores que estén jugando conmigo  una partida
- ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
+ ### HU-013: Abandonar partida
+Como jugador dentro de una lobby, quiero poder abandonar la lobby.
+
+ ### HU-014: Borrar una partida
+Como administrador, quiero poder borrar partidas de la lista.
+
+ ### HU-015: Listar logros
+Como usuario quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
+
+ ### HU-016: Listar logros
+Como administrador quiero que el sistema me permita listar logros, independientemente de si se han conseguido o no, ya sean personales (obtenidos por mí) o globales.
+
+ ### HU-017: Crear logros
+Como administrador quiero que el sistema me permita crear logros, añadiendo valores a cada campo.
+
+ ### HU-018: Modificar logros
+Como administrador quiero que el sistema me permita modificar logros, ajustando cada parámetro del logro a mi gusto.
+
+ ### HU-019: Eliminar logros
+Como administrador quiero que el sistema me permita modificar eliminar logros, borrándolos de la base de datos.
+
+ ### HU-020: Ver logros desbloqueados
+Como usuario, quiero poder diferenciar los logros que tengo desbloqueados del resto de logros.
+
+ ### HU-021: Ver las reglas
+Como usuario, quiero consultar las reglas del juego.
+
+ ### HU-022: Listar usuarios
+Como administrador quiero que el sistema me permita listar todos los usuarios del juego registrados además de ver sus nombres y roles.
+
+ ### HU-023: Crear un usuario
+Como administrador quiero que el sistema me permita crear un nuevo usuario, especificando su nombre, contraseña y rol, eligiendo entre jugador o administrador.
+
+ ### HU-024: Modificar perfil como usuario
+Como usuario quiero que el sistema me permita modificar mis datos de usuario, ya sea mi nombre o contraseña.
+
+ ### HU-025: Modificar un usuario como administrador
+Como administrador quiero que el sistema me permita modificar usuarios, ya sea su nombre, contraseña o rol.
+
+ ### HU-026: Eliminar un usuario
+Como administrador quiero que el sistema me permita eliminar usuarios, borrándolos de la base de datos.
+
+ ### HU-027: Listar desarrolladores
+Como administrador y usuario quiero que el sistema me permita listar todas las personas que han participado en el desarrollo del juego, junto con información básica de cada uno.
+
+ ### HU-028: Elegir color
+Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
+
+ ### HU-029: Colocar losetas
+Como jugador dentro de una partida iniciada, quiero poder poner losetas en el tablero cuando sea mi turno.
+
+ ### HU-030: Mover fichas de salmón
+Como jugador dentro de una partida iniciada, quiero poder mover mis salmones, ya sea saltando o nadando.
+
+ ### HU-031: Recuento de puntos
+Como jugador en una partida iniciada quiero que se recuenten los puntos de todos los jugadores al terminar para designar un ganador.
+
+ ### HU-032: Gestión de turnos
+Como jugador quiero que termine mi turno cuando gaste mis 5 puntos de movimiento.
+
+ ### HU-033: Finalizar partida
+Como jugador quiero que la partida que estoy jugando finalice cuando todos los salmones supervivientes estén en la loseta de desove.
+
+ ### HU-034: Modificar salmones de una ficha
+Como jugador quiero que cuando, en una partida, una amenaza se coma uno de mis salmones de una ficha de dos, mi ficha de dos salmones se convierta en una de uno.
+
+ ### HU-035: Eliminar ficha de salmón
+Como jugador quiero que cuando, en una partida, una amenaza se coma el salmón de una de mis fichas de un salmón, la ficha quede eliminada de la partida.
+
+ ### HU-036: Rotar losetas
+Como jugador quiero poder rotar las losetas de juego antes de colocarlas en el tablero para poder planear mi estrategia.
+
+ ### HU-037: Puntuación final
+Como jugador quiero poder ver mi puntuación final para saber quién ha resultado ganador de la partida.
+
+ ### HU-038: Entrar al desove
+Como jugador quiero poder mover mis fichas de salmón a las losetas de desove para poder conseguir puntos al final de la partida.
+
+ ### HU-039: Escribir por chat
+Como jugador quiero poder escribir y enviar mensajes a través del chat para comunicarme con otros jugadores.
+
+ ### HU-040: Número de partidas por usuario
+Como usuario quiero poder ver el número de partidas que he jugado para poderme comparar con mis amigos.
+
+ ### HU-041: Número de jugadores por partida
+Como jugador quiero poder ver cuántos jugadores hay conmigo en una partida para saber contra quién compito.
+
+ ### HU-042: Estadísticas de usuario
+Como jugador quiero poder ver mis estadísticas personales para ver mi estilo de juego.
+
 
 ## Diagrama conceptual del sistema
 
