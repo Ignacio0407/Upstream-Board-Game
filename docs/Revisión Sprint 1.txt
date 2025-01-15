@@ -1,5 +1,0 @@
-PartidaSalmon con PartidaJugador
-Relaciones 1 a 1 quitar, quitar coordenada.
-Mirar usuaio jugador, por guardar contraseña.
-Quitar PartidaSalmon de PartidaCasilla y poner coordenada solo
-Ir implementando el juego poco a poco
