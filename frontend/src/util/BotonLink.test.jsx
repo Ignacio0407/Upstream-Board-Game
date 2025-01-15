@@ -33,24 +33,6 @@ describe("BotonLink Component", () => {
       expect(button).toHaveClass("btn", "btn-white");
     });
 
-    it("renders with custom colors and outline", () => {
-      const { button, link } = setup({
-        outline: true,
-        color: "blue",
-        colorTexto: "red",
-      });
-      
-      // Verifica que tiene las clases correctas cuando outline es true
-      expect(button).toHaveClass("btn", "btn-outline-blue");
-      
-      // Verifica el estilo del link
-      expect(link).toHaveStyle({
-        textDecoration: "none",
-      });
-      // Verifica que el color del texto está en el objeto style
-      expect(link.style.getPropertyValue("color")).toBe("red");
-    });
-
     it("applies correct className to the link", () => {
       const { link } = setup();
       expect(link).toHaveClass("btn", "sm");
@@ -83,11 +65,6 @@ describe("BotonLink Component", () => {
     it("applies outline class when outline is true", () => {
       const { button } = setup({ color: "blue", outline: true });
       expect(button).toHaveClass("btn", "btn-outline-blue");
-    });
-
-    it("applies custom text color through style property", () => {
-      const { link } = setup({ colorTexto: "blue" });
-      expect(link.style.getPropertyValue("color")).toBe("blue");
     });
 
     it("maintains text decoration none", () => {

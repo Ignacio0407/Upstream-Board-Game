@@ -83,8 +83,7 @@ public class SalmonMatchController {
         return ResponseEntity.noContent().build();
     }
 
-    @SuppressWarnings("unused")
-    private void throwExceptions( MatchTile toTravel, Integer salmonsInToTravel, Coordinate myCoordinate, Coordinate newCoordinate, Player player) {
+    private void throwExceptions(Coordinate myCoordinate, Coordinate newCoordinate, Player player) {
         // if (toTravel.getCapacity() < salmonsInToTravel + 1) throw new NoCapacityException("No queda hueco en esta casilla");
  
          if(myCoordinate != null && myCoordinate.equals(newCoordinate)) throw new NotValidMoveException("No puedes moverte en la misma casilla");
@@ -182,10 +181,9 @@ public class SalmonMatchController {
         String toTravelType = toTravel.getTile().getType().getType();
         Coordinate newCoordinate2 = null;
         MatchTile toTravel2 = null;
-        Integer salmonsInToTravel = salmonMatchService.getAllFromMatch(match.getId()).stream().filter(s -> s.getCoordinate() != null && s.getCoordinate().equals(newCoordinate)).toList().size();
         Integer energyUsed = 1;
 
-        throwExceptions(toTravel, salmonsInToTravel, myCoordinate, newCoordinate, player);
+        throwExceptions(myCoordinate, newCoordinate, player);
 
         // Si salgo desde el mar.
         if (myCoordinate == null) {
@@ -227,7 +225,6 @@ public class SalmonMatchController {
             if(List.of(0, 2).contains(myCoordinate.x()) && Math.abs(distancia.x()) == 1 && Math.abs(distancia.y()) == 1) throw new NotValidMoveException("Este movimiento no está permitido");    
 
             if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber())) {
-                if (toTravel.getCapacity().equals(toTravel.getSalmonsNumber())) {
                     if (null != myCoordinate.x()) {
                         // Si estoy en el centro
                         if (newCoordinate.x().equals(myCoordinate.x())) { // Si subo hacia arriba
@@ -273,7 +270,6 @@ public class SalmonMatchController {
                     return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
                 }
             }
-        }
     }
 
             if(toTravelType.equals("AGUILA")) {

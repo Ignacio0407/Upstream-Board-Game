@@ -235,6 +235,67 @@ Como jugador quiero poder ver cuántos jugadores hay conmigo en una partida para
  ### HU-042: Estadísticas de usuario
 Como jugador quiero poder ver mis estadísticas personales para ver mi estilo de juego.
 
+ ### HU-(ISSUE#329): Usar barrra de búsqueda ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/329])
+ Como usuario quiero btener una barra de búsqueda en los listados de datos.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+
+ ### HU-(ISSUE#160): Buscar partida por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/160])
+ Como usuario quiero buscar una partida por su nombre.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+  ### HU-(ISSUE#331): Buscar logro por nombre ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/331])
+ Como usuario quiero buscar un logro disponible por su nombre.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+ ### HU-(ISSUE#330): Buscar partidas por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/330])
+ Como usuario quiero buscar varias partidas por sus nombres.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+ 
+ ### HU-(ISSUE#332): Buscar logros por sus nombres ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/332])
+ Como usuario quiero buscar varias logros por sus nombres.
+ ![](/docs/mockups/Mockup%20Buscar%20Partida%20Por%20Nombre.png)
+
+ ### HU-(ISSUE#152): Colocar casilla ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/152])
+ Como jugador dentro de una partida quiero poder colocar una casilla en el tablero.
+ ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
+ 
+  ### HU-(ISSUE#328): Mover salmones durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/328])
+ Como jugador dentro de una partida quiero mover los salmones.
+ ![](/docs/mockups/Mockup%20Colocar%20Casilla.png)
+
+ ### HU-(ISSUE#162): Elegir color ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/162])
+ Como jugador dentro de una lobby, quiero poder elegir el color de mi salmón.
+ ![](/docs/mockups/Mockup%20Elegir%20Color.png)
+
+ ### HU-(ISSUE#163): Ver jugadores ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/163])
+ Como jugador dentro de una lobby, quiero poder ver quién está en la partida conmigo.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+ 
+ ### HU-(ISSUE#164): Iniciar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/164])
+ Como jugador dentro de una lobby, quiero poder iniciar la partida.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+
+ ### HU-(ISSUE#165): Abandonar partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/165])
+ Como jugador dentro de una lobby, quiero poder abandonar la lobby.
+ ![](/docs/mockups/Mockup%20Listar%20Jugadores%20e%20Iniciar%20o%20cancelar%20partida..png)
+
+ ### HU-(ISSUE#166): Ver logros desbloqueados ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/166])
+ Como usuario, quiero poder diferenciar los logros que tengo desbloqueados del resto de logros.
+ ![](/docs/mockups/Mockup%20Listar%20Logros%20Desbloqueados.png)
+
+ ### HU-(ISSUE#167): Ver las reglas ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/167])
+ Como usuario, quiero consultar las reglas del juego. 
+ ![](/docs/mockups/Mockup%20Ver%20Reglas.png)
+
+ ### HU-(ISSUE#168): Borrar una partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/168])
+ Como administrador, quiero poder borrar partidas de la lista. (HU implementada con el proyecto base).
+ ![](/docs/mockups/Mockup%20Borrar%20Partida.png)
+ 
+ ### HU-(ISSUE#334): Chatear con los jugadores durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/334])
+ Como jugador, quiero poder chatear con el resto de jugadores que estén jugando conmigo  una partida
+ 
+ ### HU-(ISSUE#338): Rotar casillas durante la partida ([https://github.com/gii-is-DP1/DP1-2024-2025--l4-01/issues/338])
+ Como jugador, quiero poder rotar las casillas para colocarlas donde quiera
 
 ## Diagrama conceptual del sistema
 
