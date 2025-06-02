@@ -73,12 +73,11 @@ public class Match extends NamedEntity {
 		
 	}
 
-	public Integer getPlayersNum() {
+	public Integer getPlayersNumber() {
         return playersNum;
     }
-
-    // Método setter para el número de jugadores
-    public void setNumJugadores(Integer numjugadores) {
+	
+    public void setPlayersNumber(Integer numjugadores) {
         this.playersNum = numjugadores;
     }
 

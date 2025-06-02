@@ -1,8 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
 import java.util.Comparator;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,22 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ErrorMessage;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
@@ -36,134 +30,48 @@ import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
-import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/matches")
-@SuppressWarnings("SizeReplaceableByIsEmpty")
-public class MatchRestController {
+public class MatchRestController extends BaseRestController<Match, Integer>{
     
-    private final MatchService matchService;
-    private final PlayerService playerService;
-    private final UserService userService;
-    private final MatchTileService matchTileService;
-    private final SalmonMatchService salmonMatchService;
-    private final UserAchievementService userAchievementService;
+    MatchService matchService;
+    PlayerService playerService;
+    UserService userService;
+    MatchTileService matchTileService;
+    SalmonMatchService salmonMatchService;
+    UserAchievementService userAchievementService;
 
     @Autowired
-    public MatchRestController(MatchService partidaService, PlayerService jugadorService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms, UserAchievementService userAchievementService) {
-        this.matchService = partidaService;
-        this.playerService = jugadorService;
+    public MatchRestController(MatchService matchService, PlayerService playerService, UserService userService, MatchTileService matchTileService, SalmonMatchService sms, UserAchievementService userAchievementService) {
+        super(matchService);
+        this.playerService = playerService;
         this.userService = userService;
         this.matchTileService = matchTileService;
         this.salmonMatchService = sms;
         this.userAchievementService = userAchievementService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Match>> findAllPartidas() {
-        return new ResponseEntity<>(matchService.getAll(), HttpStatus.OK);
-    }
-
     // TODO
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Match>> findPartidasFromUser() {
+    public ResponseEntity<List<Match>> findMatchesFromUser() {
         return null;
-    }
-
-    @GetMapping("/names/{names}")
-    public ResponseEntity<List<Match>> findSomeByName(@PathVariable("names") List<String> names) throws ResourceNotFoundException {
-        return new ResponseEntity<>(matchService.getSomeByName(names), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Match> findById (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
-        Match p = matchService.getById(id);
-        if (p == null)
-            return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
-        else
-            return new ResponseEntity<>(p, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/players")
     public ResponseEntity<List<Player>> findPlayersFromGame(@PathVariable("id") Integer id) throws ResourceNotFoundException {
-        List<Player> l = matchService.getPlayersFromGame(id);
+        List<Player> l = matchService.findPlayersFromGame(id);
         if(l == null) {
             return new ResponseEntity<>(List.of(), HttpStatus.NOT_FOUND);
         } else return new ResponseEntity<>(l, HttpStatus.OK);
-    }
-
-    @GetMapping("/name/{name}")
-    public ResponseEntity<Match> findByName(@PathVariable("name")  String name) throws ResourceNotFoundException {
-        Match p = matchService.getByName(name);
-        if (p == null)
-            return new ResponseEntity<>(p, HttpStatus.NOT_FOUND);
-        else
-            return new ResponseEntity<>(p, HttpStatus.OK);
-    }
-
-
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-    public void deleteAll() {
-        matchService.deleteAll();
-    }
-
-    @DeleteMapping(value = "{id}")
-	@ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deleteById (@PathVariable("id") Integer id) throws ErrorMessage {
-		Match p = matchService.getById(id);
-        RestPreconditions.checkNotNull(p, "Partida", "id", id);
-		if (p != null) {
-			matchService.deletePartidaById(id);
-			return new ResponseEntity<>(new MessageResponse("Partida borrada"), HttpStatus.NO_CONTENT);
-		} else
-			return new ResponseEntity<>(new ErrorMessage(422, new Date(), 
-            "La Partida no pudo ser borrada", "Probablemente no existiese"), HttpStatus.NOT_FOUND) ;
-	}
-
-    @DeleteMapping(value = "/ids/{ids}")
-	@ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("ADMIN")
-	public ResponseEntity<Object> deleteSomeById (@PathVariable("ids") List<Integer> ids) throws ErrorMessage {
-		List<Integer> idsPartidasNoBorradas = new LinkedList<>();
-        Integer numPartidasEncontradas = 0;
-        for (Integer id : ids) {
-            RestPreconditions.checkNotNull(matchService.getById(id), "Partida", "ID", id);
-		if (matchService.getById(id) != null) {
-            numPartidasEncontradas++;
-		} else
-            idsPartidasNoBorradas.add(id);
-        }
-        if (numPartidasEncontradas == ids.size()) {
-            matchService.deleteSomeById(ids);
-            return new ResponseEntity<>(new MessageResponse("Partidas borradas"), HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>(idsPartidasNoBorradas, HttpStatus.NOT_FOUND);
-            // new ErrorMessage(422, new Date(), "La Partida no pudo ser borrada", "Probablemente no existiese")
-        }
-        
-	}
-
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Match> updateById(@PathVariable("id") Integer idToUpdate, @RequestBody @Valid Match partidaNueva) {
-        try {
-            RestPreconditions.checkNotNull(matchService.getById(idToUpdate), "Partida", "ID", idToUpdate);
-            return new ResponseEntity<>(matchService.updateById(partidaNueva, idToUpdate), HttpStatus.OK);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }    
+    }   
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Match> create(@RequestBody @Valid Match partida) {
+    @Override
+    public ResponseEntity<Match> save(@RequestBody @Valid Match partida) {
         try {
             if (partida == null || partida.getName() == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -179,7 +87,7 @@ public class MatchRestController {
 
     @PatchMapping("/{matchId}/ronda")
     public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match match = matchService.getById(matchId);
+        Match match = matchService.findById(matchId);
         if (match == null) {
             throw new ResourceNotFoundException("Partida no encontrada", "id", matchId.toString());
         }
@@ -189,7 +97,7 @@ public class MatchRestController {
 
     @PostMapping("/matchCreator/{userId}")
     public ResponseEntity<Match> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
-    User u = userService.findUser(userId);
+    User u = userService.findById(userId);
     if (u == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     String name = requestBody.getOrDefault("name", "");
     String password = requestBody.getOrDefault("password", "");
@@ -211,18 +119,18 @@ public class MatchRestController {
 
 @PatchMapping("/{matchId}/changephase/{playerId}")
 public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
-    Match match = matchService.getById(matchId);
+    Match match = matchService.findById(matchId);
     if (match == null) throw new ResourceNotFoundException("No se ha podido encontrar la partida");
-    Player player = playerService.getById(playerId);
+    Player player = playerService.findById(playerId);
     Phase phase = match.getPhase();
     List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
-    List<Player> players = playerService.getAlivePlayersByMatch(matchId).stream()
+    List<Player> players = playerService.findAlivePlayersByMatch(matchId).stream()
     .filter(p -> !salmonMatchService.getAllFromPlayerInRiver(p.getId()).isEmpty() || !salmonMatchService.getAllFromPlayerInSea(p.getId()).isEmpty()).toList();
     Integer round = match.getRound();
 
     if(mtNoC.size() == 0 && phase == Phase.CASILLAS){
         players.stream().forEach(p -> p.setEnergy(5));
-        for(Player p : players) playerService.savePlayer(p);
+        for(Player p : players) playerService.save(p);
         match.setPhase(Phase.MOVIENDO);
         match.setActualPlayer(match.getInitialPlayer());
     }
@@ -240,7 +148,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
                 salmonMatchService.save(s);});
             }
             players.stream().forEach(p -> p.setEnergy(5));
-            for(Player p : players) playerService.savePlayer(p);
+            for(Player p : players) playerService.save(p);
             match.setRound(round+1);
         }
     }
@@ -248,7 +156,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
         if (rds.contains(mtNoC.size())) {
             players.stream().forEach(p -> p.setEnergy(5));
-            for(Player p : players) playerService.savePlayer(p);
+            for(Player p : players) playerService.save(p);
             match.setPhase(Phase.MOVIENDO);
             match.setActualPlayer(match.getInitialPlayer());
         }
@@ -285,27 +193,27 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match match = matchService.getById(matchId);
+        Match match = matchService.findById(matchId);
         if (match == null) throw new ResourceNotFoundException("Ha habido un problema encontrando la partida");
-        List<Player> player = playerService.getPlayersByMatch(matchId);
+        List<Player> player = playerService.findPlayersByMatch(matchId);
 
         match.setState(State.EN_CURSO);
         match.setActualPlayer(player.get(0));
         match.setInitialPlayer(player.get(0));
-        match.setNumJugadores(player.size());
+        match.setPlayersNumber(player.size());
         matchService.save(match);
         return new ResponseEntity<>(match, HttpStatus.OK);
     }
 
     private ResponseEntity<Match> endRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        Match partida = matchService.getById(matchId);
+        Match partida = matchService.findById(matchId);
         List<MatchTile> mt = matchTileService.findByMatchId(matchId);
         List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
         List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(matchId);
         List<SalmonMatch> salmonMatches = salmonMatchService.getAllFromMatch(matchId);
         Integer round = partida.getRound();
         Phase phase = partida.getPhase();
-        List<Player> players = playerService.getPlayersByMatch(matchId);
+        List<Player> players = playerService.findPlayersByMatch(matchId);
         if(round == 2){ 
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
@@ -327,7 +235,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             } 
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y() == (round - 8)){
-                    matchTileService.deleteMatchTile(m.getId());
+                    matchTileService.delete(m.getId());
                 }
             }
             for(Player p : players) {
@@ -356,7 +264,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
 
             for(MatchTile m:mt) {
                 if(m.getCoordinate().y()==0){
-                    matchTileService.deleteMatchTile(m.getId());
+                    matchTileService.delete(m.getId());
                     //m.setCoordinate(new Coordinate(m.getCoordinate().x(), 99));
                 }
                 else{
@@ -383,8 +291,8 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
 
     @PatchMapping("/finalscore/{id}")
     public ResponseEntity<Match> finalScore(@PathVariable Integer id) {
-        List<Player> players = playerService.getPlayersByMatch(id);
-        Match match = matchService.getById(id);
+        List<Player> players = playerService.findPlayersByMatch(id);
+        Match match = matchService.findById(id);
         
         if (match.getFinalScoreCalculated() == true) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(match);
@@ -401,8 +309,8 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
             totalPoints = salmonPoints + filePoints;
             p.setPoints(totalPoints);
             u.setTotalpoints(u.getTotalpoints() + totalPoints);
-            playerService.savePlayer(p);
-            userService.saveUser(u);
+            playerService.save(p);
+            userService.save(u);
             }
             userAchievementService.checkAndUnlockAchievements(u.getId());
         }
@@ -410,7 +318,7 @@ public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchI
         if(winner.isPresent()) {
             User winnerUser = winner.get().getUserPlayer();
             winnerUser.setVictories(winnerUser.getVictories() + 1);
-            userService.saveUser(winnerUser);
+            userService.save(winnerUser);
         }
         match.setFinalScoreCalculated(true);
         matchService.save(match);

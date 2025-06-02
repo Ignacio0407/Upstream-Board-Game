@@ -3,79 +3,38 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
 
 @Service
-public class PlayerService {
+public class PlayerService extends BaseService<Player,Integer>{
         
     PlayerRepository playerRepository;
     SalmonMatchRepository salmonMatchRepository;
 
     public PlayerService(PlayerRepository playerRepository, SalmonMatchRepository salmonMatchRepository) {
-        this.playerRepository = playerRepository;
+        super(playerRepository);
         this.salmonMatchRepository = salmonMatchRepository;
     }
-    
-    @Transactional(readOnly = true)
-    public List<Player> getJugadores() {
-        return playerRepository.findAll();
-    }
 
     @Transactional(readOnly = true)
-    public Player getById(Integer id) {
-        Optional <Player> op = playerRepository.findById(id);
-        return optionalToValueOrNull(op);
-    }
-
-    @Transactional(readOnly = true)
-    public Player getByName(String name) {
-        Optional <Player> op = Optional.ofNullable(playerRepository.findByName(name));
-        return optionalToValueOrNull(op);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Player> getSomeByName (List<String> names) {
-        List<Player> Jugadores = new LinkedList<>();
-        names.stream().forEach(name -> Jugadores.add(getByName(name)));
-        return new ArrayList<>(Jugadores);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Player> getPlayersByMatch(Integer id) {
+    public List<Player> findPlayersByMatch(Integer id) {
         List<Player> jugadores = playerRepository.findPlayersByMatch(id);
-
         return jugadores.isEmpty()? new ArrayList<>() : jugadores;
-
     }
 
     @Transactional(readOnly = true)
-    public List<Player> getAlivePlayersByMatch(Integer id) {
+    public List<Player> findAlivePlayersByMatch(Integer id) {
         List<Player> jugadores = playerRepository.findAlivePlayersByMatch(id);
         if(jugadores == null) return List.of();
         return jugadores;
-    }
-
-    private Player optionalToValueOrNull(Optional<Player> op) {
-        if (!op.isPresent()) {
-            return null;
-        }
-        return op.get();
-    }
-
-
-    @Transactional
-    public void deleteById (Integer id) {
-        getById(id);
-        playerRepository.deleteById(id);
-
     }
 
     @Transactional
@@ -86,17 +45,9 @@ public class PlayerService {
 
     @Transactional
     public Player updateById (Player JugadorNueva, Integer idtoUpdate) {
-        Player JugadorToUpdate = getById(idtoUpdate);
+        Player JugadorToUpdate = this.findById(idtoUpdate);
         return update(JugadorNueva, JugadorToUpdate);
     }
-
-
-    @Transactional
-	public Player savePlayer(Player jugador) throws DataAccessException {
-		playerRepository.save(jugador);
-		return jugador;
-	}
-
 
     @Transactional
 	public List<Player> savePlayers (List<Player> Jugadores) throws DataAccessException {
@@ -113,7 +64,7 @@ public class PlayerService {
 
     @Transactional
     public void setPlayerDead(Integer playerId) {
-        Player player = playerRepository.findById(playerId).get();
+        Player player = this.findById(playerId);
         player.setAlive(false);
         player.setEnergy(0); 
         player.setPlayerOrder(10); 
@@ -122,7 +73,7 @@ public class PlayerService {
 
     @Transactional
     public void setPlayerNoEnergy(Integer playerId) {
-        Player player = playerRepository.findById(playerId).get();
+        Player player = this.findById(playerId);
         player.setEnergy(0);
         playerRepository.save(player);
 
@@ -149,10 +100,9 @@ public class PlayerService {
 
     @Transactional
     public Boolean checkPlayerNoEnergy(Integer playerId){
-        Player player = playerRepository.findById(playerId).get();
+        Player player = this.findById(playerId);
         Boolean res = false;
         if(player.getEnergy() == 0) res = true;
         return res;
     }
-
 }

@@ -26,7 +26,7 @@ public class PlayerDeserializer extends JsonDeserializer<Player> {
         Player r = null;
         try {
             Integer jid = p.getIntValue();
-            r = this.jugadorService.getById(jid);
+            r = this.jugadorService.findById(jid);
         } catch (Exception e) {
             throw new IOException("Id not found: " + p.getIntValue());
         }

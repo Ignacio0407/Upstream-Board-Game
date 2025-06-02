@@ -34,7 +34,7 @@
         <frontend-src-dir>${project.basedir}/frontend</frontend-src-dir>
 
         <!-- ngrok configuration -->
-        <ngrok.enabled>true</ngrok.enabled>
+        <ngrok.enabled>false</ngrok.enabled>
         <ngrok.authToken>2rfuENLr97X34rWWnTQCyo5suVf_337kdYPYmLmhrxYPZCVyN</ngrok.authToken>
 
     </properties>

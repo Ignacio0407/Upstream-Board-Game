@@ -59,7 +59,7 @@ public class MessageControllerTest {
 
     private Player player;
     private Match match;
-    private MessageRequest messageRequest;
+    private MessageDTO messageRequest;
 
     @BeforeEach
     public void setUp() {
@@ -84,7 +84,7 @@ public class MessageControllerTest {
         match.setSalmonMatches(new ArrayList<>());
         player.setMatch(match);
         
-        messageRequest = new MessageRequest();
+        messageRequest = new MessageDTO();
         messageRequest.setPlayerId(1);
         messageRequest.setMatchId(1);
         messageRequest.setContent("Hello, World!");
@@ -95,9 +95,9 @@ public class MessageControllerTest {
     void shouldCreateMessageSuccessfully() throws Exception {
         Message createdMessage = new Message(player, match, "Hello, World!");
         
-        when(playerService.getById(1)).thenReturn(player);
-        when(matchService.getById(1)).thenReturn(match);
-        when(messageService.createMessage(1, 1, "Hello, World!")).thenReturn(createdMessage);
+        when(playerService.findById(1)).thenReturn(player);
+        when(matchService.findById(1)).thenReturn(match);
+        when(messageService.create(1, 1, "Hello, World!")).thenReturn(createdMessage);
         when(messageRepository.save(any(Message.class))).thenReturn(createdMessage);
         
         mockMvc.perform(post("/api/v1/messages")
@@ -109,9 +109,9 @@ public class MessageControllerTest {
 
     @Test
     void shouldFailToCreateMessageWhenServiceThrowsException() throws Exception {
-        when(playerService.getById(1)).thenReturn(player);
-        when(matchService.getById(1)).thenReturn(match);
-        when(messageService.createMessage(player.getId(), match.getId(), "Hello, World!")).thenThrow(new RuntimeException("Error"));
+        when(playerService.findById(1)).thenReturn(player);
+        when(matchService.findById(1)).thenReturn(match);
+        when(messageService.create(player.getId(), match.getId(), "Hello, World!")).thenThrow(new RuntimeException("Error"));
 
         mockMvc.perform(post("/api/v1/messages")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +144,7 @@ public class MessageControllerTest {
     void shouldGetMatchMessagesSuccessfully() throws Exception {
         List<Message> messages = List.of(new Message(player, match, "Message 1"));
         when(messageService.getMatchMessages(1)).thenReturn(messages);
-        when(matchService.getById(1)).thenReturn(new Match());
+        when(matchService.findById(1)).thenReturn(new Match());
 
         mockMvc.perform(get("/api/v1/messages/match/1"))
                 .andExpect(status().isOk()) // Esperamos que devuelva un 200 OK
@@ -154,7 +154,7 @@ public class MessageControllerTest {
     @Test
     void shouldReturnEmptyListWhenNoMessagesForMatch() throws Exception {
         when(messageService.getMatchMessages(1)).thenReturn(new ArrayList<>()); // Simulamos que no hay mensajes para la partida
-        when(matchService.getById(1)).thenReturn(new Match());
+        when(matchService.findById(1)).thenReturn(new Match());
 
         mockMvc.perform(get("/api/v1/messages/match/1"))
                 .andExpect(status().isOk()) // Esperamos que devuelva un 200 OK
@@ -174,7 +174,7 @@ public class MessageControllerTest {
     void shouldGetUserMessagesSuccessfully() throws Exception {
         List<Message> messages = List.of(new Message(player, match, "User message"));
         when(messageService.getUserMessages(1)).thenReturn(messages);
-        when(userService.findUser(1)).thenReturn(new User());
+        when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/user/1"))
                 .andExpect(status().isOk())
@@ -184,7 +184,7 @@ public class MessageControllerTest {
     @Test
     void shouldReturnEmptyListWhenNoMessagesForUser() throws Exception {
         when(messageService.getUserMessages(1)).thenReturn(new ArrayList<>());
-        when(userService.findUser(1)).thenReturn(new User());
+        when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/user/1"))
                 .andExpect(status().isOk())
@@ -210,7 +210,7 @@ public class MessageControllerTest {
         mockMvc.perform(delete("/api/v1/messages/1"))
                 .andExpect(status().isNoContent());
 
-        verify(messageService).deleteMessage(1);
+        verify(messageService).delete(1);
     }
 
     @Test
@@ -226,7 +226,7 @@ public class MessageControllerTest {
     void shouldGetUserChatsSuccessfully() throws Exception {
         List<Match> chats = List.of(match);
         when(messageService.getUserChats(1)).thenReturn(chats);
-        when(userService.findUser(1)).thenReturn(new User());
+        when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/chats/1"))
                 .andExpect(status().isOk())
@@ -236,7 +236,7 @@ public class MessageControllerTest {
     @Test
     void shouldReturnEmptyListWhenNoChatsForUser() throws Exception {
         when(messageService.getUserChats(1)).thenReturn(new ArrayList<>());
-        when(userService.findUser(1)).thenReturn(new User());
+        when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/chats/1"))
                 .andExpect(status().isOk())

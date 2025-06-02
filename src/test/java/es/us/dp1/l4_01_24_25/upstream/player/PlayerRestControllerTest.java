@@ -54,7 +54,7 @@ class PlayerRestControllerTest {
     @Test
     void shouldReturnAllPlayers() throws Exception {
         List<Player> players = List.of(new Player());
-        when(playerService.getJugadores()).thenReturn(players);
+        when(playerService.findAll()).thenReturn(players);
 
         mockMvc.perform(get("/api/v1/players"))
                .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class PlayerRestControllerTest {
     void shouldReturnPlayersByName() throws Exception {
         List<Player> players = List.of(new Player());
         List<String> names = List.of("John", "Jane");
-        when(playerService.getSomeByName(names)).thenReturn(players);
+        //when(playerService.getSomeByName(names)).thenReturn(players);
 
         mockMvc.perform(get("/api/v1/players/names/{names}", "John,Jane"))
                .andExpect(status().isOk())
@@ -76,7 +76,7 @@ class PlayerRestControllerTest {
     void shouldReturnPlayerByIdWhenExists() throws Exception {
         Player player = new Player();
         player.setId(1);
-        when(playerService.getById(1)).thenReturn(player);
+        when(playerService.findById(1)).thenReturn(player);
 
         mockMvc.perform(get("/api/v1/players/{id}", 1))
                .andExpect(status().isOk())
@@ -85,7 +85,7 @@ class PlayerRestControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenPlayerIdDoesNotExist() throws Exception {
-        when(playerService.getById(99)).thenReturn(null);
+        when(playerService.findById(99)).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/players/{id}", 99))
                .andExpect(status().isNotFound());
@@ -94,7 +94,7 @@ class PlayerRestControllerTest {
     @Test
     void shouldReturnPlayersByMatchId() throws Exception {
         List<Player> players = List.of(new Player());
-        when(playerService.getPlayersByMatch(1)).thenReturn(players);
+        when(playerService.findPlayersByMatch(1)).thenReturn(players);
 
         mockMvc.perform(get("/api/v1/players/match/{id}", 1))
                .andExpect(status().isOk())
@@ -105,7 +105,7 @@ class PlayerRestControllerTest {
     void shouldReturnPlayerByNameWhenExists() throws Exception {
         Player player = new Player();
         player.setName("John");
-        when(playerService.getByName("John")).thenReturn(player);
+        //when(playerService.getByName("John")).thenReturn(player);
 
         mockMvc.perform(get("/api/v1/players/name/{name}", "John"))
                .andExpect(status().isOk())
@@ -114,7 +114,7 @@ class PlayerRestControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenPlayerByNameDoesNotExist() throws Exception {
-        when(playerService.getByName("NonExistentName")).thenReturn(null);
+        //when(playerService.getByName("NonExistentName")).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/players/name/{name}", "NonExistentName"))
                .andExpect(status().isNotFound());
@@ -122,7 +122,7 @@ class PlayerRestControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenPlayerByIdDoesNotExistForDeletion() throws Exception {
-        when(playerService.getById(99)).thenReturn(null);
+        when(playerService.findById(99)).thenReturn(null);
 
         mockMvc.perform(delete("/api/v1/players/{id}", 99))
                .andExpect(status().isNotFound());
@@ -132,7 +132,7 @@ class PlayerRestControllerTest {
     void shouldUpdatePlayerById() throws Exception {
         Player player = new Player();
         player.setId(1);
-        when(playerService.getById(1)).thenReturn(player);
+        when(playerService.findById(1)).thenReturn(player);
         when(playerService.updateById(any(), any())).thenReturn(player);
 
         mockMvc.perform(put("/api/v1/players/{id}", 1)
@@ -144,7 +144,7 @@ class PlayerRestControllerTest {
     @Test
     void shouldCreatePlayer() throws Exception {
         Player player = new Player();
-        when(playerService.savePlayer(any(Player.class))).thenReturn(player);
+        when(playerService.save(any(Player.class))).thenReturn(player);
 
         mockMvc.perform(post("/api/v1/players")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -159,9 +159,9 @@ class PlayerRestControllerTest {
         requestBody.put("color", "RED");
 
         Player player = new Player();
-        when(matchService.getById(1)).thenReturn(new Match());
-        when(userService.findUser(1)).thenReturn(new User());
-        when(playerService.savePlayer(any(Player.class))).thenReturn(player);
+        when(matchService.findById(1)).thenReturn(new Match());
+        when(userService.findById(1)).thenReturn(new User());
+        when(playerService.save(any(Player.class))).thenReturn(player);
 
         mockMvc.perform(post("/api/v1/players/match/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -173,8 +173,8 @@ class PlayerRestControllerTest {
     void shouldUpdatePlayerEnergyWhenSufficient() throws Exception {
         Player player = new Player();
         player.setEnergy(10);
-        when(playerService.getById(1)).thenReturn(player);
-        when(playerService.savePlayer(any(Player.class))).thenReturn(player);
+        when(playerService.findById(1)).thenReturn(player);
+        when(playerService.save(any(Player.class))).thenReturn(player);
 
         mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +186,7 @@ class PlayerRestControllerTest {
     void shouldReturnBadRequestWhenInsufficientEnergy() throws Exception {
         Player player = new Player();
         player.setEnergy(2);
-        when(playerService.getById(1)).thenReturn(player);
+        when(playerService.findById(1)).thenReturn(player);
 
         mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -198,8 +198,8 @@ class PlayerRestControllerTest {
     void shouldRegenerateEnergy() throws Exception {
         Player player = new Player();
         player.setEnergy(2);
-        when(playerService.getById(1)).thenReturn(player);
-        when(playerService.savePlayer(any(Player.class))).thenReturn(player);
+        when(playerService.findById(1)).thenReturn(player);
+        when(playerService.save(any(Player.class))).thenReturn(player);
 
         mockMvc.perform(patch("/api/v1/players/{id}/regenerateEnergy", 1))
                .andExpect(status().isOk());

@@ -22,22 +22,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class TileServiceTest {
 
     @Mock
-    private TileRepository casillaRepository;
+    private TileRepository tileRepository;
 
     @InjectMocks
-    private TileService casillaService;
+    private TileService tileService;
 
-    private Tile casilla1;
-    private Tile casilla2;
+    private Tile tile1;
+    private Tile tile2;
 
     @BeforeEach
     void setup() {
 
-        casilla1 = new Tile();
-        casilla1.setId(1);
+        tile1 = new Tile();
+        tile1.setId(1);
 
-        casilla2 = new Tile();
-        casilla2.setId(2);
+        tile2 = new Tile();
+        tile2.setId(2);
     }
 
     @Nested
@@ -47,29 +47,28 @@ public class TileServiceTest {
         @Test
         void testGetAllCasillas() {
             // Given
-            List<Tile> expectedCasillas = Arrays.asList(casilla1, casilla2);
-            when(casillaRepository.findAll()).thenReturn(expectedCasillas);
+            List<Tile> expectedCasillas = Arrays.asList(tile1, tile2);
+            when(tileRepository.findAll()).thenReturn(expectedCasillas);
 
             // When
-            List<Tile> result = casillaService.findAll();
+            List<Tile> result = tileService.findAll();
 
             // Then
             assertEquals(expectedCasillas, result);
-            verify(casillaRepository).findAll();
+            verify(tileRepository).findAll();
         }
 
         @Test
         void testGetCasillaById_Success() {
             // Given
-            when(casillaRepository.findById(1)).thenReturn(Optional.of(casilla1));
+            when(tileRepository.findById(1)).thenReturn(Optional.of(tile1));
 
             // When
-            Optional<Tile> result = casillaService.findById(1);
+            Tile result = tileService.findById(1);
 
             // Then
-            assertNotNull(result);
-            assertEquals(casilla1.getId(), result.get().getId());
-            verify(casillaRepository).findById(1);
+            assertEquals(tile1.getId(), result.getId());
+            verify(tileRepository).findById(1);
         }
     }
 }

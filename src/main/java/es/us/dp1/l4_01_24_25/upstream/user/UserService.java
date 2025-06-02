@@ -26,26 +26,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
 import jakarta.validation.Valid;
 
 @Service
-public class UserService {
+public class UserService extends BaseService<User,Integer>{
 
-	private final UserRepository userRepository;
-	private final UserAchievementRepository userAchievementRepository;
+	UserRepository userRepository;
+	UserAchievementRepository userAchievementRepository;
 
 	@Autowired
 	public UserService(UserRepository userRepository, UserAchievementRepository userAchievementRepository) {
-		this.userRepository = userRepository;
+		super(userRepository);
 		this.userAchievementRepository = userAchievementRepository;
-	}
-
-	@Transactional
-	public User saveUser(User user) throws DataAccessException {
-		userRepository.save(user);
-		return user;
 	}
 
 	@Transactional(readOnly = true)
@@ -53,11 +48,6 @@ public class UserService {
 		return userRepository.findByUsername(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 	}
-
-	@Transactional(readOnly = true)
-	public User findUser(Integer id) {
-		return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-	}	
 
 	@Transactional(readOnly = true)
 	public User findCurrentUser() {
@@ -73,18 +63,13 @@ public class UserService {
 		return userRepository.existsByUsername(username);
 	}
 
-	@Transactional(readOnly = true)
-	public Iterable<User> findAll() {
-		return userRepository.findAll();
-	}
-
 	public Iterable<User> findAllByAuthority(String auth) {
 		return userRepository.findAllByAuthority(auth);
 	}
 
 	@Transactional
 	public User updateUser(@Valid User user, Integer idToUpdate) {
-		User toUpdate = findUser(idToUpdate);
+		User toUpdate = this.findById(idToUpdate);
 		BeanUtils.copyProperties(user, toUpdate, "id");
 		userRepository.save(toUpdate);
 
@@ -93,19 +78,13 @@ public class UserService {
 
 	@Transactional
 	public void deleteUser(Integer id) {
-		User toDelete = findUser(id);
-//		deleteRelations(id, toDelete.getAuthority().getAuthority());
-//		this.userRepository.deletePlayerRelation(id);
+		User toDelete = this.findById(id);
 		this.userRepository.delete(toDelete);
 	}
 	
 	@Transactional
 	public List<Achievement> getUserAchievements(Integer userId) {
-		return userAchievementRepository
-			.findByUserId(userId)
-			.stream()
-			.map(userAchivement -> userAchivement.getAchievement())
-			.toList();
+		return userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
 	}
 
 }

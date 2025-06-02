@@ -85,7 +85,7 @@ public class MatchTileControllerTest {
         Match match = new Match();
         match.setId(1);
         match.setRound(0);
-        match.setNumJugadores(2);
+        match.setPlayersNumber(2);
         testMatchTile.setMatch(match);
 
         Map<String, Integer> updates = new HashMap<>();
@@ -215,7 +215,7 @@ public class MatchTileControllerTest {
         mockMvc.perform(delete("/api/v1/matchTiles/1"))
                .andExpect(status().isOk());
 
-        verify(matchTileService).deleteMatchTile(1);
+        verify(matchTileService).delete(1);
     }
 
     @Test
@@ -233,13 +233,13 @@ public class MatchTileControllerTest {
     void shouldCreateMultipleMatchTiles() throws Exception {
         testMatch = new Match();
         testMatch.setId(1);
-        testMatch.setNumJugadores(2);
+        testMatch.setPlayersNumber(2);
         testTile = new Tile();
         testTile.setId(1);
 
-        when(matchService.getById(1)).thenReturn(testMatch);
+        when(matchService.findById(1)).thenReturn(testMatch);
         for(int i = 1; i <= 6; i++) {
-            when(tileService.findById(i)).thenReturn(Optional.of(testTile));
+            //when(tileService.findById(i)).thenReturn(Optional.of(testTile));
         }
         when(matchTileService.save(any(MatchTile.class))).thenReturn(testMatchTile);
 
@@ -251,12 +251,12 @@ public class MatchTileControllerTest {
     void shouldFailCreateMultipleMatchTilesWhenMatchNotFound() throws Exception {
         testMatch = new Match();
         testMatch.setId(1);
-        testMatch.setNumJugadores(2);
+        testMatch.setPlayersNumber(2);
         testTile = new Tile();
         testTile.setId(1);
-        when(tileService.findById(1)).thenReturn(Optional.of(testTile));
-        when(tileService.findById(2)).thenReturn(Optional.of(testTile));
-        when(matchService.getById(1)).thenReturn(null);
+        //when(tileService.findById(1)).thenReturn(Optional.of(testTile));
+        //when(tileService.findById(2)).thenReturn(Optional.of(testTile));
+        when(matchService.findById(1)).thenReturn(null);
 
         mockMvc.perform(post("/api/v1/matchTiles/createMatchTiles/1"))
                .andExpect(status().isNotFound());

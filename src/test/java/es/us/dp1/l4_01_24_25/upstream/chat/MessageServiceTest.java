@@ -142,7 +142,7 @@ public class MessageServiceTest {
             when(matchRepository.findById(1)).thenReturn(Optional.of(testMatch));
             when(messageRepository.save(any(Message.class))).thenReturn(message1);
 
-            Message result = messageService.createMessage(1, 1, "Test message 1");
+            Message result = messageService.create(1, 1, "Test message 1");
 
             assertNotNull(result);
             assertEquals("Test message 1", result.getContent());
@@ -156,7 +156,7 @@ public class MessageServiceTest {
             when(playerRepository.findById(1)).thenReturn(Optional.empty());
 
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                messageService.createMessage(1, 1, "Test message");
+                messageService.create(1, 1, "Test message");
             });
 
             assertEquals("Player not found", exception.getMessage());
@@ -168,7 +168,7 @@ public class MessageServiceTest {
             when(matchRepository.findById(1)).thenReturn(Optional.empty());
 
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                messageService.createMessage(1, 1, "Test message");
+                messageService.create(1, 1, "Test message");
             });
 
             assertEquals("Match not found", exception.getMessage());
@@ -183,7 +183,7 @@ public class MessageServiceTest {
         void testDeleteMessage_Success() {
             when(messageRepository.findById(1)).thenReturn(Optional.of(message1));
 
-            messageService.deleteMessage(1);
+            messageService.delete(1);
 
             verify(messageRepository).delete(message1);
         }
@@ -193,7 +193,7 @@ public class MessageServiceTest {
             when(messageRepository.findById(99)).thenReturn(Optional.empty());
 
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                messageService.deleteMessage(99);
+                messageService.delete(99);
             });
 
             assertEquals("Message not found", exception.getMessage());
