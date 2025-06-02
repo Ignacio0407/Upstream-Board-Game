@@ -46,7 +46,7 @@ import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
-@WebMvcTest(controllers = SalmonMatchController.class,
+@WebMvcTest(controllers = salmonMatchController.class,
     excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
 @AutoConfigureMockMvc(addFilters = false)
 @SuppressWarnings("unused")
