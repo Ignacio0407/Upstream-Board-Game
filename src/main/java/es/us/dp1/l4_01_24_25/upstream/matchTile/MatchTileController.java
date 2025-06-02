@@ -8,7 +8,6 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,33 +17,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
-import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/matchTiles")
-public class MatchTileController {
+public class MatchTileController extends BaseRestController<MatchTile,Integer>{
 
-    private final MatchTileService matchTileService;
-    private final TileService tileService;
-    private final MatchService matchService;
+    MatchTileService matchTileService;
+    TileService tileService;
+    MatchService matchService;
 
     public MatchTileController(MatchTileService matchTileService, TileService tileService, MatchService matchService) {
-        this.matchTileService = matchTileService;
+        super(matchTileService);
         this.tileService = tileService;
         this.matchService = matchService;
-    }
-
-    @GetMapping
-    public List<MatchTile> getAllMatchTiles() {
-        return matchTileService.findAll();
     }
 
     @PatchMapping("/{id}")
@@ -91,23 +83,9 @@ public class MatchTileController {
     }
 
 
-    @GetMapping("/{id}")
-    public List<MatchTile> getMatchTileById(@PathVariable("id") Integer id) {
+    @GetMapping("match/{id}")
+    public List<MatchTile> findByMatchId(@PathVariable("id") Integer id) {
         return matchTileService.findByMatchId(id);
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<MatchTile> createTile(@RequestBody @Valid MatchTile matchTile) throws DataAccessException{
-        return new ResponseEntity<>(matchTileService.save(matchTile), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<MessageResponse> delete(@PathVariable("id") Integer id) {
-        RestPreconditions.checkNotNull(matchTileService.findById(id), "MatchTile", "ID", id);
-        matchTileService.deleteMatchTile(id);
-        return new ResponseEntity<>(new MessageResponse("MatchTile deleted!"), HttpStatus.OK);    
     }
 
     @PatchMapping("/{id}/rotation")
@@ -130,25 +108,25 @@ public class MatchTileController {
     @PostMapping("/createMatchTiles/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<List<MatchTile>> createMultipleMatchTiles(@PathVariable("id") Integer id) throws DataAccessException {
-        Tile agua = tileService.findById(1).orElse(null);
-        Tile piedra = tileService.findById(2).orElse(null);
-        Tile garza = tileService.findById(3).orElse(null);
-        Tile oso = tileService.findById(4).orElse(null);
-        Tile aguila = tileService.findById(5).orElse(null);
-        Tile salto = tileService.findById(6).orElse(null);
-        if (agua == null || piedra == null) {
+        Tile water = tileService.findById(1);
+        Tile rock = tileService.findById(2);
+        Tile garza = tileService.findById(3);
+        Tile bear = tileService.findById(4);
+        Tile eagle = tileService.findById(5);
+        Tile jump = tileService.findById(6);
+        if (water == null || rock == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Match match = matchService.getById(id);
+        Match match = matchService.findById(id);
         if (match == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         List<MatchTile> createdTiles = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(agua);
+            matchTile.setTile(water);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
             matchTile.setSalmonsNumber(0);
@@ -156,9 +134,9 @@ public class MatchTileController {
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(piedra);
+            matchTile.setTile(rock);
             matchTile.setMatch(match);
-            if (match.getPlayersNum() > 2) matchTile.setCapacity(match.getPlayersNum()-1);
+            if (match.getPlayersNumber() > 2) matchTile.setCapacity(match.getPlayersNumber()-1);
             else matchTile.setCapacity(2);
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
@@ -169,7 +147,7 @@ public class MatchTileController {
             MatchTile matchTile = new MatchTile();
             matchTile.setTile(garza);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
             matchTile.setSalmonsNumber(0);
@@ -177,9 +155,9 @@ public class MatchTileController {
         }
         for (int i = 0; i < 3; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(oso);
+            matchTile.setTile(bear);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
             matchTile.setSalmonsNumber(0);
@@ -187,9 +165,9 @@ public class MatchTileController {
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(aguila);
+            matchTile.setTile(eagle);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
             matchTile.setSalmonsNumber(0);
@@ -197,9 +175,9 @@ public class MatchTileController {
         } 
         for (int i = 0; i < 4; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(salto);
+            matchTile.setTile(jump);
             matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNum());
+            matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
             matchTile.setCoordinate(null);
             matchTile.setSalmonsNumber(0);
@@ -212,7 +190,7 @@ public class MatchTileController {
     }
   
     @GetMapping("/prueba1/{matchId}")
-    public List<MatchTile> getMatchTileCoordinates(@PathVariable("matchId") Integer matchId) {
+    public List<MatchTile> findMatchTileCoordinates(@PathVariable("matchId") Integer matchId) {
         return matchTileService.findByMatchIdNoCoord(matchId);
     }
 

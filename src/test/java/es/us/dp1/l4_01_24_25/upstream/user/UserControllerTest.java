@@ -149,7 +149,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser("admin")
 	void shouldReturnUser() throws Exception {
-		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
+		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(TEST_USER_ID))
 				.andExpect(jsonPath("$.username").value(user.getUsername()))
@@ -159,7 +159,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser("admin")
 	void shouldReturnNotFoundUser() throws Exception {
-		when(this.userService.findUser(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
+		when(this.userService.findById(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isNotFound());
 	}
 
@@ -181,7 +181,7 @@ public class UserControllerTest {
 		user.setUsername("UPDATED");
 		user.setPassword("CHANGED");
 
-		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
+		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
 		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
 
 		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
@@ -195,7 +195,7 @@ public class UserControllerTest {
 		user.setUsername("UPDATED");
 		user.setPassword("UPDATED");
 
-		when(this.userService.findUser(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
+		when(this.userService.findById(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
 		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
 
 		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
@@ -207,7 +207,7 @@ public class UserControllerTest {
 	void shouldDeleteOtherUser() throws Exception {
 		logged.setId(2);
 
-		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
+		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
 		doNothing().when(this.userService).deleteUser(TEST_USER_ID);
 
 		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isOk())
@@ -219,7 +219,7 @@ public class UserControllerTest {
 	void shouldNotDeleteLoggedUser() throws Exception {
 		logged.setId(TEST_USER_ID);
 
-		when(this.userService.findUser(TEST_USER_ID)).thenReturn(user);
+		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
 		doNothing().when(this.userService).deleteUser(TEST_USER_ID);
 
 		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isForbidden())

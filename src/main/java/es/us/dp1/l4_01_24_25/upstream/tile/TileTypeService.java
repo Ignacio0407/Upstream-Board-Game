@@ -2,24 +2,15 @@ package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 
 @Service
-public class TileTypeService {
+public class TileTypeService extends BaseService<TileType,Integer>{
     
-    private final TileTypeRepository tileTypeRepository;
+    TileTypeRepository tileTypeRepository;
 
     @Autowired
-    public TileTypeService(TileTypeRepository tipoCasillaRepository){
-        
-        this.tileTypeRepository = tipoCasillaRepository;
+    public TileTypeService(TileTypeRepository tileTypeRepository){
+        super(tileTypeRepository);
     }
-
-    @Transactional
-    public TileType findById(Integer id) throws ResourceNotFoundException {
-        return tileTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("TipoCasilla", "id", id));
-    }
-
 }

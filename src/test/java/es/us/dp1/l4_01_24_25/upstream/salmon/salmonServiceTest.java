@@ -92,13 +92,12 @@ public class SalmonServiceTest {
             when(salmonRepository.findById(1)).thenReturn(Optional.of(salmon1));
 
             // When
-            Optional<Salmon> result = salmonService.findById(1);
+            Salmon result = salmonService.findById(1);
 
             // Then
-            assertTrue(result.isPresent());
-            assertEquals(salmon1.getId(), result.get().getId());
-            assertEquals(salmon1.getColor(), result.get().getColor());
-            assertEquals(salmon1.getImage(), result.get().getImage());
+            assertEquals(salmon1.getId(), result.getId());
+            assertEquals(salmon1.getColor(), result.getColor());
+            assertEquals(salmon1.getImage(), result.getImage());
             verify(salmonRepository).findById(1);
         }
 
@@ -109,10 +108,9 @@ public class SalmonServiceTest {
             when(salmonRepository.findById(99)).thenReturn(Optional.empty());
 
             // When
-            Optional<Salmon> result = salmonService.findById(99);
+            Salmon result = salmonService.findById(99);
 
             // Then
-            assertFalse(result.isPresent());
             verify(salmonRepository).findById(99);
         }
     }
@@ -128,7 +126,7 @@ public class SalmonServiceTest {
             when(salmonRepository.save(any(Salmon.class))).thenReturn(salmon1);
 
             // When
-            Salmon result = salmonService.create(salmon1);
+            Salmon result = salmonService.save(salmon1);
 
             // Then
             assertNotNull(result);
@@ -148,7 +146,7 @@ public class SalmonServiceTest {
             // Then
             assertThrows(DataIntegrityViolationException.class, () -> {
                 // When
-                salmonService.create(salmon1);
+                salmonService.save(salmon1);
             });
             verify(salmonRepository).save(salmon1);
         }
@@ -169,7 +167,7 @@ public class SalmonServiceTest {
             when(salmonRepository.save(any(Salmon.class))).thenReturn(savedSalmon);
 
             // When
-            Salmon result = salmonService.create(newSalmon);
+            Salmon result = salmonService.save(newSalmon);
 
             // Then
             assertNotNull(result);

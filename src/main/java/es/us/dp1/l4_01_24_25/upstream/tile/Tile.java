@@ -19,6 +19,7 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "tile")
 public class Tile extends BaseEntity {
+    
     String image;
     
     @NotNull
