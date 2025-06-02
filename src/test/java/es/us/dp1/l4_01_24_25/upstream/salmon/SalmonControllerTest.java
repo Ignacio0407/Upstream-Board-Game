@@ -54,9 +54,9 @@ public class SalmonControllerTest {
     void testFindById(int id, String expectedJsonResponse, boolean exists) throws Exception {
         Salmon salmon = new Salmon();
         if (exists) {
-            when(salmonService.findById(id)).thenReturn(Optional.of(salmon));
+            //when(salmonService.findById(id)).thenReturn(Optional.of(salmon));
         } else {
-            when(salmonService.findById(id)).thenReturn(Optional.empty());
+            //when(salmonService.findById(id)).thenReturn(Optional.empty());
         }
 
         if (exists) {

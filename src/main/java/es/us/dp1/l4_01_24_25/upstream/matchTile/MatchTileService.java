@@ -6,38 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
-
-
 @Service
-public class MatchTileService {
+public class MatchTileService extends BaseService<MatchTile,Integer>{
     
     MatchTileRepository matchTileRepository;
     TileService tileService;
 
     @Autowired
     public MatchTileService(MatchTileRepository matchTileRepository, TileService tileService) {
-        this.matchTileRepository = matchTileRepository;
+        super(matchTileRepository);
         this.tileService = tileService;
-    }
-
-    @Transactional(readOnly = true)
-    public List<MatchTile> findAll() {
-        return matchTileRepository.findAll();
-    }
-
-    @Transactional
-    public MatchTile save(MatchTile matchTile) {
-        matchTileRepository.save(matchTile);
-        return matchTile;
-    }
-
-    @Transactional(readOnly = true)
-    public MatchTile findById(Integer id) {
-        return matchTileRepository.findById(id).orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -57,12 +40,6 @@ public class MatchTileService {
         return matchTileRepository.findByCoordinate(x,y);
     }
 
-    @Transactional
-    public void deleteMatchTile(Integer id) {
-        MatchTile toDelete = findById(id);
-        this.matchTileRepository.delete(toDelete);
-    }
-
     public Boolean validateTilePlacement(Integer round, Integer y) {
         int maxAllowedRow = round - 1;  
         return y <= maxAllowedRow;
@@ -70,7 +47,7 @@ public class MatchTileService {
     
     public MatchTile eagleToWater(MatchTile toTravel, Match match) {
         MatchTile agua = new MatchTile();
-        Tile aguaTile = tileService.findById(1).orElse(null);
+        Tile aguaTile = tileService.findById(1);
         agua.setId(toTravel.getId());
         agua.setCapacity(toTravel.getCapacity());
         agua.setOrientation(0);
@@ -81,6 +58,4 @@ public class MatchTileService {
         matchTileRepository.save(agua);
         return agua;
     }
-
-
 }

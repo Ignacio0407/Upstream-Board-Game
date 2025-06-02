@@ -3,33 +3,18 @@ package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 @Service
-public class SalmonMatchService {
-    private final SalmonMatchRepository salmonMatchRepository;
+public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
+    SalmonMatchRepository salmonMatchRepository;
 
     @Autowired
-    public SalmonMatchService(SalmonMatchRepository partidaSalmonRepository){
-        
-        this.salmonMatchRepository = partidaSalmonRepository;
-    }
-
-    @Transactional
-    public SalmonMatch save(SalmonMatch partidaSalmon) throws DataAccessException{
-        salmonMatchRepository.save(partidaSalmon);
-        return partidaSalmon;
-    }
-
-    
-	@Transactional(readOnly = true)
-	public SalmonMatch getById(Integer id) {
-		return salmonMatchRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("PartidaSalmon", "id", id));
-	}	
-
+    public SalmonMatchService(SalmonMatchRepository salmonMatchRepository){
+        super(salmonMatchRepository);
+    }	
     
 	@Transactional(readOnly = true)
 	public List<SalmonMatch> getAllFromMatch(Integer matchId) {
@@ -55,11 +40,6 @@ public class SalmonMatchService {
         List<SalmonMatch> res = salmonMatchRepository.findAllFromPlayerInSea(playerId);
         if(res == null) res = List.of();
         return res;
-    }
-
-    @Transactional
-    public void delete(Integer id) throws DataAccessException {
-        salmonMatchRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +73,4 @@ public class SalmonMatchService {
     }
         return puntuaje;
     }
-
-
 }

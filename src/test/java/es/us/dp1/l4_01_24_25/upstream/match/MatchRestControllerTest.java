@@ -67,7 +67,7 @@ public class MatchRestControllerTest {
     @Test
     void shouldGetAllMatches() throws Exception {
         List<Match> matches = List.of(testMatch);
-        when(matchService.getAll()).thenReturn(matches);
+        when(matchService.findAll()).thenReturn(matches);
 
         mockMvc.perform(get("/api/v1/matches"))
                .andExpect(status().isOk())
@@ -77,7 +77,7 @@ public class MatchRestControllerTest {
 
     @Test
     void shouldFindMatchById() throws Exception {
-        when(matchService.getById(1)).thenReturn(testMatch);
+        when(matchService.findById(1)).thenReturn(testMatch);
 
         mockMvc.perform(get("/api/v1/matches/1"))
                .andExpect(status().isOk())
@@ -87,7 +87,7 @@ public class MatchRestControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenMatchDoesNotExist() throws Exception {
-        when(matchService.getById(1)).thenReturn(null);
+        when(matchService.findById(1)).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/matches/1"))
                .andExpect(status().isNotFound());
@@ -133,7 +133,7 @@ public class MatchRestControllerTest {
         updatedMatch.setName("Updated Match");
         updatedMatch.setPlayersNum(3);
 
-        when(matchService.getById(1)).thenReturn(testMatch);
+        when(matchService.findById(1)).thenReturn(testMatch);
         when(matchService.updateById(any(Match.class), eq(1))).thenReturn(updatedMatch);
 
         mockMvc.perform(put("/api/v1/matches/1")
@@ -160,17 +160,17 @@ public class MatchRestControllerTest {
 
     @Test
     void shouldDeleteMatchSuccessfully() throws Exception {
-        when(matchService.getById(1)).thenReturn(testMatch);
+        when(matchService.findById(1)).thenReturn(testMatch);
 
         mockMvc.perform(delete("/api/v1/matches/1"))
                .andExpect(status().isNoContent());
 
-        verify(matchService).deletePartidaById(1);
+        verify(matchService).delete(1);
     }
 
     @Test
     void shouldFailDeletingMatchWhenNotFound() throws Exception {
-        when(matchService.getById(1)).thenReturn(null);
+        when(matchService.findById(1)).thenReturn(null);
 
         mockMvc.perform(delete("/api/v1/matches/1"))
                .andExpect(status().isNotFound());
@@ -185,8 +185,8 @@ public class MatchRestControllerTest {
         player.setAlive(true);
         testMatch.setInitialPlayer(player);
 
-        when(matchService.getById(1)).thenReturn(testMatch);
-        when(playerService.getPlayersByMatch(1)).thenReturn(List.of(player));
+        when(matchService.findById(1)).thenReturn(testMatch);
+        when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player));
 
         mockMvc.perform(patch("/api/v1/matches/1/startGame"))
             .andExpect(status().isOk())
@@ -196,7 +196,7 @@ public class MatchRestControllerTest {
 
     @Test
     void shouldFailStartGameWhenMatchNotFound() throws Exception {
-        when(matchService.getById(1)).thenReturn(null);
+        when(matchService.findById(1)).thenReturn(null);
 
         mockMvc.perform(patch("/api/v1/matches/1/startGame"))
                .andExpect(status().isNotFound());
@@ -205,8 +205,8 @@ public class MatchRestControllerTest {
     @Test
     void shouldChangePhaseSuccessfully() throws Exception {
         List<Player> players = List.of(new Player());
-        when(matchService.getById(1)).thenReturn(testMatch);
-        when(playerService.getById(1)).thenReturn(players.get(0));
+        when(matchService.findById(1)).thenReturn(testMatch);
+        when(playerService.findById(1)).thenReturn(players.get(0));
         when(matchTileService.findByMatchIdNoCoord(1)).thenReturn(List.of());
 
         mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
@@ -215,7 +215,7 @@ public class MatchRestControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenChangingPhaseWithInvalidMatch() throws Exception {
-        when(matchService.getById(1)).thenReturn(null);
+        when(matchService.findById(1)).thenReturn(null);
 
         mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
                .andExpect(status().isNotFound());

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MessageRequest {
+public class MessageDTO {
     @JsonProperty("playerId")
     private Integer playerId;
 
@@ -26,7 +26,7 @@ public class MessageRequest {
                 '}';
     }
 
-    public MessageRequest() {
+    public MessageDTO() {
         
     }
 }

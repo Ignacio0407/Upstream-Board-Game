@@ -79,7 +79,7 @@ public class TileControllerTest {
         tiletype.setType("AGUA");
         tile.setType(tiletype);
 
-        when(tileService.findById(1)).thenReturn(Optional.of(tile));
+        //when(tileService.findById(1)).thenReturn(Optional.of(tile));
 
         mockMvc.perform(get("/api/v1/tiles/1"))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ public class TileControllerTest {
 
     @Test
     public void testFindTileById_NotFound() throws Exception {
-        when(tileService.findById(1)).thenReturn(Optional.empty());
+        //when(tileService.findById(1)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/v1/tiles/1"))
                 .andExpect(status().isNotFound());

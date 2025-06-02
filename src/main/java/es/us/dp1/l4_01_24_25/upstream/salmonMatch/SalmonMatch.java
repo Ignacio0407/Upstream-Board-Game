@@ -37,9 +37,11 @@ public class SalmonMatch extends BaseEntity{
     @Min(0)
     @Max(5)
     Integer salmonsNumber;
+
     @Min(0)
     @Max(5)
     Integer spawningNumber;
+    
     @Embedded
     Coordinate coordinate;
     

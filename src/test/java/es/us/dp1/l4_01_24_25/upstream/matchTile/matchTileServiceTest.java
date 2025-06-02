@@ -187,7 +187,7 @@ public class MatchTileServiceTest {
 
         @Test
         void testEagleToWater_Success() {
-            when(tileService.findById(1)).thenReturn(Optional.of(waterTile));
+            //when(tileService.findById(1)).thenReturn(Optional.of(waterTile));
             when(matchTileRepository.save(any(MatchTile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             MatchTile result = matchTileService.eagleToWater(matchTile1, testMatch);
@@ -205,7 +205,7 @@ public class MatchTileServiceTest {
 
         @Test
         void testEagleToWater_WaterTileNotFound() {
-            when(tileService.findById(1)).thenReturn(Optional.empty());
+           // when(tileService.findById(1)).thenReturn(Optional.empty());
             when(matchTileRepository.save(any(MatchTile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             MatchTile result = matchTileService.eagleToWater(matchTile1, testMatch);
@@ -225,7 +225,7 @@ public class MatchTileServiceTest {
         void testDeleteMatchTileById_Success() {
             when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile1));
 
-            matchTileService.deleteMatchTile(1);
+            matchTileService.delete(1);
 
             verify(matchTileRepository).delete(matchTile1);
         }

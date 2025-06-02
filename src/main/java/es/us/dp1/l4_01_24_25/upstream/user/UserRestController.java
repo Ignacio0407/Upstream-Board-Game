@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.response.MessageResponse;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.util.RestPreconditions;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -41,26 +42,15 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/users")
-@SecurityRequirement(name = "bearerAuth")
-class UserRestController {
+class UserRestController extends BaseRestController<User,Integer>{
 
-	private final UserService userService;
-	private final AuthoritiesService authService;
+	UserService userService;
+	AuthoritiesService authService;
 
 	@Autowired
 	public UserRestController(UserService userService, AuthoritiesService authService) {
-		this.userService = userService;
+		super(userService);
 		this.authService = authService;
-	}
-
-	@GetMapping
-	public ResponseEntity<List<User>> findAll(@RequestParam(required = false) String auth) {
-		List<User> res;
-		if (auth != null) {
-			res = (List<User>) userService.findAllByAuthority(auth);
-		} else
-			res = (List<User>) userService.findAll();
-		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
 	@GetMapping("authorities")
@@ -75,29 +65,17 @@ class UserRestController {
 		return new ResponseEntity<>(l, HttpStatus.OK);
 	}
 
-	@GetMapping(value = "{id}")
-	public ResponseEntity<User> findById(@PathVariable("id") Integer id) {
-		return new ResponseEntity<>(userService.findUser(id), HttpStatus.OK);
-	}
-
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<User> create(@RequestBody @Valid User user) {
-		User savedUser = userService.saveUser(user);
-		return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
-	}
-
 	@PutMapping(value = "{userId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<User> update(@PathVariable("userId") Integer id, @RequestBody @Valid User user) {
-		if (userService.findUser(id) == null) throw new ResourceNotFoundException("");
+		if (userService.findById(id) == null) throw new ResourceNotFoundException("");
 		return new ResponseEntity<>(this.userService.updateUser(user, id), HttpStatus.OK);
 	}
 
 	@DeleteMapping(value = "{userId}")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<MessageResponse> delete(@PathVariable("userId") int id) {
-		RestPreconditions.checkNotNull(userService.findUser(id), "User", "ID", id);
+		RestPreconditions.checkNotNull(userService.findById(id), "User", "ID", id);
 		if (userService.findCurrentUser().getId() != id) {
 			userService.deleteUser(id);
 			return new ResponseEntity<>(new MessageResponse("User deleted!"), HttpStatus.OK);

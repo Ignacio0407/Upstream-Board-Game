@@ -60,7 +60,7 @@ public class UserAchievementRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) throws Exception {
         User u = userService.findUser(username);
-        Achievement a = achievementService.getById(4);
+        Achievement a = achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);
         UserAchievement repeated = userAchievementService.findByUandA(u, a);
         if(repeated != null) throw new Exception(); 

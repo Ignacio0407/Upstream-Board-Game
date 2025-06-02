@@ -7,7 +7,7 @@ public class GameInitializer extends SpringBootServletInitializer {
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(GameApplication.class);
+		return application.sources(Upstream.class);
 	}
 
 }

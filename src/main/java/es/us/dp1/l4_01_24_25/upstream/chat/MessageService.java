@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
@@ -15,7 +16,7 @@ import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
 import jakarta.transaction.Transactional;
 
 @Service
-public class MessageService {
+public class MessageService extends BaseService<Message,Integer>{
     
     @Autowired
     private MessageRepository messageRepository;
@@ -23,6 +24,12 @@ public class MessageService {
     private PlayerRepository playerRepository;
     @Autowired
     private MatchRepository matchRepository;
+
+    public MessageService(MessageRepository messageRepository, PlayerRepository playerRepository, MatchRepository matchRepository) {
+        super(messageRepository);
+        this.playerRepository = playerRepository;
+        this.matchRepository = matchRepository;
+    }
     
     /*@Transactional
     public Message createMessage2(Player player, Match match, String content) {
@@ -61,7 +68,7 @@ public class MessageService {
     }
 
     @Transactional
-    public Message createMessage(Integer playerId, Integer matchId, String content) {
+    public Message create(Integer playerId, Integer matchId, String content) {
 
         Player player = playerRepository.findById(playerId)
             .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
@@ -71,13 +78,6 @@ public class MessageService {
             
         Message message = new Message(player, match, content);
         return messageRepository.save(message);
-    }
-
-    @Transactional
-    public void deleteMessage(Integer messageId) {
-        Message message = messageRepository.findById(messageId)
-            .orElseThrow(() -> new RuntimeException("Message not found"));
-        messageRepository.delete(message);
     }
 
 }

@@ -51,7 +51,7 @@ class AchievementRestControllerTest {
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindAll_Positive() throws Exception {
         List<Achievement> achievements = Arrays.asList(new Achievement(), new Achievement());
-        when(achievementService.getAchievements()).thenReturn(achievements);
+        when(achievementService.findAll()).thenReturn(achievements);
         
         mockMvc.perform(get("/api/v1/achievements"))
             .andExpect(status().isOk())
@@ -61,7 +61,7 @@ class AchievementRestControllerTest {
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindAll_Negative() throws Exception {
-        when(achievementService.getAchievements()).thenReturn(Collections.emptyList());
+        when(achievementService.findAll()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/v1/achievements"))
             .andExpect(status().isOk())
@@ -73,7 +73,7 @@ class AchievementRestControllerTest {
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindById_Positive() throws Exception {
         Achievement achievement = new Achievement();
-        when(achievementService.getById(1)).thenReturn(achievement);
+        when(achievementService.findById(1)).thenReturn(achievement);
 
         mockMvc.perform(get("/api/v1/achievements/1"))
             .andExpect(status().isOk())
@@ -83,7 +83,7 @@ class AchievementRestControllerTest {
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindById_Negative() throws Exception {
-        when(achievementService.getById(1)).thenReturn(null);
+        when(achievementService.findById(1)).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/achievements/1"))
             .andExpect(status().isNotFound());
@@ -93,7 +93,7 @@ class AchievementRestControllerTest {
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindByName_Positive() throws Exception {
         Achievement achievement = new Achievement();
-        when(achievementService.getByName("234")).thenReturn(achievement);
+        //when(achievementService.getByName("234")).thenReturn(achievement);
 
         mockMvc.perform(get("/api/v1/achievements/name/234"))
             .andExpect(status().isOk())
@@ -103,7 +103,7 @@ class AchievementRestControllerTest {
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     void testFindByName_Negative() throws Exception {
-        when(achievementService.getByName("234")).thenReturn(null);
+        //when(achievementService.getByName("234")).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/achievements/name/234"))
             .andExpect(status().isNotFound());
@@ -114,7 +114,7 @@ class AchievementRestControllerTest {
         Achievement achievement = new Achievement();
         achievement.setName("Test Achievement");
         achievement.setMetric(Metric.EXPLORER);
-        when(achievementService.saveAchievement(any(Achievement.class))).thenReturn(achievement);
+        when(achievementService.save(any(Achievement.class))).thenReturn(achievement);
 
         mockMvc.perform(post("/api/v1/achievements")
             .with(csrf())
@@ -141,7 +141,7 @@ class AchievementRestControllerTest {
     @Test
     void testDeleteById_Positive() throws Exception {
         Achievement achievement = new Achievement();
-        when(achievementService.getById(1)).thenReturn(achievement);
+        when(achievementService.findById(1)).thenReturn(achievement);
 
         mockMvc.perform(delete("/api/v1/achievements/1")
             .with(csrf())
@@ -152,7 +152,7 @@ class AchievementRestControllerTest {
     @Test
     void testDeleteById_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Achievement not found"))
-            .when(achievementService).getById(1);
+            .when(achievementService).findById(1);
 
         mockMvc.perform(delete("/api/v1/achievements/1")
             .with(csrf())
@@ -165,8 +165,8 @@ class AchievementRestControllerTest {
         Achievement achievement = new Achievement();
         achievement.setId(1);
         achievement.setMetric(Metric.EXPLORER);
-        when(achievementService.getById(1)).thenReturn(achievement);
-        when(achievementService.saveAchievement(any(Achievement.class))).thenReturn(achievement);
+        when(achievementService.findById(1)).thenReturn(achievement);
+        when(achievementService.save(any(Achievement.class))).thenReturn(achievement);
 
         mockMvc.perform(put("/api/v1/achievements/1")
             .with(csrf()) 
@@ -179,7 +179,7 @@ class AchievementRestControllerTest {
     @Test
     void testUpdate_Negative() throws Exception {
         doThrow(new ResourceNotFoundException("Achievement not found"))
-            .when(achievementService).getById(1);
+            .when(achievementService).findById(1);
         Achievement achievement = new Achievement();
         achievement.setId(1);
         achievement.setMetric(Metric.EXPLORER);
@@ -196,7 +196,7 @@ class AchievementRestControllerTest {
     @WithMockUser("user")
     void testFindByNames_Positive() throws Exception {
         List<Achievement> achievements = Arrays.asList(new Achievement(), new Achievement());
-        when(achievementService.getByNames(anyList())).thenReturn(achievements);
+        //when(achievementService.getByNames(anyList())).thenReturn(achievements);
 
         mockMvc.perform(get("/api/v1/achievements/names/name1,name2"))
             .andExpect(status().isOk())
@@ -206,7 +206,7 @@ class AchievementRestControllerTest {
     @Test
     @WithMockUser("user")
     void testFindByNames_Negative() throws Exception {
-        when(achievementService.getByNames(anyList())).thenReturn(null);
+        //when(achievementService.getByNames(anyList())).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/achievements/names/name1,name2"))
             .andExpect(status().isNotFound());

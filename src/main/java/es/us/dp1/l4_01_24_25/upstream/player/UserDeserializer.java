@@ -27,7 +27,7 @@ public class UserDeserializer extends JsonDeserializer<User>{
 
         try {
             Integer uId = p.getIntValue();
-            r = this.userService.findUser(uId);
+            r = this.userService.findById(uId);
         } catch (Exception e) {
             throw new IOException("Id not found: " + p.getIntValue());
         }

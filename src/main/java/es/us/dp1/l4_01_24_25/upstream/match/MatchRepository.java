@@ -13,11 +13,10 @@ import es.us.dp1.l4_01_24_25.upstream.player.Player;
 @Repository
 public interface MatchRepository extends CrudRepository<Match, Integer>{
     
-    @SuppressWarnings("null")
     @Override
     List<Match> findAll();
     
-    public Match findByName(String name);
+    public Match findByName(@Param("name") String name);
 
     @Query("SELECT p FROM Player p WHERE p.match.id = :id")
     public List<Player> findPlayersFromGame(@Param("id") Integer id);

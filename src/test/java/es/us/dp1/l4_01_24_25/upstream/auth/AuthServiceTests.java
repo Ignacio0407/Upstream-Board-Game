@@ -64,7 +64,7 @@ public class AuthServiceTests {
 			playerUser.setUsername("clinicOwnerTest");
 			playerUser.setPassword("clinicOwnerTest");
 			playerUser.setAuthority(authoritiesService.findByAuthority("PLAYER"));
-			userService.saveUser(playerUser);			
+			userService.save(playerUser);			
 		}
 
 		return request;

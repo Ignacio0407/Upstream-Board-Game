@@ -25,7 +25,7 @@ public class AchievementDeserializer extends JsonDeserializer<Achievement>{
         
         try {
             Integer aId = p.getIntValue();
-            a = this.achievementService.getById(aId);
+            a = this.achievementService.findById(aId);
         } catch (Exception e) {
             throw new IOException("Achievement not found: " + p.getIntValue());
         }

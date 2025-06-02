@@ -15,10 +15,10 @@ import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 @Component
 public class TileDeserializer extends JsonDeserializer<Tile>{
 
-    private TileService casillaService;
+    private TileService tileService;
     
-    public TileDeserializer(TileService casillaService) {
-        this.casillaService = casillaService;
+    public TileDeserializer(TileService tileService) {
+        this.tileService = tileService;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class TileDeserializer extends JsonDeserializer<Tile>{
         Tile r = null;
         try {
             Integer i = p.getIntValue();
-            r = this.casillaService.findById(i).get();
+            r = this.tileService.findById(i);
         } catch (Exception e) {
             throw new IOException();
         }

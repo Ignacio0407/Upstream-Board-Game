@@ -24,7 +24,7 @@ public class SalmonDeserializer extends JsonDeserializer<Salmon>{
         Salmon s = null;
         try {
             Integer sId = p.getIntValue();
-            s = this.salmonService.findById(sId).get();
+            s = this.salmonService.findById(sId);
         } catch (Exception e) {
             throw new IOException("Salmon not found: " + p.getIntValue());
         } 

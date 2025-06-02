@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +19,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NoCapacityException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.OnlyMovingForwardException;
+import es.us.dp1.l4_01_24_25.upstream.general.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
@@ -28,23 +28,21 @@ import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/salmonMatches")
-@SecurityRequirement(name = "bearerAuth")
-public class SalmonMatchController {
+public class SalmonMatchController extends BaseRestController<SalmonMatch,Integer>{
 
-    private final SalmonMatchService salmonMatchService;
-    private final PlayerService playerService;
-    private final SalmonService salmonService;
-    private final MatchTileService matchTileService;
-    private final MatchService matchService;
+    SalmonMatchService salmonMatchService;
+    PlayerService playerService;
+    SalmonService salmonService;
+    MatchTileService matchTileService;
+    MatchService matchService;
 
     @Autowired
     public SalmonMatchController(SalmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
-        this.salmonMatchService = salmonMatchService;
+        super(salmonMatchService);
         this.playerService = playerService;
         this.salmonService = salmonService;
         this.matchTileService = matchTileService;
@@ -65,22 +63,6 @@ public class SalmonMatchController {
     @GetMapping("/player/{playerId}")
     public ResponseEntity<List<SalmonMatch>> findAllFromPlayer(@PathVariable Integer playerId) {  
         return new ResponseEntity<>(salmonMatchService.getAllFromPlayer(playerId), HttpStatus.OK);
-    }
-
-    @GetMapping(value="/{id}")
-    public ResponseEntity<SalmonMatch> findById(@PathVariable("id") Integer id){
-        return new ResponseEntity<>(salmonMatchService.getById(id), HttpStatus.OK);
-    }
-
-    @PostMapping
-    public ResponseEntity<SalmonMatch> create(@RequestBody @Valid SalmonMatch salmonMatch) {
-        return new ResponseEntity<>(salmonMatchService.save(salmonMatch), HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        salmonMatchService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 
     private void throwExceptions(Coordinate myCoordinate, Coordinate newCoordinate, Player player) {
@@ -121,7 +103,7 @@ public class SalmonMatchController {
 
     private void herons(Player player, Match match, List<Player> players, Integer numPlayers) {
         List<SalmonMatch> salmonMatchesFromPlayer = salmonMatchService.getAllFromPlayerInRiver(player.getId());
-        List<MatchTile> herons = matchService.getHeronWithCoordsFromGame(match.getId());
+        List<MatchTile> herons = matchService.findHeronWithCoordsFromGame(match.getId());
         for(MatchTile h : herons) {
             for(SalmonMatch s: salmonMatchesFromPlayer){
                 if(s.getCoordinate().equals(h.getCoordinate())){
@@ -135,7 +117,7 @@ public class SalmonMatchController {
                 }
             }   
         }
-        playerService.savePlayer(player);
+        playerService.save(player);
         matchService.save(match);
     }
 
@@ -148,7 +130,7 @@ public class SalmonMatchController {
         if (player.getEnergy() == 0) {
             herons(player, match, players, numPlayers);
         }
-        playerService.savePlayer(player);
+        playerService.save(player);
         if (salmonMatch.getSalmonsNumber() > 0) {
             salmonMatchService.save(salmonMatch);
         } else {
@@ -169,11 +151,11 @@ public class SalmonMatchController {
 
     @PatchMapping("/coordinate/{id}")
     public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
-        SalmonMatch salmonMatch = salmonMatchService.getById(id);
+        SalmonMatch salmonMatch = salmonMatchService.findById(id);
         Player player = salmonMatch.getPlayer();
         Match match = salmonMatch.getMatch();
-        List<Player> players = playerService.getPlayersByMatch(match.getId());
-        Integer numPlayers = match.getPlayersNum();
+        List<Player> players = playerService.findPlayersByMatch(match.getId());
+        Integer numPlayers = match.getPlayersNumber();
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y"));
         List<MatchTile> matchTiles = matchTileService.findByMatchId(match.getId());
@@ -377,7 +359,7 @@ public class SalmonMatchController {
     @PostMapping("/player/{playerId}")
     public void create(@PathVariable("playerId") Integer playerId) {
         for (int i=0; i < 4; i++) {
-            Player player = playerService.getById(playerId);
+            Player player = playerService.findById(playerId);
             Salmon salmon = salmonService.findAll().stream().filter(sal -> sal.getColor().equals(player.getColor())).findFirst().orElse(null);
             Match match = player.getMatch();
             Coordinate coordinate = new Coordinate(null, null);;
@@ -394,11 +376,11 @@ public class SalmonMatchController {
 
     @PatchMapping("/enterSpawn/{id}")
     public ResponseEntity<SalmonMatch> enterSpawn(@PathVariable Integer id) {
-        SalmonMatch salmonMatch = salmonMatchService.getById(id);
+        SalmonMatch salmonMatch = salmonMatchService.findById(id);
         Player player = salmonMatch.getPlayer();
         Match match = salmonMatch.getMatch();
-        List<Player> players = playerService.getPlayersByMatch(match.getId());
-        Integer numPlayers = match.getPlayersNum();
+        List<Player> players = playerService.findPlayersByMatch(match.getId());
+        Integer numPlayers = match.getPlayersNumber();
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(1,5);
         Coordinate updateCoordinate = new Coordinate(1, 21);
@@ -456,7 +438,7 @@ public class SalmonMatchController {
         matchService.save(match);
     }
     
-    playerService.savePlayer(player);
+    playerService.save(player);
     if (salmonMatch.getSalmonsNumber() > 0) salmonMatchService.save(salmonMatch);
     else salmonMatchService.delete(salmonMatch.getId());
     return new ResponseEntity<>(salmonMatch, HttpStatus.OK);

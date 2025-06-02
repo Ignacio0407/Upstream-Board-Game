@@ -36,7 +36,9 @@ public class Player extends BaseEntity implements Serializable{
     Integer playerOrder;
     
     Boolean alive;
+
     Integer points;
+    
     @Min(0)
     @Max(5)
     Integer energy;

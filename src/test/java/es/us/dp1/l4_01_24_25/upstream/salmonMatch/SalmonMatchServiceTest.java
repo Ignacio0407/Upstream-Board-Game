@@ -91,10 +91,10 @@ public class SalmonMatchServiceTest {
 
         @Test
         @DisplayName("Should get salmon match by ID successfully")
-        void testGetById_Success() {
+        void testfindById_Success() {
             when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonMatch1));
 
-            SalmonMatch result = salmonMatchService.getById(1);
+            SalmonMatch result = salmonMatchService.findById(1);
 
             assertNotNull(result);
             assertEquals(salmonMatch1, result);
@@ -103,10 +103,10 @@ public class SalmonMatchServiceTest {
 
         @Test
         @DisplayName("Should throw ResourceNotFoundException when salmon match not found")
-        void testGetById_NotFound() {
+        void testfindById_NotFound() {
             when(salmonMatchRepository.findById(99)).thenReturn(Optional.empty());
 
-            assertThrows(ResourceNotFoundException.class, () -> salmonMatchService.getById(99));
+            assertThrows(ResourceNotFoundException.class, () -> salmonMatchService.findById(99));
             verify(salmonMatchRepository).findById(99);
         }
 

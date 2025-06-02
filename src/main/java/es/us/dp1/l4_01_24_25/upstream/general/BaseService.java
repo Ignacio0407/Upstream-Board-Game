@@ -1,0 +1,57 @@
+package es.us.dp1.l4_01_24_25.upstream.general;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import jakarta.validation.Valid;
+
+import java.util.List;
+import java.util.Optional;
+
+public abstract class BaseService<T, ID> {
+    protected final CrudRepository<T, ID> repository;
+
+    protected BaseService(CrudRepository<T, ID> repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<T> findAll() {
+        return (List<T>) repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public T findById(ID id) {
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resource not found with ID: " + id));
+    }
+
+    @Transactional
+    public T save(@Valid T entity) {
+        return repository.save(entity);
+    }
+
+    @Transactional
+    public void delete(ID id) {
+        Optional<T> entity = repository.findById(id);
+        if (!entity.isPresent()) {
+            throw new ResourceNotFoundException("Resource not found with ID: " + id);
+        }
+        repository.delete(entity.get());
+    }
+
+    @Transactional
+    public T update(ID id, @Valid T updatedEntity) {
+        T existingEntity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with ID: " + id));
+
+        updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
+
+        return repository.save(existingEntity);
+    }
+
+    protected void updateEntityFields(@Valid T existing, @Valid T updated) {
+        throw new UnsupportedOperationException("updateEntityFields no implementado");
+    }
+
+}
