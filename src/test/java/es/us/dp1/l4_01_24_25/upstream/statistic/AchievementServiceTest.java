@@ -51,7 +51,7 @@ class AchievementServiceTest {
         @Test
         @DisplayName("Should get all achievements successfully")
         void testGetAchievements() {
-            List<Achievement> expectedAchievements = Arrays.asList(achievement1, achievement2);
+            ArrayList<Achievement> expectedAchievements = (ArrayList<Achievement>) Arrays.asList(achievement1, achievement2);
             when(achievementRepository.findAll()).thenReturn(expectedAchievements);
 
             List<Achievement> result = achievementService.findAll();
@@ -89,7 +89,7 @@ class AchievementServiceTest {
         @Test
         @DisplayName("Should get achievement by name successfully")
         void testGetByName_Success() {
-            when(achievementRepository.findByName("First Achievement")).thenReturn(achievement1);
+            when(achievementRepository.findByName("First Achievement")).thenReturn(Optional.of(achievement1));
 
             Achievement result = new Achievement();//achievementService.getByName("First Achievement");
 
@@ -113,8 +113,8 @@ class AchievementServiceTest {
         @DisplayName("Should get achievements by names list successfully")
         void testGetByNames_Success() {
             List<String> names = Arrays.asList("First Achievement", "Second Achievement");
-            when(achievementRepository.findByName("First Achievement")).thenReturn(achievement1);
-            when(achievementRepository.findByName("Second Achievement")).thenReturn(achievement2);
+            when(achievementRepository.findByName("First Achievement")).thenReturn(Optional.of(achievement1));
+            when(achievementRepository.findByName("Second Achievement")).thenReturn(Optional.of(achievement2));
 
             List<Achievement> result = new ArrayList<>();//achievementService.getByNames(names);
 
@@ -130,7 +130,7 @@ class AchievementServiceTest {
             List<String> names = Arrays.asList("First Achievement", "Nonexistent");
 
             // Simulamos el comportamiento del repositorio
-            when(achievementRepository.findByName("First Achievement")).thenReturn(achievement1);
+            when(achievementRepository.findByName("First Achievement")).thenReturn(Optional.of(achievement1));
             when(achievementRepository.findByName("Nonexistent")).thenReturn(null);
 
             // Llamamos al método

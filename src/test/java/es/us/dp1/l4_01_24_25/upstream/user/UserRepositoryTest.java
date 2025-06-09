@@ -24,7 +24,7 @@ public class UserRepositoryTest {
         String auth = "ADMIN";
 
         User user1 = new User();
-        user1.setUsername("admin_user");
+        user1.setName("admin_user");
         Authorities auth1 = new Authorities();
         auth1.setAuthority("ADMIN");
         user1.setAuthority(auth1);

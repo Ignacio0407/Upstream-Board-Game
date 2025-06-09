@@ -73,7 +73,7 @@ public class MatchTileServiceTest {
         @Test
         void testGetAllMatchTiles() {
             List<MatchTile> expectedMatchTiles = Arrays.asList(matchTile2, matchTile1);
-            when(matchTileRepository.findAll()).thenReturn(expectedMatchTiles);
+            //when(matchTileRepository.findAll()).thenReturn(expectedMatchTiles);
 
             List<MatchTile> result = matchTileService.findAll();
 

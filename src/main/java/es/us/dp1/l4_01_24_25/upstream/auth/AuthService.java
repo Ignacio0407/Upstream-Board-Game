@@ -35,7 +35,7 @@ public class AuthService {
 	@Transactional
 	public void createUser(@Valid SignupRequest request) {
 		User user = new User();
-		user.setUsername(request.getUsername());
+		user.setName(request.getUsername());
 		user.setPassword(encoder.encode(request.getPassword()));
 		String strRoles = request.getAuthority();
 		Authorities role;
