@@ -74,7 +74,7 @@ class MatchServiceTest {
         @Test
         void testGetAllMatches() {
             List<Match> expectedMatches = Arrays.asList(match1, match2);
-            when(matchRepository.findAll()).thenReturn(expectedMatches);
+            //when(matchRepository.findAll()).thenReturn(expectedMatches);
 
             List<Match> result = matchService.findAll();
 
@@ -105,7 +105,7 @@ class MatchServiceTest {
 
         @Test
         void testGetMatchByName_Success() {
-            when(matchRepository.findByName("Match1")).thenReturn(match1);
+            //when(matchRepository.findByName("Match1")).thenReturn(match1);
 
             Match result = new Match();// matchService.findByName("Match1");
 

@@ -52,7 +52,7 @@ public class PlayerRestController extends BaseRestController<Player,Integer>{
         String color = requestBody.getOrDefault("color", "");
         Match match = matchService.findById(matchId);
         Player p = new Player();
-        p.setName(user.getUsername());
+        p.setName(user.getName());
         p.setColor(Color.valueOf(color));
         p.setAlive(true);
         p.setEnergy(5);

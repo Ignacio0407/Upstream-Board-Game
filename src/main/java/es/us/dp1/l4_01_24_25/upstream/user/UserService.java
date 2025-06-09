@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,7 @@ public class UserService extends BaseService<User,Integer>{
 
 	@Transactional(readOnly = true)
 	public User findUser(String username) {
-		return userRepository.findByUsername(username)
+		return userRepository.findByName(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 	}
 
@@ -55,12 +54,12 @@ public class UserService extends BaseService<User,Integer>{
 		if (auth == null)
 			throw new ResourceNotFoundException("Nobody authenticated!");
 		else
-			return userRepository.findByUsername(auth.getName())
+			return userRepository.findByName(auth.getName())
 					.orElseThrow(() -> new ResourceNotFoundException("User", "Username", auth.getName()));
 	}
 
 	public Boolean existsUser(String username) {
-		return userRepository.existsByUsername(username);
+		return userRepository.existsByName(username);
 	}
 
 	public Iterable<User> findAllByAuthority(String auth) {

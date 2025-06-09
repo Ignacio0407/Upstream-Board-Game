@@ -3,8 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
-import jakarta.persistence.Column;
+import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -20,10 +19,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "appusers")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class User extends BaseEntity {
+public class User extends NamedEntity {
 
-	@Column(unique = true)
-	String username;
 	@JsonIgnore
 	String password;
 	Integer victories;

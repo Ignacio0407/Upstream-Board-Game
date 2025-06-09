@@ -102,7 +102,7 @@ public class MatchRestControllerTest {
         player.setAlive(true);
         User user = new User();
         user.setId(1);
-        user.setUsername("Paco");
+        user.setName("Paco");
         testMatch.setInitialPlayer(player);
         testMatch.setMatchCreator(user);
         testMatch.setSalmonMatches(new ArrayList<>());

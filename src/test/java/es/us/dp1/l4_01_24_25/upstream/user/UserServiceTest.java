@@ -31,7 +31,7 @@ public class UserServiceTest {
 	@WithMockUser(username = "player1", password = "0wn3r")
 	void shouldFindCurrentUser() {
 		User user = this.userService.findCurrentUser();
-		assertEquals("player1", user.getUsername());
+		assertEquals("player1", user.getName());
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class UserServiceTest {
 	@Test
 	void shouldFindUsersByUsername() {
 		User user = this.userService.findUser("player1");
-		assertEquals("player1", user.getUsername());
+		assertEquals("player1", user.getName());
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class UserServiceTest {
 	@Test
 	void shouldFindSingleUser() {
 		User user = this.userService.findById(4);
-		assertEquals("player1", user.getUsername());
+		assertEquals("player1", user.getName());
 	}
 
 	@Test
@@ -98,10 +98,10 @@ public class UserServiceTest {
 		int idToUpdate = 1;
 		String newName="Change";
 		User user = this.userService.findById(idToUpdate);
-		user.setUsername(newName);
+		user.setName(newName);
 		userService.updateUser(user, idToUpdate);
 		user = this.userService.findById(idToUpdate);
-		assertEquals(newName, user.getUsername());
+		assertEquals(newName, user.getName());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class UserServiceTest {
 		int count = ((Collection<User>) this.userService.findAll()).size();
 
 		User user = new User();
-		user.setUsername("Sam");
+		user.setName("Sam");
 		user.setPassword("password");
 		user.setAuthority(authService.findByAuthority("ADMIN"));
 

@@ -1,16 +1,13 @@
 package es.us.dp1.l4_01_24_25.upstream.statistic;
 
-import java.util.List;
+import java.util.Optional;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AchievementRepository extends CrudRepository<Achievement, Integer>{
+public interface AchievementRepository extends JpaRepository<Achievement, Integer>{
     
-    @SuppressWarnings("override")
-    List<Achievement> findAll();
-    
-    public Achievement findByName(String name);
+    public Optional<Achievement> findByName(@Param("name") String name);
 }
-

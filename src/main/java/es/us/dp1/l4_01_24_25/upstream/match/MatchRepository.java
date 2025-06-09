@@ -1,9 +1,10 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -11,12 +12,9 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 
 @Repository
-public interface MatchRepository extends CrudRepository<Match, Integer>{
-    
-    @Override
-    List<Match> findAll();
-    
-    public Match findByName(@Param("name") String name);
+public interface MatchRepository extends JpaRepository<Match, Integer>{
+
+    public Optional<Match> findByName(@Param("name") String name);
 
     @Query("SELECT p FROM Player p WHERE p.match.id = :id")
     public List<Player> findPlayersFromGame(@Param("id") Integer id);

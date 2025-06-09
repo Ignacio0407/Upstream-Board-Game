@@ -80,7 +80,7 @@ public class UserAchievementServiceTest {
 
     @Test
     void testGetAllUserAchievementsSuccess() {
-        List<UserAchievement> expectedUserAchievements = Arrays.asList(ua1, ua2);
+        ArrayList<UserAchievement> expectedUserAchievements = (ArrayList<UserAchievement>) Arrays.asList(ua1, ua2);
         when(userAchievementRepository.findAll()).thenReturn(expectedUserAchievements);
 
         List<UserAchievement> result = userAchievementService.findAll();
@@ -113,7 +113,7 @@ public class UserAchievementServiceTest {
         UserAchievement userAchievement = new UserAchievement();
         when(userAchievementRepository.save(userAchievement)).thenReturn(userAchievement);
 
-        UserAchievement result = userAchievementService.saveUA(userAchievement);
+        UserAchievement result = userAchievementService.save(userAchievement);
 
         assertNotNull(result);
         assertEquals(userAchievement, result);
@@ -126,7 +126,7 @@ public class UserAchievementServiceTest {
         DataAccessException ex = new DataAccessException("Test exception") {};
         when(userAchievementRepository.save(userAchievement)).thenThrow(ex);
 
-        assertThrows(DataAccessException.class, () -> userAchievementService.saveUA(userAchievement));
+        assertThrows(DataAccessException.class, () -> userAchievementService.save(userAchievement));
         verify(userAchievementRepository, times(1)).save(userAchievement);
     }
 
@@ -134,10 +134,10 @@ public class UserAchievementServiceTest {
     void testGetUserAchievementByIdSuccesfully() { 
         when(userAchievementRepository.findById(1)).thenReturn(Optional.of(ua1));
 
-        Optional<UserAchievement> result = userAchievementService.findById(1);
+        UserAchievement result = userAchievementService.findById(1);
 
         assertNotNull(result);
-        assertEquals(ua1, result.get());
+        assertEquals(ua1, result);
         verify(userAchievementRepository).findById(1);
     }
 

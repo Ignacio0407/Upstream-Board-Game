@@ -1,5 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.tile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +48,7 @@ public class TileServiceTest {
         @Test
         void testGetAllCasillas() {
             // Given
-            List<Tile> expectedCasillas = Arrays.asList(tile1, tile2);
+            ArrayList<Tile> expectedCasillas = (ArrayList<Tile>) Arrays.asList(tile1, tile2);
             when(tileRepository.findAll()).thenReturn(expectedCasillas);
 
             // When

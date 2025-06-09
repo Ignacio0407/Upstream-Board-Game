@@ -61,7 +61,7 @@ public class AuthServiceTests {
 
 		if(auth == "PLAYER") {
 			User playerUser = new User();
-			playerUser.setUsername("clinicOwnerTest");
+			playerUser.setName("clinicOwnerTest");
 			playerUser.setPassword("clinicOwnerTest");
 			playerUser.setAuthority(authoritiesService.findByAuthority("PLAYER"));
 			userService.save(playerUser);			

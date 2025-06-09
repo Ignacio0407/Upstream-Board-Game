@@ -69,7 +69,7 @@ public class UserControllerTest {
 
 		user = new User();
 		user.setId(1);
-		user.setUsername("user");
+		user.setName("user");
 		user.setPassword("password");
 		user.setAuthority(auth);
 
@@ -79,7 +79,7 @@ public class UserControllerTest {
 
 	private User getUserFromDetails(UserDetails details) {
 		logged = new User();
-		logged.setUsername(details.getUsername());
+		logged.setName(details.getUsername());
 		logged.setPassword(details.getPassword());
 		Authorities aux = new Authorities();
 		for (GrantedAuthority auth : details.getAuthorities()) {
@@ -94,11 +94,11 @@ public class UserControllerTest {
 	void shouldFindAll() throws Exception {
 		User sara = new User();
 		sara.setId(2);
-		sara.setUsername("Sara");
+		sara.setName("Sara");
 
 		User juan = new User();
 		juan.setId(3);
-		juan.setUsername("Juan");
+		juan.setName("Juan");
 
 		when(this.userService.findAll()).thenReturn(List.of(user, sara, juan));
 
@@ -117,12 +117,12 @@ public class UserControllerTest {
 
 		User sara = new User();
 		sara.setId(2);
-		sara.setUsername("Sara");
+		sara.setName("Sara");
 		sara.setAuthority(aux);
 
 		User juan = new User();
 		juan.setId(3);
-		juan.setUsername("Juan");
+		juan.setName("Juan");
 		juan.setAuthority(auth);
 
 		when(this.userService.findAllByAuthority(auth.getAuthority())).thenReturn(List.of(user, juan));
@@ -152,7 +152,7 @@ public class UserControllerTest {
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(TEST_USER_ID))
-				.andExpect(jsonPath("$.username").value(user.getUsername()))
+				.andExpect(jsonPath("$.username").value(user.getName()))
 				.andExpect(jsonPath("$.authority").value(user.getAuthority().getAuthority()));
 	}
 
@@ -167,7 +167,7 @@ public class UserControllerTest {
 	@WithMockUser("admin")
 	void shouldCreateUser() throws Exception {
 		User aux = new User();
-		aux.setUsername("Prueba");
+		aux.setName("Prueba");
 		aux.setPassword("Prueba");
 		aux.setAuthority(auth);
 
@@ -178,7 +178,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser("admin")
 	void shouldUpdateUser() throws Exception {
-		user.setUsername("UPDATED");
+		user.setName("UPDATED");
 		user.setPassword("CHANGED");
 
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
@@ -192,7 +192,7 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser("admin")
 	void shouldReturnNotFoundUpdateUser() throws Exception {
-		user.setUsername("UPDATED");
+		user.setName("UPDATED");
 		user.setPassword("UPDATED");
 
 		when(this.userService.findById(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
