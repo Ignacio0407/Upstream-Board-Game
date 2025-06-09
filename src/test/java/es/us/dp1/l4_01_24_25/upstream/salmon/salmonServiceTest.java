@@ -1,5 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.salmon;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class SalmonServiceTest {
         @DisplayName("Should find all salmons successfully")
         void testGetAllSalmons() {
             // Given
-            List<Salmon> expectedSalmons = Arrays.asList(salmon1, salmon2);
+            ArrayList<Salmon> expectedSalmons = (ArrayList<Salmon>) List.of(salmon1, salmon2);
             when(salmonRepository.findAll()).thenReturn(expectedSalmons);
 
             // When
@@ -74,7 +75,7 @@ public class SalmonServiceTest {
         @DisplayName("Should find all salmons when empty")
         void testGetAllSalmons_EmptyList() {
             // Given
-            when(salmonRepository.findAll()).thenReturn(Arrays.asList());
+            when(salmonRepository.findAll()).thenReturn(new ArrayList<>());
 
             // When
             List<Salmon> result = salmonService.findAll();

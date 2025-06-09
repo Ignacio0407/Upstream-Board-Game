@@ -62,7 +62,7 @@ public class PlayerServiceTest {
         
         @Test
         void testGetPlayers() {
-            List<Player> players = Arrays.asList(player1, player2);
+            ArrayList<Player> players = (ArrayList<Player>) Arrays.asList(player1, player2);
             when(playerRepository.findAll()).thenReturn(players);
 
             List<Player> result = playerService.findAll();
@@ -94,7 +94,7 @@ public class PlayerServiceTest {
 
         @Test
         void testGetByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(player1);
+            when(playerRepository.findByName("Player1")).thenReturn(Optional.of(player1));
 
             Player result = new Player();//playerService.getByName("Player1");
 
@@ -115,8 +115,8 @@ public class PlayerServiceTest {
 
         @Test
         void testGetSomePlayersByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(player1);
-            when(playerRepository.findByName("Player2")).thenReturn(player2);
+            when(playerRepository.findByName("Player1")).thenReturn(Optional.of(player1));
+            when(playerRepository.findByName("Player2")).thenReturn(Optional.of(player2));
 
             List<String> names = Arrays.asList("Player1", "Player2");
             List<Player> result = new ArrayList<>();//playerService.getSomeByName(names);

@@ -1,14 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.salmon;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@SuppressWarnings("override")
-public interface  SalmonRepository extends  CrudRepository<Salmon, Integer>{
-    List<Salmon> findAll();
-    Optional<Salmon> findById(int id);
-    
+public interface  SalmonRepository extends  JpaRepository<Salmon, Integer>{   
 }

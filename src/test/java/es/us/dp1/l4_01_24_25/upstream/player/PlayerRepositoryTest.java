@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -90,12 +91,12 @@ public class PlayerRepositoryTest {
         Player player = new Player();
         player.setName(name);
 
-        when(playerRepository.findByName(name)).thenReturn(player);
+        when(playerRepository.findByName(name)).thenReturn(Optional.of(player));
 
-        Player result = playerRepository.findByName(name);
+        Optional<Player> result = playerRepository.findByName(name);
 
         assertNotNull(result);
-        assertEquals(name, result.getName());
+        assertEquals(name, result.get().getName());
 
         String invalidName = "Non Existent Player";
 
