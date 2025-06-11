@@ -207,18 +207,18 @@ public class SalmonMatchRepositoryTest {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         salmonMatches.add(sm1);
 
-        when(salmonMatchRepository.findWithNoCoord(matchId)).thenReturn(salmonMatches);
+        when(salmonMatchRepository.findByMatchIdNoCoord(matchId)).thenReturn(salmonMatches);
 
-        List<SalmonMatch> result = salmonMatchRepository.findWithNoCoord(matchId);
+        List<SalmonMatch> result = salmonMatchRepository.findByMatchIdNoCoord(matchId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
 
         Integer invalidMatchId = 99;
 
-        when(salmonMatchRepository.findWithNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(salmonMatchRepository.findByMatchIdNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        result = salmonMatchRepository.findWithNoCoord(invalidMatchId);
+        result = salmonMatchRepository.findByMatchIdNoCoord(invalidMatchId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

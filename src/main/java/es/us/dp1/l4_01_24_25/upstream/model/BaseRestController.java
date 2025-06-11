@@ -1,4 +1,5 @@
-package es.us.dp1.l4_01_24_25.upstream.general;
+package es.us.dp1.l4_01_24_25.upstream.model;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public abstract class BaseRestController<T, ID> {
 
     @PostMapping
     public ResponseEntity<T> save(@RequestBody T entity) {
-        return ResponseEntity.ok(service.save(entity));
+        return new ResponseEntity<>((service.save(entity)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
