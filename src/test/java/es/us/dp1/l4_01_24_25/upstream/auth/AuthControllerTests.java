@@ -129,7 +129,7 @@ class AuthControllerTests {
 
 	@Test
 	void shouldRegisterUser() throws Exception {
-		when(this.userService.existsUser(signupRequest.getUsername())).thenReturn(false);
+		when(this.userService.existsUserByName(signupRequest.getUsername())).thenReturn(false);
 		doNothing().when(this.authService).createUser(signupRequest);
 
 		mockMvc.perform(post(BASE_URL + "/signup").with(csrf()).contentType(MediaType.APPLICATION_JSON)
@@ -139,7 +139,7 @@ class AuthControllerTests {
 
 	@Test
 	void shouldNotRegisterUserWithExistingUsername() throws Exception {
-		when(this.userService.existsUser(signupRequest.getUsername())).thenReturn(true);
+		when(this.userService.existsUserByName(signupRequest.getUsername())).thenReturn(true);
 
 		mockMvc.perform(post(BASE_URL + "/signup").with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(signupRequest))).andExpect(status().isBadRequest())

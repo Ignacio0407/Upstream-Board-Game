@@ -3,5 +3,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface  SalmonRepository extends  JpaRepository<Salmon, Integer>{   
-}
+public interface  SalmonRepository extends  JpaRepository<Salmon, Integer> {}

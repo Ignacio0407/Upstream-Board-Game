@@ -12,13 +12,12 @@ import es.us.dp1.l4_01_24_25.upstream.player.MatchDeserializer;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.matchSerializer;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
+import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,12 +33,10 @@ public class SalmonMatch extends BaseEntity{
 	@JsonDeserialize(using = PlayerDeserializer.class)
     Player player;
     
-    @Min(0)
-    @Max(5)
+    @ValidNumber(min=0,max=5)
     Integer salmonsNumber;
 
-    @Min(0)
-    @Max(5)
+    @ValidNumber(min=0,max=5)
     Integer spawningNumber;
     
     @Embedded

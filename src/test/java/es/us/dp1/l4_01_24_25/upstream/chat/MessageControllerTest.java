@@ -67,7 +67,7 @@ public class MessageControllerTest {
         player.setId(1);
         player.setName("Player 1");
         player.setEnergy(5);
-        player.setColor(Color.ROJO);
+        player.setColor(Color.RED);
         player.setPlayerOrder(0);
         player.setAlive(true);
         player.setPoints(0);

@@ -49,11 +49,11 @@ public class MatchTileRepositoryTest {
         matchTile.setId(1);
         matchTile.setCoordinate(null);
 
-        when(matchTileRepository.findWithNoCoord(validMatchId)).thenReturn(List.of(matchTile));
-        when(matchTileRepository.findWithNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(matchTileRepository.findByMatchIdNoCoord(validMatchId)).thenReturn(List.of(matchTile));
+        when(matchTileRepository.findByMatchIdNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        List<MatchTile> validResult = matchTileRepository.findWithNoCoord(validMatchId);
-        List<MatchTile> invalidResult = matchTileRepository.findWithNoCoord(invalidMatchId);
+        List<MatchTile> validResult = matchTileRepository.findByMatchIdNoCoord(validMatchId);
+        List<MatchTile> invalidResult = matchTileRepository.findByMatchIdNoCoord(invalidMatchId);
 
         assertFalse(validResult.isEmpty());
         assertSame(matchTile, validResult.get(0));

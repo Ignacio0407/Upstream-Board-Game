@@ -27,7 +27,7 @@ public interface SalmonMatchRepository extends JpaRepository<SalmonMatch, Intege
     List<SalmonMatch> findAllFromPlayerInRiver(@Param("playerId") Integer playerId);
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate IS NULL")
-    List<SalmonMatch> findWithNoCoord(Integer matchId);
+    List<SalmonMatch> findByMatchIdNoCoord(Integer matchId);
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId AND sm.coordinate.y > 20")
     List<SalmonMatch> findAllFromPlayerInSpawn(@Param("playerId") Integer playerId);

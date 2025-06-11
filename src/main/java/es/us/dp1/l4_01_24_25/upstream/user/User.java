@@ -23,8 +23,11 @@ public class User extends NamedEntity {
 
 	@JsonIgnore
 	String password;
+	
 	Integer victories;
+	
 	Integer playedgames;
+	
 	Integer totalpoints;
 
 	@NotNull
