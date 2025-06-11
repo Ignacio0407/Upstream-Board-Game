@@ -1,7 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -9,8 +7,8 @@ import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
 import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,11 +16,8 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,14 +30,18 @@ public class Match extends NamedEntity {
 
 	// Esto para unirse
 	String password;
+	
 	@Enumerated(EnumType.STRING)
 	State state;
+	
 	// Esto para jugar en sí
-	@Min(0)
-	@Max(5)
+	@ValidNumber(min=0,max=5)
 	Integer playersNum;
-    Integer round;
-    @Enumerated(EnumType.STRING)
+    
+	@ValidNumber(min=0)
+	Integer round;
+    
+	@Enumerated(EnumType.STRING)
 	Phase phase;
 
 	Boolean finalScoreCalculated;
@@ -65,13 +64,7 @@ public class Match extends NamedEntity {
 	@JsonDeserialize(using = UserDeserializer.class)
 	User matchCreator;
 
-	@OneToMany(mappedBy = "match")
-	private List<SalmonMatch> salmonMatches;
-
-
-	public Match() {
-		
-	}
+	public Match() {}
 
 	public Integer getPlayersNumber() {
         return playersNum;

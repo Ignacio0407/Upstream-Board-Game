@@ -116,7 +116,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch1, salmonMatch2);
             when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.getAllFromMatch(1);
+            List<SalmonMatch> result = salmonMatchService.findAllFromMatch(1);
 
             assertNotNull(result);
             assertEquals(expected, result);
@@ -128,7 +128,7 @@ public class SalmonMatchServiceTest {
         void testGetAllFromMatch_Empty() {
             when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(null);
 
-            List<SalmonMatch> result = salmonMatchService.getAllFromMatch(1);
+            List<SalmonMatch> result = salmonMatchService.findAllFromMatch(1);
 
             assertEquals(List.of(), result);
             verify(salmonMatchRepository).findAllFromMatch(1);
@@ -190,12 +190,12 @@ public class SalmonMatchServiceTest {
         @DisplayName("Should get salmons in sea")
         void testGetSalmonsInSea() {
             List<SalmonMatch> expected = List.of(salmonMatch2);
-            when(salmonMatchRepository.findWithNoCoord(1)).thenReturn(expected);
+            when(salmonMatchRepository.findByMatchIdNoCoord(1)).thenReturn(expected);
 
             List<SalmonMatch> result = salmonMatchService.getSalmonsInSea(1);
 
             assertEquals(expected, result);
-            verify(salmonMatchRepository).findWithNoCoord(1);
+            verify(salmonMatchRepository).findByMatchIdNoCoord(1);
         }
 
         @Test

@@ -15,7 +15,9 @@ import lombok.Setter;
 public class Achievement extends NamedEntity {
     
     private String description;
+    
     private String badgeImage;
+    
     @Min(0)
     private double threshold;
 

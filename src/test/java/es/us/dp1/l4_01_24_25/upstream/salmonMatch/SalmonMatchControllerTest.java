@@ -82,7 +82,7 @@ public class SalmonMatchControllerTest {
         player.setId(1);
         player.setName("Player 1");
         player.setEnergy(5);
-        player.setColor(Color.ROJO);
+        player.setColor(Color.RED);
         player.setPlayerOrder(0);
         player.setAlive(true);
         player.setPoints(0);
@@ -119,7 +119,7 @@ public class SalmonMatchControllerTest {
 
         salmon = new Salmon();
         salmon.setId(1);
-        salmon.setColor(Color.ROJO);
+        salmon.setColor(Color.RED);
         salmon.setImage("rojo2");
 
         salmonMatch = new SalmonMatch();
@@ -135,7 +135,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldFindAllFromMatch() throws Exception {
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch));
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch));
 
         mockMvc.perform(get("/api/v1/salmonMatches/match/1"))
             .andExpect(status().isOk())
@@ -183,7 +183,7 @@ public class SalmonMatchControllerTest {
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(match.getSalmonMatches());
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(match.getSalmonMatches());
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
@@ -212,7 +212,7 @@ public class SalmonMatchControllerTest {
         matchTile.setSalmonsNumber(2);
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch, salmonMatch, salmonMatch));
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of(salmonMatch, salmonMatch, salmonMatch));
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
@@ -247,7 +247,7 @@ public class SalmonMatchControllerTest {
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of());
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
@@ -268,7 +268,7 @@ public class SalmonMatchControllerTest {
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
         when(matchTileService.eagleToWater(any(), any())).thenReturn(matchTile);
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of());
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
@@ -289,7 +289,7 @@ public class SalmonMatchControllerTest {
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
-        when(salmonMatchService.getAllFromMatch(anyInt())).thenReturn(List.of());
+        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of());
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 

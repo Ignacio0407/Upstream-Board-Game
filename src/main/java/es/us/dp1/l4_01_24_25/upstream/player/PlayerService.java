@@ -1,40 +1,44 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @Service
 public class PlayerService extends BaseService<Player,Integer>{
         
     PlayerRepository playerRepository;
-    SalmonMatchRepository salmonMatchRepository;
+    SalmonMatchService salmonMatchService ;
+    UserService userService;
+    MatchService matchService;
 
-    public PlayerService(PlayerRepository playerRepository, SalmonMatchRepository salmonMatchRepository) {
+    public PlayerService(PlayerRepository playerRepository, SalmonMatchService  salmonMatchService , UserService userService, MatchService matchService) {
         super(playerRepository);
-        this.salmonMatchRepository = salmonMatchRepository;
+        this.salmonMatchService = salmonMatchService ;
+        this.userService = userService;
+        this.matchService = matchService;
     }
 
     @Transactional(readOnly = true)
     public List<Player> findPlayersByMatch(Integer id) {
-        List<Player> jugadores = playerRepository.findPlayersByMatch(id);
-        return jugadores.isEmpty()? new ArrayList<>() : jugadores;
+        return this.findList(playerRepository.findPlayersByMatch(id));
     }
 
     @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatch(Integer id) {
-        List<Player> jugadores = playerRepository.findAlivePlayersByMatch(id);
-        if(jugadores == null) return List.of();
-        return jugadores;
+        return this.findList(playerRepository.findAlivePlayersByMatch(id));
     }
 
     @Transactional
@@ -49,18 +53,41 @@ public class PlayerService extends BaseService<Player,Integer>{
         return update(JugadorNueva, JugadorToUpdate);
     }
 
-    @Transactional
-	public List<Player> savePlayers (List<Player> Jugadores) throws DataAccessException {
-        List<Player> jugadoresFallidas = new LinkedList<>();
-        Jugadores.forEach(jugador -> {
-            try {
-                playerRepository.save(jugador);
-            } catch (DataAccessException e) {
-                jugadoresFallidas.add(jugador);
-            }
-        });
-		return jugadoresFallidas;
-	}
+    public Player createPlayerInMatch(Integer matchId, Map<String,String> requestBody) {
+        String idUser = requestBody.getOrDefault("user", "");
+        User user = userService.findById(Integer.valueOf(idUser));
+        String color = requestBody.getOrDefault("color", "");
+        Match match = matchService.findById(matchId);
+        Player p = new Player();
+        p.setName(user.getName());
+        p.setColor(Color.valueOf(color));
+        p.setAlive(true);
+        p.setEnergy(5);
+        p.setUserPlayer(user);
+        p.setMatch(match);
+        p.setPoints(0);
+        p.setPlayerOrder(match.getPlayersNumber());
+        match.setPlayersNumber(match.getPlayersNumber() + 1);
+        matchService.save(match);
+
+        return this.save(p);
+    }
+
+    public Player updateEnergy(Integer id, Integer energyUsed) throws ResourceNotFoundException, Exception {
+        Player player = this.findById(id);
+        if (player.getEnergy() - energyUsed < 0) {
+            throw new BadRequestException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
+                player.getEnergy(), energyUsed));
+        }
+        player.setEnergy(player.getEnergy() - energyUsed);
+        return this.save(player);
+    }
+
+    public Player regenerateEnergy(Integer id) {
+        Player player = this.findById(id);
+        player.setEnergy(5);
+        return this.save(player);
+    }
 
     @Transactional
     public void setPlayerDead(Integer playerId) {
@@ -68,41 +95,31 @@ public class PlayerService extends BaseService<Player,Integer>{
         player.setAlive(false);
         player.setEnergy(0); 
         player.setPlayerOrder(10); 
-        playerRepository.save(player);
+        this.save(player);
     }
 
     @Transactional
     public void setPlayerNoEnergy(Integer playerId) {
         Player player = this.findById(playerId);
         player.setEnergy(0);
-        playerRepository.save(player);
+        this.save(player);
 
     }
 
     @Transactional
     public Boolean checkPlayerFinished(Integer playerId) {
-        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
-        Boolean res = false;
-        if (!salmons.isEmpty() && 
-            salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20)) {
-            res = true;
-        }
-        return res;
+        List<SalmonMatch> salmons = salmonMatchService.findAllFromPlayer(playerId);
+        return !salmons.isEmpty() && salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20);
     }
 
     @Transactional
     public Boolean checkPlayerIsDead(Integer playerId) {
-        List<SalmonMatch> salmons = salmonMatchRepository.findAllFromPlayer(playerId);
-        Boolean res = false;
-        if(salmons.isEmpty()) { res = true;}
-        return res;
+        return salmonMatchService.findAllFromPlayer(playerId).isEmpty();
     }
 
     @Transactional
     public Boolean checkPlayerNoEnergy(Integer playerId){
         Player player = this.findById(playerId);
-        Boolean res = false;
-        if(player.getEnergy() == 0) res = true;
-        return res;
+        return player.getEnergy() == 0;
     }
 }

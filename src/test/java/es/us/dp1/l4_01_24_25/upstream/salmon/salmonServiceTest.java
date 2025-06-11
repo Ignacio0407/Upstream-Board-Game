@@ -41,12 +41,12 @@ public class SalmonServiceTest {
     void setup() {
         salmon1 = new Salmon();
         salmon1.setId(1);
-        salmon1.setColor(Color.ROJO);
+        salmon1.setColor(Color.RED);
         salmon1.setImage("salmon1.png");
         
         salmon2 = new Salmon();
         salmon2.setId(2);
-        salmon2.setColor(Color.AMARILLO);
+        salmon2.setColor(Color.YELLOW);
         salmon2.setImage("salmon2.png");
     }
 
@@ -157,12 +157,12 @@ public class SalmonServiceTest {
         void testCreateSalmon_WithNullId() {
             // Given
             Salmon newSalmon = new Salmon();
-            newSalmon.setColor(Color.VERDE);
+            newSalmon.setColor(Color.GREEN);
             newSalmon.setImage("newSalmon.png");
             
             Salmon savedSalmon = new Salmon();
             savedSalmon.setId(3);
-            savedSalmon.setColor(Color.VERDE);
+            savedSalmon.setColor(Color.GREEN);
             savedSalmon.setImage("newSalmon.png");
             
             when(salmonRepository.save(any(Salmon.class))).thenReturn(savedSalmon);

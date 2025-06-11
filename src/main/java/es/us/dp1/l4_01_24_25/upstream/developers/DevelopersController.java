@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/developers")
 public class DevelopersController {
+    
     List<Developer> developers;
-    //comentario para ignacio
 
     @GetMapping
     public List<Developer> getDevelopers(){
@@ -32,9 +32,6 @@ public class DevelopersController {
             developers=model.getDevelopers();                                            
         } catch (IOException | XmlPullParserException e) {
             
-        }
-        
+        }   
     }
-
-
 }

@@ -42,7 +42,7 @@ public class PlayerServiceTest {
         player1 = new Player();
         player1.setId(1);
         player1.setName("Player1");
-        player1.setColor(Color.AMARILLO);
+        player1.setColor(Color.YELLOW);
         player1.setPlayerOrder(1);
         player1.setAlive(true);
         player1.setPoints(10);
@@ -50,7 +50,7 @@ public class PlayerServiceTest {
         player2 = new Player();
         player2.setId(2);
         player2.setName("Player2");
-        player2.setColor(Color.AMARILLO);
+        player2.setColor(Color.YELLOW);
         player2.setPlayerOrder(2);
         player2.setAlive(true);
         player2.setPoints(20);
@@ -193,7 +193,7 @@ public class PlayerServiceTest {
             Player updatedPlayer = new Player();
             updatedPlayer.setId(1);
             updatedPlayer.setName("UpdatedPlayer");
-            updatedPlayer.setColor(Color.ROJO);
+            updatedPlayer.setColor(Color.RED);
             updatedPlayer.setPoints(30);
 
             when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
@@ -202,7 +202,7 @@ public class PlayerServiceTest {
             Player result = playerService.updateById(updatedPlayer, 1);
 
             assertEquals("UpdatedPlayer", result.getName());
-            assertEquals(Color.ROJO, result.getColor());
+            assertEquals(Color.RED, result.getColor());
             assertEquals(30, result.getPoints());
         }
 

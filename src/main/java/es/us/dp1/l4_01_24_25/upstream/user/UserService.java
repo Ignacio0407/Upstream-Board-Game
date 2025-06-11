@@ -24,8 +24,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.general.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
 import jakarta.validation.Valid;
@@ -43,7 +44,7 @@ public class UserService extends BaseService<User,Integer>{
 	}
 
 	@Transactional(readOnly = true)
-	public User findUser(String username) {
+	public User findUserByName(String username) {
 		return userRepository.findByName(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 	}
@@ -58,12 +59,12 @@ public class UserService extends BaseService<User,Integer>{
 					.orElseThrow(() -> new ResourceNotFoundException("User", "Username", auth.getName()));
 	}
 
-	public Boolean existsUser(String username) {
+	public Boolean existsUserByName(String username) {
 		return userRepository.existsByName(username);
 	}
 
 	public Iterable<User> findAllByAuthority(String auth) {
-		return userRepository.findAllByAuthority(auth);
+		return this.findList(userRepository.findAllByAuthority(auth));
 	}
 
 	@Transactional
@@ -74,16 +75,19 @@ public class UserService extends BaseService<User,Integer>{
 
 		return toUpdate;
 	}
-
-	@Transactional
-	public void deleteUser(Integer id) {
-		User toDelete = this.findById(id);
-		this.userRepository.delete(toDelete);
-	}
 	
 	@Transactional
-	public List<Achievement> getUserAchievements(Integer userId) {
+	public List<Achievement> findUserAchievements(Integer userId) {
 		return userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
+	}
+
+	@Transactional
+	@Override
+	public void delete(Integer id) {
+		if (this.findCurrentUser().getId() != id) {
+			this.delete(id);
+		} else
+			throw new AccessDeniedException("You can't delete yourself!");
 	}
 
 }

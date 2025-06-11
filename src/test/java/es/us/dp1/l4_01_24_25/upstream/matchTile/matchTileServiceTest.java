@@ -128,12 +128,12 @@ public class MatchTileServiceTest {
         @Test
         void testFindByMatchIdNoCoord_Success() {
             List<MatchTile> expectedMatchTiles = Arrays.asList(matchTile2);
-            when(matchTileRepository.findWithNoCoord(1)).thenReturn(expectedMatchTiles);
+            when(matchTileRepository.findByMatchIdNoCoord(1)).thenReturn(expectedMatchTiles);
 
             List<MatchTile> result = matchTileService.findByMatchIdNoCoord(1);
 
             assertEquals(expectedMatchTiles, result);
-            verify(matchTileRepository).findWithNoCoord(1);
+            verify(matchTileRepository).findByMatchIdNoCoord(1);
         }
 
         @Test
