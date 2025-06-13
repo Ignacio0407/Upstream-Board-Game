@@ -1,58 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import { fetchById, fetchByName, fetchByNames } from '../util/fetchers';
-import '../static/css/others/SearchBar.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
+import React, { useState, useEffect, useRef } from 'react';
+import '../static/css/others/SearchBar.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
-/**
- * Crea una barra de búsqueda que actualiza
- * @param {function} setter - define el setter del elemento cuya renderización hay que actualizar
- * @param {string} uri - uri of the element to be represented
- * @param {function} data - define the original data to be rendered if the search content is erased
- */
-export default function SearchBar( { setter, uri, data } ) {
-  const [input, setInput] = useState("");
+const splitQuery = (queryStr) => {
+  const tokens = [];
+  let currentToken = '';
+  let inQuotes = false;
+  
+  for (const char of queryStr) {
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ' ' && !inQuotes) {
+      if (currentToken) {
+        tokens.push(currentToken.trim());
+        currentToken = '';
+      }
+    } else {
+      currentToken += char;
+    }
+  }
+  if (currentToken) tokens.push(currentToken.trim());
+  return tokens;
+};
+
+const splitValues = (valueStr) => {
+  const values = [];
+  let currentValue = '';
+  let inQuotes = false;
+  
+  for (const char of valueStr) {
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ',' && !inQuotes) {
+      values.push(currentValue.trim());
+      currentValue = '';
+    } else {
+      currentValue += char;
+    }
+  }
+  if (currentValue) values.push(currentValue.trim());
+  
+  return values.map(v => v.replace(/"/g, '').trim().toLowerCase());
+};
+
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((acc, part) => acc?.[part], obj);
+};
+
+const filterData = (data, query, attributeMap = {}) => {
+  const queryParts = splitQuery(query);
+  const filters = {};
+  
+  for (const part of queryParts) {
+    const [attr, valueStr] = part.split(':');
+    if (attr && valueStr) {
+      filters[attr.trim()] = splitValues(valueStr);
+    }
+  }
+
+  return data.filter(item => {
+    return Object.entries(filters).every(([attr, values]) => {
+      const path = attributeMap[attr] || attr;
+      const fieldValue = getNestedValue(item, path)?.toString().toLowerCase().trim() || '';
+      return values.some(value => fieldValue.includes(value));
+    });
+  });
+};
+
+export default function SearchBar2({ data, setFiltered, placeholder, attributeMap = {} }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const inputRef = useRef(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
-    if (input === "") {
-      setter(data); // Restablecer al listado original
+    if (searchTerm === "") {
+      setFiltered(data);
     }
-  }, [input, data, setter]);
+  }, [searchTerm, data, setFiltered]);
+
+  const attributes = React.useMemo(() => {
+    if (!data.length) return [];
+    const dataKeys = Object.keys(data[0]);
+    const mappedKeys = Object.keys(attributeMap);
+    const combined = [...new Set([...mappedKeys, ...dataKeys])];
+    return combined.filter(key => key.toLowerCase() !== 'id');
+  }, [data, attributeMap]);
+
+  const handleChange = (e) => setSearchTerm(e.target.value);
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const toggleHelp = () => {
+    setShowHelp(!showHelp);
+  };
+
+  const handleAttributeClick = (attribute) => {
+    let prefix = searchTerm.trim();
+    if (prefix && !prefix.endsWith(':')) prefix += ' ';
+    setSearchTerm(prefix + attribute + ':');
+    setShowDropdown(false);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
 
   const handleSearch = () => {
-    
-    if (/^\d+$/.test(input)) {
-      fetchById(input, uri)
-        .then(response => setter([response.data]))
-        .catch(error => console.error(error));
-    } else if (input.includes(",")) {
-      const namesArray = input.split(",").map(name => name.trim());
-      fetchByNames(namesArray, uri)
-        .then(response => setter(response.data))
-        .catch(error => console.error(error));
-    } else {
-      fetchByName(input, uri)
-        .then(response => setter([response.data]))
-        .catch(error => console.error(error));
-    }
+    const filteredData = filterData(data, searchTerm, attributeMap);
+    setFiltered(filteredData);
   };
 
   return (
-    <div class="search-container">
+    <>
+    <div className="search-container">
+      <div className="search-dropdown-container">
+        <i className="fa fa-chevron-down search-dropdown-toggle" onClick={toggleDropdown}></i>
+        {showDropdown && (
+          <div className="search-dropdown">
+            {attributes.map((attr) => (
+              <div key={attr} className="search-dropdown-item" onClick={() => handleAttributeClick(attr)}>
+                {attr}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       <input
         className="search-bar"
         type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleSearch();
-          }
-        }}
-        placeholder = {`Search ${uri}`}
+        placeholder={placeholder || "Search..."}
+        value={searchTerm}
+        onChange={handleChange}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        ref={inputRef}
       />
       <button className="search-button" onClick={handleSearch}>
-      <i className="fa fa-search"></i>
+        <i className="fa fa-search"></i>
       </button>
     </div>
+    <div className="help-icon-container">
+    <i className="fa fa-question-circle help-icon" onClick={toggleHelp}></i>
+    {showHelp && (
+      <div className="help-text">
+        <p>When searching for values with spaces, wrap them in double quotes (e.g., <b>clinic:"Clinic 1"</b>)</p>
+      </div>
+    )}
+  </div>
+  </>
   );
-}
+};
