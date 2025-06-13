@@ -35,23 +35,22 @@ public class PlayerRestController extends BaseRestController<Player,Integer>{
     }
 
     @GetMapping("/match/{id}")
-    public ResponseEntity<List<Player>> findPlayersByMatchId (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+    public ResponseEntity<List<PlayerDTO>> findPlayersByMatchId (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
         return new ResponseEntity<>(playerService.findPlayersByMatch(id), HttpStatus.OK);
     }
 
     @PostMapping("/match/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Player> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody Map<String,String> requestBody) {
-        return new ResponseEntity<>(playerService.createPlayerInMatch(matchId, requestBody), HttpStatus.CREATED);
+    public ResponseEntity<PlayerDTO> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody PlayerDTO playerDTO) {
+        return new ResponseEntity<>(playerService.createPlayerInMatch(matchId, playerDTO), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/energy")
-    public ResponseEntity<Player> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException, Exception {
+    public ResponseEntity<PlayerDTO> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException, Exception {
         return new ResponseEntity<>(playerService.updateEnergy(id, energyUsed), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}/regenerateEnergy")
-    public ResponseEntity<Player> regenerateEnergy(@PathVariable("id") Integer id) throws ResourceNotFoundException, Exception {
+    public ResponseEntity<PlayerDTO> regenerateEnergy(@PathVariable("id") Integer id) throws ResourceNotFoundException, Exception {
         return new ResponseEntity<>(playerService.regenerateEnergy(id), HttpStatus.OK);
     }
        
