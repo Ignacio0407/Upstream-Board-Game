@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
@@ -26,9 +25,10 @@ import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @Service
-public class MatchService extends BaseService<Match, Integer>{
+public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         
     MatchRepository matchRepository;
+    MatchMapper matchMapper;
     PlayerService playerService;
     UserService userService;
     SalmonMatchService salmonMatchService;
@@ -36,8 +36,8 @@ public class MatchService extends BaseService<Match, Integer>{
     MatchTileService matchTileService;
 
     @Autowired
-    public MatchService(MatchRepository matchRepository, PlayerService playerService, UserService userService, SalmonMatchService salmonMatchService, UserAchievementService userAchievementService, MatchTileService matchTileService) {
-        super(matchRepository);
+    public MatchService(MatchRepository matchRepository, MatchMapper matchMapper, PlayerService playerService, UserService userService, SalmonMatchService salmonMatchService, UserAchievementService userAchievementService, MatchTileService matchTileService) {
+        super(matchRepository, matchMapper);
         this.playerService = playerService;
         this.userService = userService;
         this.salmonMatchService = salmonMatchService;
@@ -45,27 +45,18 @@ public class MatchService extends BaseService<Match, Integer>{
         this.matchTileService = matchTileService;
     }
 
-    @Transactional(readOnly = true)
-    public List<Player> findPlayersFromGame(Integer id) {
-        return playerService.findPlayersByMatch(id);
-    }
-
+    @Override
     @Transactional
-    private Match update(Match partidaNueva, Match partidaToUpdate) {
-        BeanUtils.copyProperties(partidaNueva, partidaToUpdate, "id");
-        return matchRepository.save(partidaToUpdate);
-    }
-
-    @Transactional
-    public Match updateById(Match partidaNueva, Integer idtoUpdate) {
-        Match partidaToUpdate = findById(idtoUpdate);
-        if (partidaToUpdate == null){
-            return null;
-        }
-       if (partidaToUpdate.getPlayersNumber() != null && partidaToUpdate.getPlayersNumber().equals(0)){ 
-            partidaToUpdate.setState(State.FINALIZADA);
-        }
-        return update(partidaNueva, partidaToUpdate);
+    protected void updateEntityFields(Match newMatch, Match matchToUpdate) {
+        matchToUpdate.setPassword(newMatch.getPassword());
+        matchToUpdate.setState(newMatch.getState());
+        matchToUpdate.setPlayersNumber(newMatch.getPlayersNumber());
+        matchToUpdate.setRound(newMatch.getRound());
+        matchToUpdate.setPhase(newMatch.getPhase());
+        matchToUpdate.setFinalScoreCalculated(newMatch.getFinalScoreCalculated());
+        matchToUpdate.setInitialPlayer(newMatch.getInitialPlayer());
+        matchToUpdate.setActualPlayer(newMatch.getActualPlayer());
+        matchToUpdate.setMatchCreator(newMatch.getMatchCreator());
     }
 
     @Transactional(readOnly = true)
@@ -73,7 +64,7 @@ public class MatchService extends BaseService<Match, Integer>{
         return this.findList(matchRepository.findHeronWithCoordFromGame(gameId));
     }
 
-    public Match createMatchWMatchCreator(Integer userId, Map<String, String> requestBody) { 
+    public MatchDTO createMatchWMatchCreator(Integer userId, Map<String, String> requestBody) { 
         User u = userService.findById(userId);
         String name = requestBody.getOrDefault("name", "");
         String password = requestBody.getOrDefault("password", "");
@@ -82,29 +73,32 @@ public class MatchService extends BaseService<Match, Integer>{
         m.setPassword(password);
         m.setMatchCreator(u);
         m.setState(State.ESPERANDO);
-        m.setPlayersNum(0);
+        m.setPlayersNumber(0);
         m.setRound(0);
         m.setPhase(Phase.CASILLAS);
         m.setInitialPlayer(null);
         m.setActualPlayer(null);
         m.setFinalScoreCalculated(false);
-        return this.save(m);
+        this.save(m);
+        return matchMapper.toDTO(m);
     }
 
-    public Match startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+    public MatchDTO startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match match = this.findById(matchId);
         List<Player> player = playerService.findPlayersByMatch(matchId);
         match.setState(State.EN_CURSO);
         match.setActualPlayer(player.get(0));
         match.setInitialPlayer(player.get(0));
         match.setPlayersNumber(player.size());
-        return this.save(match);
+        this.save(match);
+        return matchMapper.toDTO(match);
     }
 
-    public Match updateRound(Integer matchId) {
+    public MatchDTO updateRound(Integer matchId) {
         Match match = this.findById(matchId);
         match.setRound(match.getRound()+1);
-        return match;
+        this.save(match);
+        return matchMapper.toDTO(match);
     }
 
     @Transactional
@@ -249,7 +243,7 @@ public class MatchService extends BaseService<Match, Integer>{
         return match;
     }
 
-    public Match changePhase(Integer matchId, Integer playerId) {
+    public MatchDTO changePhase(Integer matchId, Integer playerId) {
         Match match = this.findById(matchId);
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
@@ -314,10 +308,11 @@ public class MatchService extends BaseService<Match, Integer>{
 
         endRound(matchId);
         this.checkGameHasFinished(matchId);
-        return this.save(match);
+        this.save(match);
+        return matchMapper.toDTO(match);
     }
 
-    public Match finalScore(Integer id) {
+    public MatchDTO finalScore(Integer id) {
         List<Player> players = playerService.findPlayersByMatch(id);
         Match match = this.findById(id);
         
@@ -348,7 +343,8 @@ public class MatchService extends BaseService<Match, Integer>{
             userService.save(winnerUser);
         }
         match.setFinalScoreCalculated(true);
-        return this.save(match);
+        this.save(match);
+        return matchMapper.toDTO(match);
     }
     
     @Transactional

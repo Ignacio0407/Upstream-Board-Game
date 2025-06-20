@@ -12,7 +12,7 @@ export default function EndGame({ match }) {
     const navigate = useNavigate();
 
     const fetchPlayers = async () => {
-        const playersResponse = await get(`/api/v1/matches/${match.id}/players`, jwt);
+        const playersResponse = await get(`/api/v1/players/match/${match.id}`, jwt);
         const playerData = await playersResponse.json();
 
         // Ordena los jugadores por puntos de mayor a menor
@@ -61,7 +61,6 @@ export default function EndGame({ match }) {
             <h2 className="endgame-title">PUNTUAJE</h2>
             
             {playersWithPoints.length > 0 && <div>{player}</div>}
-
             
             <Button color='danger' onClick={() => navigate("/dashboard")} className='buttonExit'>
             Salir

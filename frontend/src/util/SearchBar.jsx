@@ -67,7 +67,7 @@ const filterData = (data, query, attributeMap = {}) => {
   });
 };
 
-export default function SearchBar2({ data, setFiltered, placeholder, attributeMap = {} }) {
+export default function SearchBar({ data, setFiltered, placeholder, attributeMap = {} }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef(null);

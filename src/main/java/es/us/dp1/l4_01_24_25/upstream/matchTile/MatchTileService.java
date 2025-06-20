@@ -13,20 +13,21 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
 @Service
-public class MatchTileService extends BaseService<MatchTile,Integer>{
+public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO, Integer>{
     
     MatchTileRepository matchTileRepository;
+    MatchTileMapper matchTileMapper;
     TileService tileService;
     MatchService matchService;
 
     @Autowired
-    public MatchTileService(MatchTileRepository matchTileRepository, TileService tileService, MatchService matchService) {
-        super(matchTileRepository);
+    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, TileService tileService, MatchService matchService) {
+        super(matchTileRepository, matchTileMapper);
         this.tileService = tileService;
         this.matchService = matchService;
     }
@@ -37,13 +38,34 @@ public class MatchTileService extends BaseService<MatchTile,Integer>{
     }
 
     @Transactional(readOnly = true)
+    public List<MatchTileDTO> findByMatchIdAsDTO(Integer matchId) {
+        return this.findListDTO(this.findByMatchId(matchId), matchTileMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
     public List<MatchTile> findByMatchIdNoCoord(Integer matchId) {
         return this.findList(matchTileRepository.findByMatchIdNoCoord(matchId));
     }
 
     @Transactional(readOnly = true)
+    public List<MatchTileDTO> findByMatchIdNoCoordAsDTO(Integer matchId) {
+        return this.findListDTO(this.findByMatchIdNoCoord(matchId), matchTileMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
     public MatchTile findByCoordinate(Integer x, Integer y) {
         return matchTileRepository.findByCoordinate(x,y).orElseThrow(() -> new ResourceNotFoundException("Coordinate (" + x + y + ") not found"));
+    }
+
+    @Override
+    @Transactional
+    protected void updateEntityFields(MatchTile newMatchTile, MatchTile matchTileToUpdate) {
+        matchTileToUpdate.setCapacity(newMatchTile.getCapacity());
+        matchTileToUpdate.setOrientation(newMatchTile.getOrientation());
+        matchTileToUpdate.setSalmonsNumber(newMatchTile.getSalmonsNumber());
+        matchTileToUpdate.setCoordinate(newMatchTile.getCoordinate());
+        matchTileToUpdate.setTile(newMatchTile.getTile());
+        matchTileToUpdate.setMatch(newMatchTile.getMatch());
     }
 
     public Boolean validateTilePlacement(Integer round, Integer y) {
@@ -65,7 +87,7 @@ public class MatchTileService extends BaseService<MatchTile,Integer>{
         return water;
     }
 
-    public MatchTile updateCoordinate(Integer id, Map<String, Integer> updates) {
+    public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) {
         
         MatchTile matchTile = this.findById(id);
 
@@ -89,16 +111,18 @@ public class MatchTileService extends BaseService<MatchTile,Integer>{
         if (updates.containsKey("x") && updates.containsKey("y")) {
             matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y")));
         }
-        return this.save(matchTile);
+        this.save(matchTile);
+        return matchTileMapper.toDTO(matchTile);
     }
 
-    public MatchTile updateMatchTileRotation(Integer id, Integer rotation) {
+    public MatchTileDTO updateMatchTileRotation(Integer id, Integer rotation) {
         MatchTile matchTile = this.findById(id);
         matchTile.setOrientation(rotation);
-        return this.save(matchTile);
+        this.save(matchTile);
+        return matchTileMapper.toDTO(matchTile);
     }
 
-    public List<MatchTile> createMultipleMatchTiles(Integer id) throws DataAccessException {
+    public List<MatchTileDTO> createMultipleMatchTiles(Integer id) throws DataAccessException {
         Tile water = tileService.findById(1);
         Tile rock = tileService.findById(2);
         Tile garza = tileService.findById(3);
@@ -171,6 +195,6 @@ public class MatchTileService extends BaseService<MatchTile,Integer>{
         Collections.shuffle(createdTiles);
         createdTiles.stream().forEach(mT -> this.save(mT));
 
-        return createdTiles;
+        return matchTileMapper.toDTOList(createdTiles);
     }
 }

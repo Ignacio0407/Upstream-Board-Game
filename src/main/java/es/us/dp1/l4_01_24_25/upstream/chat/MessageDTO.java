@@ -8,23 +8,17 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MessageDTO {
+    
     @JsonProperty("playerId")
     private Integer playerId;
+
+    private String playerName;
 
     @JsonProperty("matchId")
     private Integer matchId;
 
     @JsonProperty("content")
     private String content;
-
-    @Override
-    public String toString() {
-        return "MessageRequest{" +
-                "playerId=" + playerId +
-                ", matchId=" + matchId +
-                ", content='" + content + '\'' +
-                '}';
-    }
 
     public MessageDTO() {
         

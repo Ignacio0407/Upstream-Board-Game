@@ -74,7 +74,7 @@ public class MessageControllerTest {
         // userPlayer can be null for basic tests unless specifically needed
         match = new Match();
         match.setId(1);
-        match.setPlayersNum(2);
+        match.setPlayersNumber(2);
         match.setState(State.EN_CURSO); 
         match.setRound(1);
         match.setPhase(Phase.MOVIENDO);
@@ -143,7 +143,7 @@ public class MessageControllerTest {
     @Test
     void shouldGetMatchMessagesSuccessfully() throws Exception {
         List<Message> messages = List.of(new Message(player, match, "Message 1"));
-        when(messageService.getMatchMessages(1)).thenReturn(messages);
+        when(messageService.findMatchMessages(1)).thenReturn(messages);
         when(matchService.findById(1)).thenReturn(new Match());
 
         mockMvc.perform(get("/api/v1/messages/match/1"))
@@ -153,7 +153,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoMessagesForMatch() throws Exception {
-        when(messageService.getMatchMessages(1)).thenReturn(new ArrayList<>()); // Simulamos que no hay mensajes para la partida
+        when(messageService.findMatchMessages(1)).thenReturn(new ArrayList<>()); // Simulamos que no hay mensajes para la partida
         when(matchService.findById(1)).thenReturn(new Match());
 
         mockMvc.perform(get("/api/v1/messages/match/1"))
@@ -163,7 +163,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldFailToGetMatchMessagesWhenMatchIdIsInvalid() throws Exception {
-        when(messageService.getMatchMessages(999)).thenThrow(new RuntimeException("Invalid Match"));
+        when(messageService.findMatchMessages(999)).thenThrow(new RuntimeException("Invalid Match"));
 
         mockMvc.perform(get("/api/v1/messages/match/999"))
                 .andExpect(status().isNotFound());
@@ -173,7 +173,7 @@ public class MessageControllerTest {
     @Test
     void shouldGetUserMessagesSuccessfully() throws Exception {
         List<Message> messages = List.of(new Message(player, match, "User message"));
-        when(messageService.getUserMessages(1)).thenReturn(messages);
+        when(messageService.findUserMessages(1)).thenReturn(messages);
         when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/user/1"))
@@ -183,7 +183,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoMessagesForUser() throws Exception {
-        when(messageService.getUserMessages(1)).thenReturn(new ArrayList<>());
+        when(messageService.findUserMessages(1)).thenReturn(new ArrayList<>());
         when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/user/1"))
@@ -193,7 +193,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldFailToGetUserMessagesWhenUserIdIsInvalid() throws Exception {
-        when(messageService.getUserMessages(999)).thenThrow(new RuntimeException("Invalid User"));
+        when(messageService.findUserMessages(999)).thenThrow(new RuntimeException("Invalid User"));
 
         mockMvc.perform(get("/api/v1/messages/user/999"))
                 .andExpect(status().isNotFound());
@@ -225,7 +225,7 @@ public class MessageControllerTest {
     @Test
     void shouldGetUserChatsSuccessfully() throws Exception {
         List<Match> chats = List.of(match);
-        when(messageService.getUserChats(1)).thenReturn(chats);
+        when(messageService.findUserChats(1)).thenReturn(chats);
         when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/chats/1"))
@@ -235,7 +235,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoChatsForUser() throws Exception {
-        when(messageService.getUserChats(1)).thenReturn(new ArrayList<>());
+        when(messageService.findUserChats(1)).thenReturn(new ArrayList<>());
         when(userService.findById(1)).thenReturn(new User());
 
         mockMvc.perform(get("/api/v1/messages/chats/1"))
@@ -245,7 +245,7 @@ public class MessageControllerTest {
 
     @Test
     void shouldFailToGetUserChatsWhenUserIdIsInvalid() throws Exception {
-        when(messageService.getUserChats(999)).thenThrow(new RuntimeException("Invalid User"));
+        when(messageService.findUserChats(999)).thenThrow(new RuntimeException("Invalid User"));
 
         mockMvc.perform(get("/api/v1/messages/chats/999"))
                 .andExpect(status().isNotFound());

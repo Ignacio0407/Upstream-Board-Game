@@ -55,15 +55,7 @@ export const handleRotateTile = async (tile, jwt) => {
         const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
         console.log(newOrientation);
 
-        const response = await fetch(`/api/v1/matchTiles/${tile[0].id}/rotation`, {
-            method: "PATCH",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newOrientation),
-        });
+        const response = await patch(`/api/v1/matchTiles/${tile[0].id}/rotation`, jwt, newOrientation)
 
         if (!response.ok) {
             throw new Error('Error updating tile rotation');
