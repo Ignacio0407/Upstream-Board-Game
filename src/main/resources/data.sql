@@ -55,29 +55,19 @@ UPDATE player SET partida = 1 WHERE id=2;
 UPDATE player SET partida = 1 WHERE id=3;
 */
 
-INSERT INTO tile_type(id, type) VALUES 
-(1, 'AGUA'),
-(2, 'PIEDRA'),
-(3, 'GARZA'),
-(4, 'OSO'),
-(5, 'AGUILA'),
-(6, 'SALTO'),
-(7, 'MAR'),
-(8, 'DESOVE');
-
-INSERT INTO tile (id, image, tile_type) VALUES 
-(1, 'src/main/resources/images/waterTile.png', 1),
-(2, 'src/main/resources/images/rockTile.png', 2),
-(3, 'src/main/resources/images/heronTile.png', 3),
-(4, 'src/main/resources/images/bearTile.png', 4),
-(5, 'src/main/resources/images/eagleTile.png', 5),
-(6, 'src/main/resources/images/jumpTile.png', 6),
-(7, 'src/main/resources/images/seaTile.png', 7),
-(8, 'src/main/resources/images/spawningTile.png', 8);
+INSERT INTO tile (id, image, type) VALUES 
+(1, 'src/main/resources/images/waterTile.png', 'WATER'),
+(2, 'src/main/resources/images/rockTile.png', 'ROCK'),
+(3, 'src/main/resources/images/heronTile.png', 'HERON'),
+(4, 'src/main/resources/images/bearTile.png', 'BEAR'),
+(5, 'src/main/resources/images/eagleTile.png', 'EAGLE'),
+(6, 'src/main/resources/images/jumpTile.png', 'JUMP'),
+(7, 'src/main/resources/images/seaTile.png', 'SEA'),
+(8, 'src/main/resources/images/spawningTile.png', 'SPAWNING');
 
 INSERT INTO salmon (id, color, image) VALUES
-(1, 'AMARILLO', 'src/main/resources/images/Amarillo_2.png'),
-(2, 'BLANCO', 'src/main/resources/images/Blanco_2.png'),
-(3, 'ROJO', 'src/main/resources/images/Rojo_2.png'),
-(4, 'MORADO', 'src/main/resources/images/Morado_2.png'),
-(5, 'VERDE', 'src/main/resources/images/Verde_2.png');
+(1, 'YELLOW', 'src/main/resources/images/Amarillo_2.png'),
+(2, 'WHITE', 'src/main/resources/images/Blanco_2.png'),
+(3, 'RED', 'src/main/resources/images/Rojo_2.png'),
+(4, 'PURPLE', 'src/main/resources/images/Morado_2.png'),
+(5, 'GREEN', 'src/main/resources/images/Verde_2.png');

@@ -37,8 +37,8 @@ export const post = async (uri, jwt, data) => {
     return await fetch(uri, {
       method: "POST",
       headers: {
-        'Authorization': `Bearer ${jwt}`,
-        'Accept': 'application/json',
+        Authorization: `Bearer ${jwt}`,
+        Accept: 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)

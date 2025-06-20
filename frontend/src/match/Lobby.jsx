@@ -17,13 +17,13 @@ export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
-    const [players,setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt)
+    const [players,setPlayers] = useFetchState([],`/api/v1/players/match/${match.id}`,jwt)
     const [matches,setMatches] = useFetchState([],`/api/v1/matches/${match.id}`,jwt)
     const [userPlayer,setUserPlayer] = useState(null);
     const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
-    const [numjug, Setnumjug] = useState(match.playersNum);
+    const [numjug, Setnumjug] = useState(match.playersNumber);
     const [loading, setLoading] = useState(false);
     const spectatorIds = useLocation().state?.spectatorIds||[];
     
@@ -72,16 +72,8 @@ stompClient.activate();
     }, [players, match.id, user.id, matches.state]);
  
     const fetchPlayers = async () => {
-        const response = await fetch("/api/v1/matches/"+match.id+"/players", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            },
-        });
+        const response = await get("/api/v1/matches/"+match.id+"/players", jwt);
         const data = await response.json();
-        setPlayers([])
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
 
@@ -140,7 +132,7 @@ stompClient.activate();
             Password: {match.password}
         </h4>}
         <h4 className='passwordContainer'>
-            Número de jugadores: {match.playersNum}
+            Número de jugadores: {match.playersNumber}
         </h4>
         </div>
         <div className='lobbyMainContainer'>

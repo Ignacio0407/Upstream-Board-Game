@@ -6,20 +6,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 @Table(name="salmon")
 public class Salmon extends BaseEntity{
     
     @Enumerated(EnumType.STRING)
     Color color;
+    
     String image;
     
 }

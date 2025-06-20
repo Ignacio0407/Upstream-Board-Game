@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { get, post } from '../util/fetchers';
 import tokenService from '../services/token.service';
 import { Client } from '@stomp/stompjs';
@@ -55,21 +55,18 @@ const Chat = ({ match, players, currentPlayer }) => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-
     try {
-
       const playerId = currentPlayer.id;
       const matchId = match.id
-
-      const url = `/api/v1/messages/${matchId}/${playerId}/${encodeURIComponent(newMessage)}`;
-
-      await post(url, jwt);
+      const message = encodeURIComponent(newMessage)
+      //const url = `/api/v1/messages/${matchId}/${playerId}/${encodeURIComponent(newMessage)}`;
+      const url = '/api/v1/messages'
+      await post(url, jwt, {matchId, playerId, message});
         setNewMessage('');
     } catch (error) {
         console.error('Error sending message:', error);
     }
   };
-    
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -99,15 +96,15 @@ const Chat = ({ match, players, currentPlayer }) => {
               <div
                 key={message.id}
                 className={`chat-message ${
-                  message.player.id === currentPlayer.id ? 'own-message' : ''
+                  message.playerId === currentPlayer.id ? 'own-message' : ''
                 }`}
               >
                 <div className="message-content">
                   <span
                     className="message-username"
-                    style={{ color: getPlayerColor(message.player.id) }}
+                    style={{ color: getPlayerColor(message.playerId) }}
                   >
-                    {message.player.name}
+                    {message.playerName}
                   </span>
                   <p>{message.content}</p>
                 </div>

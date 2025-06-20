@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from "react-router-dom";
 import tokenService from '../services/token.service'
 import useFetchState from "../util/useFetchState";
@@ -30,7 +30,7 @@ import Chat from '../chat/Chat'
 export default function Game({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser();
-    const [players, setPlayers] = useFetchState([],`/api/v1/matches/${match.id}/players`,jwt);
+    const [players, setPlayers] = useFetchState([],`/api/v1/players/match/${match.id}`,jwt);
     const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
     const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
     const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
@@ -76,7 +76,7 @@ export default function Game({match}){
     }, [tilesList, matchTiles]);
 
     const fetchPlayers = async () => {
-        const playersResponse = await get(`/api/v1/matches/${match.id}/players`, jwt);
+        const playersResponse = await get(`/api/v1/players/match/${match.id}`, jwt);
         const playerData = await playersResponse.json();
         setPlayers(playerData);
     };

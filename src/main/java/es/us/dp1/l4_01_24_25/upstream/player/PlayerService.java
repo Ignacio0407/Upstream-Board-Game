@@ -1,31 +1,32 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @Service
-public class PlayerService extends BaseService<Player,Integer>{
+public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer>{
         
     PlayerRepository playerRepository;
-    SalmonMatchService salmonMatchService ;
+    PlayerMapper playerMapper;
+    SalmonMatchService salmonMatchService;
     UserService userService;
     MatchService matchService;
 
-    public PlayerService(PlayerRepository playerRepository, SalmonMatchService  salmonMatchService , UserService userService, MatchService matchService) {
-        super(playerRepository);
+    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, SalmonMatchService  salmonMatchService , UserService userService, MatchService matchService) {
+        super(playerRepository, playerMapper);
         this.salmonMatchService = salmonMatchService ;
         this.userService = userService;
         this.matchService = matchService;
@@ -37,23 +38,32 @@ public class PlayerService extends BaseService<Player,Integer>{
     }
 
     @Transactional(readOnly = true)
+    public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
+        return this.findListDTO(this.findPlayersByMatch(id), playerMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatch(Integer id) {
         return this.findList(playerRepository.findAlivePlayersByMatch(id));
     }
 
-    @Transactional
-    private Player update (Player JugadorNueva, Player JugadorToUpdate) {
-        BeanUtils.copyProperties(JugadorNueva, JugadorToUpdate, "id");
-        return playerRepository.save(JugadorToUpdate);
+    @Transactional(readOnly = true)
+    public List<PlayerDTO> findAlivePlayersByMatchAsDTO(Integer id) {
+        return this.findListDTO(this.findAlivePlayersByMatch(id), playerMapper::toDTO);
     }
 
+    @Override
     @Transactional
-    public Player updateById (Player JugadorNueva, Integer idtoUpdate) {
-        Player JugadorToUpdate = this.findById(idtoUpdate);
-        return update(JugadorNueva, JugadorToUpdate);
+    protected void updateEntityFields (Player newPlayer, Player playerToUpdate) {
+        playerToUpdate.setName(newPlayer.getName());
+        playerToUpdate.setColor(newPlayer.getColor());
+        playerToUpdate.setAlive(newPlayer.getAlive());
+        playerToUpdate.setEnergy(newPlayer.getEnergy());
+        playerToUpdate.setPoints(newPlayer.getPoints());
+        playerToUpdate.setPlayerOrder(newPlayer.getPlayerOrder());
     }
 
-    public PlayerDTO createPlayerInMatch(Integer matchId, PlayerDTO playerDTO) {
+    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, LobbyPlayerDTO playerDTO) {
         User user = userService.findById(playerDTO.getUserId());
         Match match = matchService.findById(matchId);
         Player p = new Player();
@@ -68,23 +78,25 @@ public class PlayerService extends BaseService<Player,Integer>{
         match.setPlayersNumber(match.getPlayersNumber() + 1);
         matchService.save(match);
         this.save(p);
-        return PlayerMapper.toDTO(p);
+        return playerMapper.toLobby(p);
     }
 
-    public Player updateEnergy(Integer id, Integer energyUsed) throws ResourceNotFoundException, Exception {
+    public PlayerDTO updateEnergy(Integer id, Integer energyUsed) throws ResourceNotFoundException, Exception {
         Player player = this.findById(id);
         if (player.getEnergy() - energyUsed < 0) {
             throw new BadRequestException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
                 player.getEnergy(), energyUsed));
         }
         player.setEnergy(player.getEnergy() - energyUsed);
-        return this.save(player);
+        this.save(player);
+        return playerMapper.toDTO(player);
     }
 
-    public Player regenerateEnergy(Integer id) {
+    public PlayerDTO regenerateEnergy(Integer id) {
         Player player = this.findById(id);
         player.setEnergy(5);
-        return this.save(player);
+        this.save(player);
+        return playerMapper.toDTO(player);
     }
 
     @Transactional

@@ -5,10 +5,10 @@ import getIdFromUrl from "../util/getIdFromUrl";
 import Lobby from "./Lobby"
 import Game from "./Game"
 import EndGame from './EndGame';
+
 export default function Match() { 
 
     const jwt = tokenService.getLocalAccessToken();
-    const user = tokenService.getUser()
     
     const [id, setId] = useState(null);
     const [isReady, setIsReady] = useState(false);
@@ -32,49 +32,30 @@ export default function Match() {
         jwt
     );
 
-
     useEffect(() => {
         if(id) {
-
-        
         const interval = setInterval(() => {
-            fetch("/api/v1/matches/"+ id, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            }).then(response => {response.json()
-                .then(data => {setMatch(data)
-                })})
-}, 500); // Cada 5 segundos
-    return () => clearInterval(interval);
-
-}
-
-}, [isReady]);
-
+            get("/api/v1/matches/"+ id, jwt)
+            .then(response => {response.json()
+            .then(data => {setMatch(data)})})
+            }, 500); // Cada 5 segundos
+        return () => clearInterval(interval);
+        }
+    }, [isReady]);
 
     useEffect(() => {
         console.log("Entered the game")
     }, []);
 
-    
     if (!isReady || !id || !match) {
         return <div>Loading...</div>;
     }
-
 
     if (error) {
         return <div>Error: {error.message}</div>;
     }
 
-
     return(        
-        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : match.state === "FINALIZADA" ? <EndGame match={match}></EndGame> : <Game match={match}></Game>
-        
+        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : match.state === "FINALIZADA" ? <EndGame match={match}></EndGame> : <Game match={match}></Game>  
     )
-
-
 }
