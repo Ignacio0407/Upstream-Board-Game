@@ -36,7 +36,7 @@ public class Match extends NamedEntity {
 	
 	// Esto para jugar en sí
 	@ValidNumber(min=0,max=5)
-	Integer playersNum;
+	Integer playersNumber;
     
 	@ValidNumber(min=0)
 	Integer round;
@@ -65,13 +65,5 @@ public class Match extends NamedEntity {
 	User matchCreator;
 
 	public Match() {}
-
-	public Integer getPlayersNumber() {
-        return playersNum;
-    }
-	
-    public void setPlayersNumber(Integer numjugadores) {
-        this.playersNum = numjugadores;
-    }
 
 }

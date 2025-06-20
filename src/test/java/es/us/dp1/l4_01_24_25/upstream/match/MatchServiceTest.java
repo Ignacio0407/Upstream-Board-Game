@@ -53,7 +53,7 @@ class MatchServiceTest {
         match1.setName("Match1");
         match1.setPassword("password1");
         match1.setState(State.ESPERANDO);
-        match1.setPlayersNum(2);
+        match1.setPlayersNumber(2);
         match1.setRound(1);
         match1.setPhase(Phase.CASILLAS);
 
@@ -62,7 +62,7 @@ class MatchServiceTest {
         match2.setName("Match2");
         match2.setPassword("password2");
         match2.setState(State.EN_CURSO);
-        match2.setPlayersNum(3);
+        match2.setPlayersNumber(3);
         match2.setRound(2);
         match2.setPhase(Phase.MOVIENDO);
     }

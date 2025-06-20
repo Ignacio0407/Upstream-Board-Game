@@ -1,13 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.tile;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,10 +14,6 @@ public class Tile extends BaseEntity {
     
     String image;
     
-    @NotNull
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "tile_type")
-    @JsonSerialize(using = TileTypeSerializer.class)
-    @JsonDeserialize(using = TileTypeDeserializer.class)
-    TileType type;
+    @Enumerated(EnumType.STRING)
+	String type;
 }

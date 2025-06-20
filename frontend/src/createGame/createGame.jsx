@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Form, Input, Label, Button } from "reactstrap"; 
 import tokenService from '../services/token.service'
-import jwt_decode from "jwt-decode";
-// import '../static/css/createGame/createGame.css'
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
 import '../static/css/createGame/createGame.css'
 import '../static/css/admin/adminPage.css'
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { post } from '../util/fetchers'
 
 export default function CreateGame() { 
     const [name, setName] = useState("");
@@ -46,15 +44,7 @@ export default function CreateGame() {
     function handleSubmit(event) {
       event.preventDefault();
 
-      fetch(`/api/v1/matches/matchCreator/${finalUser.id}`, {
-          method: "POST",
-          headers: {
-              Authorization: `Bearer ${jwt}`,
-              Accept: "application/json",
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, password }), // Solo los valores que se pueden modificar
-      })
+      post(`/api/v1/matches/matchCreator/${finalUser.id}`, jwt, { name, password })
       .then(response => {
           if (!response.ok) {
               return response.text().then(err => {
@@ -63,19 +53,19 @@ export default function CreateGame() {
           }
           return response.json();
       })
-      .then(matchCreada => {
-          console.log("Match creado:", matchCreada);
+      .then(createdMatch => {
+          console.log("Match creado:", createdMatch);
 
           try {
               stompClient.publish({
                   destination: "/app/dash",
-                  body: JSON.stringify({ action: "colorChanged", matchId: matchCreada.id }),
+                  body: JSON.stringify({ action: "colorChanged", matchId: createdMatch.id }),
               });
           } catch (e) {
               console.log("Error al publicar en WebSocket:", e);
           }
 
-          navigate(`/matches/${matchCreada.id}`);
+          navigate(`/matches/${createdMatch.id}`);
       })
       .catch(error => {
           console.error("Error al crear la partida:", error);

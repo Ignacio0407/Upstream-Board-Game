@@ -29,12 +29,12 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     }
 
     @Transactional
-    public UserAchievement findByUandA(User u, Achievement a) throws ResourceNotFoundException {
-        if (u == null || a == null) {
+    public UserAchievement findByUserandAchievement(User user, Achievement achievement) throws ResourceNotFoundException {
+        if (user == null || achievement == null) {
             throw new ResourceNotFoundException("Usuario o logro no pueden ser nulos.");
         }
-        User pu = userService.findById(u.getId());
-        Achievement pa = achievementService.findById(a.getId());
+        User pu = userService.findById(user.getId());
+        Achievement pa = achievementService.findById(achievement.getId());
         return userAchievementRepository.findRepeatedUserAchievement(pu, pa);
     }
 
@@ -55,7 +55,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         User u = userService.findUserByName(username);
         Achievement a = achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);
-        UserAchievement repeated = this.findByUandA(u, a);
+        UserAchievement repeated = this.findByUserandAchievement(u, a);
         if(repeated != null) throw new Exception(); 
         return this.save(ua);
     }

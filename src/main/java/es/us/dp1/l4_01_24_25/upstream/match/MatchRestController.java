@@ -14,12 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
-import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 
 @RestController
 @RequestMapping("/api/v1/matches")
-public class MatchRestController extends BaseRestController<Match, Integer>{
+public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchDTO, Integer>{
     
     MatchService matchService;
 
@@ -32,35 +31,29 @@ public class MatchRestController extends BaseRestController<Match, Integer>{
     @GetMapping("/user/{id}")
     public ResponseEntity<List<Match>> findMatchesFromUser() {
         return null;
-    }
-
-    @GetMapping("/{id}/players")
-    public ResponseEntity<List<Player>> findPlayersFromGame(@PathVariable("id") Integer id) throws ResourceNotFoundException {
-        return ResponseEntity.ok(matchService.findList(matchService.findPlayersFromGame(id)));
-    }   
+    } 
 
     @PatchMapping("/{matchId}/ronda")
-    public ResponseEntity<Match> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        return ResponseEntity.ok(matchService.findById(matchId));
+    public ResponseEntity<MatchDTO> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+        return ResponseEntity.ok(matchService.updateRound(matchId));
     }
 
     @PostMapping("/matchCreator/{userId}")
-    public ResponseEntity<Match> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
+    public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
         return new ResponseEntity<>(matchService.createMatchWMatchCreator(userId, requestBody), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{matchId}/startGame")
-    public ResponseEntity<Match> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
+    public ResponseEntity<MatchDTO> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         return new ResponseEntity<>(matchService.startGame(matchId), HttpStatus.OK);
     }
 
-    public ResponseEntity<Match> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
-        Match updatedMatch = matchService.changePhase(matchId, playerId);
-        return new ResponseEntity<>(updatedMatch, HttpStatus.OK);
+    public ResponseEntity<MatchDTO> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
+        return new ResponseEntity<>(matchService.changePhase(matchId, playerId), HttpStatus.OK);
     }
 
     @PatchMapping("/finalscore/{id}")
-    public ResponseEntity<Match> finalScore(@PathVariable Integer id) {
+    public ResponseEntity<MatchDTO> finalScore(@PathVariable Integer id) {
         return new ResponseEntity<>(matchService.finalScore(id), HttpStatus.OK);
     }
 }

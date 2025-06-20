@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class BaseService<T, ID> {
     protected final CrudRepository<T, ID> repository;
@@ -30,7 +29,7 @@ public abstract class BaseService<T, ID> {
 
     @Transactional(readOnly = true)
     public <D> List<D> findList(List<D> list) {
-        if(list.isEmpty()) throw new ResourceNotFoundException("List not found");
+        if(list == null) throw new ResourceNotFoundException("List not found");
         else return list;
     }
 
@@ -54,21 +53,17 @@ public abstract class BaseService<T, ID> {
 
     @Transactional
     public void delete(ID id) {
-        Optional<T> entity = repository.findById(id);
-        if (!entity.isPresent()) {
-            throw new ResourceNotFoundException("Resource not found with ID: " + id);
-        }
-        repository.delete(entity.get());
+        T entity = this.findById(id);
+        repository.delete(entity);
     }
 
     @Transactional
     public T update(ID id, @Valid T updatedEntity) {
-        T existingEntity = repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with ID: " + id));
+        T existingEntity = this.findById(id);
 
         updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
 
-        return repository.save(existingEntity);
+        return this.save(existingEntity);
     }
 
     protected void updateEntityFields(@Valid T existing, @Valid T updated) {

@@ -58,7 +58,7 @@ public class MatchRestControllerTest {
         testMatch = new Match();
         testMatch.setId(1);
         testMatch.setName("Test Match");
-        testMatch.setPlayersNum(2);
+        testMatch.setPlayersNumber(2);
         testMatch.setRound(0);
         testMatch.setState(State.ESPERANDO);
         testMatch.setPhase(Phase.CASILLAS);
@@ -131,7 +131,7 @@ public class MatchRestControllerTest {
         Match updatedMatch = new Match();
         updatedMatch.setId(1);
         updatedMatch.setName("Updated Match");
-        updatedMatch.setPlayersNum(3);
+        updatedMatch.setPlayersNumber(3);
 
         when(matchService.findById(1)).thenReturn(testMatch);
         when(matchService.updateById(any(Match.class), eq(1))).thenReturn(updatedMatch);

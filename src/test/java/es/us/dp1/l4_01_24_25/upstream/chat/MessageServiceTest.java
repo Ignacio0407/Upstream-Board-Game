@@ -74,7 +74,7 @@ public class MessageServiceTest {
             List<Message> expectedMessages = Arrays.asList(message2, message1);
             when(messageRepository.findAllMessagesByMatchId(1)).thenReturn(expectedMessages);
 
-            List<Message> result = messageService.getMatchMessages(1);
+            List<Message> result = messageService.findMatchMessages(1);
 
             assertNotNull(result);
             assertEquals(expectedMessages, result);
@@ -85,7 +85,7 @@ public class MessageServiceTest {
         void testGetMatchMessages_NotFound() {
             when(messageRepository.findAllMessagesByMatchId(99)).thenReturn(null);
 
-            List<Message> result = messageService.getMatchMessages(99);
+            List<Message> result = messageService.findMatchMessages(99);
 
             assertNotNull(result);
             assertTrue(result.isEmpty());
@@ -97,7 +97,7 @@ public class MessageServiceTest {
             List<Message> expectedMessages = Arrays.asList(message2, message1);
             when(messageRepository.findAllMessagesFromUser(1)).thenReturn(expectedMessages);
 
-            List<Message> result = messageService.getUserMessages(1);
+            List<Message> result = messageService.findUserMessages(1);
 
             assertNotNull(result);
             assertEquals(expectedMessages, result);
@@ -109,7 +109,7 @@ public class MessageServiceTest {
             List<Match> expectedChats = Arrays.asList(testMatch);
             when(messageRepository.findAllChatsFromUser(1)).thenReturn(expectedChats);
 
-            List<Match> result = messageService.getUserChats(1);
+            List<Match> result = messageService.findUserChats(1);
 
             assertNotNull(result);
             assertEquals(expectedChats, result);
@@ -123,7 +123,7 @@ public class MessageServiceTest {
             when(messageRepository.findNewMessages(eq(1), any(LocalDateTime.class))).thenReturn(expectedMessages);
 
             // Llamada al método con matchers para ambos argumentos
-            List<Message> result = messageService.getNewMessages(1, LocalDateTime.now().minusMinutes(10));
+            List<Message> result = messageService.findNewMessages(1, LocalDateTime.now().minusMinutes(10));
 
             assertNotNull(result);
             assertEquals(expectedMessages, result);

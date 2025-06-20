@@ -1,45 +1,55 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
-@Component
-public class PlayerMapper {
+@Mapper(componentModel = "spring")
+public abstract class PlayerMapper implements EntityMapper<Player, PlayerDTO> {
+    
+    @Autowired
+    protected UserService userService;
 
-    private UserService userService;
-    private MatchService matchService;
+    @Autowired
+    protected MatchService matchService;
 
-    public static Player toEntity(PlayerDTO dto) {
-        Player player = new Player();
-        player.setId(dto.getId());
-        player.setName(dto.getName());
-        player.setColor(dto.getColor());
-        player.setPlayerOrder(dto.getPlayerOrder());
-        player.setAlive(dto.getAlive());
-        player.setPoints(dto.getPoints());
-        player.setEnergy(dto.getEnergy());
-        if (dto.getUserId() != null) {
-            player.setUserPlayer(userService.findById(dto.getUserId()));
-        }
-        if (dto.getMatchId() != null) {
-            player.setMatch(matchService.findById(dto.getMatchId()));
-        }
-        return player;
+    @Override
+    @Mapping(source = "userPlayer.id", target = "userId")
+    @Mapping(source = "match.id", target = "matchId")
+    public abstract PlayerDTO toDTO(Player player);
+
+    @Override
+    @Mapping(source = "userId", target = "userPlayer") // needs to resolve the complete User (below)
+    @Mapping(source = "matchId", target = "match")
+    public abstract Player toEntity(PlayerDTO dto);
+
+    @Mapping(source = "userPlayer.id", target = "userId")
+    @Mapping(source = "match.id", target = "matchId")
+    public abstract LobbyPlayerDTO toLobby(Player player);
+
+    @Mapping(source = "userId", target = "userPlayer")
+    @Mapping(source = "matchId", target = "match")
+    @Mapping(target = "alive", ignore = true)
+    @Mapping(target = "energy", ignore = true)
+    @Mapping(target = "playerOrder", ignore = true)
+    @Mapping(target = "points", ignore = true)
+    public abstract Player toEntityFromLobby(LobbyPlayerDTO player);
+
+    // Auxiliar methods to mape Integer → Entity
+    protected User mapUserPlayer(Integer userId) {
+        return userId == null ? null : userService.findById(userId);
     }
 
-    public static PlayerDTO toDTO(Player player) {
-        PlayerDTO dto = new PlayerDTO();
-        dto.setId(player.getId());
-        dto.setName(player.getName());
-        dto.setColor(player.getColor());
-        dto.setPlayerOrder(player.getPlayerOrder());
-        dto.setAlive(player.getAlive());
-        dto.setPoints(player.getPoints());
-        dto.setEnergy(player.getEnergy());
-        dto.setUserId(player.getUserPlayer() != null ? player.getUserPlayer().getId() : null);
-        dto.setMatchId(player.getMatch() != null ? player.getMatch().getId() : null);
-        return dto;
+    protected Match mapMatch(Integer matchId) {
+        return matchId == null ? null : matchService.findById(matchId);
     }
+
 }
