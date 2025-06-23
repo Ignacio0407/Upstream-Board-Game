@@ -1,7 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -9,12 +11,15 @@ import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 
+@Mapper(componentModel = "spring")
 public abstract class MessageMapper implements EntityMapper<Message, MessageDTO> {
     
     @Autowired
+    @Lazy
     protected PlayerService playerService;
 
     @Autowired
+    @Lazy
     protected MatchService matchService;
 
     @Override

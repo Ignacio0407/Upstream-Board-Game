@@ -15,7 +15,7 @@ public interface MatchRepository extends JpaRepository<Match, Integer>{
 
     public Optional<Match> findByName(@Param("name") String name);
 
-    @Query("SELECT mt FROM MatchTile mt WHERE mt.tile.type.type = 'GARZA' AND mt.coordinate IS NOT NULL AND mt.match.id = :id")
+    @Query("SELECT mt FROM MatchTile mt WHERE mt.tile.type = 'HERON' AND mt.coordinate IS NOT NULL AND mt.match.id = :id")
     public List<MatchTile> findHeronWithCoordFromGame(@Param("id") Integer id);
 
 }

@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
@@ -14,10 +15,12 @@ import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 @Mapper(componentModel = "spring")
 public abstract class MatchMapper implements EntityMapper<Match, MatchDTO>{
  
-     @Autowired
+    @Autowired
+    @Lazy
     protected UserService userService;
 
     @Autowired
+    @Lazy
     protected PlayerService playerService;
 
     @Override

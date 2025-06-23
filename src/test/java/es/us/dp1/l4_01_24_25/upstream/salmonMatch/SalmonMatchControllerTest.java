@@ -97,16 +97,13 @@ public class SalmonMatchControllerTest {
         match.setActualPlayer(player);
         match.setInitialPlayer(player);
         match.setPassword("testpass");
-        match.setSalmonMatches(new ArrayList<>());
 
         player.setMatch(match);
 
         tile = new Tile();
         tile.setId(1);
         tile.setImage("AGUA");
-        TileType tileType = new TileType();
-        tileType.setType("AGUA");
-        tile.setType(tileType);
+        tile.setType(TileType.WATER);
 
         matchTile = new MatchTile();
         matchTile.setId(1);
@@ -129,8 +126,6 @@ public class SalmonMatchControllerTest {
         salmonMatch.setSalmon(salmon);
         salmonMatch.setSalmonsNumber(2);
         salmonMatch.setCoordinate(new Coordinate(null, null));
-
-        match.getSalmonMatches().add(salmonMatch);
     }
 
     @Test
@@ -144,7 +139,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldFindAllFromMatchInSpawn() throws Exception {
-        when(salmonMatchService.getSalmonsInSpawnFromGame(anyInt())).thenReturn(List.of(salmonMatch));
+        when(salmonMatchService.findSalmonsInSpawnFromGame(anyInt())).thenReturn(List.of(salmonMatch));
 
         mockMvc.perform(get("/api/v1/salmonMatches/match/1/spawn"))
             .andExpect(status().isOk())
@@ -183,7 +178,6 @@ public class SalmonMatchControllerTest {
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
-        when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(match.getSalmonMatches());
 
         Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
 
@@ -239,9 +233,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleOsoBearEncounter() throws Exception {
-        TileType osoType = new TileType();
-        osoType.setType("OSO");
-        tile.setType(osoType);
+        tile.setType(TileType.BEAR);
         matchTile.setOrientation(0);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
@@ -260,9 +252,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleEagleEncounter() throws Exception {
-        TileType eagleType = new TileType();
-        eagleType.setType("AGUILA");
-        tile.setType(eagleType);
+        tile.setType(TileType.EAGLE);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
@@ -281,9 +271,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleJumpTile() throws Exception {
-        TileType jumpType = new TileType();
-        jumpType.setType("SALTO");
-        tile.setType(jumpType);
+        tile.setType(TileType.JUMP);
         matchTile.setOrientation(0);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);

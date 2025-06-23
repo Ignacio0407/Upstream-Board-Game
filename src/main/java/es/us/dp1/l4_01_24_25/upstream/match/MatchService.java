@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     MatchTileService matchTileService;
 
     @Autowired
-    public MatchService(MatchRepository matchRepository, MatchMapper matchMapper, PlayerService playerService, UserService userService, SalmonMatchService salmonMatchService, UserAchievementService userAchievementService, MatchTileService matchTileService) {
+    public MatchService(MatchRepository matchRepository, MatchMapper matchMapper, @Lazy PlayerService playerService, @Lazy UserService userService, @Lazy SalmonMatchService salmonMatchService, @Lazy UserAchievementService userAchievementService, @Lazy MatchTileService matchTileService) {
         super(matchRepository, matchMapper);
         this.playerService = playerService;
         this.userService = userService;

@@ -1,163 +1,120 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.Phase;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
+import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
-@ExtendWith(MockitoExtension.class)
-public class MessageRepositoryTest {
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class MessageRepositoryTest {
 
-    @Mock
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Autowired
     private MessageRepository messageRepository;
 
-    @Test
-    public void testFindAllMessagesByMatchId() {
-        Integer matchId = 1;
-        
-        Message message1 = new Message();
-        message1.setMatch(new Match());
-        message1.getMatch().setId(matchId);
-        message1.setCreatedAt(LocalDateTime.now());
+    private Player player;
+    private Match match;
 
-        Message message2 = new Message();
-        message2.setMatch(new Match());
-        message2.getMatch().setId(matchId);
-        message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
+    @BeforeEach
+    void setup() {
+        match = new Match();
+        match.setState(State.EN_CURSO);
+        match.setPhase(Phase.CASILLAS);
+        match.setPlayersNumber(2);
+        match.setRound(1);
+        match.setFinalScoreCalculated(false);
+        entityManager.persist(match);
 
-        List<Message> messages = new ArrayList<>();
-        messages.add(message1);
-        messages.add(message2);
+        User user = new User();
+        user.setName("test");
+        user.setName("test");
+        user.setPassword("123");
+        entityManager.persist(user);
 
-        when(messageRepository.findAllMessagesByMatchId(matchId)).thenReturn(messages);
-
-        List<Message> result = messageRepository.findAllMessagesByMatchId(matchId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        Integer invalidMatchId = 2;
-
-        when(messageRepository.findAllMessagesByMatchId(invalidMatchId)).thenReturn(new ArrayList<>());
-
-        result = messageRepository.findAllMessagesByMatchId(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        player = new Player();
+        player.setAlive(true);
+        player.setColor(Color.RED);
+        player.setEnergy(5);
+        player.setName("Jugador 1");
+        player.setPoints(0);
+        player.setPlayerOrder(1);
+        player.setMatch(match);
+        player.setUserPlayer(user);
+        entityManager.persist(player);
     }
 
     @Test
-    public void testFindAllMessagesFromUser() {
-        Integer userId = 1;
-        
-        Message message1 = new Message();
-        message1.setPlayer(new Player());
-        message1.getPlayer().setUserPlayer(new User());
-        message1.getPlayer().getUserPlayer().setId(userId);
-        message1.setCreatedAt(LocalDateTime.now());
+    void testFindAllMessagesByMatchId() {
+        Message m1 = new Message(player, match, "Hola");
+        m1.setCreatedAt(LocalDateTime.now().minusMinutes(2));
+        entityManager.persist(m1);
 
-        Message message2 = new Message();
-        message2.setPlayer(new Player());
-        message2.getPlayer().setUserPlayer(new User());
-        message2.getPlayer().getUserPlayer().setId(userId);
-        message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
+        Message m2 = new Message(player, match, "Mundo");
+        m2.setCreatedAt(LocalDateTime.now());
+        entityManager.persist(m2);
 
-        List<Message> messages = new ArrayList<>();
-        messages.add(message1);
-        messages.add(message2);
+        List<Message> messages = messageRepository.findAllMessagesByMatchId(match.getId());
 
-        when(messageRepository.findAllMessagesFromUser(userId)).thenReturn(messages);
-
-        List<Message> result = messageRepository.findAllMessagesFromUser(userId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        Integer invalidUserId = 2;
-
-        when(messageRepository.findAllMessagesFromUser(invalidUserId)).thenReturn(new ArrayList<>());
-
-        result = messageRepository.findAllMessagesFromUser(invalidUserId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertEquals(2, messages.size());
+        assertEquals("Hola", messages.get(0).getContent());
+        assertEquals("Mundo", messages.get(1).getContent());
     }
 
     @Test
-    public void testFindAllChatsFromUser() {
-        Integer userId = 1;
-        
-        Match match1 = new Match();
-        match1.setId(1);
-        Match match2 = new Match();
-        match2.setId(2);
+    void testFindAllMessagesFromUser() {
+        Message m1 = new Message(player, match, "Hola");
+        m1.setCreatedAt(LocalDateTime.now());
+        entityManager.persist(m1);
 
-        List<Match> matches = new ArrayList<>();
-        matches.add(match1);
-        matches.add(match2);
+        List<Message> messages = messageRepository.findAllMessagesFromUser(player.getUserPlayer().getId());
 
-        when(messageRepository.findAllChatsFromUser(userId)).thenReturn(matches);
-
-        List<Match> result = messageRepository.findAllChatsFromUser(userId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        Integer invalidUserId = 2;
-
-        when(messageRepository.findAllChatsFromUser(invalidUserId)).thenReturn(new ArrayList<>());
-
-        result = messageRepository.findAllChatsFromUser(invalidUserId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertEquals(1, messages.size());
+        assertEquals("Hola", messages.get(0).getContent());
     }
 
     @Test
-    public void testFindNewMessages() {
-        Integer matchId = 1;
-        LocalDateTime timestamp = LocalDateTime.now().minusMinutes(5);
+    void testFindAllChatsFromUser() {
+        Message m = new Message(player, match, "chat test");
+        m.setCreatedAt(LocalDateTime.now());
+        entityManager.persist(m);
 
-        Message message1 = new Message();
-        message1.setMatch(new Match());
-        message1.getMatch().setId(matchId);
-        message1.setCreatedAt(LocalDateTime.now().minusMinutes(3));
+        List<Match> result = messageRepository.findAllChatsFromUser(player.getUserPlayer().getId());
 
-        Message message2 = new Message();
-        message2.setMatch(new Match());
-        message2.getMatch().setId(matchId);
-        message2.setCreatedAt(LocalDateTime.now().minusMinutes(1));
+        assertEquals(1, result.size());
+        assertEquals(match.getId(), result.get(0).getId());
+    }
 
-        List<Message> messages = new ArrayList<>();
-        messages.add(message1);
-        messages.add(message2);
+    @Test
+    void testFindNewMessages() {
+        LocalDateTime now = LocalDateTime.now();
 
-        when(messageRepository.findNewMessages(matchId, timestamp)).thenReturn(messages);
+        Message oldMsg = new Message(player, match, "Antiguo");
+        oldMsg.setCreatedAt(now.minusMinutes(10));
+        entityManager.persist(oldMsg);
 
-        List<Message> result = messageRepository.findNewMessages(matchId, timestamp);
+        Message newMsg = new Message(player, match, "Nuevo");
+        newMsg.setCreatedAt(now.minusSeconds(30));
+        entityManager.persist(newMsg);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+        List<Message> result = messageRepository.findNewMessages(match.getId(), now.minusMinutes(1));
 
-        LocalDateTime invalidTimestamp = LocalDateTime.now().plusMinutes(5);
-
-        when(messageRepository.findNewMessages(matchId, invalidTimestamp)).thenReturn(new ArrayList<>());
-
-        result = messageRepository.findNewMessages(matchId, invalidTimestamp);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals("Nuevo", result.get(0).getContent());
     }
 }

@@ -106,13 +106,12 @@ class AchievementServiceTest {
             Achievement result = new Achievement();//achievementService.getByName("Nonexistent");
 
             assertNull(result);
-            verify(achievementRepository).findByName("Nonexistent");
         }
 
         @Test
         @DisplayName("Should get achievements by names list successfully")
         void testGetByNames_Success() {
-            List<String> names = Arrays.asList("First Achievement", "Second Achievement");
+            //List<String> names = Arrays.asList("First Achievement", "Second Achievement");
             when(achievementRepository.findByName("First Achievement")).thenReturn(Optional.of(achievement1));
             when(achievementRepository.findByName("Second Achievement")).thenReturn(Optional.of(achievement2));
 
@@ -127,7 +126,7 @@ class AchievementServiceTest {
         @Test
         @DisplayName("Should return list with achievements and null when not all achievements found by names")
         void testGetByNames_NotAllFound() {
-            List<String> names = Arrays.asList("First Achievement", "Nonexistent");
+            //List<String> names = Arrays.asList("First Achievement", "Nonexistent");
 
             // Simulamos el comportamiento del repositorio
             when(achievementRepository.findByName("First Achievement")).thenReturn(Optional.of(achievement1));

@@ -208,7 +208,7 @@ public class UserControllerTest {
 		logged.setId(2);
 
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		doNothing().when(this.userService).deleteUser(TEST_USER_ID);
+		doNothing().when(this.userService).delete(TEST_USER_ID);
 
 		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("User deleted!"));
@@ -220,7 +220,7 @@ public class UserControllerTest {
 		logged.setId(TEST_USER_ID);
 
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		doNothing().when(this.userService).deleteUser(TEST_USER_ID);
+		doNothing().when(this.userService).delete(TEST_USER_ID);
 
 		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isForbidden())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof AccessDeniedException));

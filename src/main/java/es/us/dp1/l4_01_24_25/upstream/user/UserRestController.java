@@ -43,6 +43,7 @@ class UserRestController extends BaseRestController<User,Integer>{
 	@Autowired
 	public UserRestController(UserService userService, AuthoritiesService authService) {
 		super(userService);
+		this.userService = userService;
 		this.authService = authService;
 	}
 

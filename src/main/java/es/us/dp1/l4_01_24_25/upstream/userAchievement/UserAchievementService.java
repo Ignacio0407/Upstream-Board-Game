@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.userAchievement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -22,7 +23,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     AchievementUnlocker achievementUnlocker = new AchievementUnlocker();
 
     @Autowired
-    public UserAchievementService( UserAchievementRepository userAchievementRepository, UserService userService, AchievementService achievementService) {
+    public UserAchievementService( UserAchievementRepository userAchievementRepository, @Lazy UserService userService, AchievementService achievementService) {
         super(userAchievementRepository);
         this.userService = userService;
         this.achievementService = achievementService;

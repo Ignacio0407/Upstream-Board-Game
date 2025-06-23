@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -16,9 +17,11 @@ import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 public abstract class PlayerMapper implements EntityMapper<Player, PlayerDTO> {
     
     @Autowired
+    @Lazy
     protected UserService userService;
 
     @Autowired
+    @Lazy
     protected MatchService matchService;
 
     @Override
@@ -50,6 +53,14 @@ public abstract class PlayerMapper implements EntityMapper<Player, PlayerDTO> {
 
     protected Match mapMatch(Integer matchId) {
         return matchId == null ? null : matchService.findById(matchId);
+    }
+
+    protected Integer mapUserId(User user) {
+    return user != null ? user.getId() : null;
+    }
+
+    protected Integer mapMatchId(Match match) {
+        return match != null ? match.getId() : null;
     }
 
 }

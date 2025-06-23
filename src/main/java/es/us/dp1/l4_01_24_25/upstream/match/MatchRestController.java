@@ -25,6 +25,7 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
     @Autowired
     public MatchRestController(MatchService matchService) {
         super(matchService);
+        this.matchService = matchService;
     }
 
     // TODO

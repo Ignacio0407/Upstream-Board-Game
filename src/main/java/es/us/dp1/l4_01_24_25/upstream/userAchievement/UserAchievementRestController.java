@@ -22,6 +22,7 @@ public class UserAchievementRestController extends BaseRestController<UserAchiev
     @Autowired
     public UserAchievementRestController(UserAchievementService userAchievementService, AchievementChecker achievementChecker) {
         super(userAchievementService);
+        this.userAchievementService = userAchievementService;
     }
 
     @PostMapping("/unlockrules/{username}")

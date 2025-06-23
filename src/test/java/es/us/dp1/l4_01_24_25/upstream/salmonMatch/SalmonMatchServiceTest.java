@@ -140,7 +140,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch1, salmonMatch2);
             when(salmonMatchRepository.findAllFromPlayer(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.getAllFromPlayer(1);
+            List<SalmonMatch> result = salmonMatchService.findAllFromPlayer(1);
 
             assertNotNull(result);
             assertEquals(expected, result);
@@ -180,7 +180,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch1);
             when(salmonMatchRepository.findFromGameInSpawn(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.getSalmonsInSpawnFromGame(1);
+            List<SalmonMatch> result = salmonMatchService.findSalmonsInSpawnFromGame(1);
 
             assertEquals(expected, result);
             verify(salmonMatchRepository).findFromGameInSpawn(1);
@@ -192,7 +192,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch2);
             when(salmonMatchRepository.findByMatchIdNoCoord(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.getSalmonsInSea(1);
+            List<SalmonMatch> result = salmonMatchService.findSalmonsInSea(1);
 
             assertEquals(expected, result);
             verify(salmonMatchRepository).findByMatchIdNoCoord(1);
@@ -204,7 +204,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch1);
             when(salmonMatchRepository.findAllFromPlayerInSpawn(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.getSalmonsFromPlayerInSpawn(1);
+            List<SalmonMatch> result = salmonMatchService.findSalmonsFromPlayerInSpawn(1);
 
             assertEquals(expected, result);
             verify(salmonMatchRepository).findAllFromPlayerInSpawn(1);
@@ -217,7 +217,7 @@ public class SalmonMatchServiceTest {
             salmonInSpawn.setCoordinate(new Coordinate(5, 25)); // y > 20
             when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonInSpawn));
 
-            Integer points = salmonMatchService.getPointsFromASalmonInSpawn(1);
+            Integer points = salmonMatchService.findPointsFromASalmonInSpawn(1);
 
             assertEquals(5, points); // 25 - 20 = 5 points
             verify(salmonMatchRepository).findById(1);
@@ -230,7 +230,7 @@ public class SalmonMatchServiceTest {
             salmonInSpawn.setCoordinate(new Coordinate(5, 15)); // y < 20
             when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonInSpawn));
 
-            Integer points = salmonMatchService.getPointsFromASalmonInSpawn(1);
+            Integer points = salmonMatchService.findPointsFromASalmonInSpawn(1);
 
             assertEquals(0, points);
             verify(salmonMatchRepository).findById(1);

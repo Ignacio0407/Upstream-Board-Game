@@ -1,7 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.tile;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.when;
@@ -34,18 +33,12 @@ public class TileControllerTest {
         Tile tile1 = new Tile();
         tile1.setId(1);
         tile1.setImage("rojo1");
-        TileType tiletype1 = new TileType();
-        tiletype1.setId(1);
-        tiletype1.setType("AGUA");
-        tile1.setType(tiletype1);
+        tile1.setType(TileType.WATER);
 
         Tile tile2 = new Tile();
         tile2.setId(2);
         tile2.setImage("rojo2");
-        TileType tiletype2 = new TileType();
-        tiletype2.setId(2);
-        tiletype2.setType("AGUILA");
-        tile2.setType(tiletype2);
+        tile2.setType(TileType.EAGLE);
 
         List<Tile> tiles = List.of(tile1, tile2);
 
@@ -55,8 +48,8 @@ public class TileControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         [
-                            {"id": 1, "image": "rojo1", "type": "AGUA"},
-                            {"id": 2, "image": "rojo2", "type": "AGUILA"}
+                            {"id": 1, "image": "rojo1", "type": "WATER"},
+                            {"id": 2, "image": "rojo2", "type": "EAGLE"}
                         ]
                         """));
     }
@@ -74,17 +67,15 @@ public class TileControllerTest {
     @Test
     public void testFindTileById_Success() throws Exception {
         Tile tile = new Tile();
-        tile.setId(1); tile.setImage("rojo1");
-        TileType tiletype = new TileType();
-        tiletype.setType("AGUA");
-        tile.setType(tiletype);
+        tile.setId(1); tile.setImage("rojo1");;
+        tile.setType(TileType.WATER);
 
         //when(tileService.findById(1)).thenReturn(Optional.of(tile));
 
         mockMvc.perform(get("/api/v1/tiles/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
-                        {"id": 1, "image": "rojo1", "type": "AGUA"}
+                        {"id": 1, "image": "rojo1", "type": "WATER"}
                         """));
     }
 

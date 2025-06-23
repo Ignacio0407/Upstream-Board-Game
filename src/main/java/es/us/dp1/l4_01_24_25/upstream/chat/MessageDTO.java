@@ -9,6 +9,8 @@ import lombok.Setter;
 @Setter
 public class MessageDTO {
     
+    Integer id;
+
     @JsonProperty("playerId")
     private Integer playerId;
 
@@ -20,7 +22,4 @@ public class MessageDTO {
     @JsonProperty("content")
     private String content;
 
-    public MessageDTO() {
-        
-    }
 }

@@ -1,14 +1,19 @@
 package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +29,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.hasSize;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -270,5 +277,84 @@ public class MatchTileControllerTest {
         mockMvc.perform(get("/api/v1/matchTiles/prueba1/1"))
                .andExpect(status().isOk())
                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void findAll_ShouldReturnAllDTOs() throws Exception {
+        // Arrange
+        MatchTileDTO dto1 = new MatchTileDTO();
+        MatchTileDTO dto2 = new MatchTileDTO();
+        when(matchTileService.findAllAsDTO()).thenReturn(Arrays.asList(dto1, dto2));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/matchTiles"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    // Test parametrizado para GET /api/v1/matchTiles/{id} (findById heredado)
+    @ParameterizedTest
+    @CsvSource({"1", "2"})
+    void findById_ShouldReturnDTO(Integer id) throws Exception {
+        // Arrange
+        MatchTileDTO dto = new MatchTileDTO();
+        when(matchTileService.findByIdAsDTO(id)).thenReturn(dto);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/matchTiles/{id}", id))
+               .andExpect(status().isOk());
+    }
+
+    // Test para POST /api/v1/matchTiles (save heredado)
+    @Test
+    void save_ShouldCreateAndReturnDTO() throws Exception {
+        // Arrange
+        MatchTileDTO requestDto = new MatchTileDTO();
+        requestDto.setCapacity(3);
+        
+        MatchTileDTO responseDto = new MatchTileDTO();
+        responseDto.setCapacity(3);
+        
+        when(matchTileService.saveAsDTO(any())).thenReturn(responseDto);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/matchTiles")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(requestDto)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.capacity").value(3));
+    }
+
+    // Test para PUT /api/v1/matchTiles/{id} (update heredado)
+    @Test
+    void update_ShouldUpdateAndReturnDTO() throws Exception {
+        // Arrange
+        Integer id = 1;
+        MatchTileDTO requestDto = new MatchTileDTO();
+        requestDto.setCapacity(5);
+        
+        MatchTileDTO responseDto = new MatchTileDTO();
+        responseDto.setCapacity(5);
+        
+        when(matchTileService.updateAsDTO(eq(id), any())).thenReturn(responseDto);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/matchTiles/{id}", id)
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(requestDto)))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.capacity").value(5));
+    }
+
+    // Test para DELETE /api/v1/matchTiles/{id} (delete heredado)
+    @Test
+    void delete_ShouldReturnNoContent() throws Exception {
+        // Arrange
+        Integer id = 1;
+        doNothing().when(matchTileService).delete(id);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/matchTiles/{id}", id))
+               .andExpect(status().isNoContent());
     }
 }

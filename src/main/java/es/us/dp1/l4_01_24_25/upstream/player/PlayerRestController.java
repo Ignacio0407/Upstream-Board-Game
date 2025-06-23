@@ -29,6 +29,7 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
 
     public PlayerRestController(PlayerService playerService, UserService userService, MatchService matchService) {
         super(playerService);
+        this.playerService = playerService;
         this.userService = userService;
         this.matchService = matchService;
     }

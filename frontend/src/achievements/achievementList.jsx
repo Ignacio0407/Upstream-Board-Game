@@ -17,7 +17,7 @@ export default function AchievementList() {
     const [visible, setVisible] = useState(false);
     const [alerts, setAlerts] = useState([]);
     const [achievements, setAchievements] = useFetchState([],`/api/v1/achievements`,jwt);
-    const [originalAchievements, setOriginalAchievements] = useFetchState([],`/api/v1/achievements`,jwt);
+    const [filtered, setFiltered] = useState([]);
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const [userAchievements,setUserAchievements] = useFetchState([],`/api/v1/users/${user.id}/achievements`,jwt)
@@ -88,7 +88,7 @@ export default function AchievementList() {
                         </Table>
 
                 </div>
-                <SearchBar setter={setAchievements} uri={"achievements"} data={originalAchievements} />
+                <SearchBar data={achievements} setFiltered={setFiltered} placeholder={"Search achievements"} />
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
                 <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>

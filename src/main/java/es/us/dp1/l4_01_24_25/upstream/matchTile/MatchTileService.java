@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     MatchService matchService;
 
     @Autowired
-    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, TileService tileService, MatchService matchService) {
+    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService) {
         super(matchTileRepository, matchTileMapper);
         this.tileService = tileService;
         this.matchService = matchService;
@@ -125,7 +126,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     public List<MatchTileDTO> createMultipleMatchTiles(Integer id) throws DataAccessException {
         Tile water = tileService.findById(1);
         Tile rock = tileService.findById(2);
-        Tile garza = tileService.findById(3);
+        Tile heron = tileService.findById(3);
         Tile bear = tileService.findById(4);
         Tile eagle = tileService.findById(5);
         Tile jump = tileService.findById(6);
@@ -154,7 +155,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(garza);
+            matchTile.setTile(heron);
             matchTile.setMatch(match);
             matchTile.setCapacity(match.getPlayersNumber());
             matchTile.setOrientation(0);
