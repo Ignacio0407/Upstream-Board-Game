@@ -28,6 +28,7 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
     @Autowired
     public MessageController(MessageService messageService, SimpMessagingTemplate messagingTemplate) {
         super(messageService);
+        this.messageService = messageService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -54,7 +55,7 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
     }
     
     @GetMapping("/chats/{userId}")
-    public ResponseEntity<List<Match>> getUserChats(@PathVariable Integer userId) {
+    public ResponseEntity<List<Match>> findUserChats(@PathVariable Integer userId) {
         return ResponseEntity.ok(messageService.findUserChats(userId));
     }
 

@@ -63,8 +63,8 @@ class PlayerRestControllerTest {
 
     @Test
     void shouldReturnPlayersByName() throws Exception {
-        List<Player> players = List.of(new Player());
-        List<String> names = List.of("John", "Jane");
+        //List<Player> players = List.of(new Player());
+        //List<String> names = List.of("John", "Jane");
         //when(playerService.getSomeByName(names)).thenReturn(players);
 
         mockMvc.perform(get("/api/v1/players/names/{names}", "John,Jane"))
@@ -133,7 +133,7 @@ class PlayerRestControllerTest {
         Player player = new Player();
         player.setId(1);
         when(playerService.findById(1)).thenReturn(player);
-        when(playerService.updateById(any(), any())).thenReturn(player);
+        when(playerService.update(any(), any())).thenReturn(player);
 
         mockMvc.perform(put("/api/v1/players/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)

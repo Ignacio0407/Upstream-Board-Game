@@ -25,6 +25,7 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
 
     public MatchTileController(MatchTileService matchTileService) {
         super(matchTileService);
+        this.matchTileService = matchTileService;
     }
 
     @GetMapping("match/{id}")

@@ -1,20 +1,19 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,257 +22,296 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class PlayerServiceTest {
 
-    @Mock
-    private PlayerRepository playerRepository;
-
     @InjectMocks
     private PlayerService playerService;
 
-    private Player player1;
-    private Player player2;
+    @Mock
+    private PlayerRepository playerRepository;
 
-    @BeforeEach
-    void setup() {
-        player1 = new Player();
-        player1.setId(1);
-        player1.setName("Player1");
-        player1.setColor(Color.YELLOW);
-        player1.setPlayerOrder(1);
-        player1.setAlive(true);
-        player1.setPoints(10);
+    @Mock
+    private UserService userService;
 
-        player2 = new Player();
-        player2.setId(2);
-        player2.setName("Player2");
-        player2.setColor(Color.YELLOW);
-        player2.setPlayerOrder(2);
-        player2.setAlive(true);
-        player2.setPoints(20);
+    @Mock
+    private MatchService matchService;
+
+    @Mock
+    private SalmonMatchService salmonMatchService;
+
+    @Mock
+    private PlayerMapper playerMapper;
+
+    private static final Integer MATCH_ID = 1;
+    private static final Integer PLAYER_ID = 1;
+
+    // Player entity de prueba
+    private Player createSamplePlayer(Integer id, Integer energy, Integer points) {
+        Player player = new Player();
+        player.setId(id);
+        player.setName("Test Player");
+        player.setColor(Color.RED);
+        player.setEnergy(energy);
+        player.setPoints(points);
+        player.setAlive(true);
+        return player;
     }
 
-    @Nested
-    @DisplayName("Get Operations Tests")
-    class GetOperationsTests {
+    /* *********************************************************************
+     * Tests parametrizados para el método save (BaseService)
+     ********************************************************************* */
+    @ParameterizedTest
+    @MethodSource("saveScenarios")
+    void testSavePlayer_Parametrized(Player inputPlayer, 
+                                    boolean shouldThrowException, 
+                                    Player expectedOutput) {
+        if (shouldThrowException) {
+            doThrow(new DataAccessException("DB Error") {})
+                .when(playerRepository).save(inputPlayer);
+        } else {
+            when(playerRepository.save(inputPlayer)).thenReturn(expectedOutput);
+        }
+
+        if (shouldThrowException) {
+            assertThrows(DataAccessException.class, () -> playerService.save(inputPlayer));
+        } else {
+            Player result = playerService.save(inputPlayer);
+            assertNotNull(result);
+            assertEquals(expectedOutput.getId(), result.getId());
+            verify(playerRepository, times(1)).save(inputPlayer);
+        }
+    }
+
+    static Stream<Arguments> saveScenarios() {
+        Player validPlayer = new Player();
+        validPlayer.setId(1);
+        validPlayer.setName("Valid Player");
         
-        @Test
-        void testGetPlayers() {
-            ArrayList<Player> players = (ArrayList<Player>) Arrays.asList(player1, player2);
-            when(playerRepository.findAll()).thenReturn(players);
+        Player playerWithNullFields = new Player();
+        playerWithNullFields.setName(null);
+        
+        Player playerWithInvalidEnergy = new Player();
+        playerWithInvalidEnergy.setId(2);
+        playerWithInvalidEnergy.setName("Invalid Energy");
+        playerWithInvalidEnergy.setEnergy(-1); // Valor inválido
 
-            List<Player> result = playerService.findAll();
-
-            assertEquals(2, result.size());
-            verify(playerRepository).findAll();
-        }
-
-        @Test
-        void testfindById_Success() {
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
-
-            Player result = playerService.findById(1);
-
-            assertNotNull(result);
-            assertEquals("Player1", result.getName());
-            verify(playerRepository).findById(1);
-        }
-
-        @Test
-        void testfindById_NotFound() {
-            when(playerRepository.findById(99)).thenReturn(Optional.empty());
-
-            Player result = playerService.findById(99);
-
-            assertNull(result);
-            verify(playerRepository).findById(99);
-        }
-
-        @Test
-        void testGetByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(Optional.of(player1));
-
-            Player result = new Player();//playerService.getByName("Player1");
-
-            assertNotNull(result);
-            assertEquals(1, result.getId());
-            verify(playerRepository).findByName("Player1");
-        }
-
-        @Test
-        void testGetByName_NotFound() {
-            when(playerRepository.findByName("NonExistent")).thenReturn(null);
-
-            Player result = new Player();//playerService.getByName("NonExistent");
-
-            assertNull(result);
-            verify(playerRepository).findByName("NonExistent");
-        }
-
-        @Test
-        void testGetSomePlayersByName_Success() {
-            when(playerRepository.findByName("Player1")).thenReturn(Optional.of(player1));
-            when(playerRepository.findByName("Player2")).thenReturn(Optional.of(player2));
-
-            List<String> names = Arrays.asList("Player1", "Player2");
-            List<Player> result = new ArrayList<>();//playerService.getSomeByName(names);
-
-            assertEquals(2, result.size());
-            assertEquals(1, result.get(0).getId());
-            assertEquals(2, result.get(1).getId());
-        }
-
-        @Test
-        void testGetSomePlayersByName_EmptyList() {
-            List<String> names = Arrays.asList();
-            List<Player> result = new ArrayList<>();//playerService.getSomeByName(names);
-            assertTrue(result.isEmpty());
-        }
-
-        @Test
-        void testGetPlayersByMatch_Success() {
-            List<Player> players = Arrays.asList(player1, player2);
-            when(playerRepository.findPlayersByMatch(1)).thenReturn(players);
-
-            List<Player> result = playerService.findPlayersByMatch(1);
-
-            assertEquals(2, result.size());
-            assertEquals(players, result);
-        }
-
-        @Test
-        void testGetPlayersByMatch_EmptyResult() {
-            when(playerRepository.findPlayersByMatch(1)).thenReturn(Arrays.asList());
-
-            List<Player> result = playerService.findPlayersByMatch(1);
-
-            assertTrue(result.isEmpty());
-        }
+        return Stream.of(
+            // Caso 1: Guardado exitoso
+            Arguments.of(validPlayer, false, validPlayer),
+            
+            // Caso 2: Excepción al guardar
+            Arguments.of(validPlayer, true, null),
+            
+            // Caso 3: Jugador con campos nulos
+            Arguments.of(playerWithNullFields, true, null),
+            
+            // Caso 4: Jugador con energía inválida
+            Arguments.of(playerWithInvalidEnergy, true, null)
+        );
     }
 
-    @Nested
-    @DisplayName("Delete Operations Tests")
-    class DeleteOperationsTests {
-
-        @Test
-        void testDeleteById_Success() {
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
-
-            playerService.delete(1);
-
-            verify(playerRepository).deleteById(1);
+    /* *********************************************************************
+     * Tests parametrizados para findPlayersByMatch
+     ********************************************************************* */
+    @ParameterizedTest
+    @MethodSource("findPlayersScenarios")
+    void testFindPlayersByMatch_Parametrized(Integer matchId, 
+                                          List<Player> dbResponse,
+                                          boolean shouldThrowException) {
+        if (shouldThrowException) {
+            doThrow(new DataAccessException("DB Error") {})
+                .when(playerRepository).findPlayersByMatch(matchId);
+        } else {
+            when(playerRepository.findPlayersByMatch(matchId)).thenReturn(dbResponse);
         }
 
-        @Test
-        void testDeleteById_NotFound() {
-            when(playerRepository.findById(99)).thenReturn(Optional.empty());
-
-            assertNull(playerService.findById(99));
-        }
-
-        @Test
-        void testDeleteByName_NotFound() {
-            when(playerRepository.findByName("NonExistent")).thenReturn(null);
-
-            Player result = new Player();//playerService.getByName("NonExistent");
-            assertNull(result);
-        }
-
-    }
-
-    @Nested
-    @DisplayName("Update Operations Tests")
-    class UpdateOperationsTests {
-
-        @Test
-        void testUpdatePlayerById_Success() {
-            Player updatedPlayer = new Player();
-            updatedPlayer.setId(1);
-            updatedPlayer.setName("UpdatedPlayer");
-            updatedPlayer.setColor(Color.RED);
-            updatedPlayer.setPoints(30);
-
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player1));
-            when(playerRepository.save(any())).thenReturn(updatedPlayer);
-
-            Player result = playerService.updateById(updatedPlayer, 1);
-
-            assertEquals("UpdatedPlayer", result.getName());
-            assertEquals(Color.RED, result.getColor());
-            assertEquals(30, result.getPoints());
-        }
-
-        @Test
-        void testUpdatePlayerById_NotFound() {
-            when(playerRepository.findById(99)).thenReturn(Optional.empty());
-
-            Player result = playerService.findById(99);
-            assertNull(result);
-        }
-
-        @Test
-        void testUpdatePlayerByName_NotFound() {
-            when(playerRepository.findByName("NonExistent")).thenReturn(null);
-
-            Player result = new Player();//playerService.getByName("NonExistent");
-            assertNull(result);
-        }
-    }
-
-    @Nested
-    @DisplayName("Save Operations Tests")
-    class SaveOperationsTests {
-
-        @Test
-        void testSavePlayer_Success() {
-            when(playerRepository.save(any(Player.class))).thenReturn(player1);
-
-            Player result = playerService.save(player1);
-
-            assertEquals("Player1", result.getName());
-            verify(playerRepository).save(player1);
-        }
-
-        @Test
-        void testSavePlayer_Error() {
-            when(playerRepository.save(any(Player.class)))
-                .thenThrow(new DataIntegrityViolationException("Database error"));
-
+        if (shouldThrowException) {
             assertThrows(DataAccessException.class, () -> 
-                playerService.save(player1));
+                playerService.findPlayersByMatch(matchId));
+        } else {
+            List<Player> result = playerService.findPlayersByMatch(matchId);
+            assertNotNull(result);
+            assertEquals(dbResponse.size(), result.size());
+        }
+    }
+
+    static Stream<Arguments> findPlayersScenarios() {
+        Player player1 = new Player(); player1.setId(1);
+        Player player2 = new Player(); player2.setId(2);
+        
+        return Stream.of(
+            // Caso 1: Partida con jugadores
+            Arguments.of(MATCH_ID, Arrays.asList(player1, player2), false),
+            
+            // Caso 2: Partida sin jugadores
+            Arguments.of(MATCH_ID, Collections.emptyList(), false),
+            
+            // Caso 3: Partida no existente
+            Arguments.of(999, Collections.emptyList(), false),
+            
+            // Caso 4: Error de base de datos
+            Arguments.of(MATCH_ID, null, true)
+        );
+    }
+
+    /* *********************************************************************
+     * Tests parametrizados para updateEnergy
+     ********************************************************************* */
+    @ParameterizedTest
+    @MethodSource("updateEnergyScenarios")
+    void testUpdateEnergy_Parametrized(Integer playerId, 
+                                   Integer energyUsed,
+                                   Integer initialEnergy,
+                                   boolean shouldThrowException) {
+        Player player = createSamplePlayer(playerId, initialEnergy, 0);
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
+        
+        if (shouldThrowException && energyUsed > initialEnergy) {
+            assertThrows(BadRequestException.class, () -> 
+                playerService.updateEnergy(playerId, energyUsed));
+        } else if (shouldThrowException) {
+            when(playerRepository.findById(playerId)).thenThrow(new DataAccessException("DB Error") {});
+            assertThrows(DataAccessException.class, () -> 
+                playerService.updateEnergy(playerId, energyUsed));
+        } else {
+            PlayerDTO updatedPlayer = playerService.updateEnergy(playerId, energyUsed);
+            assertNotNull(updatedPlayer);
+            assertEquals(initialEnergy - energyUsed, updatedPlayer.getEnergy());
+        }
+    }
+
+    static Stream<Arguments> updateEnergyScenarios() {
+        return Stream.of(
+            // Caso 1: Uso exitoso de energía
+            Arguments.of(PLAYER_ID, 2, 5, false),
+            
+            // Caso 2: Uso total de energía
+            Arguments.of(PLAYER_ID, 5, 5, false),
+            
+            // Caso 3: Energía insuficiente
+            Arguments.of(PLAYER_ID, 6, 5, true),
+            
+            // Caso 4: Error al buscar jugador
+            Arguments.of(PLAYER_ID, 2, 5, true)
+        );
+    }
+
+    /* *********************************************************************
+     * Tests parametrizados para createPlayerInMatch
+     ********************************************************************* */
+    @ParameterizedTest
+    @MethodSource("createPlayerScenarios")
+    void testCreatePlayerInMatch_Parametrized(LobbyPlayerDTO dto, 
+                                           boolean userExists, 
+                                           boolean matchExists) {
+        Match match = new Match();
+        match.setId(MATCH_ID);
+        match.setPlayersNumber(0);
+        
+        if (userExists && matchExists) {
+            User user = new User();
+            user.setId(dto.getUserId());
+            when(userService.findById(dto.getUserId())).thenReturn(user);
+            when(matchService.findById(MATCH_ID)).thenReturn(match);
+            when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> {
+                Player p = invocation.getArgument(0);
+                p.setId(1); // Simular ID generado
+                return p;
+            });
+        } else if (userExists) {
+            when(userService.findById(dto.getUserId())).thenThrow(new ResourceNotFoundException("User not found"));
+        } else if (matchExists) {
+            when(matchService.findById(MATCH_ID)).thenThrow(new ResourceNotFoundException("Match not found"));
         }
 
-        @Test
-        void testSavePlayers_Success() {
-            List<Player> players = Arrays.asList(player1, player2);
-            when(playerRepository.save(any(Player.class))).thenReturn(player1, player2);
-
-            List<Player> result = playerService.savePlayers(players);
-
-            assertTrue(result.isEmpty());
-            verify(playerRepository, times(2)).save(any(Player.class));
+        if (userExists && matchExists) {
+            LobbyPlayerDTO result = playerService.createPlayerInMatch(MATCH_ID, dto);
+            assertNotNull(result);
+            assertEquals(1, result.getUserId());
+            assertEquals(1, match.getPlayersNumber());
+        } else {
+            assertThrows(ResourceNotFoundException.class, () -> 
+                playerService.createPlayerInMatch(MATCH_ID, dto));
         }
+    }
 
-        @Test
-        void testSavePlayers_PartialSuccess() {
-            List<Player> players = Arrays.asList(player1, player2);
-            when(playerRepository.save(player1)).thenReturn(player1);
-            when(playerRepository.save(player2)).thenThrow(new DataAccessException("Error") {});
+    static Stream<Arguments> createPlayerScenarios() {
+        LobbyPlayerDTO dto = new LobbyPlayerDTO();
+        dto.setName("New Player");
+        dto.setColor(Color.GREEN);
+        dto.setUserId(1);
+        
+        LobbyPlayerDTO invalidDto = new LobbyPlayerDTO();
+        invalidDto.setName(null);
+        invalidDto.setColor(null);
+        invalidDto.setUserId(null);
+        
+        return Stream.of(
+            // Caso 1: Creación exitosa
+            Arguments.of(dto, true, true),
+            
+            // Caso 2: Usuario no existe
+            Arguments.of(dto, false, true),
+            
+            // Caso 3: Partida no existe
+            Arguments.of(dto, true, false),
+            
+            // Caso 4: DTO inválido
+            Arguments.of(invalidDto, true, true)
+        );
+    }
 
-            List<Player> result = playerService.savePlayers(players);
+    /* *********************************************************************
+     * Tests parametrizados para checkPlayerFinished y checkPlayerIsDead
+     ********************************************************************* */
+    @ParameterizedTest
+    @MethodSource("checkPlayerScenarios")
+    void testCheckPlayerStatus_Parametrized(List<SalmonMatch> salmonMatches,
+                                        boolean expectedFinished,
+                                        boolean expectedIsDead) {
+        when(salmonMatchService.findAllFromPlayer(PLAYER_ID)).thenReturn(salmonMatches);
+        
+        boolean resultFinished = playerService.checkPlayerFinished(PLAYER_ID);
+        boolean resultIsDead = playerService.checkPlayerIsDead(PLAYER_ID);
+        
+        assertEquals(expectedFinished, resultFinished);
+        assertEquals(expectedIsDead, resultIsDead);
+    }
 
-            assertEquals(1, result.size());
-            assertTrue(result.contains(player2));
-        }
-
-        @Test
-        void testSavePlayers_EmptyList() {
-            List<Player> players = Arrays.asList();
-            List<Player> result = playerService.savePlayers(players);
-            assertTrue(result.isEmpty());
-        }
+    static Stream<Arguments> checkPlayerScenarios() {
+        SalmonMatch salmon1 = mock(SalmonMatch.class);
+        when(salmon1.getCoordinate()).thenReturn(new Coordinate(0, 21));
+        
+        SalmonMatch salmon2 = mock(SalmonMatch.class);
+        when(salmon2.getCoordinate()).thenReturn(new Coordinate(0, 15));
+        
+        return Stream.of(
+            // Caso 1: Todos los salmones terminaron
+            Arguments.of(Collections.singletonList(salmon1), true, false),
+            
+            // Caso 2: Algunos salmones no terminaron
+            Arguments.of(Arrays.asList(salmon1, salmon2), false, false),
+            
+            // Caso 3: Sin salmones (muerto)
+            Arguments.of(Collections.emptyList(), false, true),
+            
+            // Caso 4: Mixto con null
+            Arguments.of(Arrays.asList(salmon1, null), false, false)
+        );
     }
 }

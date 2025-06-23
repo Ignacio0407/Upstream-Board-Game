@@ -11,6 +11,8 @@ import lombok.Setter;
 @Setter
 public class MatchTileDTO {
     
+    Integer id;
+
     @ValidNumber(min=0)
     Integer capacity;
 

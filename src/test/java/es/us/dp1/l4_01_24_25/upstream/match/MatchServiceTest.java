@@ -1,17 +1,18 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,256 +20,342 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileRepository;
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
-import es.us.dp1.l4_01_24_25.upstream.player.PlayerRepository;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchRepository;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("unused")
 class MatchServiceTest {
 
-    @Mock
-    private MatchRepository matchRepository;
-
-    @Mock
-    private MatchTileRepository matchTileRepository;
-
-    @Mock
-    private SalmonMatchRepository salmonMatchRepository;
-
-    @Mock
-    private PlayerRepository playerRepository;
-
     @InjectMocks
-    private MatchService matchService;
+    MatchService matchService;
 
-    private Match match1;
-    private Match match2;
+    @Mock
+    MatchRepository matchRepository;
+    @Mock
+    MatchMapper matchMapper;
+    @Mock
+    PlayerService playerService;
+    @Mock
+    UserService userService;
+    @Mock
+    SalmonMatchService salmonMatchService;
+    @Mock
+    UserAchievementService userAchievementService;
+    @Mock
+    MatchTileService matchTileService;
 
-    @BeforeEach
-    void setup() {
-        match1 = new Match();
-        match1.setId(1);
-        match1.setName("Match1");
-        match1.setPassword("password1");
-        match1.setState(State.ESPERANDO);
-        match1.setPlayersNumber(2);
-        match1.setRound(1);
-        match1.setPhase(Phase.CASILLAS);
+    @Test
+    void findById_shouldReturnEntity() {
+        Match match = new Match();
+        match.setId(1);
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
 
-        match2 = new Match();
-        match2.setId(2);
-        match2.setName("Match2");
-        match2.setPassword("password2");
-        match2.setState(State.EN_CURSO);
-        match2.setPlayersNumber(3);
-        match2.setRound(2);
-        match2.setPhase(Phase.MOVIENDO);
+        Match result = matchService.findById(1);
+
+        assertEquals(1, result.getId());
     }
 
-    @Nested
-    @DisplayName("GET Operations Tests")
-    class GetOperationsTests {
-        
-        @Test
-        void testGetAllMatches() {
-            List<Match> expectedMatches = Arrays.asList(match1, match2);
-            //when(matchRepository.findAll()).thenReturn(expectedMatches);
+    @Test
+    void findAll_shouldReturnList() {
+        Match match = new Match();
+        when(matchRepository.findAll()).thenReturn(List.of(match));
 
-            List<Match> result = matchService.findAll();
+        List<Match> matches = matchService.findAll();
 
-            assertEquals(expectedMatches, result);
-            verify(matchRepository).findAll();
-        }
-
-        @Test
-        void testGetMatchById_Success() {
-            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
-
-            Match result = matchService.findById(1);
-
-            assertNotNull(result);
-            assertEquals(match1.getName(), result.getName());
-            verify(matchRepository).findById(1);
-        }
-
-        @Test
-        void testGetMatchById_NotFound() {
-            when(matchRepository.findById(99)).thenReturn(Optional.empty());
-
-            Match result = matchService.findById(99);
-
-            assertNull(result);
-            verify(matchRepository).findById(99);
-        }
-
-        @Test
-        void testGetMatchByName_Success() {
-            //when(matchRepository.findByName("Match1")).thenReturn(match1);
-
-            Match result = new Match();// matchService.findByName("Match1");
-
-            assertNotNull(result);
-            assertEquals(match1.getName(), result.getName());
-            verify(matchRepository).findByName("Match1");
-        }
-
-        @Test
-        void testGetMatchByName_NotFound() {
-            when(matchRepository.findByName("NonExistent")).thenReturn(null);
-
-            Match result = new Match();//matchService.getByName("NonExistent");
-
-            assertNull(result);
-            verify(matchRepository).findByName("NonExistent");
-        }
-
-        @Test
-        void testGetPlayersFromMatch_Success() {
-            Player player1 = new Player();
-            player1.setId(1);
-            Player player2 = new Player();
-            player2.setId(2);
-
-            List<Player> players = List.of(player1, player2);
-            when(matchRepository.findPlayersFromGame(1)).thenReturn(players);
-
-            List<Player> result = matchService.findPlayersFromGame(1);
-
-            assertEquals(2, result.size());
-            assertEquals(players, result);
-            verify(matchRepository).findPlayersFromGame(1);
-        }
-
-        @Test
-        void testGetPlayersFromMatch_Empty() {
-            when(matchRepository.findPlayersFromGame(99)).thenReturn(List.of());
-
-            List<Player> result = matchService.findPlayersFromGame(99);
-
-            assertEquals(0, result.size());
-            verify(matchRepository).findPlayersFromGame(99);
-        }
+        assertEquals(1, matches.size());
     }
 
-    @Nested
-    @DisplayName("POST Operations Tests")
-    class PostOperationsTests {
-        
-        @Test
-        void testSaveMatch() {
-            when(matchRepository.save(any(Match.class))).thenReturn(match1);
+    @Test
+    void save_shouldCallRepositorySave() {
+        Match match = new Match();
+        when(matchRepository.save(match)).thenReturn(match);
 
-            Match result = matchService.save(match1);
+        Match result = matchService.save(match);
 
-            assertNotNull(result);
-            assertEquals(match1.getName(), result.getName());
-            verify(matchRepository).save(match1);
-        }
+        assertEquals(match, result);
     }
 
-    @Nested
-    @DisplayName("PUT Operations Tests")
-    class PutOperationsTests {
-        
-        @Test
-        void testUpdateMatchById_Success() {
-            Match updatedMatch = new Match();
-            updatedMatch.setName("UpdatedMatch");
-
-            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
-            when(matchRepository.save(any(Match.class))).thenReturn(updatedMatch);
-
-            Match result = matchService.updateById(updatedMatch, 1);
-
-            assertNotNull(result);
-            assertEquals("UpdatedMatch", result.getName());
-            verify(matchRepository).save(any(Match.class));
-        }
-
-        @Test
-        void testUpdateMatchById_NotFound() {
-            Match updatedMatch = new Match();
-            updatedMatch.setName("UpdatedMatch");
-
-            when(matchRepository.findById(99)).thenReturn(Optional.empty());
-
-            Match result = matchService.updateById(updatedMatch, 99);
-
-            assertNull(result);
-            verify(matchRepository).findById(99);
-        }
+    @Test
+    void delete_shouldCallRepositoryDeleteById() {
+        matchService.delete(1);
+        verify(matchRepository).deleteById(1);
     }
 
-    @Nested
-    @DisplayName("DELETE Operations Tests")
-    class DeleteOperationsTests {
-        
-        @Test
-        void testDeleteAllMatches() {
-            //matchService.deleteAll();
+    @Test
+    void findDTOById_shouldReturnMatchDTO() {
+        Match match = new Match();
+        match.setId(1);
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(matchMapper.toDTO(match)).thenReturn(dto);
 
-            verify(matchRepository).deleteAll();
-        }
-
-        @Test
-        void testDeleteMatchById_Success() {
-            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
-
-            matchService.delete(1);
-
-            verify(matchRepository).deleteById(1);
-        }
-
-        @Test
-        void testDeleteSomeMatchesById() {
-            List<Integer> ids = List.of(1, 2);
-
-            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
-            when(matchRepository.findById(2)).thenReturn(Optional.of(match2));
-
-            //matchService.deleteSomeById(ids);
-
-            verify(matchRepository).deleteById(1);
-            verify(matchRepository).deleteById(2);
-        }
+        MatchDTO result = matchService.findByIdAsDTO(1);
+        assertEquals(1, result.getId());
     }
 
-    @Nested
-    @DisplayName("Custom Methods Tests")
-    class CustomMethodsTests {
-        
-        @Test
-        void testCheckGameHasFinished() {
-            when(matchRepository.findById(1)).thenReturn(Optional.of(match1));
-            when(matchTileRepository.findByMatchId(1)).thenReturn(List.of());
-            when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(List.of());
-            when(playerRepository.findPlayersByMatch(1)).thenReturn(List.of());
+    @Test
+    void saveAsDTO_shouldMapAndSave() {
+        MatchDTO dto = new MatchDTO();
+        Match match = new Match();
+        Match saved = new Match();
+        MatchDTO expected = new MatchDTO();
 
-            matchService.checkGameHasFinished(1);
+        when(matchMapper.toEntity(dto)).thenReturn(match);
+        when(matchRepository.save(match)).thenReturn(saved);
+        when(matchMapper.toDTO(saved)).thenReturn(expected);
 
-            assertEquals(State.FINALIZADA, match1.getState());
-            verify(matchRepository).save(match1);
-        }
+        MatchDTO result = matchService.saveAsDTO(dto);
 
-        @Test
-        void testChangePlayerTurn() {
-            Player player = new Player();
-            player.setId(1);
-            player.setPlayerOrder(0);
-            player.setEnergy(5);
-            player.setAlive(true);
-            match1.setActualPlayer(player);
-            player.setMatch(match1);
+        assertEquals(expected, result);
+    }
 
-            when(playerRepository.findById(1)).thenReturn(Optional.of(player));
-            when(playerRepository.findAlivePlayersByMatch(1)).thenReturn(List.of(player));
+    @Test
+    void update_shouldModifyFieldsAndSave() {
+        Match match = new Match();
+        match.setId(1);
+        match.setPassword("pass1");
 
-            matchService.changePlayerTurn(1);
+        Match existing = new Match();
+        existing.setId(1);
+        existing.setPassword("old");
 
-            assertNotNull(match1.getActualPlayer());
-            verify(matchRepository).save(match1);
-        }
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        dto.setPassword("pass1");
+
+        when(matchMapper.toEntity(dto)).thenReturn(match);
+        when(matchRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(matchRepository.save(existing)).thenReturn(existing);
+        when(matchMapper.toDTO(existing)).thenReturn(dto);
+
+        MatchDTO result = matchService.updateAsDTO(existing.getId(), dto);
+
+        assertEquals("pass1", result.getPassword());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0,1", "1,2", "5,6"
+    })
+    void updateRound_shouldIncreaseRound(int initial, int expected) {
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(initial);
+        MatchDTO dto = new MatchDTO();
+        dto.setRound(expected);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(matchRepository.save(any())).thenReturn(match);
+        when(matchMapper.toDTO(match)).thenReturn(dto);
+
+        MatchDTO result = matchService.updateRound(1);
+        assertEquals(expected, result.getRound());
+    }
+
+    @Test
+    void createMatchWMatchCreator_shouldReturnDTO() {
+        Map<String, String> data = Map.of("name", "test", "password", "123");
+        User user = new User();
+        Match match = new Match();
+        MatchDTO dto = new MatchDTO();
+
+        when(userService.findById(1)).thenReturn(user);
+        when(matchRepository.save(any())).thenReturn(match);
+        when(matchMapper.toDTO(match)).thenReturn(dto);
+
+        MatchDTO result = matchService.createMatchWMatchCreator(1, data);
+        assertNotNull(result);
+    }
+
+    @Test
+    void startGame_shouldReturnStartedGame() {
+        Match match = new Match();
+        match.setId(1);
+        Player p = new Player();
+        List<Player> players = List.of(p);
+        MatchDTO dto = new MatchDTO();
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findPlayersByMatch(1)).thenReturn(players);
+        when(matchRepository.save(match)).thenReturn(match);
+        when(matchMapper.toDTO(match)).thenReturn(dto);
+
+        MatchDTO result = matchService.startGame(1);
+        assertNotNull(result);
+    }
+
+    @Test
+    void findHeronWithCoordsFromGame_shouldReturnList() {
+        List<MatchTile> tiles = List.of(new MatchTile());
+        when(matchRepository.findHeronWithCoordFromGame(1)).thenReturn(tiles);
+
+        List<MatchTile> result = matchService.findHeronWithCoordsFromGame(1);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void createMatchWMatchCreator_shouldCreateMatchWithDefaultValues() {
+        User user = new User();
+        user.setId(1);
+
+        Map<String, String> body = Map.of("name", "Partida1", "password", "abc");
+
+        Match savedMatch = new Match();
+        savedMatch.setId(1);
+        savedMatch.setName("Partida1");
+        savedMatch.setState(State.ESPERANDO);
+
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        dto.setName("Partida1");
+
+        when(userService.findById(1)).thenReturn(user);
+        when(matchRepository.save(any(Match.class))).thenReturn(savedMatch);
+        when(matchMapper.toDTO(any(Match.class))).thenReturn(dto);
+
+        MatchDTO result = matchService.createMatchWMatchCreator(1, body);
+
+        assertEquals("Partida1", result.getName());
+        assertEquals(1, result.getId());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 1",
+        "1, 2",
+        "5, 6"
+    })
+    void updateRound_shouldIncrementRoundCorrectly(int initialRound, int expectedRound) {
+        Match match = new Match();
+        match.setId(1);
+        match.setRound(initialRound);
+
+        Match saved = new Match();
+        saved.setId(1);
+        saved.setRound(expectedRound);
+
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        dto.setRound(expectedRound);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(matchRepository.save(any(Match.class))).thenReturn(saved);
+        when(matchMapper.toDTO(any(Match.class))).thenReturn(dto);
+
+        MatchDTO result = matchService.updateRound(1);
+
+        assertEquals(expectedRound, result.getRound());
+    }
+
+    @Test
+    void startGame_shouldSetInitialAndActualPlayer() {
+        Match match = new Match();
+        match.setId(1);
+        match.setState(State.ESPERANDO);
+        match.setPlayersNumber(0);
+
+        Player p = new Player();
+        p.setId(1);
+        p.setPlayerOrder(0);
+
+        List<Player> players = List.of(p);
+
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        dto.setState(State.EN_CURSO);
+        dto.setPlayersNumber(1);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findPlayersByMatch(1)).thenReturn(players);
+        when(matchRepository.save(any(Match.class))).thenReturn(match);
+        when(matchMapper.toDTO(any(Match.class))).thenReturn(dto);
+
+        MatchDTO result = matchService.startGame(1);
+
+        assertEquals(State.EN_CURSO, result.getState());
+        assertEquals(1, result.getPlayersNumber());
+    }
+
+    @Test
+    void finalScore_shouldThrowIfAlreadyCalculated() {
+        Match match = new Match();
+        match.setId(1);
+        match.setFinalScoreCalculated(true);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+
+        assertThrows(ConflictException.class, () -> matchService.finalScore(1));
+    }
+
+    @Test
+    void finalScore_shouldCalculateScoreAndSetFinalScoreFlag() {
+        Match match = new Match();
+        match.setId(1);
+        match.setFinalScoreCalculated(false);
+
+        Player player = new Player();
+        player.setId(1);
+        player.setPoints(0);
+        User user = new User();
+        user.setId(1);
+        user.setPlayedgames(0);
+        user.setTotalpoints(0);
+        player.setUserPlayer(user);
+
+        SalmonMatch salmon = new SalmonMatch();
+        salmon.setId(1);
+        salmon.setSalmonsNumber(2);
+        Coordinate coord = new Coordinate(1, 1);
+        salmon.setCoordinate(coord);
+
+        List<Player> players = List.of(player);
+        List<SalmonMatch> salmons = List.of(salmon);
+
+        when(playerService.findPlayersByMatch(1)).thenReturn(players);
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(salmons);
+        when(salmonMatchService.findPointsFromASalmonInSpawn(1)).thenReturn(10);
+        when(matchRepository.save(any())).thenReturn(match);
+        when(matchMapper.toDTO(any())).thenReturn(new MatchDTO());
+
+        MatchDTO result = matchService.finalScore(1);
+
+        assertNotNull(result);
+        verify(userService).save(user);
+        verify(playerService).save(player);
+    }
+
+    @Test
+    void changeInitialPlayer_shouldRotateToNextPlayer() {
+        Match match = new Match();
+        match.setId(1);
+
+        Player p1 = new Player();
+        p1.setPlayerOrder(0);
+
+        Player p2 = new Player();
+        p2.setPlayerOrder(1);
+
+        match.setInitialPlayer(p1);
+
+        List<Player> players = List.of(p1, p2);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findAlivePlayersByMatch(1)).thenReturn(players);
+        when(matchRepository.save(any())).thenReturn(match);
+
+        matchService.changeInitialPlayer(1);
+
+        assertEquals(p2, match.getInitialPlayer());
     }
 }

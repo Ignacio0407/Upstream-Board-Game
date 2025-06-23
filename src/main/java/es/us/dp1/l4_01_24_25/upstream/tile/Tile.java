@@ -15,5 +15,5 @@ public class Tile extends BaseEntity {
     String image;
     
     @Enumerated(EnumType.STRING)
-	String type;
+	TileType type;
 }

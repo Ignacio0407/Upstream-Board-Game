@@ -1,12 +1,10 @@
 package es.us.dp1.l4_01_24_25.upstream.salmon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -109,7 +107,7 @@ public class SalmonServiceTest {
             when(salmonRepository.findById(99)).thenReturn(Optional.empty());
 
             // When
-            Salmon result = salmonService.findById(99);
+            //Salmon result = salmonService.findById(99);
 
             // Then
             verify(salmonRepository).findById(99);

@@ -1,87 +1,58 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
-import es.us.dp1.l4_01_24_25.upstream.player.Player;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class MatchRepositoryTest {
 
-    @Mock
-    private MatchRepository matchRepository;
+    @Autowired
+    MatchRepository matchRepository;
+
+    @Autowired
+    TestEntityManager entityManager;
 
     @Test
-    void findPlayersFromGame_shouldReturnPlayerList_whenMatchExists() {
-        
-        Integer matchId = 1;
-        List<Player> expectedPlayers = new ArrayList<>();
-        Player player1 = new Player();
-        Player player2 = new Player();
-        expectedPlayers.add(player1);
-        expectedPlayers.add(player2);
-        
-        when(matchRepository.findPlayersFromGame(matchId)).thenReturn(expectedPlayers);
+    void findByName_returnsCorrectMatch() {
+        Match match = new Match();
+        match.setName("Prueba");
+        match.setPhase(Phase.CASILLAS);
+        match.setState(State.ESPERANDO);
+        match.setRound(0);
+        match.setPlayersNumber(0);
+        match.setFinalScoreCalculated(false);
+        entityManager.persist(match);
 
-        List<Player> result = matchRepository.findPlayersFromGame(matchId);
+        Optional<Match> result = matchRepository.findByName("Prueba");
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(expectedPlayers, result);
+        assertTrue(result.isPresent());
+        assertEquals("Prueba", result.get().getName());
     }
 
-
     @Test
-    void findPlayersFromGame_shouldReturnEmptyList_whenMatchDoesNotExist() {
+    void findHeronWithCoordFromGame_returnsEmptyListIfNoMatchTile() {
+        Match match = new Match();
+        match.setName("Heron");
+        match.setPhase(Phase.CASILLAS);
+        match.setState(State.ESPERANDO);
+        match.setRound(0);
+        match.setPlayersNumber(0);
+        match.setFinalScoreCalculated(false);
+        entityManager.persist(match);
 
-        Integer matchId = 999;
-        when(matchRepository.findPlayersFromGame(matchId)).thenReturn(new ArrayList<>());
+        List<MatchTile> tiles = matchRepository.findHeronWithCoordFromGame(match.getId());
 
-        List<Player> result = matchRepository.findPlayersFromGame(matchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-
-    @Test
-    void findHeronWithCoordFromGame_shouldReturnMatchTileList_whenMatchExists() {
-        Integer matchId = 1;
-        List<MatchTile> expectedTiles = new ArrayList<>();
-        MatchTile tile1 = new MatchTile();
-        MatchTile tile2 = new MatchTile();
-        expectedTiles.add(tile1);
-        expectedTiles.add(tile2);
-        
-        when(matchRepository.findHeronWithCoordFromGame(matchId)).thenReturn(expectedTiles);
-
-        List<MatchTile> result = matchRepository.findHeronWithCoordFromGame(matchId);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(expectedTiles, result);
-    }
-
-
-    @Test
-    void findHeronWithCoordFromGame_shouldReturnEmptyList_whenNoHeronsFound() {
-
-        Integer matchId = 1;
-        when(matchRepository.findHeronWithCoordFromGame(matchId)).thenReturn(new ArrayList<>());
-
-        List<MatchTile> result = matchRepository.findHeronWithCoordFromGame(matchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(tiles.isEmpty());
     }
 }

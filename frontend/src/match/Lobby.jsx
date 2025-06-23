@@ -13,6 +13,7 @@ import { Client } from '@stomp/stompjs';
 import startGame from '../util/startGame';
 import endGame from '../util/endGame';
 import ColorHandler from '../util/ColorHandler';
+import {get} from '../util/fetchers'
 export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()

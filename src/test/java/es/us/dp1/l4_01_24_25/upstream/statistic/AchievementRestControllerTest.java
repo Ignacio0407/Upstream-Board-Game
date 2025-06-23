@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;

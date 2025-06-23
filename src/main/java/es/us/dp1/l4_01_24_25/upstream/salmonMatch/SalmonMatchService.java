@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
@@ -31,7 +32,7 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
     MatchService matchService;
 
     @Autowired
-    public SalmonMatchService(SalmonMatchRepository salmonMatchRepository, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
+    public SalmonMatchService(SalmonMatchRepository salmonMatchRepository, @Lazy PlayerService playerService, @Lazy SalmonService salmonService, @Lazy MatchTileService matchTileService, @Lazy MatchService matchService) {
         super(salmonMatchRepository);
         this.playerService = playerService;
         this.salmonService = salmonService;
@@ -110,18 +111,18 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
     private MatchTile tileFullNull(SalmonMatch salmonMatch, List<MatchTile> matchTiles, Coordinate newCoordinate) {
         Coordinate newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
         MatchTile toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).toList().get(0);
-        String toTravelType2 = toTravel2.getTile().getType();
+        TileType toTravelType2 = toTravel2.getTile().getType();
         if(toTravelType2.equals(TileType.BEAR) && List.of(0, 1).contains(toTravel2.getOrientation())) 
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
         return toTravel2;
     }
 
     private MatchTile handleTileFull(Coordinate newCoordinate, SalmonMatch salmonMatch, MatchTile myTile, 
-        String myCoordinateType, List<MatchTile> matchTiles, List<Integer> from, List<Integer> to, Integer x, Integer y) {
+        TileType myCoordinateType, List<MatchTile> matchTiles, List<Integer> from, List<Integer> to, Integer x, Integer y) {
         Coordinate newCoordinate2 = newCoordinateToTravel(newCoordinate, x, y);
         MatchTile toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).findFirst().orElse(null);
         if (toTravel2 == null) throw new NotValidMoveException("¡No se puede ir a la casilla a saltar o todavía no está puesta!");
-        String toTravelType2 = toTravel2.getTile().getType();
+        TileType toTravelType2 = toTravel2.getTile().getType();
         if (bearBoolean(myTile, toTravel2, myCoordinateType, toTravelType2, from, to)) {
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
         }
@@ -170,7 +171,7 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
         return salmonMatch;
     }
 
-    private Boolean bearBoolean(MatchTile myTile, MatchTile toTravel, String myCoordinateType, String toTravelType, List<Integer> from, List<Integer> to) {
+    private Boolean bearBoolean(MatchTile myTile, MatchTile toTravel, TileType myCoordinateType, TileType toTravelType, List<Integer> from, List<Integer> to) {
         return myCoordinateType.equals(TileType.BEAR) && from.contains(myTile.getOrientation()) ||
             toTravelType.equals(TileType.BEAR) && to.contains(toTravel.getOrientation());
     }
@@ -185,7 +186,7 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
         Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y"));
         List<MatchTile> matchTiles = matchTileService.findByMatchId(match.getId());
         MatchTile toTravel = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate)).findFirst().orElse(null);
-        String toTravelType = toTravel.getTile().getType();
+        TileType toTravelType = toTravel.getTile().getType();
         Coordinate newCoordinate2 = null;
         MatchTile toTravel2 = null;
         Integer energyUsed = 1;
@@ -222,7 +223,7 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
         // Si ya estoy en el tablero.
         else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
             MatchTile myTile = matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
-            String myCoordinateType = myTile.getTile().getType();
+            TileType myCoordinateType = myTile.getTile().getType();
             Coordinate distancia = new Coordinate((newCoordinate.x() - myCoordinate.x()), (newCoordinate.y() - myCoordinate.y()));
 
             if(distancia.y() < 0) throw new NotValidMoveException("Solo puedes moverte hacia delante"); 
@@ -410,7 +411,7 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
         Integer energyUsed = 1;
         MatchTile myTile = matchTileService.findByMatchId(match.getId()).stream()
             .filter(m -> salmonMatch.getCoordinate().equals(m.getCoordinate())).findFirst().orElse(null);
-        String tileType = myTile.getTile().getType();
+        TileType tileType = myTile.getTile().getType();
 
         if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
             // Para subir 
@@ -463,5 +464,10 @@ public class SalmonMatchService extends BaseService<SalmonMatch,Integer>{
         else this.delete(salmonMatch.getId());
         return salmonMatch;
 
+    }
+
+    public List<SalmonMatch> findSalmonsInSpawnFromGame(int i) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findSalmonsInSpawnFromGame'");
     }
 }

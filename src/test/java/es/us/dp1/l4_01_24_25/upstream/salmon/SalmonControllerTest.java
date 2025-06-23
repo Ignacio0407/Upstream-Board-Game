@@ -2,7 +2,6 @@ package es.us.dp1.l4_01_24_25.upstream.salmon;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -52,12 +51,6 @@ public class SalmonControllerTest {
         "999, null, false"  // Recurso no encontrado, no se espera cuerpo
     })
     void testFindById(int id, String expectedJsonResponse, boolean exists) throws Exception {
-        Salmon salmon = new Salmon();
-        if (exists) {
-            //when(salmonService.findById(id)).thenReturn(Optional.of(salmon));
-        } else {
-            //when(salmonService.findById(id)).thenReturn(Optional.empty());
-        }
 
         if (exists) {
             mockMvc.perform(get("/api/v1/salmons/" + id))
