@@ -1,17 +1,18 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,201 +24,124 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.player.Player;
-import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.user.User;
-
-@SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
-public class MatchRestControllerTest {
+@WebMvcTest(MatchRestController.class)
+@AutoConfigureMockMvc
+class MatchRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @MockBean
     private MatchService matchService;
 
-    @MockBean
-    private PlayerService playerService;
+    @Test
+    void updateRound_shouldReturn200AndUpdatedMatchDTO() throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setRound(3);
+        when(matchService.updateRound(1)).thenReturn(dto);
 
-    @MockBean
-    private MatchTileService matchTileService;
-
-
-    private Match testMatch;
-
-    @BeforeEach
-    @SuppressWarnings("unused")
-    void setup() {
-        testMatch = new Match();
-        testMatch.setId(1);
-        testMatch.setName("Test Match");
-        testMatch.setPlayersNumber(2);
-        testMatch.setRound(0);
-        testMatch.setState(State.ESPERANDO);
-        testMatch.setPhase(Phase.CASILLAS);
+        mockMvc.perform(patch("/api/v1/matches/1/ronda"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.round").value(3));
     }
 
     @Test
-    void shouldGetAllMatches() throws Exception {
-        List<Match> matches = List.of(testMatch);
-        when(matchService.findAll()).thenReturn(matches);
+    void createMatchWMatchCreator_shouldReturn201() throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setName("Test Match");
 
-        mockMvc.perform(get("/api/v1/matches"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(1))
-               .andExpect(jsonPath("$[0].name").value("Test Match"));
+        when(matchService.createMatchWMatchCreator(eq(1), any())).thenReturn(dto);
+
+        mockMvc.perform(post("/api/v1/matches/matchCreator/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Test Match\", \"password\": \"123\"}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.name").value("Test Match"));
     }
 
     @Test
-    void shouldFindMatchById() throws Exception {
-        when(matchService.findById(1)).thenReturn(testMatch);
-
-        mockMvc.perform(get("/api/v1/matches/1"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(1))
-               .andExpect(jsonPath("$.name").value("Test Match"));
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenMatchDoesNotExist() throws Exception {
-        when(matchService.findById(1)).thenReturn(null);
-
-        mockMvc.perform(get("/api/v1/matches/1"))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldCreateMatchSuccessfully() throws Exception {
-        Player player = new Player();
-        player.setId(1);
-        player.setName("Player 1");
-        player.setEnergy(5);
-        player.setAlive(true);
-        User user = new User();
-        user.setId(1);
-        user.setName("Paco");
-        testMatch.setInitialPlayer(player);
-        testMatch.setMatchCreator(user);
-        testMatch.setSalmonMatches(new ArrayList<>());
-        when(matchService.save(any(Match.class))).thenReturn(testMatch);
-
-        mockMvc.perform(post("/api/v1/matches")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(testMatch)))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.id").value(1))
-               .andExpect(jsonPath("$.name").value("Test Match"));
-    }
-
-    @Test
-    void shouldFailCreatingMatchWhenInvalidName() throws Exception {
-        testMatch.setName("A");
-
-        mockMvc.perform(post("/api/v1/matches")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(testMatch)))
-               .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldUpdateMatchSuccessfully() throws Exception {
-        Match updatedMatch = new Match();
-        updatedMatch.setId(1);
-        updatedMatch.setName("Updated Match");
-        updatedMatch.setPlayersNumber(3);
-
-        when(matchService.findById(1)).thenReturn(testMatch);
-        when(matchService.updateById(any(Match.class), eq(1))).thenReturn(updatedMatch);
-
-        mockMvc.perform(put("/api/v1/matches/1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(updatedMatch)))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(1))
-               .andExpect(jsonPath("$.name").value("Updated Match"));
-    }
-
-    @Test
-    void shouldFailUpdatingMatchWhenNotFound() throws Exception {
-        Match updatedMatch = new Match();
-        updatedMatch.setId(2);
-        updatedMatch.setName("Updated Match");
-
-        when(matchService.updateById(updatedMatch, testMatch.getId())).thenReturn(null);
-
-        mockMvc.perform(put("/api/v1/matches/1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(updatedMatch)))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldDeleteMatchSuccessfully() throws Exception {
-        when(matchService.findById(1)).thenReturn(testMatch);
-
-        mockMvc.perform(delete("/api/v1/matches/1"))
-               .andExpect(status().isNoContent());
-
-        verify(matchService).delete(1);
-    }
-
-    @Test
-    void shouldFailDeletingMatchWhenNotFound() throws Exception {
-        when(matchService.findById(1)).thenReturn(null);
-
-        mockMvc.perform(delete("/api/v1/matches/1"))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldStartGameSuccessfully() throws Exception {
-        Player player = new Player();
-        player.setId(1);
-        player.setName("Player 1");
-        player.setEnergy(5);
-        player.setAlive(true);
-        testMatch.setInitialPlayer(player);
-
-        when(matchService.findById(1)).thenReturn(testMatch);
-        when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player));
+    void startGame_shouldReturn200() throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        when(matchService.startGame(1)).thenReturn(dto);
 
         mockMvc.perform(patch("/api/v1/matches/1/startGame"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.state").value("EN_CURSO"));
-    }
-
-
-    @Test
-    void shouldFailStartGameWhenMatchNotFound() throws Exception {
-        when(matchService.findById(1)).thenReturn(null);
-
-        mockMvc.perform(patch("/api/v1/matches/1/startGame"))
-               .andExpect(status().isNotFound());
+            .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
-    void shouldChangePhaseSuccessfully() throws Exception {
-        List<Player> players = List.of(new Player());
-        when(matchService.findById(1)).thenReturn(testMatch);
-        when(playerService.findById(1)).thenReturn(players.get(0));
-        when(matchTileService.findByMatchIdNoCoord(1)).thenReturn(List.of());
+    void finalScore_shouldReturn200() throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setFinalScoreCalculated(true);
 
-        mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
-               .andExpect(status().isOk());
+        when(matchService.finalScore(1)).thenReturn(dto);
+
+        mockMvc.perform(patch("/api/v1/matches/finalscore/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.finalScoreCalculated").value(true));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0", "1", "2"})
+    void baseController_findById_shouldReturnDTO(Integer id) throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setId(id);
+        when(matchService.findByIdAsDTO(id)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/v1/matches/" + id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id));
     }
 
     @Test
-    void shouldReturnNotFoundWhenChangingPhaseWithInvalidMatch() throws Exception {
-        when(matchService.findById(1)).thenReturn(null);
+    void baseController_findAll_shouldReturnList() throws Exception {
+        MatchDTO dto = new MatchDTO();
+        dto.setId(1);
+        when(matchService.findAllAsDTO()).thenReturn(List.of(dto));
 
-        mockMvc.perform(patch("/api/v1/matches/1/changephase/1"))
-               .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/matches"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void baseController_save_shouldReturnSavedDTO() throws Exception {
+        MatchDTO input = new MatchDTO();
+        input.setName("Match X");
+
+        MatchDTO saved = new MatchDTO();
+        saved.setName("Match X");
+
+        when(matchService.saveAsDTO(any())).thenReturn(saved);
+
+        mockMvc.perform(post("/api/v1/matches")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Match X\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Match X"));
+    }
+
+    @Test
+    void baseController_update_shouldReturnUpdatedDTO() throws Exception {
+        MatchDTO updated = new MatchDTO();
+        updated.setId(1);
+        updated.setName("Updated Match");
+
+        when(matchService.updateAsDTO(any(), any())).thenReturn(updated);
+
+        mockMvc.perform(put("/api/v1/matches")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\":1,\"name\":\"Updated Match\"}"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Updated Match"));
+    }
+
+    @Test
+    void baseController_delete_shouldReturnNoContent() throws Exception {
+        mockMvc.perform(delete("/api/v1/matches/1"))
+            .andExpect(status().isNoContent());
+
+        verify(matchService).delete(1);
     }
 }

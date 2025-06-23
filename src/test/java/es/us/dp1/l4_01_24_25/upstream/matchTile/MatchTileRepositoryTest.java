@@ -1,84 +1,87 @@
 package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-@ExtendWith(MockitoExtension.class)
-public class MatchTileRepositoryTest {
+import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.match.Match;
 
-    @Mock
+import java.util.List;
+import java.util.Optional;
+
+@DataJpaTest
+class MatchTileRepositoryTest {
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Autowired
     private MatchTileRepository matchTileRepository;
 
     @Test
-    void testFindByMatchId() {
-        Integer validMatchId = 1;
-        Integer invalidMatchId = 2;
+    void findByMatchId_ShouldReturnTiles() {
+        // Setup
+        Match match = new Match();
+        entityManager.persist(match);
+        
+        MatchTile tile1 = new MatchTile();
+        tile1.setMatch(match);
+        entityManager.persist(tile1);
+        
+        MatchTile tile2 = new MatchTile();
+        tile2.setMatch(match);
+        entityManager.persist(tile2);
 
-        MatchTile matchTile = new MatchTile();
-        matchTile.setId(1);
+        // Test
+        List<MatchTile> result = matchTileRepository.findByMatchId(match.getId());
 
-        when(matchTileRepository.findByMatchId(validMatchId)).thenReturn(List.of(matchTile));
-        when(matchTileRepository.findByMatchId(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        List<MatchTile> validResult = matchTileRepository.findByMatchId(validMatchId);
-        List<MatchTile> invalidResult = matchTileRepository.findByMatchId(invalidMatchId);
-
-        assertFalse(validResult.isEmpty());
-        assertSame(matchTile, validResult.get(0));
-
-        assertTrue(invalidResult.isEmpty());
+        // Verify
+        assertEquals(2, result.size());
     }
 
-
     @Test
-    void testFindWithNoCoord() {
-        Integer validMatchId = 1;
-        Integer invalidMatchId = 2;
+    void findByMatchIdNoCoord_ShouldReturnOnlyTilesWithoutCoordinates() {
+        // Setup
+        Match match = new Match();
+        entityManager.persist(match);
+        
+        MatchTile tile1 = new MatchTile();
+        tile1.setMatch(match);
+        tile1.setCoordinate(new Coordinate(1, 1));
+        entityManager.persist(tile1);
+        
+        MatchTile tile2 = new MatchTile();
+        tile2.setMatch(match);
+        entityManager.persist(tile2);
 
-        MatchTile matchTile = new MatchTile();
-        matchTile.setId(1);
-        matchTile.setCoordinate(null);
+        // Test
+        List<MatchTile> result = matchTileRepository.findByMatchIdNoCoord(match.getId());
 
-        when(matchTileRepository.findByMatchIdNoCoord(validMatchId)).thenReturn(List.of(matchTile));
-        when(matchTileRepository.findByMatchIdNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        List<MatchTile> validResult = matchTileRepository.findByMatchIdNoCoord(validMatchId);
-        List<MatchTile> invalidResult = matchTileRepository.findByMatchIdNoCoord(invalidMatchId);
-
-        assertFalse(validResult.isEmpty());
-        assertSame(matchTile, validResult.get(0));
-
-        assertTrue(invalidResult.isEmpty());
+        // Verify
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getCoordinate());
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1, true",
+        "2, 2, false"
+    })
+    void findByCoordinate_ShouldReturnCorrectTile(int x, int y, boolean shouldExist) {
+        // Setup
+        MatchTile tile = new MatchTile();
+        tile.setCoordinate(new Coordinate(1, 1));
+        entityManager.persist(tile);
 
-    @Test
-    void testFindByCoordinate() {
-        Integer x = 5;
-        Integer y = 10;
-        Integer invalidX = 1;
-        Integer invalidY = 2;
+        // Test
+        Optional<MatchTile> result = matchTileRepository.findByCoordinate(x, y);
 
-        MatchTile matchTile = new MatchTile();
-        matchTile.setId(1);
-
-        when(matchTileRepository.findByCoordinate(x, y)).thenReturn(matchTile);
-        when(matchTileRepository.findByCoordinate(invalidX, invalidY)).thenReturn(null);
-
-        MatchTile validResult = matchTileRepository.findByCoordinate(x, y);
-        MatchTile invalidResult = matchTileRepository.findByCoordinate(invalidX, invalidY);
-
-        assertSame(matchTile, validResult);
-        assertNull(invalidResult);
+        // Verify
+        assertEquals(shouldExist, result.isPresent());
     }
 }

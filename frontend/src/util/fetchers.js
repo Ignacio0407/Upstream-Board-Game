@@ -52,7 +52,6 @@ export const deleteEntity = async (uri, jwt, id) => {
           Authorization: `Bearer ${jwt}`,
           Accept: "application/json",
           "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data)
+      }
     });
 };

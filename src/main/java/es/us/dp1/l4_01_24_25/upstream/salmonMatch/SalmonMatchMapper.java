@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -14,9 +15,11 @@ import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 public abstract class SalmonMatchMapper implements EntityMapper<SalmonMatch, SalmonMatchDTO> {
     
     @Autowired
+    @Lazy
     protected PlayerService playerService;
 
     @Autowired
+    @Lazy
     protected MatchService matchService;
 
     @Override

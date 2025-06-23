@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import tokenService from '../services/token.service'
 import useFetchState from "../util/useFetchState";
 import getIdFromUrl from "../util/getIdFromUrl";
 import Lobby from "./Lobby"
 import Game from "./Game"
 import EndGame from './EndGame';
+import {get} from '../util/fetchers'
 
 export default function Match() { 
 

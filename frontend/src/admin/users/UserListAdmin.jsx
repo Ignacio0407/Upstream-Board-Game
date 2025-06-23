@@ -13,14 +13,8 @@ const jwt = tokenService.getLocalAccessToken();
 export default function UserListAdmin() {
   const [message, setMessage] = useState(null);
   const [visible, setVisible] = useState(false);
-  const [users, setUsers] = useFetchState(
-    [],
-    `/api/v1/users`,
-    jwt,
-    setMessage,
-    setVisible
-  );
-  const [originalUsers, setOriginalUsers] = useFetchState([],`/api/v1/users`,jwt,setMessage,setVisible);
+  const [users, setUsers] = useFetchState([],`/api/v1/users`,jwt,setMessage,setVisible);
+  const [filtered, setFiltered] = useState([]);
   const [alerts, setAlerts] = useState([]);
 
   const userList = users.map((user) => {
@@ -65,7 +59,7 @@ export default function UserListAdmin() {
 
   return (
     <div className="admin-page-container">
-    <SearchBar setter={setUsers} uri={"users"} data={originalUsers}/>
+    <SearchBar data={users} setFiltered={setFiltered} placeholder={"Search users"} />
       <h1 className="text-center">Users</h1>
       {alerts.map((a) => a.alert)}
       {modal}

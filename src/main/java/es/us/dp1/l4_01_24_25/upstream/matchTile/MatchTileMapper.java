@@ -1,15 +1,19 @@
 package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 
+@Mapper(componentModel = "spring")
 public abstract class MatchTileMapper implements EntityMapper<MatchTile, MatchTileDTO>{
  
-     @Autowired
+    @Autowired
+    @Lazy
     protected MatchService matchService;
 
     @Override

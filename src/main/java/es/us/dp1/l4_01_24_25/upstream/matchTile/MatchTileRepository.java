@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@SuppressWarnings("override")
 public interface MatchTileRepository extends JpaRepository<MatchTile, Integer>{
 
     @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId")

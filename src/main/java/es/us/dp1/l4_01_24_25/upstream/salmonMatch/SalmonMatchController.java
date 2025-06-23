@@ -38,6 +38,7 @@ public class SalmonMatchController extends BaseRestController<SalmonMatch,Intege
     @Autowired
     public SalmonMatchController(SalmonMatchService salmonMatchService, PlayerService playerService, SalmonService salmonService, MatchTileService matchTileService, MatchService matchService) {
         super(salmonMatchService);
+        this.salmonMatchService = salmonMatchService;
         this.playerService = playerService;
         this.salmonService = salmonService;
         this.matchTileService = matchTileService;

@@ -17,6 +17,7 @@ export default function CreateGame() {
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
      
    const navigate = useNavigate();
+   console.log(jwt)
 
    const socket = new SockJS('http://localhost:8080/ws-upstream');
    const stompClient = new Client({
@@ -48,7 +49,7 @@ export default function CreateGame() {
       .then(response => {
           if (!response.ok) {
               return response.text().then(err => {
-                  throw new Error(`Nombre no válido.`);
+                  throw new Error(err);
               });
           }
           return response.json();

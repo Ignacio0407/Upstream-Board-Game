@@ -2,10 +2,10 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
@@ -25,7 +25,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     UserService userService;
     MatchService matchService;
 
-    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, SalmonMatchService  salmonMatchService , UserService userService, MatchService matchService) {
+    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, @Lazy SalmonMatchService salmonMatchService , @Lazy UserService userService, @Lazy MatchService matchService) {
         super(playerRepository, playerMapper);
         this.salmonMatchService = salmonMatchService ;
         this.userService = userService;
@@ -81,7 +81,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return playerMapper.toLobby(p);
     }
 
-    public PlayerDTO updateEnergy(Integer id, Integer energyUsed) throws ResourceNotFoundException, Exception {
+    public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
         Player player = this.findById(id);
         if (player.getEnergy() - energyUsed < 0) {
             throw new BadRequestException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
