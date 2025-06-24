@@ -57,11 +57,10 @@ const Chat = ({ match, players, currentPlayer }) => {
     if (!newMessage.trim()) return;
     try {
       const playerId = currentPlayer.id;
+      const playerName = currentPlayer.name;
       const matchId = match.id
-      const message = encodeURIComponent(newMessage)
-      //const url = `/api/v1/messages/${matchId}/${playerId}/${encodeURIComponent(newMessage)}`;
-      const url = '/api/v1/messages'
-      await post(url, jwt, {matchId, playerId, message});
+      const content = newMessage;
+      await post('/api/v1/messages', jwt, {playerId, playerName, matchId, content});
         setNewMessage('');
     } catch (error) {
         console.error('Error sending message:', error);

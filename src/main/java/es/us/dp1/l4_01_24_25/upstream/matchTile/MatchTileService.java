@@ -29,6 +29,8 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     @Autowired
     public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService) {
         super(matchTileRepository, matchTileMapper);
+        this.matchTileRepository = matchTileRepository;
+        this.matchTileMapper = matchTileMapper;
         this.tileService = tileService;
         this.matchService = matchService;
     }

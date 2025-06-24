@@ -2,7 +2,9 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -215,66 +217,64 @@ public class PlayerServiceTest {
      * Tests parametrizados para createPlayerInMatch
      ********************************************************************* */
     @ParameterizedTest
-    @MethodSource("createPlayerScenarios")
-    void testCreatePlayerInMatch_Parametrized(LobbyPlayerDTO dto, 
-                                           boolean userExists, 
-                                           boolean matchExists) {
-        Match match = new Match();
-        match.setId(MATCH_ID);
-        match.setPlayersNumber(0);
-        
-        if (userExists && matchExists) {
-            User user = new User();
-            user.setId(dto.getUserId());
-            when(userService.findById(dto.getUserId())).thenReturn(user);
-            when(matchService.findById(MATCH_ID)).thenReturn(match);
-            when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> {
-                Player p = invocation.getArgument(0);
-                p.setId(1); // Simular ID generado
-                return p;
-            });
-        } else if (userExists) {
-            when(userService.findById(dto.getUserId())).thenThrow(new ResourceNotFoundException("User not found"));
-        } else if (matchExists) {
-            when(matchService.findById(MATCH_ID)).thenThrow(new ResourceNotFoundException("Match not found"));
-        }
+@MethodSource("createPlayerScenarios")
+void testCreatePlayerInMatch_Parametrized(Map<String, String> playerDTO,
+                                          boolean userExists,
+                                          boolean matchExists) {
+    Match match = new Match();
+    match.setId(MATCH_ID);
+    match.setPlayersNumber(0);
 
-        if (userExists && matchExists) {
-            LobbyPlayerDTO result = playerService.createPlayerInMatch(MATCH_ID, dto);
-            assertNotNull(result);
-            assertEquals(1, result.getUserId());
-            assertEquals(1, match.getPlayersNumber());
-        } else {
-            assertThrows(ResourceNotFoundException.class, () -> 
-                playerService.createPlayerInMatch(MATCH_ID, dto));
-        }
+    Integer userId = null;
+    try {
+        userId = Integer.valueOf(playerDTO.get("userId"));
+    } catch (NumberFormatException | NullPointerException e) {
+        // Valor inválido o nulo
     }
 
+    if (userExists && matchExists && userId != null) {
+        User user = new User();
+        user.setId(userId);
+        when(userService.findById(userId)).thenReturn(user);
+        when(matchService.findById(MATCH_ID)).thenReturn(match);
+        when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> {
+            Player p = invocation.getArgument(0);
+            p.setId(1);
+            return p;
+        });
+    } else if (userExists) {
+        when(userService.findById(userId)).thenThrow(new ResourceNotFoundException("User not found"));
+    } else if (matchExists) {
+        when(matchService.findById(MATCH_ID)).thenThrow(new ResourceNotFoundException("Match not found"));
+    }
+
+    if (userExists && matchExists && userId != null) {
+        LobbyPlayerDTO result = playerService.createPlayerInMatch(MATCH_ID, playerDTO);
+        assertNotNull(result);
+        assertEquals(userId, result.getUserId());
+        assertEquals(1, match.getPlayersNumber());
+    } else {
+        assertThrows(ResourceNotFoundException.class, () ->
+            playerService.createPlayerInMatch(MATCH_ID, playerDTO));
+    }
+}
+
     static Stream<Arguments> createPlayerScenarios() {
-        LobbyPlayerDTO dto = new LobbyPlayerDTO();
-        dto.setName("New Player");
-        dto.setColor(Color.GREEN);
-        dto.setUserId(1);
-        
-        LobbyPlayerDTO invalidDto = new LobbyPlayerDTO();
-        invalidDto.setName(null);
-        invalidDto.setColor(null);
-        invalidDto.setUserId(null);
-        
+        Map<String, String> validDto = new HashMap<>();
+        validDto.put("color", "GREEN");
+        validDto.put("userId", "1");
+
+        Map<String, String> invalidDto = new HashMap<>();
+        // Dejar claves sin valores para simular entrada inválida
+
         return Stream.of(
-            // Caso 1: Creación exitosa
-            Arguments.of(dto, true, true),
-            
-            // Caso 2: Usuario no existe
-            Arguments.of(dto, false, true),
-            
-            // Caso 3: Partida no existe
-            Arguments.of(dto, true, false),
-            
-            // Caso 4: DTO inválido
+            Arguments.of(validDto, true, true),
+            Arguments.of(validDto, false, true),
+            Arguments.of(validDto, true, false),
             Arguments.of(invalidDto, true, true)
         );
     }
+
 
     /* *********************************************************************
      * Tests parametrizados para checkPlayerFinished y checkPlayerIsDead

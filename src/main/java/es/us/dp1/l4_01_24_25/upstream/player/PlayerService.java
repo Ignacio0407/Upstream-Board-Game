@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,9 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, @Lazy SalmonMatchService salmonMatchService , @Lazy UserService userService, @Lazy MatchService matchService) {
         super(playerRepository, playerMapper);
-        this.salmonMatchService = salmonMatchService ;
+        this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
+        this.salmonMatchService = salmonMatchService;
         this.userService = userService;
         this.matchService = matchService;
     }
@@ -63,12 +66,12 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         playerToUpdate.setPlayerOrder(newPlayer.getPlayerOrder());
     }
 
-    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, LobbyPlayerDTO playerDTO) {
-        User user = userService.findById(playerDTO.getUserId());
+    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {
+        User user = userService.findById(Integer.valueOf(playerDTO.get("user")));
         Match match = matchService.findById(matchId);
         Player p = new Player();
         p.setName(user.getName());
-        p.setColor(playerDTO.getColor());
+        p.setColor(Color.valueOf(playerDTO.get("color")));
         p.setAlive(true);
         p.setEnergy(5);
         p.setUserPlayer(user);
@@ -78,7 +81,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         match.setPlayersNumber(match.getPlayersNumber() + 1);
         matchService.save(match);
         this.save(p);
-        return playerMapper.toLobby(p);
+    return playerMapper.toLobby(p);
     }
 
     public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {

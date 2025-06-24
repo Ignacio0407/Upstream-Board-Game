@@ -39,6 +39,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     @Autowired
     public MatchService(MatchRepository matchRepository, MatchMapper matchMapper, @Lazy PlayerService playerService, @Lazy UserService userService, @Lazy SalmonMatchService salmonMatchService, @Lazy UserAchievementService userAchievementService, @Lazy MatchTileService matchTileService) {
         super(matchRepository, matchMapper);
+        this.matchRepository = matchRepository;
+        this.matchMapper = matchMapper;
         this.playerService = playerService;
         this.userService = userService;
         this.salmonMatchService = salmonMatchService;

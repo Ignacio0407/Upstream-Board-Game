@@ -26,8 +26,6 @@ export default function AchievementList() {
     if (jwt) {
       roles = getRolesFromJWT(jwt);
     }
-
-    const modal = getErrorModal(setVisible, visible, message);
   
     function getRolesFromJWT(jwt) {
       return jwt_decode(jwt).authorities;
@@ -37,8 +35,8 @@ export default function AchievementList() {
         return userAchievements.some(userAchievement => userAchievement.id === achievementId);
     }
 
-    const achievementList =
-    achievements.map((a) => {
+    function achievementList(achievementsToList) {
+    return achievementsToList.map((a) => {
         return (
             <tr key={a.id} className="table-row">
             <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.name}</td>
@@ -67,6 +65,7 @@ export default function AchievementList() {
             </tr>
         );
     });
+    }
 
             return (
             <body className="achievement-container">
@@ -105,7 +104,7 @@ export default function AchievementList() {
                         {roles[0] === "ADMIN" && <th className="text-center table-row">Actions</th>}
                         </tr>
                     </thead>
-                    <tbody>{achievementList}</tbody>
+                    <tbody>{filtered ? achievementList(filtered) : achievementList(achievements)}</tbody>
 
                     {roles[0] === "ADMIN" && 
                     <BotonLink outline={true} color={"success"} direction={'/achievements/new'} text={"Create achievement"}/>}

@@ -17,7 +17,6 @@ export default function CreateGame() {
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
      
    const navigate = useNavigate();
-   console.log(jwt)
 
    const socket = new SockJS('http://localhost:8080/ws-upstream');
    const stompClient = new Client({

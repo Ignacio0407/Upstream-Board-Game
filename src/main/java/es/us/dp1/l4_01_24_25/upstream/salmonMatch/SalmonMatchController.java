@@ -20,14 +20,14 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.OnlyMovingForwardException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/salmonMatches")
-public class SalmonMatchController extends BaseRestController<SalmonMatch,Integer>{
+public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch, SalmonMatchDTO, Integer>{
 
     SalmonMatchService salmonMatchService;
     PlayerService playerService;
@@ -46,33 +46,33 @@ public class SalmonMatchController extends BaseRestController<SalmonMatch,Intege
     }
 
     @GetMapping("/match/{matchId}")
-    public ResponseEntity<List<SalmonMatch>> findAllFromMatch(@PathVariable Integer matchId) {  
-        return new ResponseEntity<>(salmonMatchService.findAllFromMatch(matchId), HttpStatus.OK);
+    public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatch(@PathVariable Integer matchId) {  
+        return new ResponseEntity<>(salmonMatchService.findAllFromMatchDTO(matchId), HttpStatus.OK);
     }
 
     
     @GetMapping("/match/{matchId}/spawn")
-    public ResponseEntity<List<SalmonMatch>> findAllFromMatchInSpawn(@PathVariable Integer matchId) {  
-        return new ResponseEntity<>(salmonMatchService.findFromGameInSpawn(matchId), HttpStatus.OK);
+    public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatchInSpawn(@PathVariable Integer matchId) {  
+        return new ResponseEntity<>(salmonMatchService.findFromGameInSpawnDTO(matchId), HttpStatus.OK);
     }
 
     @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<SalmonMatch>> findAllFromPlayer(@PathVariable Integer playerId) {  
-        return new ResponseEntity<>(salmonMatchService.findAllFromPlayer(playerId), HttpStatus.OK);
+    public ResponseEntity<List<SalmonMatchDTO>> findAllFromPlayer(@PathVariable Integer playerId) {  
+        return new ResponseEntity<>(salmonMatchService.findAllFromPlayerDTO(playerId), HttpStatus.OK);
     }
 
     @PatchMapping("/coordinate/{id}")
-    public ResponseEntity<SalmonMatch> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
+    public ResponseEntity<SalmonMatchDTO> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
         return ResponseEntity.ok(salmonMatchService.updateCoordinate(id, coordinate));    
     }
 
     @PostMapping("/player/{playerId}")
-    public ResponseEntity<SalmonMatch> create(@PathVariable("playerId") Integer playerId) {
+    public ResponseEntity<SalmonMatchDTO> create(@PathVariable("playerId") Integer playerId) {
         return ResponseEntity.ok(salmonMatchService.create(playerId));
     }
 
     @PatchMapping("/enterSpawn/{id}")
-    public ResponseEntity<SalmonMatch> enterSpawn(@PathVariable Integer id) {
+    public ResponseEntity<SalmonMatchDTO> enterSpawn(@PathVariable Integer id) {
         return new ResponseEntity<>(salmonMatchService.enterSpawn(id), HttpStatus.OK);
     }
 

@@ -1,15 +1,15 @@
 function ColorToRgb(color) {
     let colorReturn = ''
-    if(color === "BLANCO")
+    if(color === "WHITE")
     {
         colorReturn = '#FFFFFF';
-    }else if(color === "MORADO"){
+    }else if(color === "PURPLE"){
         colorReturn = '#572364';
-    }else if(color === "AMARILLO"){
+    }else if(color === "YELLOW"){
         colorReturn = '#FFFF00';
-    }else if(color === "ROJO"){
+    }else if(color === "RED"){
         colorReturn = '#FF0000';
-    }else if(color === "VERDE"){
+    }else if(color === "GREEN"){
         colorReturn = '#008F39';
     } 
 
@@ -17,21 +17,16 @@ function ColorToRgb(color) {
 
 }
 
-function RgbToColor(color) {
-    let colorReturn = 'MORADO'
-    if(color === "#FFFFFF")
-    {
-        colorReturn = 'BLANCO';
-    }else if(color === "#FFFF00"){
-        colorReturn = 'AMARILLO';
-    }else if(color === "#FF0000"){
-        colorReturn = 'ROJO';
-    }else if(color === "#008F39"){
-        colorReturn = 'VERDE';
-    }
+const COLOR_MAP = {
+    '#FFFF00': 'YELLOW',
+    '#FF0000': 'RED', 
+    '#008F39': 'GREEN',
+    '#572364': 'PURPLE',
+    '#FFFFFF': 'WHITE'
+};
 
-    return colorReturn;
-
+function RgbToColor(rgbColor) {
+    return COLOR_MAP[rgbColor.toUpperCase()];
 }
 
 export { ColorToRgb, RgbToColor }

@@ -35,8 +35,6 @@ public class UserAchievement {
 
     @ManyToOne
     @JoinColumn(name="achievement_id", nullable = false)
-    @JsonSerialize(using = AchievementSerializer.class)
-    @JsonDeserialize(using = AchievementDeserializer.class)
     private Achievement achievement;
 
     public UserAchievement() {}
