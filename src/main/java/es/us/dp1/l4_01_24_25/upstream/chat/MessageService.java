@@ -22,6 +22,8 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
 
     public MessageService(MessageRepository messageRepository, MessageMapper messageMapper, PlayerService playerService, MatchService matchService) {
         super(messageRepository, messageMapper);
+        this.messageRepository = messageRepository;
+        this.messageMapper = messageMapper;
         this.playerService = playerService;
         this.matchService = matchService;
     }

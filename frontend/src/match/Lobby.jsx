@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import tokenService from '../services/token.service'
 import useFetchState from "../util/useFetchState";
 import '../static/css/game/lobby.css'
 import PlayerCard from './PlayerCard';
 import { Button, Table } from 'reactstrap';
 import { useNavigate } from "react-router-dom";
-import ColorPickerModal from '../util/ColorPickerModal';
 import { ColorToRgb } from '../util/ColorParser';
 import { useLocation } from "react-router-dom";
 import SockJS from 'sockjs-client';
@@ -14,6 +13,7 @@ import startGame from '../util/startGame';
 import endGame from '../util/endGame';
 import ColorHandler from '../util/ColorHandler';
 import {get} from '../util/fetchers'
+
 export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
@@ -27,7 +27,6 @@ export default function Lobby({match}){
     const [numjug, Setnumjug] = useState(match.playersNumber);
     const [loading, setLoading] = useState(false);
     const spectatorIds = useLocation().state?.spectatorIds||[];
-    
     const socket = new SockJS('http://localhost:8080/ws-upstream');
     const stompClient = new Client({
     webSocketFactory: () => socket,
@@ -38,13 +37,13 @@ export default function Lobby({match}){
         Authorization: `Bearer ${jwt}`
     },
     onConnect: (frame) => {
-        console.log('Connected: ' + frame);
+        //console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/refresh', (message) => {
-            console.log('Message received: ' + message.body);
-            fetchPlayers() ;
+            //console.log('Message received: ' + message.body);
+            fetchPlayers();
         });
         stompClient.subscribe('/topic/game', (message) => {
-            console.log('Message received: ' + message.body);
+            //console.log('Message received: ' + message.body);
             window.location.reload(true);
         })
     },
@@ -61,7 +60,7 @@ stompClient.activate();
     
 
     useEffect(() => {
-        const playerUser = players.find(player => player.userPlayer.id === user.id);
+        const playerUser = players.find(player => player.userPlayer === user.id);
         setUserPlayer(playerUser);
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
@@ -73,8 +72,9 @@ stompClient.activate();
     }, [players, match.id, user.id, matches.state]);
  
     const fetchPlayers = async () => {
-        const response = await get("/api/v1/matches/"+match.id+"/players", jwt);
+        const response = await get("/api/v1/players/match/"+match.id, jwt);
         const data = await response.json();
+        console.log("data", data)
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
 
@@ -104,7 +104,7 @@ stompClient.activate();
     const playerList = players.map((p) =>{
         return (
             <tr key={p.id} className="r">
-                 <PlayerCard nombre={p.name} color={p.color}/>
+                 <PlayerCard name={p.name} color={p.color}/>
             </tr>
             
         )
@@ -114,14 +114,8 @@ stompClient.activate();
         <div className='lobbyContainer'>
         {players.find(p => p.userPlayer === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         (
-            <ColorHandler
-                matchId={match.id}
-                jwt={jwt}
-                finalUserId={finalUser.id}
-                takenColors={takenColors}
-                onColorChanged={() => setShowColorPicker(false)}
-                stompClient={stompClient}
-            />
+            <ColorHandler matchId={match.id} jwt={jwt} finalUserId={finalUser.id} takenColors={takenColors} 
+            onColorChanged={() => setShowColorPicker(false)} stompClient={stompClient} />
         )
         )}
         <div className='lobbyTitleContainer'>
@@ -149,11 +143,11 @@ stompClient.activate();
        
         <div className='lobbyUtilContainer' tabIndex={0} 
         onKeyDown={(e) => {
-            if (e.key === "Enter" && match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug >= 1) {
+            if (e.key === "Enter" && match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug >= 1) {
                 startingGame();
             }
         }}>
-        {match.matchCreator === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=2 &&
+        {match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && numjug>=2 &&
         <Button color='success' onClick={startingGame} className='buttonStart'>
             Iniciar
         </Button>}

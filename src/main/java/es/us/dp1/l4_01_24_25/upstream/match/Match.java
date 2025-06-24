@@ -48,14 +48,10 @@ public class Match extends NamedEntity {
 
 	@OneToOne
 	@JoinColumn(name="initial_player")
-	@JsonSerialize(using = PlayerSerializer.class)
-	@JsonDeserialize(using = PlayerDeserializer.class)
 	Player initialPlayer;
 	
 	@OneToOne
 	@JoinColumn(name="actual_player")
-	@JsonSerialize(using = PlayerSerializer.class)
-	@JsonDeserialize(using = PlayerDeserializer.class)
 	Player actualPlayer;
 
 	@ManyToOne

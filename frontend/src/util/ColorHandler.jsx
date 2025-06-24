@@ -1,18 +1,11 @@
-import React from 'react';
 import ColorPickerModal from './ColorPickerModal';
+import {post} from '../util/fetchers'
 
 export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged, stompClient }) {
     async function handleColorChange(color) {
+        console.log(color)
         try {
-            const response = await fetch(`/api/v1/players/match/${matchId}`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ color: color, user: finalUserId }),
-            });
+            const response = await post(`/api/v1/players/match/${matchId}`, jwt, { color: color, user: finalUserId });
 
             if (response.ok) {
                 const createdPlayer = await response.json();
@@ -21,14 +14,7 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
                     body: JSON.stringify({ action: "colorChanged", userId: finalUserId }),
                 });
 
-                const req = fetch(`/api/v1/salmonMatches/player/${createdPlayer.id}`, {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${jwt}`,
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                });
+                const req = post(`/api/v1/salmonMatches/player/${createdPlayer.id}`, jwt);
 
                 await Promise.all([req]);
                 console.log("Todos los SalmonMatch han sido creados.");
@@ -37,7 +23,7 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
                 console.error('Error al crear el jugador:', response.statusText);
             }
         } catch (error) {
-            console.error('Error al crear el jugador:', error);
+            console.error('Error inesperado al crear el jugador:', error);
         }
     }
 

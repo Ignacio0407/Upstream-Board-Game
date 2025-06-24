@@ -1,6 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,8 +42,8 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
     }
 
     @PostMapping("/match/{id}")
-    public ResponseEntity<LobbyPlayerDTO> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody LobbyPlayerDTO playerDTO) {
-        return new ResponseEntity<>(playerService.createPlayerInMatch(matchId, playerDTO), HttpStatus.CREATED);
+    public ResponseEntity<LobbyPlayerDTO> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody Map<String,String> playerdata) {
+        return new ResponseEntity<>(playerService.createPlayerInMatch(matchId, playerdata), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/energy")

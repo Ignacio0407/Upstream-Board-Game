@@ -34,14 +34,13 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
 
     @Override
     @PostMapping
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<MessageDTO> save(@Valid MessageDTO messageDto) {
-
             MessageDTO createdMessage = messageService.saveAsDTO(messageDto);
             // Send message to WebSocket
             messagingTemplate.convertAndSend("/topic/chat/" + createdMessage.getMatchId(), createdMessage);
             return ResponseEntity.ok(createdMessage);
-        }
+    }
     
     @GetMapping("/match/{matchId}")
     public ResponseEntity<List<MessageDTO>> findMatchMessages(@PathVariable Integer matchId) {

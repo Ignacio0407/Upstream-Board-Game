@@ -32,7 +32,7 @@ export default function Game({match}){
     const user = tokenService.getUser();
     const [players, setPlayers] = useFetchState([],`/api/v1/players/match/${match.id}`,jwt);
     const [tilesList,setTilesList] = useFetchState([], '/api/v1/tiles',jwt); // Siempre igual
-    const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/${match.id}`,jwt) // Todos los front tienen las mismas tiles
+    const [matchTiles, setMatchTiles] = useFetchState([], `/api/v1/matchTiles/match/${match.id}`,jwt) // Todos los front tienen las mismas tiles
     const [salmons, setSalmons] = useFetchState([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [tilesAndImages, setTilesAndImages] = useState([]);
@@ -48,7 +48,7 @@ export default function Game({match}){
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
-    const playerList = generatePlayerList(players, match.actualPlayer);
+    const playerList = generatePlayerList(players, match.actualPlayerId);
     
     const location = useLocation();
     const spectatorIds = location.state?.spectatorIds || []; // Obtener la lista de espectadores
@@ -58,7 +58,6 @@ export default function Game({match}){
 
     useEffect(() => {
         if (players.length > 0 && tilesList.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
-            //console.log("match", match)
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
@@ -70,8 +69,7 @@ export default function Game({match}){
             setGridSalmons(salmonMatchesWCoord)
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
-            setMyPlayer(players.filter(p => p.userPlayer === user.id)[0]);
-            //console.log(gridD);
+            setMyPlayer(players.filter(p => p.userId === user.id)[0]);
         }
     }, [tilesList, matchTiles]);
 
@@ -83,10 +81,10 @@ export default function Game({match}){
     
     const handleSalmonClick = (salmon) => {
         console.log("My player id", myPlayer.id);
-        console.log("match.actualPlayer", match.actualPlayer);
+        console.log("match.actualPlayer", match.actualPlayerId);
         console.log("salmon[0].player", salmon[0].player)
         console.log("Soy el salmon", salmon)
-        if (myPlayer.id === match.actualPlayer && myPlayer.id === salmon[0].player && match.phase === 'MOVIENDO') {
+        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon[0].player && match.phase === 'MOVIENDO') {
             setSelectedSalmon(salmon);
             console.log("Selected salmon", salmon)
         }
@@ -170,13 +168,11 @@ export default function Game({match}){
         const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
         players.forEach((p) => {
             const pSalmons = salmons.filter(s => s.player === p.id);
-            //console.log("pSalomns", pSalmons)
             if(pSalmons.length > 0) {
                 for (let i = 0; i < pSalmons.length; i++) {
                 newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i], players, salmonImages)]); }
             }})
         setGridS(newGridS);
-        //console.log("gridS", newGridS)
     }, [gridSalmons])
 
     useEffect(() => {
@@ -193,7 +189,7 @@ export default function Game({match}){
     // No quitar este useEffect
     useEffect(() => {
         const interval = setInterval(() => {
-            get(`/api/v1/matchTiles/${match.id}`, jwt)
+            get(`/api/v1/matchTiles/match/${match.id}`, jwt)
             .then(response => response.json())
             .then(data => setMatchTiles(data))
             .catch(error => console.error('Error fetching tiles:', error));
@@ -286,9 +282,7 @@ export default function Game({match}){
                 }
 
                 }
-                console.log("JWT", jwt)
-                await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayer}`, jwt)
-                //await patch(`/api/v1/matches/${match.id}/endRound`, jwt);
+                await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
             }catch (error) {
                 console.error("Error updating tile position or advancing turn:", error);
             }
@@ -299,7 +293,7 @@ export default function Game({match}){
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
+            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
             <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -324,7 +318,7 @@ export default function Game({match}){
                 }>
                     {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
                     {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
-                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
@@ -333,9 +327,9 @@ export default function Game({match}){
                         ...getRotationStyle(tilesAndImages[0][0])} 
                         }></img>
                     }
-                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS' && 
-                    (tilesList[tilesAndImages[0][0].tile-1].type === 'OSO' || 
-                        tilesList[tilesAndImages[0][0].tile-1].type === 'SALTO')
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'CASILLAS' && 
+                    (tilesList[tilesAndImages[0][0].tile.id-1].type === 'BEAR' || 
+                        tilesList[tilesAndImages[0][0].tile.id-1].type === 'JUMP')
                     && <button onClick={() => handleRotateTile(tilesAndImages[0], jwt)}>Rotate Tile</button>}
             </div>
             }
@@ -377,6 +371,8 @@ export default function Game({match}){
                         className="grid-item"
                         style={{ position: 'relative' }}
                     >
+                        {console.log("Rendering cell.tile", cell.tile)}
+                        {console.log("Rotation style", getRotationStyle(cell.tile?.data))}
                         {cell.tile && (
                         <img 
                             src={cell.tile.image}

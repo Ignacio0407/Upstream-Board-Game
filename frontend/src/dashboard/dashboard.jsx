@@ -78,8 +78,8 @@ export default function Dashboard() {
 
     stompClient.activate();
 
-    const matchesList = 
-      matches.map((match) => {
+    function matchesList(matchesToList) {
+      return matchesToList.map((match) => {
         return (
             <tr key={match.nombre} className='fila'>
                 <td className='celda'>{match.name}</td>
@@ -108,6 +108,7 @@ export default function Dashboard() {
             </tr>
         );
       })
+    }
 
     return ( 
         <> 
@@ -132,7 +133,7 @@ export default function Dashboard() {
                         <th className='cabeza'>Spectate</th>
                     </tr>
                 </thead>
-                <tbody>{matchesList}</tbody>
+                <tbody>{filtered ? matchesList(filtered) : matchesList(matches)}</tbody>
                 </div>
             </div>
         </div> 
