@@ -4,18 +4,18 @@ import { patch } from "../util/fetchers";
 export const getTileImage = (tileP, tilesList, images) => {
     if (!tileP) return null;
     const realTile = tilesList[tileP.tile - 1];
-    switch(realTile.type) {
-        case 'OSO':
+    switch(realTile) {
+        case 'BEAR':
             return images.bearTile;
-        case 'AGUILA':
+        case 'EAGLE':
             return images.eagleTile;
-        case 'GARZA':
+        case 'HERON':
             return images.heronTile;
-        case 'SALTO':
+        case 'JUMP':
             return images.jumpTile;
-        case 'PIEDRA':
+        case 'ROCK':
             return images.rockTile;
-        case 'AGUA':
+        case 'SEA':
             return images.waterTile;
         default:
             return null;
@@ -24,7 +24,7 @@ export const getTileImage = (tileP, tilesList, images) => {
 
 export const getSalmonImage = (salmonTile, players, images) => {
     if (!salmonTile) return null;  // Casilla vacia
-            const color = players.filter(p => p.id === salmonTile.player)[0].color;
+            const color = players.filter(p => p.id === salmonTile.playerId)[0].color;
             const salmonN = salmonTile.salmonsNumber;
             switch(color){
                 case 'AMARILLO':

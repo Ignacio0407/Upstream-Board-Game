@@ -17,7 +17,8 @@ export default function UserListAdmin() {
   const [filtered, setFiltered] = useState([]);
   const [alerts, setAlerts] = useState([]);
 
-  const userList = users.map((user) => {
+  function userList(usersToList) {
+  return usersToList.map((user) => {
     return (
       <tr key={user.id}>
         <td>{user.username}</td>
@@ -55,6 +56,7 @@ export default function UserListAdmin() {
       </tr>
     );
   });
+  }
   const modal = getErrorModal(setVisible, visible, message);
 
   return (
@@ -75,7 +77,7 @@ export default function UserListAdmin() {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>{userList}</tbody>
+          <tbody>{filtered ? userList(filtered) : userList(users)}</tbody>
         </Table>
       </div>
     </div>

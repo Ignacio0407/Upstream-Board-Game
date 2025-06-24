@@ -45,8 +45,6 @@ public class Player extends BaseEntity implements Serializable{
     User userPlayer;
     
     @ManyToOne
-    @JsonSerialize(using = matchSerializer.class)
-    @JsonDeserialize(using = MatchDeserializer.class)
     Match match;
 
     @Override
