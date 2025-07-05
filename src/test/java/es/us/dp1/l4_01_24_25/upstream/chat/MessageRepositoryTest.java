@@ -35,7 +35,7 @@ class MessageRepositoryTest {
     void setup() {
         match = new Match();
         match.setState(State.EN_CURSO);
-        match.setPhase(Phase.CASILLAS);
+        match.setPhase(Phase.TILES);
         match.setPlayersNumber(2);
         match.setRound(1);
         match.setFinalScoreCalculated(false);

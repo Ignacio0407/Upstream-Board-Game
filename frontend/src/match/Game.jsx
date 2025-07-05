@@ -9,7 +9,6 @@ import heronTile from '../static/images/tiles/heronTile.png'
 import jumpTile from '../static/images/tiles/jumpTile.png'
 import rockTile from '../static/images/tiles/rockTile.png'
 import waterTile from '../static/images/tiles/waterTile.png'
-import spawningTile from '../static/images/tiles/spawningTile.png'
 import amarillo1 from '../static/images/salmons/Amarillo_1.png';
 import amarillo2 from '../static/images/salmons/Amarillo_2.png';
 import blanco1 from '../static/images/salmons/Blanco_1.png';
@@ -43,8 +42,8 @@ export default function Game({match}){
     const [selectedTile, setSelectedTile] = useState(null);
     const [selectedSalmon, setSelectedSalmon] = useState(null);
     const [grid, setGrid] = useState(Array(18).fill(null).reverse()); // Cada celda será un array vacío.
-    const [gridS, setGridS] = useState(Array(4).fill(null));
-    const [gridD, setGridD] = useState(Array(5).fill(null));
+    const [gridS, setGridS] = useState(Array(4).fill(null).map(() => []));
+    const [gridD, setGridD] = useState(Array(5).fill(null).map(() => []));
     const [myPlayer, setMyPlayer] = useState(null);
     const tileImages = {bearTile, eagleTile, heronTile, jumpTile, rockTile, waterTile};
     const salmonImages = {amarillo1, amarillo2, blanco1, blanco2, morado1, morado2, rojo1, rojo2, verde1, verde2};
@@ -80,13 +79,8 @@ export default function Game({match}){
     };
     
     const handleSalmonClick = (salmon) => {
-        console.log("My player id", myPlayer.id);
-        console.log("match.actualPlayer", match.actualPlayerId);
-        console.log("salmon[0].player", salmon[0].player)
-        console.log("Soy el salmon", salmon)
-        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon[0].player && match.phase === 'MOVIENDO') {
+        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon[0].playerId && match.phase === 'MOVING') {
             setSelectedSalmon(salmon);
-            console.log("Selected salmon", salmon)
         }
     }
 
@@ -100,17 +94,14 @@ export default function Game({match}){
         Authorization: `Bearer ${jwt}`
     },
     onConnect: (frame) => {
-        //console.log('Connected: ' + frame);
         
         stompClient.subscribe('/topic/salmon', (message) => {
-            console.log('Message received: ' + message.body);
             const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null).map((s) => [s,getSalmonImage(s, players, salmonImages)])
             const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null).map((s) => [s,getSalmonImage(s, players, salmonImages)])
             setSalmonAndImages(salmonMatchesNoCoord)
             setGridSalmons(salmonMatchesWCoord)
         });
         stompClient.subscribe('/topic/tiles', (message) => {
-            console.log('Message received: ' + message.body);
             const matchTilesNoCoord = [...matchTiles].filter(mT => mT.coordinate === null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             const matchTilesWCoord = [...matchTiles].filter(mT => mT.coordinate !== null).map((t) => [t,getTileImage(t, tilesList, tileImages)])
             setTilesAndImages(matchTilesNoCoord)
@@ -118,7 +109,6 @@ export default function Game({match}){
             
         });
         stompClient.subscribe('/topic/players', (message) => {
-            console.log('Message received: ' + message.body);
             fetchPlayers();
         });
     },
@@ -167,13 +157,13 @@ export default function Game({match}){
         const salmonsPerPlayer = 4;
         const newGridS = Array(salmonsPerPlayer).fill(null).map(() => []);
         players.forEach((p) => {
-            const pSalmons = salmons.filter(s => s.player === p.id);
+            const pSalmons = salmons.filter(s => s.playerId === p.id);
             if(pSalmons.length > 0) {
                 for (let i = 0; i < pSalmons.length; i++) {
                 newGridS[i].push([pSalmons[i], getSalmonImage(pSalmons[i], players, salmonImages)]); }
             }})
         setGridS(newGridS);
-    }, [gridSalmons])
+    }, [salmons, players])
 
     useEffect(() => {
         const newGridD = Array(5).fill(null).map(() => []);
@@ -186,7 +176,7 @@ export default function Game({match}){
         setGridD(newGridD)
     }, [spawnSalmons])
 
-    // No quitar este useEffect
+    // No quitar este useEffect -> MIRAR CON DETENIMIENTO
     useEffect(() => {
         const interval = setInterval(() => {
             get(`/api/v1/matchTiles/match/${match.id}`, jwt)
@@ -204,11 +194,9 @@ export default function Game({match}){
             .then(data => setSpawnSalmons(data))
             .catch(error => console.error('Error fetching spawn salmons:', error));
 
-            get(`/api/v1/players/match/${match.id}`, jwt)
+            get(`/api/v1/players/match/sorted/${match.id}`, jwt)
             .then(response => response.json())
-            .then(data => {let ps = [...data].sort(p => p.playerOrder);
-                setPlayers(ps);
-            })
+            .then(data => setPlayers(data))
             .catch(error => console.error('Error fetching players:', error));
         }, 500); // Cada 5 segundos
         return () => clearInterval(interval);
@@ -248,6 +236,7 @@ export default function Game({match}){
     const updateTilePosition = async (tile, x, y) => {
         try {
             const response = await patch(`/api/v1/matchTiles/${tile[0].id}`, jwt, {x,y});
+            console.log("response", response)
             if (!response.ok) {
                 throw new Error('Invalid tile placement');
             }
@@ -262,12 +251,10 @@ export default function Game({match}){
         const gridHeight = 6; // Altura de la cuadrícula (número de filas)
         const x = index % gridWidth;
         const y = gridHeight - 1 - Math.floor(index / gridWidth)
-        console.log("Selected salmon", selectedSalmon)
         try {
             if(selectedSalmon === null){
                 await updateTilePosition(selectedTile, x, y);
                 setSelectedTile(null);
-                //await patch(`/api/v1/matches/${match.id}/actualPlayer/${match.actualPlayer}`, jwt);
             }
             else{
                 const foundTile = gridTiles.find(
@@ -293,7 +280,7 @@ export default function Game({match}){
             <h1 class="game-title game-name">Game: {match.name}</h1>
             <h1 class="game-title game-round">Round: {match.round}</h1>
             <h1 class="game-title game-phase">Phase: {match.phase}</h1>
-            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'MOVIENDO' && <h1 class="game-title game-turn">Move your salmons!</h1>}
+            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'MOVING' && <h1 class="game-title game-turn">Move your salmons!</h1>}
             <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -318,7 +305,7 @@ export default function Game({match}){
                 }>
                     {selectedTile && <h2>Selected tile: <img src={tilesAndImages[0][1]} alt='' style={{width: '150px'}}></img></h2>}
                     {<h2>Remaining tiles: {tilesAndImages.length}</h2>}
-                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'CASILLAS' && <h2>Pick the tile!</h2>}
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && <h2>Pick the tile!</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(tilesAndImages[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
@@ -327,7 +314,7 @@ export default function Game({match}){
                         ...getRotationStyle(tilesAndImages[0][0])} 
                         }></img>
                     }
-                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'CASILLAS' && 
+                    {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && 
                     (tilesList[tilesAndImages[0][0].tile.id-1].type === 'BEAR' || 
                         tilesList[tilesAndImages[0][0].tile.id-1].type === 'JUMP')
                     && <button onClick={() => handleRotateTile(tilesAndImages[0], jwt)}>Rotate Tile</button>}
@@ -335,7 +322,7 @@ export default function Game({match}){
             }
 
 
-            {gridS[0].length > 0 && 
+            { 
                 <div className='game-container'>
                     {match.round >= 6 && <div className='grid3'>
                         {gridD.map((salmon, index) => (
@@ -343,16 +330,12 @@ export default function Game({match}){
                             <div className='salmons-containerSpawn'>
                             {salmon.map((s, i) => (
                                 (s[0].coordinate.y > 20 && 
-                                <img
-                                src = {s[1]}
-                                alt=""
+                                <img key = {i} src = {s[1]} alt=""
                                 style={{                          
-                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`,
-                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].playerId)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].playerId)[0].color)}`, // Cambia el color y grosor del borde según necesites
                                     borderRadius: '40px',}}
                                 />
-                               
-                                
                                 )
                             ))}
                              
@@ -371,12 +354,7 @@ export default function Game({match}){
                         className="grid-item"
                         style={{ position: 'relative' }}
                     >
-                        {console.log("Rendering cell.tile", cell.tile)}
-                        {console.log("Rotation style", getRotationStyle(cell.tile?.data))}
-                        {cell.tile && (
-                        <img 
-                            src={cell.tile.image}
-                            alt=""
+                        {cell.tile && (<img src={cell.tile.image} alt=""
                             style={{ 
                             width: '250px',
                             ...getRotationStyle(cell.tile.data)
@@ -387,14 +365,9 @@ export default function Game({match}){
                         {cell.salmons && cell.salmons.map((salmon, sIndex) => {
                             const position = calculateSalmonPosition(sIndex, cell.salmons.length);
                             return (
-                                <img
-                                key={`salmon-${index}-${sIndex}`}
-                                src={salmon.image}
-                                alt=""
+                                <img key={`salmon-${index}-${sIndex}`} src={salmon.image} alt=""
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    console.log("Clicked salmon data:", salmon.data);
-                                    console.log("Clicked salmon image:", salmon.image);
                                     handleSalmonClick([salmon.data, salmon.image]);
                                 }}
                                 style={{
@@ -404,8 +377,8 @@ export default function Game({match}){
                                     transition: 'all 0.3s ease-in-out',
                                     zIndex: 2,
                                     cursor: 'pointer',
-                                    filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
-                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.player)[0].color)}`,
+                                    filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.filter(p => p.id === salmon.data.playerId)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === salmon.data.playerId)[0].color)}`,
                                     borderRadius: '40px',    
                                 }}
                                 />
@@ -413,22 +386,17 @@ export default function Game({match}){
                             })}
                     </div>
                     ))}
-
                     </div>
+                    
                     {match.round < 2 &&
                     <div className='grid2'>
                     {gridS.map((salmon, index) => (
                         <div key={index} className="grid-item2">    
                             {salmon.map((s, i) => (
-                                (s[0].coordinate === null && 
-                                <img
-                                key = {i}
-                                src = {s[1]}
-                                alt=""
-                                onClick={() => handleSalmonClick(s)}
+                                (s[0].coordinate === null && <img key = {i} src = {s[1]} alt="" onClick={() => handleSalmonClick(s)}
                                 style={{                          
-                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`,
-                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].player)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                                    filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s[0].playerId)[0].color)}`,
+                                    border: `3px solid ${ColorToRgb(players.filter(p => p.id === s[0].playerId)[0].color)}`, // Cambia el color y grosor del borde según necesites
                                     borderRadius: '40px',}}
                                 />
                                 )

@@ -41,6 +41,11 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
         return new ResponseEntity<>(playerService.findPlayersByMatchAsDTO(id), HttpStatus.OK);
     }
 
+    @GetMapping("/match/sorted/{id}")
+    public ResponseEntity<List<PlayerDTO>> findPlayersByMatchIdSortedPlayerOrder (@PathVariable("id")  Integer id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(playerService.findPlayersByMatchSortedPlayerOrderAsDTO(id), HttpStatus.OK);
+    }
+
     @PostMapping("/match/{id}")
     public ResponseEntity<LobbyPlayerDTO> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody Map<String,String> playerdata) {
         return new ResponseEntity<>(playerService.createPlayerInMatch(matchId, playerdata), HttpStatus.CREATED);

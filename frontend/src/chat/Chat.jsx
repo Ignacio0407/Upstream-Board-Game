@@ -6,13 +6,15 @@ import SockJS from 'sockjs-client';
 import { ColorToRgb } from '../util/ColorParser';
 import '../static/css/chat/chat.css'
 
-const Chat = ({ match, players, currentPlayer }) => {
+export default function Chat({ match, players, currentPlayer }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isChatVisible, setIsChatVisible] = useState(false); 
   const chatContainerRef = useRef(null);
   const jwt = tokenService.getLocalAccessToken();
+
   const socket = new SockJS('http://localhost:8080/ws-upstream');
+  
   const stompClient = new Client({
     webSocketFactory: () => socket,
     connectHeaders: {
@@ -24,21 +26,6 @@ const Chat = ({ match, players, currentPlayer }) => {
   });
 
   useEffect(() => {
-    // Cargar mensajes existentes al montar el componente
-    const loadExistingMessages = async () => {
-      try {
-        const response = await get(`/api/v1/messages/match/${match.id}`, jwt);
-        const data = await response.json();
-        setMessages(data);
-        scrollToBottom();
-      } catch (error) {
-        console.error('Error loading messages:', error);
-      }
-    };
-
-    loadExistingMessages();
-
-    // Configurar WebSocket
     stompClient.onConnect = () => {
       stompClient.subscribe(`/topic/chat/${match.id}`, (message) => {
         const newMessage = JSON.parse(message.body);
@@ -87,7 +74,7 @@ const Chat = ({ match, players, currentPlayer }) => {
       {isChatVisible && (
         <div className="chat-container">
           <div className="chat-header">
-            <h3>Chat de la partida</h3>
+            <h3>Match Chat</h3>
           </div>
 
           <div className="chat-messages" ref={chatContainerRef}>
@@ -116,14 +103,12 @@ const Chat = ({ match, players, currentPlayer }) => {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Escribe un mensaje..."
+              placeholder="Write a message..."
             />
-            <button type="submit">Enviar</button>
+            <button type="submit">Send</button>
           </form>
         </div>
       )}
     </div>
   );
 };
-
-export default Chat;
