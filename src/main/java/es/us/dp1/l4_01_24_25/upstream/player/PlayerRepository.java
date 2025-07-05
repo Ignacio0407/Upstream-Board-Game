@@ -16,6 +16,9 @@ public interface  PlayerRepository extends JpaRepository<Player, Integer>{
     @Query("SELECT p FROM Player p WHERE p.match.id = :id")
     public List<Player> findPlayersByMatch(Integer id);
 
+    @Query("SELECT p FROM Player p WHERE p.match.id = :id ORDER BY p.playerOrder ASC")
+    public List<Player> findPlayersByMatchSortedPlayerOrder(Integer id);
+
     @Query("SELECT p FROM Player p WHERE p.match.id = :matchId AND p.alive = TRUE")
     List<Player> findAlivePlayersByMatch(@Param("matchId") Integer matchId);
 }

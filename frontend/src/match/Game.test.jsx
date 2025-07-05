@@ -31,7 +31,7 @@ jest.mock('../util/fetchers', () => ({
 describe('Game Component', () => {
     it('renders without crashing and initializes WebSocket subscriptions', async () => {
         await act(async () => {
-            render(<Game match={{ id: 1, actualPlayer: 1, matchCreator: 1, phase: 'MOVIENDO' }} />);
+            render(<Game match={{ id: 1, actualPlayer: 1, matchCreator: 1, phase: 'MOVING' }} />);
         });
 
         // Verificar que el STOMP Client fue creado
@@ -65,7 +65,7 @@ describe('Game Component', () => {
         });
     
         await act(async () => {
-            render(<Game match={{ id: 1, actualPlayer: 1, matchCreator: 1, phase: 'MOVIENDO' }} />);
+            render(<Game match={{ id: 1, actualPlayer: 1, matchCreator: 1, phase: 'MOVING' }} />);
         });
     
         // Simular un mensaje recibido por el WebSocket

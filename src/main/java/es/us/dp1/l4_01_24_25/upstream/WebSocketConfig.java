@@ -20,6 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws-upstream")
         .setAllowedOrigins(
+            "http://localhost:8080",
             "http://localhost:3000",
             "https://*.ngrok-free.app"  // Allow ngrok domains
         )

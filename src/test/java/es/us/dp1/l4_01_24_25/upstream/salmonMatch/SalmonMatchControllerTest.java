@@ -93,7 +93,7 @@ public class SalmonMatchControllerTest {
         match.setPlayersNumber(2);
         match.setState(State.EN_CURSO); 
         match.setRound(1);
-        match.setPhase(Phase.MOVIENDO);
+        match.setPhase(Phase.MOVING);
         match.setActualPlayer(player);
         match.setInitialPlayer(player);
         match.setPassword("testpass");
