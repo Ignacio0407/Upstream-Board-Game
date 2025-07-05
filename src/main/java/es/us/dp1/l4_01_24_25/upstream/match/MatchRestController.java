@@ -49,6 +49,7 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
         return new ResponseEntity<>(matchService.startGame(matchId), HttpStatus.OK);
     }
 
+    @PatchMapping("/{matchId}/changephase/{playerId}")
     public ResponseEntity<MatchDTO> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
         return new ResponseEntity<>(matchService.changePhase(matchId, playerId), HttpStatus.OK);
     }

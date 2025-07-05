@@ -3,7 +3,8 @@ import { patch } from "../util/fetchers";
 
 export const getTileImage = (tileP, tilesList, images) => {
     if (!tileP) return null;
-    const realTile = tilesList[tileP.tile - 1];
+    //const realTile = tilesList[tileP.tile.id - 1];
+    const realTile = tileP.tile.type;
     switch(realTile) {
         case 'BEAR':
             return images.bearTile;
@@ -15,7 +16,7 @@ export const getTileImage = (tileP, tilesList, images) => {
             return images.jumpTile;
         case 'ROCK':
             return images.rockTile;
-        case 'SEA':
+        case 'WATER':
             return images.waterTile;
         default:
             return null;
@@ -27,15 +28,15 @@ export const getSalmonImage = (salmonTile, players, images) => {
             const color = players.filter(p => p.id === salmonTile.playerId)[0].color;
             const salmonN = salmonTile.salmonsNumber;
             switch(color){
-                case 'AMARILLO':
+                case 'YELLOW':
                     return salmonN === 1? images.amarillo1 : images.amarillo2;
-                case 'BLANCO':
+                case 'WHITE':
                     return salmonN === 1? images.blanco1 : images.blanco2;
-                case 'MORADO':
+                case 'PURPLE':
                     return salmonN === 1? images.morado1 : images.morado2;
-                case 'ROJO':
+                case 'RED':
                     return salmonN === 1? images.rojo1 : images.rojo2;
-                case 'VERDE':
+                case 'GREEN':
                     return salmonN === 1? images.verde1 : images.verde2;
                 default:
                     return null;
@@ -43,7 +44,7 @@ export const getSalmonImage = (salmonTile, players, images) => {
 }
 
 export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelectedSalmon) => {
-    if (myPlayer.id === match.actualPlayer && match.phase === 'CASILLAS') {
+    if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
         setSelectedTile(tile);
         setSelectedSalmon(null);
         console.log('selected', tile)
@@ -70,6 +71,9 @@ export const handleRotateTile = async (tile, jwt) => {
 };
 
 export const getRotationStyle = (tile) => {
+    if (!tile) {
+        return {};
+    }
     // Puedes usar la propiedad `orientation` de cada tile
     return {
         transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados

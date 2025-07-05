@@ -27,7 +27,7 @@ class MatchRepositoryTest {
     void findByName_returnsCorrectMatch() {
         Match match = new Match();
         match.setName("Prueba");
-        match.setPhase(Phase.CASILLAS);
+        match.setPhase(Phase.TILES);
         match.setState(State.ESPERANDO);
         match.setRound(0);
         match.setPlayersNumber(0);
@@ -44,7 +44,7 @@ class MatchRepositoryTest {
     void findHeronWithCoordFromGame_returnsEmptyListIfNoMatchTile() {
         Match match = new Match();
         match.setName("Heron");
-        match.setPhase(Phase.CASILLAS);
+        match.setPhase(Phase.TILES);
         match.setState(State.ESPERANDO);
         match.setRound(0);
         match.setPlayersNumber(0);

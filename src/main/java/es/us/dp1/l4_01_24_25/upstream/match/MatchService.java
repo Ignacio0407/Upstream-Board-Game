@@ -78,7 +78,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         m.setState(State.ESPERANDO);
         m.setPlayersNumber(0);
         m.setRound(0);
-        m.setPhase(Phase.CASILLAS);
+        m.setPhase(Phase.TILES);
         m.setInitialPlayer(null);
         m.setActualPlayer(null);
         m.setFinalScoreCalculated(false);
@@ -153,7 +153,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         else {
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
             if(!tilesNoCoord.isEmpty()) {
-                match.setPhase(Phase.CASILLAS); 
+                match.setPhase(Phase.TILES); 
                 match.setRound(match.getRound()+1);
             }
             this.changeInitialPlayer(match.getId());
@@ -210,7 +210,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             }
         }
         
-        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.CASILLAS){
+        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.TILES){
 
             for(SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
@@ -246,6 +246,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         return match;
     }
 
+    @Transactional
     public MatchDTO changePhase(Integer matchId, Integer playerId) {
         Match match = this.findById(matchId);
         Phase phase = match.getPhase();
@@ -254,14 +255,14 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         .filter(p -> !salmonMatchService.findAllFromPlayerInRiver(p.getId()).isEmpty() || !salmonMatchService.findAllFromPlayerInSea(p.getId()).isEmpty()).toList();
         Integer round = match.getRound();
 
-        if(mtNoC.size() == 0 && phase == Phase.CASILLAS){
+        if(mtNoC.size() == 0 && phase == Phase.TILES){
             players.stream().forEach(p -> p.setEnergy(5));
             for(Player p : players) playerService.save(p);
-            match.setPhase(Phase.MOVIENDO);
+            match.setPhase(Phase.MOVING);
             match.setActualPlayer(match.getInitialPlayer());
         }
         else if(mtNoC.size() == 0) {
-            match.setPhase(Phase.MOVIENDO);
+            match.setPhase(Phase.MOVING);
             if(playerService.checkPlayerNoEnergy(playerId)){
                 this.changePlayerTurn(playerId);
             }
@@ -278,12 +279,12 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                 match.setRound(round+1);
             }
         }
-        else if(phase.equals(Phase.CASILLAS)) {
+        else if(phase.equals(Phase.TILES)) {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
             if (rds.contains(mtNoC.size())) {
                 players.stream().forEach(p -> p.setEnergy(5));
                 for(Player p : players) playerService.save(p);
-                match.setPhase(Phase.MOVIENDO);
+                match.setPhase(Phase.MOVING);
                 match.setActualPlayer(match.getInitialPlayer());
             }
             if (match.getRound() == 0 && mtNoC.size() != 17) this.changePlayerTurn(playerId);

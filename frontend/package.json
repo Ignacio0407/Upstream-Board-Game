@@ -36,6 +36,7 @@
     "web-vitals": "^3.1.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "identity-obj-proxy": "^3.0.0",
     "msw": "^1.2.1",
     "nth-check": "^2.1.1",
@@ -44,7 +45,7 @@
     "source-map-loader": "^4.0.1"
   },
   "scripts": {
-    "start": "react-scripts start --host 0.0.0.0 --disable-host-check",
+    "start": "cross-env HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "coverage": "react-scripts test --coverage --watchAll --collectCoverageFrom='!src/{index,reportWebVitals,error-page,App}.{js,jsx}'",
