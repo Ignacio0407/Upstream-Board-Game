@@ -12,10 +12,23 @@ import java.util.List;
 
 public abstract class BaseService<T, ID> {
     protected final CrudRepository<T, ID> repository;
+    protected final String entityName;
 
     protected BaseService(CrudRepository<T, ID> repository) {
         this.repository = repository;
+        this.entityName = extractEntityName(repository);
     }
+
+    private String extractEntityName(CrudRepository<T, ID> repository) {
+        try {
+            return ((Class<?>) ((java.lang.reflect.ParameterizedType)
+                repository.getClass().getInterfaces()[0].getGenericInterfaces()[0])
+                .getActualTypeArguments()[0]).getSimpleName();
+        } catch (Exception e) {
+            return "Resource"; // Fallback elegante si falla la reflexión
+        }
+    }
+
 
     @Transactional(readOnly = true)
     public List<T> findAll() {
@@ -24,7 +37,7 @@ public abstract class BaseService<T, ID> {
 
     @Transactional(readOnly = true)
     public T findById(ID id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resource not found with ID: " + id));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(this.entityName + " not found with ID: " + id));
     }
 
     @Transactional(readOnly = true)

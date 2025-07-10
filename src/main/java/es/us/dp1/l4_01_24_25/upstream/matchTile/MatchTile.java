@@ -18,10 +18,10 @@ import lombok.Setter;
 @Table(name="match_tile")
 public class MatchTile extends BaseEntity {
 
-    @ValidNumber(min=0)
+    @ValidNumber(min=0, max=5)
     Integer capacity;
 
-    @ValidNumber(min=0, max=6)
+    @ValidNumber(min=0)
     Integer orientation;
 
     @ValidNumber(min=0, max=5)

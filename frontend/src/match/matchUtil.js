@@ -1,5 +1,6 @@
 import { ColorToRgb } from "../util/ColorParser";
 import { patch } from "../util/fetchers";
+import '../static/css/game/game.css'
 
 export const getSalmonImage = (salmonTile, players, images) => {
     if (!salmonTile) return null;  // Casilla vacia
@@ -25,24 +26,16 @@ export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelec
     if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
         setSelectedTile(tile);
         setSelectedSalmon(null);
-        console.log('selected', tile)
     }
 }
 
 export const handleRotateTile = async (tile, jwt) => {
     try {
         const newOrientation = (tile.orientation + 1) % 7; // Incrementa la rotación
-        console.log(newOrientation);
-
         const response = await patch(`/api/v1/matchTiles/${tile.id}/rotation`, jwt, newOrientation)
-
         if (!response.ok) {
             throw new Error('Error updating tile rotation');
         }
-
-        const data = await response.json(); // Si la respuesta incluye un JSON
-        console.log(data);
-
     } catch (error) {
         console.error('Error rotating tile:', error);
     }
@@ -60,10 +53,7 @@ export const getRotationStyle = (tile) => {
 
 export const generatePlayerList = (players, actualPlayerId) => {
     return players.map((p) => (
-        <tr key={p.id} style={{
-            backgroundColor: p.id === actualPlayerId ? 'rgba(0, 255, 0, 0.3) !important' : 'transparent',
-        }}
-        >
+        <tr key={p.id} className={`table-row ${p.id === actualPlayerId ? 'table-row-active' : ''}`}>
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.name}</td>
             <td className="table-cell" style={{ padding: '0', textAlign: 'center', verticalAlign: 'middle'}}>
                 <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: `${ColorToRgb(p.color)}`, 

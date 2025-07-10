@@ -354,7 +354,7 @@ class MatchServiceTest {
         when(playerService.findAlivePlayersByMatch(1)).thenReturn(players);
         when(matchRepository.save(any())).thenReturn(match);
 
-        matchService.changeInitialPlayer(1);
+        matchService.changeInitialPlayer(match);
 
         assertEquals(p2, match.getInitialPlayer());
     }

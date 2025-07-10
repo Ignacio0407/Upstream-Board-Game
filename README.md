@@ -1,12 +1,22 @@
-# React Petclinic
-Small project based on spring-petclinic for teaching SPA architectures with react, java and spring developer for teaching DP1 at the Software Engineering degree of University of Sevilla.
+# Upstream
+This software is based on a reduced version of spring-petclinic and adapted for board games made by some Software Engineering degree of University of Seville teachers for teaching SPA architectures with react, java and spring developer in DP1 subject.
 
-This is a fork of https://github.com/spring-projects/spring-petclinic  The main changes that have been performed were:
+Therefore, this is a fork of https://github.com/spring-projects/spring-petclinic.  The main changes performed are:
 - Trimming several parts of the application to keep the example low
 - Reorganize some parts of the code according to best practices introduced in the course
-- Modifying the Controllers to work as RestControllers creating several API endpoings
+- Modifying the Controllers to work as RestControllers creating several API endpoints
 - Modifying the security configuration to use JWT
-- Creating a React frontend.
+- Creating a React frontend in js.
+
+I will first introduce Upstream and then leave the original readme of teachers.
+Start backend pressing f5 in Upstream.java file, then, you can access the compiled app through 3 different methods:
+  http://localhost:8080 -> for playing (one browser can have two active players, one in normal mode and another one in incognito) in the pc that started the app. Open a browser and write localhost:8080.
+  http://192.168.*.*:8080 -> for multi-device playing, this requires knwoing the IP of the pc running the app (windows key -> type cmd -> ipconfig and copy the IPv4 one). Open a browser and write copiedIP:8080.
+  https://*.ngrok-free.app -> for playing through internet, access application.properties an set ngrok.enabled to true. Copy the link provided in the terminal message.
+WARNING: These methods will be avaliable in the future, although you can play the beta through the first two methods.
+
+After starting backend you can start frontend by opening a terminal in your IDE and writing cd frontend && npm start, this will always allow you yo play the latest version of the game and will open automatically a web browser's window, with localhost:3000, although you can, to play multi-device
+
 
 ## Understanding the Spring Petclinic application  backend with a few diagrams
 <a href="https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application">See the presentation here</a>
