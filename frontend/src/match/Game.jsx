@@ -193,6 +193,20 @@ export default function Game({match}){
             throw error.message;
         }
     }
+
+    const changephase = async() => {
+        try {
+            const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
+            if (!responseChangePhase.ok) {
+                const errorData = await responseChangePhase.json();
+                alert(errorData.error || "Error changing phase.");
+                console.log("Error changing phase.", errorData);
+            }            
+        } catch (error){
+            console.log("Error changing phase.", error)
+            throw error.message;
+        }
+    }
     
     const updateSpawn = async(salmon) => {
         try {
@@ -240,7 +254,7 @@ export default function Game({match}){
                 }
 
                 }
-                await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
+                changephase();
             }
             catch (error) {
                 console.error("Error updating tile position or advancing turn:", error);
@@ -252,7 +266,8 @@ export default function Game({match}){
             <h1 className="game-title game-name">Game: {match.name}</h1>
             <h1 className="game-title game-round">Round: {match.round}</h1>
             <h1 className="game-title game-phase">Phase: {match.phase}</h1>
-            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'MOVING' && <h1 className="game-title game-turn">Move your salmons!</h1>}
+            {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'MOVING' && 
+            <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
             <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                     <tr>
@@ -271,13 +286,12 @@ export default function Game({match}){
 
             {matchTiles.length > 0 &&
             <div key={matchTiles[0].id}
-                style={{cursor: 'pointer', position: 'absolute', bottom: '-900px', right: '20px'}}
+                className='pick-the-tile-block'
                 onClick={() =>
                 handleTileClick(matchTiles[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
                 }>
-                    {selectedTile && <h2>Selected tile: <img src={matchTiles[0].tile.image} alt='' style={{width: '150px'}}></img></h2>}
-                    {<h2>Remaining tiles: {matchTiles.length}</h2>}
                     {!isCurrentUserSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && <h2>Pick the tile!</h2>}
+                    {<h2>Remaining tiles: {matchTiles.length}</h2>}
                     <h2>Next tile:</h2>
                     {<img 
                     onClick={() => handleTileClick(matchTiles[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
@@ -329,7 +343,7 @@ export default function Game({match}){
                         {cell.tile && (<img src={cell.tile.tile.image} alt=""
                             style={{ 
                             width: '250px',
-                            ...getRotationStyle(cell.tile.tile)
+                            ...getRotationStyle(cell.tile)
                             }}
                         />
                         )}

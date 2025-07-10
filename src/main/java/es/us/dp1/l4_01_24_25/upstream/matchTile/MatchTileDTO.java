@@ -13,10 +13,10 @@ public class MatchTileDTO {
     
     Integer id;
 
-    @ValidNumber(min=0)
+    @ValidNumber(min=0, max=5)
     Integer capacity;
 
-    @ValidNumber(min=0, max=6)
+    @ValidNumber(min=0)
     Integer orientation;
 
     @ValidNumber(min=0, max=5)
