@@ -24,7 +24,7 @@ public class SalmonMatch extends BaseEntity{
     @ManyToOne
     Player player;
     
-    @ValidNumber(min=0,max=5)
+    @ValidNumber(min=0,max=2)
     Integer salmonsNumber;
 
     @ValidNumber(min=0,max=5)

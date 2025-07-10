@@ -62,11 +62,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         matchToUpdate.setMatchCreator(newMatch.getMatchCreator());
     }
 
-    @Transactional(readOnly = true)
-    public List<MatchTile> findHeronWithCoordsFromGame(Integer gameId){
-        return this.findList(matchRepository.findHeronWithCoordFromGame(gameId));
-    }
-
     public MatchDTO createMatchWMatchCreator(Integer userId, Map<String, String> requestBody) { 
         User u = userService.findById(userId);
         String name = requestBody.getOrDefault("name", "");
@@ -75,7 +70,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         m.setName(name);
         m.setPassword(password);
         m.setMatchCreator(u);
-        m.setState(State.ESPERANDO);
+        m.setState(State.WAITING);
         m.setPlayersNumber(0);
         m.setRound(0);
         m.setPhase(Phase.TILES);
@@ -89,7 +84,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     public MatchDTO startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
         Match match = this.findById(matchId);
         List<Player> player = playerService.findPlayersByMatch(matchId);
-        match.setState(State.EN_CURSO);
+        match.setState(State.ON_GOING);
         match.setActualPlayer(player.get(0));
         match.setInitialPlayer(player.get(0));
         match.setPlayersNumber(player.size());
@@ -123,10 +118,9 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }    
 
     @Transactional
-    public void changePlayerTurn(Integer playerId) {
-        Player player = playerService.findById(playerId);
+    public void changePlayerTurn(Player player) {
         Match match = player.getMatch();
-        List<Player> players = playerService.findAlivePlayersByMatch(match.getId()).stream().sorted(Comparator.comparing(Player::getPlayerOrder)).toList();
+        List<Player> players = playerService.findAlivePlayersByMatchSortedPlayerOrder(match.getId());
         Integer myOrder = player.getPlayerOrder();
         Integer nPlayers = players.size();
         List<MatchTile> tilesNoCoord = matchTileService.findByMatchIdNoCoord(match.getId());
@@ -141,8 +135,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                 nextPlayer = players.get(nextIndex);
                 if (nextPlayer.equals(player)) {
                     // Validate aditional conditions before finalizing game
-                    if (salmonMatchService.findAllFromPlayer(playerId).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
-                        match.setState(State.FINALIZADA);
+                    if (salmonMatchService.findAllFromPlayer(player.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
+                        match.setState(State.FINALIZED);
                         break;
                     }
                 }
@@ -158,7 +152,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             }
             this.changeInitialPlayer(match.getId());
             match.setActualPlayer(match.getInitialPlayer());
-        }else{
+        }
+        else{
             int currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
     
         int nextIndex = (currentIndex + 1) % nPlayers;
@@ -186,8 +181,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
                 Boolean finished = playerService.checkPlayerFinished(p.getId());
-                if (dead) playerService.setPlayerDead(p.getId());
-                if (finished) playerService.setPlayerNoEnergy(p.getId());
+                if (dead) playerService.setPlayerDead(p);
+                if (finished) playerService.setPlayerNoEnergy(p);
             }
         }
 
@@ -205,14 +200,14 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
                 Boolean finished = playerService.checkPlayerFinished(p.getId());
-                if (dead) playerService.setPlayerDead(p.getId());
-                if (finished) playerService.setPlayerNoEnergy(p.getId());
+                if (dead) playerService.setPlayerDead(p);
+                if (finished) playerService.setPlayerNoEnergy(p);
             }
         }
         
-        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.TILES){
+        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.TILES) {
 
-            for(SalmonMatch sm:salmonMatches) {
+            for (SalmonMatch sm:salmonMatches) {
                 if(sm.getCoordinate().y()==0){
                     salmonMatchService.delete(sm.getId());
                     playerService.checkPlayerIsDead(sm.getPlayer().getId());
@@ -221,7 +216,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                     Coordinate newCoord = new Coordinate(oldCoord.x(), oldCoord.y() - 1);
                     sm.setCoordinate(newCoord);
                     salmonMatchService.save(sm);
-
                 }
             }
 
@@ -239,8 +233,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             for(Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
                 Boolean finished = playerService.checkPlayerFinished(p.getId());
-                if (dead) playerService.setPlayerDead(p.getId());
-                if (finished) playerService.setPlayerNoEnergy(p.getId());
+                if (dead) playerService.setPlayerDead(p);
+                if (finished) playerService.setPlayerNoEnergy(p);
             }
         }
         return match;
@@ -249,59 +243,63 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     @Transactional
     public MatchDTO changePhase(Integer matchId, Integer playerId) {
         Match match = this.findById(matchId);
+        Player player = playerService.findById(playerId);
         Phase phase = match.getPhase();
         List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
         List<Player> players = playerService.findAlivePlayersByMatch(matchId).stream()
         .filter(p -> !salmonMatchService.findAllFromPlayerInRiver(p.getId()).isEmpty() || !salmonMatchService.findAllFromPlayerInSea(p.getId()).isEmpty()).toList();
         Integer round = match.getRound();
 
-        if(mtNoC.size() == 0 && phase == Phase.TILES){
+        if(mtNoC.size() == 0 && phase == Phase.TILES) {
             players.stream().forEach(p -> p.setEnergy(5));
-            for(Player p : players) playerService.save(p);
+            playerService.saveAll(players);
             match.setPhase(Phase.MOVING);
             match.setActualPlayer(match.getInitialPlayer());
         }
+
         else if(mtNoC.size() == 0) {
             match.setPhase(Phase.MOVING);
-            if(playerService.checkPlayerNoEnergy(playerId)){
-                this.changePlayerTurn(playerId);
+            if(playerService.checkPlayerNoEnergy(player)){
+                this.changePlayerTurn(player);
             }
             if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
                 List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.findFromGameInSpawn(matchId);
-                if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
+                if(salmonMatchesInSpawn != null && !salmonMatchesInSpawn.isEmpty()) {
                     List<SalmonMatch> salmonMatchesInSpawnExceptLast = salmonMatchesInSpawn.stream().filter(s -> s.getCoordinate().y() < 25).toList();
                     salmonMatchesInSpawnExceptLast.stream().forEach(s -> {
                     s.setCoordinate(new Coordinate(s.getCoordinate().x(), s.getCoordinate().y() + 1));
                     salmonMatchService.save(s);});
                 }
                 players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.save(p);
+                playerService.saveAll(players);
                 match.setRound(round+1);
             }
         }
+
         else if(phase.equals(Phase.TILES)) {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
             if (rds.contains(mtNoC.size())) {
                 players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.save(p);
+                playerService.saveAll(players);
                 match.setPhase(Phase.MOVING);
                 match.setActualPlayer(match.getInitialPlayer());
             }
-            if (match.getRound() == 0 && mtNoC.size() != 17) this.changePlayerTurn(playerId);
+            if (match.getRound() == 0 && mtNoC.size() != 17) this.changePlayerTurn(player);
         }
+
         else {
-            if (playerService.checkPlayerNoEnergy(playerId)) {
-                this.changePlayerTurn(playerId); 
+            if (playerService.checkPlayerNoEnergy(player)) {
+                this.changePlayerTurn(player); 
             }
         }
 
         if (playerService.checkPlayerIsDead(playerId)) { 
-            this.changePlayerTurn(playerId);
-            playerService.setPlayerDead(playerId);
+            this.changePlayerTurn(player);
+            playerService.setPlayerDead(player);
             
         } else if (playerService.checkPlayerFinished(playerId)) {
-            playerService.setPlayerNoEnergy(playerId); 
-            this.changePlayerTurn(playerId);
+            playerService.setPlayerNoEnergy(player); 
+            this.changePlayerTurn(player);
         }
         /**
          * Muere (sigue teniendo energia)
@@ -329,14 +327,14 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             List<SalmonMatch> salmons = salmonMatchService.findSalmonsFromPlayerInSpawn(p.getId());
             u.setPlayedgames(u.getPlayedgames() + 1);
             if(!salmons.isEmpty()) {
-            Integer totalPoints = 0;
-            Integer salmonPoints = salmons.stream().mapToInt(s -> salmonMatchService.findPointsFromASalmonInSpawn(s.getId())).sum();
-            Integer filePoints = salmons.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
-            totalPoints = salmonPoints + filePoints;
-            p.setPoints(totalPoints);
-            u.setTotalpoints(u.getTotalpoints() + totalPoints);
-            playerService.save(p);
-            userService.save(u);
+                Integer totalPoints = 0;
+                Integer salmonPoints = salmons.stream().mapToInt(s -> salmonMatchService.findPointsFromASalmonInSpawn(s.getId())).sum();
+                Integer filePoints = salmons.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
+                totalPoints = salmonPoints + filePoints;
+                p.setPoints(totalPoints);
+                u.setTotalpoints(u.getTotalpoints() + totalPoints);
+                playerService.save(p);
+                userService.save(u);
             }
             userAchievementService.checkAndUnlockAchievements(u.getId());
         }
@@ -352,16 +350,16 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }
     
     @Transactional
-    private void checkGameHasFinished(Integer matchId) {
+    public void checkGameHasFinished(Integer matchId) {
         Match match = matchRepository.findById(matchId).get();
         List<MatchTile> tiles = matchTileService.findByMatchId(matchId);
-        List<SalmonMatch> salmons = salmonMatchService.findFromGameInSpawn(matchId); // Aquí estaba findAllFromMatch
+        List<SalmonMatch> salmons = salmonMatchService.findAllFromMatch(matchId);
         List<SalmonMatch> noCoord = salmonMatchService.findByMatchIdNoCoord(matchId);
         List<Player> players = playerService.findPlayersByMatch(matchId);
-        if(tiles.isEmpty() || (salmons.isEmpty() && noCoord.isEmpty()) ||  players.stream().allMatch(p -> p.getAlive() == false)
+        if(tiles.isEmpty() || salmons.isEmpty() ||  (salmons.stream().filter(s -> s.getCoordinate() != null).allMatch(s -> s.getCoordinate().y() > 20) && noCoord.isEmpty()) ||  players.stream().allMatch(p -> p.getAlive() == false)
          || players.stream().allMatch(p -> playerService.checkPlayerFinished(p.getId()))) {
-            match.setState(State.FINALIZADA);
-            this.save(match);
+            match.setState(State.FINALIZED);
+            save(match);
         }
     }
 }

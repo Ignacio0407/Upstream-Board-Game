@@ -57,6 +57,6 @@ export default function Match() {
     }
 
     return(        
-        match.state === "ESPERANDO" ? <Lobby match={match}></Lobby> : match.state === "FINALIZADA" ? <EndGame match={match}></EndGame> : <Game match={match}></Game>  
+        match.state === "WAITING" ? <Lobby match={match}></Lobby> : match.state === "FINALIZED" ? <EndGame match={match}></EndGame> : <Game match={match}></Game>  
     )
 }

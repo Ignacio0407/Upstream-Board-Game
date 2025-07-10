@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import tokenService from '../services/token.service'
 import jwt_decode from "jwt-decode";
 import '../static/css/dashboard/dashb.css'
@@ -8,11 +8,10 @@ import SearchBar from '../util/SearchBar';
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import { Button } from 'reactstrap';
 import deleteFromList from '../util/deleteFromList';
-import getErrorModal from '../util/getErrorModal';
 import WhiteSpace from '../util/WhiteSpace';
 import { useNavigate } from "react-router-dom";
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { createWebSocket } from '../util/fetchers'
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
@@ -31,8 +30,6 @@ export default function Dashboard() {
             setUsername(jwt_decode(jwt).sub);
         }
     }, [jwt])
-
-    const modal = getErrorModal(setVisible, visible, message);
     
     function espectate(match){
         setSpectatorIds(prevSpectators => [...prevSpectators, user.id]);
@@ -50,7 +47,7 @@ export default function Dashboard() {
         navigate('/matches/'+match.id);
     }
 
-    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    const socket = createWebSocket();
         const stompClient = new Client({
         webSocketFactory: () => socket,
         debug: (str) => {
@@ -86,10 +83,10 @@ export default function Dashboard() {
                 <td className='celda'>{match.playersNumber}</td>
                 <td className='celda'>{match.state}</td>
                 <td className='celda'>{match.password != "" && <i className="fa fa-lock"></i>}</td>
-                <td className='celda'>{match.state === 'ESPERANDO' &&
+                <td className='celda'>{match.state === 'WAITING' &&
                 <Button color={"success"} onClick={() => join(match)}>Join game</Button>
                 }</td>
-                <td className='celda'>{(match.state === 'EN_CURSO' || match.state === 'ESPERANDO') &&
+                <td className='celda'>{(match.state === 'ON_GOING' || match.state === 'WAITING') &&
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
                 {user.roles[0] == "ADMIN" && <Button color="danger"

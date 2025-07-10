@@ -197,9 +197,9 @@ class MatchServiceTest {
     @Test
     void findHeronWithCoordsFromGame_shouldReturnList() {
         List<MatchTile> tiles = List.of(new MatchTile());
-        when(matchRepository.findHeronWithCoordFromGame(1)).thenReturn(tiles);
+        when(matchTileService.findHeronWithCoordsFromGame(1)).thenReturn(tiles);
 
-        List<MatchTile> result = matchService.findHeronWithCoordsFromGame(1);
+        List<MatchTile> result = matchTileService.findHeronWithCoordsFromGame(1);
         assertEquals(1, result.size());
     }
 
@@ -213,7 +213,7 @@ class MatchServiceTest {
         Match savedMatch = new Match();
         savedMatch.setId(1);
         savedMatch.setName("Partida1");
-        savedMatch.setState(State.ESPERANDO);
+        savedMatch.setState(State.WAITING);
 
         MatchDTO dto = new MatchDTO();
         dto.setId(1);
@@ -261,7 +261,7 @@ class MatchServiceTest {
     void startGame_shouldSetInitialAndActualPlayer() {
         Match match = new Match();
         match.setId(1);
-        match.setState(State.ESPERANDO);
+        match.setState(State.WAITING);
         match.setPlayersNumber(0);
 
         Player p = new Player();
@@ -272,7 +272,7 @@ class MatchServiceTest {
 
         MatchDTO dto = new MatchDTO();
         dto.setId(1);
-        dto.setState(State.EN_CURSO);
+        dto.setState(State.ON_GOING);
         dto.setPlayersNumber(1);
 
         when(matchRepository.findById(1)).thenReturn(Optional.of(match));
@@ -282,7 +282,7 @@ class MatchServiceTest {
 
         MatchDTO result = matchService.startGame(1);
 
-        assertEquals(State.EN_CURSO, result.getState());
+        assertEquals(State.ON_GOING, result.getState());
         assertEquals(1, result.getPlayersNumber());
     }
 

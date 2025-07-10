@@ -5,9 +5,8 @@ import { useNavigate } from "react-router-dom";
 import useFetchState from '../util/useFetchState';
 import '../static/css/createGame/createGame.css'
 import '../static/css/admin/adminPage.css'
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-import { post } from '../util/fetchers'
+import { post, createWebSocket } from '../util/fetchers'
 
 export default function CreateGame() { 
     const [name, setName] = useState("");
@@ -18,7 +17,7 @@ export default function CreateGame() {
      
    const navigate = useNavigate();
 
-   const socket = new SockJS('http://localhost:8080/ws-upstream');
+   const socket = createWebSocket();
    const stompClient = new Client({
     webSocketFactory: () => socket,
     debug: (str) => {
