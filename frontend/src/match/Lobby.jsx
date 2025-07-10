@@ -7,12 +7,11 @@ import { Button, Table } from 'reactstrap';
 import { useNavigate } from "react-router-dom";
 import { ColorToRgb } from '../util/ColorParser';
 import { useLocation } from "react-router-dom";
-import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import startGame from '../util/startGame';
 import endGame from '../util/endGame';
 import ColorHandler from '../util/ColorHandler';
-import {get} from '../util/fetchers'
+import {get, createWebSocket} from '../util/fetchers'
 
 export default function Lobby({match}){
     const jwt = tokenService.getLocalAccessToken();
@@ -27,7 +26,8 @@ export default function Lobby({match}){
     const [numjug, Setnumjug] = useState(match.playersNumber);
     const [loading, setLoading] = useState(false);
     const spectatorIds = useLocation().state?.spectatorIds||[];
-    const socket = new SockJS('http://localhost:8080/ws-upstream');
+    
+    const socket = createWebSocket();
     const stompClient = new Client({
     webSocketFactory: () => socket,
     debug: (str) => {
@@ -54,11 +54,10 @@ export default function Lobby({match}){
     onWebSocketError: (error) => {
         console.error('Error with websocket', error);
     }
-});
+    });
 
 stompClient.activate();
     
-
     useEffect(() => {
         const playerUser = players.find(player => player.userPlayer === user.id);
         setUserPlayer(playerUser);
@@ -66,7 +65,7 @@ stompClient.activate();
         setTakenColors(colorsUsed);
         Setnumjug(players.length);
  
-        if(matches.state === "FINALIZADA"){
+        if(matches.state === "FINALIZED"){
             navigate("/dashboard");
         }
     }, [players, match.id, user.id, matches.state]);
@@ -74,31 +73,15 @@ stompClient.activate();
     const fetchPlayers = async () => {
         const response = await get("/api/v1/players/match/"+match.id, jwt);
         const data = await response.json();
-        console.log("data", data)
         setPlayers(data); // Actualiza el estado con los nuevos jugadores
     };
 
     const startingGame = async () => {
-        await startGame({
-            matchId: match.id,
-            jwt,
-            stompClient,
-            finalUser,
-            setLoading,
-        });
+        await startGame({matchId: match.id, jwt, stompClient, finalUser, setLoading});
     };
     
     const endingGame = async () => {
-        await endGame({
-            match,
-            players,
-            user,
-            jwt,
-            spectatorIds,
-            navigate,
-            numjug,
-            setMatches,
-        });
+        await endGame({match, players, user, jwt, spectatorIds, navigate, numjug, setMatches});
     };
     
     const playerList = players.map((p) =>{
@@ -106,7 +89,6 @@ stompClient.activate();
             <tr key={p.id} className="r">
                  <PlayerCard name={p.name} color={p.color}/>
             </tr>
-            
         )
     })
     

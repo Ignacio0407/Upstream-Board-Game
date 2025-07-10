@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { get, post } from '../util/fetchers';
+import { post, createWebSocket } from '../util/fetchers';
 import tokenService from '../services/token.service';
 import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import { ColorToRgb } from '../util/ColorParser';
 import '../static/css/chat/chat.css'
 
@@ -13,8 +12,7 @@ export default function Chat({ match, players, currentPlayer }) {
   const chatContainerRef = useRef(null);
   const jwt = tokenService.getLocalAccessToken();
 
-  const socket = new SockJS('http://localhost:8080/ws-upstream');
-  
+  const socket = createWebSocket();
   const stompClient = new Client({
     webSocketFactory: () => socket,
     connectHeaders: {

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -16,7 +17,16 @@ public interface MatchTileRepository extends JpaRepository<MatchTile, Integer>{
     @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId AND mt.coordinate IS NULL")
     List<MatchTile> findByMatchIdNoCoord(Integer matchId);
 
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.match.id = :matchId")
+    List<MatchTileDTO> findByMatchIdAsDTO(@Param("matchId") Integer matchId);
+
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.match.id = :matchId AND mt.coordinate IS NULL")
+    List<MatchTileDTO> findByMatchIdNoCoordAsDTO(@Param("matchId") Integer matchId);
+
+    @Query("SELECT mt FROM MatchTile mt WHERE mt.tile.type = 'HERON' AND mt.coordinate IS NOT NULL AND mt.match.id = :id")
+    public List<MatchTile> findHeronWithCoordFromGame(@Param("id") Integer id);
+
     @Query("SELECT mt FROM MatchTile mt WHERE mt.coordinate.x = :x AND mt.coordinate.y = :y")
-    Optional<MatchTile> findByCoordinate(Integer x, Integer y);
+    Optional<MatchTile> findByCoordinate(Integer x, Integer y);    
 
 }

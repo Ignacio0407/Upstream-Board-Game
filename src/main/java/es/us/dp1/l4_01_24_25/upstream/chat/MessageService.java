@@ -1,6 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -27,25 +26,17 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
         this.playerService = playerService;
         this.matchService = matchService;
     }
-
-    public List<Message> findMatchMessages(Integer matchId) {
-        return this.findList(messageRepository.findAllMessagesByMatchId(matchId));
-    }
     
     public List<MessageDTO> findMatchMessagesAsDTO(Integer matchId) {
-        return this.findListDTO(this.findMatchMessages(matchId), messageMapper::toDTO);
+        return this.findList(messageRepository.findMessagesByMatchIdDTO(matchId));
     } 
     
     public List<MessageDTO> findUserMessages(Integer userId) {
-        return this.findListDTO(messageRepository.findAllMessagesFromUser(userId), messageMapper::toDTO);
+        return this.findList(messageRepository.findMessagesByUserIdDTO(userId));
     }
     
     public List<Match> findUserChats(Integer userId) {
-        return messageRepository.findAllChatsFromUser(userId);
-    }
-    
-    public List<Message> findNewMessages(Integer matchId, LocalDateTime since) {
-        return messageRepository.findNewMessages(matchId, since);
+        return this.findList(messageRepository.findAllChatsFromUser(userId));
     }
 
     @Override

@@ -1,28 +1,6 @@
 import { ColorToRgb } from "../util/ColorParser";
 import { patch } from "../util/fetchers";
 
-export const getTileImage = (tileP, tilesList, images) => {
-    if (!tileP) return null;
-    //const realTile = tilesList[tileP.tile.id - 1];
-    const realTile = tileP.tile.type;
-    switch(realTile) {
-        case 'BEAR':
-            return images.bearTile;
-        case 'EAGLE':
-            return images.eagleTile;
-        case 'HERON':
-            return images.heronTile;
-        case 'JUMP':
-            return images.jumpTile;
-        case 'ROCK':
-            return images.rockTile;
-        case 'WATER':
-            return images.waterTile;
-        default:
-            return null;
-    }
-}
-
 export const getSalmonImage = (salmonTile, players, images) => {
     if (!salmonTile) return null;  // Casilla vacia
             const color = players.filter(p => p.id === salmonTile.playerId)[0].color;
@@ -53,10 +31,10 @@ export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelec
 
 export const handleRotateTile = async (tile, jwt) => {
     try {
-        const newOrientation = (tile[0].orientation + 1) % 7; // Incrementa la rotación
+        const newOrientation = (tile.orientation + 1) % 7; // Incrementa la rotación
         console.log(newOrientation);
 
-        const response = await patch(`/api/v1/matchTiles/${tile[0].id}/rotation`, jwt, newOrientation)
+        const response = await patch(`/api/v1/matchTiles/${tile.id}/rotation`, jwt, newOrientation)
 
         if (!response.ok) {
             throw new Error('Error updating tile rotation');
@@ -87,19 +65,9 @@ export const generatePlayerList = (players, actualPlayerId) => {
         }}
         >
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.name}</td>
-            <td className="table-cell" style={{
-            padding: '0',
-            textAlign: 'center',
-            verticalAlign: 'middle',
-                }}>
-                <div style={{
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '50%',
-                    backgroundColor: `${ColorToRgb(p.color)}`,
-                    border: '1px solid #000',
-                    display: 'inline-block', 
-                }}>
+            <td className="table-cell" style={{ padding: '0', textAlign: 'center', verticalAlign: 'middle'}}>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: `${ColorToRgb(p.color)}`, 
+                border: '1px solid #000', display: 'inline-block'}}>
                     
                 </div>
             </td>   

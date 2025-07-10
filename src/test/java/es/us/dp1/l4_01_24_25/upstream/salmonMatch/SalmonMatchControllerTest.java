@@ -91,7 +91,7 @@ public class SalmonMatchControllerTest {
         match = new Match();
         match.setId(1);
         match.setPlayersNumber(2);
-        match.setState(State.EN_CURSO); 
+        match.setState(State.ON_GOING); 
         match.setRound(1);
         match.setPhase(Phase.MOVING);
         match.setActualPlayer(player);
@@ -103,7 +103,6 @@ public class SalmonMatchControllerTest {
         tile = new Tile();
         tile.setId(1);
         tile.setImage("AGUA");
-        tile.setType(TileType.WATER);
 
         matchTile = new MatchTile();
         matchTile.setId(1);
@@ -116,7 +115,6 @@ public class SalmonMatchControllerTest {
 
         salmon = new Salmon();
         salmon.setId(1);
-        salmon.setColor(Color.RED);
         salmon.setImage("rojo2");
 
         salmonMatch = new SalmonMatch();
@@ -233,7 +231,6 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleOsoBearEncounter() throws Exception {
-        tile.setType(TileType.BEAR);
         matchTile.setOrientation(0);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
@@ -252,7 +249,6 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleEagleEncounter() throws Exception {
-        tile.setType(TileType.EAGLE);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
@@ -271,7 +267,6 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldHandleJumpTile() throws Exception {
-        tile.setType(TileType.JUMP);
         matchTile.setOrientation(0);
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);

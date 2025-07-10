@@ -42,12 +42,12 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
-        return this.findListDTO(this.findPlayersByMatch(id), playerMapper::toDTO);
+        return this.findList(playerRepository.findPlayersByMatchAsDTO(id));
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchSortedPlayerOrderAsDTO(Integer id) {
-        return this.findListDTO(this.findList(this.playerRepository.findPlayersByMatchSortedPlayerOrder(id)), playerMapper::toDTO);
+        return this.findList(playerRepository.findPlayersByMatchSortedPlayerOrderAsDTO(id));
     }
 
     @Transactional(readOnly = true)
@@ -56,8 +56,8 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     @Transactional(readOnly = true)
-    public List<PlayerDTO> findAlivePlayersByMatchAsDTO(Integer id) {
-        return this.findListDTO(this.findAlivePlayersByMatch(id), playerMapper::toDTO);
+    public List<Player> findAlivePlayersByMatchSortedPlayerOrder(Integer id) {
+        return this.findList(playerRepository.findAlivePlayersByMatchSortedPlayerOrder(id));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         match.setPlayersNumber(match.getPlayersNumber() + 1);
         matchService.save(match);
         this.save(p);
-    return playerMapper.toLobby(p);
+        return playerMapper.toLobby(p);
     }
 
     public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
@@ -108,8 +108,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     @Transactional
-    public void setPlayerDead(Integer playerId) {
-        Player player = this.findById(playerId);
+    public void setPlayerDead(Player player) {
         player.setAlive(false);
         player.setEnergy(0); 
         player.setPlayerOrder(10); 
@@ -117,11 +116,9 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     @Transactional
-    public void setPlayerNoEnergy(Integer playerId) {
-        Player player = this.findById(playerId);
+    public void setPlayerNoEnergy(Player player) {
         player.setEnergy(0);
         this.save(player);
-
     }
 
     @Transactional
@@ -136,8 +133,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     @Transactional
-    public Boolean checkPlayerNoEnergy(Integer playerId){
-        Player player = this.findById(playerId);
+    public Boolean checkPlayerNoEnergy(Player player) {
         return player.getEnergy() == 0;
     }
 }

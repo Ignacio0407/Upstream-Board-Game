@@ -1,7 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -22,7 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Player extends BaseEntity implements Serializable{
+public class Player extends BaseEntity{
     
     String name;
     
@@ -46,19 +44,5 @@ public class Player extends BaseEntity implements Serializable{
     
     @ManyToOne
     Match match;
-
-    @Override
-    public String toString() {
-    return "Player{" +
-            "id=" + getId() +
-            ", name='" + name + '\'' +
-            ", color=" + color +
-            ", playerOrder=" + playerOrder +
-            ", alive=" + alive +
-            ", points=" + points +
-            ", userPlayer=" + (userPlayer != null ? userPlayer.getId() : "null") +
-            ", match=" + (match != null ? match.getId() : "null") +
-            '}';
-    }
 
 }

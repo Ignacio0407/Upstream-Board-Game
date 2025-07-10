@@ -17,13 +17,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/ws-upstream")
-        .setAllowedOrigins(
-            "http://localhost:8080",
-            "http://localhost:3000",
-            "https://*.ngrok-free.app"  // Allow ngrok domains
-        )
-        .withSockJS();
-}
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws-upstream")
+            .setAllowedOriginPatterns(
+                "http://localhost:8080",
+                "http://localhost:3000",
+                "http://192.168.*.*:3000",
+                "https://*.ngrok-free.app"
+            )
+            .withSockJS();
+    }
 }

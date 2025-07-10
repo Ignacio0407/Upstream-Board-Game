@@ -1,3 +1,5 @@
+import SockJS from 'sockjs-client';
+
 export const get = async (uri, jwt) => {
   return fetch(uri, {
     method: "GET",
@@ -55,3 +57,12 @@ export const deleteEntity = async (uri, jwt, id) => {
       }
     });
 };
+
+export const createWebSocket = () => {
+      // Obtain dynamic host
+      const host = window.location.hostname;
+      // Build WebSocket URL
+      const socketUrl = `http://${host}:8080/ws-upstream`;
+      // Create SockJS conection 
+      return new SockJS(socketUrl);
+}

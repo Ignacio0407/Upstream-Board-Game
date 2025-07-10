@@ -29,4 +29,16 @@ public class MatchTileDTO {
 
     Integer matchId;
 
+    public MatchTileDTO(Integer id, Integer capacity, Integer orientation, Integer salmonsNumber, Coordinate coordinate, Tile tile, Integer matchId) {
+        this.id = id;
+        this.capacity = capacity;
+        this.orientation = orientation;
+        this.salmonsNumber = salmonsNumber;
+        this.coordinate = coordinate;
+        this.tile = tile;
+        this.matchId = matchId;
+    }
+
+    public MatchTileDTO() {}
+
 }

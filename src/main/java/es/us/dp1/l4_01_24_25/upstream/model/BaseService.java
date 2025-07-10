@@ -39,6 +39,11 @@ public abstract class BaseService<T, ID> {
     }
 
     @Transactional
+    public List<T> saveAll(List<T> entity) {
+        return (List<T>) repository.saveAll(entity);
+    }
+
+    @Transactional
     public List<T> saveSome(List<T> entities) {
         List<T> failedToSave = new LinkedList<>();
         entities.forEach(jugador -> {

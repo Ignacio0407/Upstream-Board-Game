@@ -26,4 +26,16 @@ public class PlayerDTO {
 
     private Integer matchId;
 
+    public PlayerDTO(Integer id, String name, Color color, Integer playerOrder, Boolean alive, Integer points, Integer energy, Integer userId, Integer matchId) {
+        this.id = id;
+        this.name = name;
+        this.color = color;
+        this.playerOrder = playerOrder;
+        this.alive = alive;
+        this.points = points;
+        this.energy = energy;
+        this.userId = userId;
+        this.matchId = matchId;
+    }
+    
 }

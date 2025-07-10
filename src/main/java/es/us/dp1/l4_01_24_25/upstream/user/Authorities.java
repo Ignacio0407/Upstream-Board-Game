@@ -19,6 +19,5 @@ public class Authorities extends BaseEntity{
 	
 	@Column(length = 20)
 	String authority;
-	
-	
+		
 }

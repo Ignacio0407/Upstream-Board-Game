@@ -7,7 +7,6 @@ import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -35,7 +34,6 @@ public class MatchTile extends BaseEntity {
     Tile tile;
 
     @ManyToOne
-    @JoinColumn(name = "match_id")
     Match match;
 
 }

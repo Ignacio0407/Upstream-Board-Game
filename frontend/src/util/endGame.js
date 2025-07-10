@@ -21,9 +21,9 @@ const endGame = async ({ match, players, user, jwt, spectatorIds, navigate, numj
     match.playersNum = numJugadores;
 
     if (numJugadores === 0) {
-        match.state = "FINALIZADA";
+        match.state = "FINALIZED";
     } else {
-        match.state = "ESPERANDO";
+        match.state = "WATIING";
     }
 
     try {

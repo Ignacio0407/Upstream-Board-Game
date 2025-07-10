@@ -52,7 +52,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     @Transactional(readOnly = true)
 	public List<SalmonMatchDTO> findAllFromMatchDTO(Integer matchId) {
-		return salmonMatchMapper.toDTOList(this.findAllFromMatch(matchId));
+		return this.findList(salmonMatchRepository.findAllFromMatchAsDTO(matchId));
 	}
     
     @Transactional()
@@ -62,28 +62,8 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     @Transactional()
 	public List<SalmonMatchDTO> findAllFromPlayerDTO(Integer playerId) {
-		return salmonMatchMapper.toDTOList(this.findAllFromPlayer(playerId));
+		return this.findList(salmonMatchRepository.findAllFromPlayerAsDTO(playerId));
 	}
-
-    @Transactional
-    public List<SalmonMatch> findAllFromPlayerInRiver(Integer playerId) {
-        return this.findList(salmonMatchRepository.findAllFromPlayerInRiver(playerId));
-    }
-
-    @Transactional
-    public List<SalmonMatchDTO> findAllFromPlayerInRiverDTO(Integer playerId) {
-        return salmonMatchMapper.toDTOList(this.findAllFromPlayerInRiver(playerId));
-    }
-
-    @Transactional
-    public List<SalmonMatch> findAllFromPlayerInSea(Integer playerId) {
-        return this.findList(salmonMatchRepository.findAllFromPlayerInSea(playerId));
-    }
-
-    @Transactional
-    public List<SalmonMatchDTO> findAllFromPlayerInSeaDTO(Integer playerId) {
-        return salmonMatchMapper.toDTOList(this.findAllFromPlayerInSea(playerId));
-    }
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> findFromGameInSpawn(Integer matchId) {
@@ -92,17 +72,22 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     @Transactional(readOnly = true)
     public List<SalmonMatchDTO> findFromGameInSpawnDTO(Integer matchId) {
-        return salmonMatchMapper.toDTOList(this.findFromGameInSpawn(matchId));
+        return this.findList(salmonMatchRepository.findFromGameInSpawnAsDTO(matchId));
+    }
+
+    @Transactional
+    public List<SalmonMatch> findAllFromPlayerInRiver(Integer playerId) {
+        return this.findList(salmonMatchRepository.findAllFromPlayerInRiver(playerId));
+    }
+
+    @Transactional
+    public List<SalmonMatch> findAllFromPlayerInSea(Integer playerId) {
+        return this.findList(salmonMatchRepository.findAllFromPlayerInSea(playerId));
     }
 
     @Transactional
     public List<SalmonMatch> findSalmonsInSea(Integer matchId) {
         return this.findList(salmonMatchRepository.findByMatchIdNoCoord(matchId));
-    }
-
-    @Transactional
-    public List<SalmonMatchDTO> findSalmonsInSeaDTO(Integer matchId) {
-        return salmonMatchMapper.toDTOList(this.findSalmonsInSea(matchId));
     }
 
     @Transactional(readOnly = true)
@@ -111,18 +96,8 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     }
 
     @Transactional(readOnly = true)
-    public List<SalmonMatchDTO> findSalmonsFromPlayerInSpawnDTO(Integer playerId){
-        return salmonMatchMapper.toDTOList(this.findSalmonsFromPlayerInSpawn(playerId));
-    }
-
-    @Transactional(readOnly = true)
     public List<SalmonMatch> findByMatchIdNoCoord(Integer matchId){
         return this.findList(salmonMatchRepository.findByMatchIdNoCoord(matchId));
-    }
-
-    @Transactional(readOnly = true)
-    public List<SalmonMatchDTO> findByMatchIdNoCoordDTO(Integer matchId){
-        return salmonMatchMapper.toDTOList(this.findByMatchIdNoCoord(matchId));
     }
 
     @Transactional(readOnly = true)
@@ -140,6 +115,11 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         salmonMatchToUpdate.setCoordinate(newSalmonMatch.getCoordinate());
         salmonMatchToUpdate.setSalmon(newSalmonMatch.getSalmon());
         salmonMatchToUpdate.setMatch(newSalmonMatch.getMatch());
+    }
+
+    public void setSalmonImage (SalmonMatch salmonMatch) {
+        if (!salmonMatch.getSalmon().getImage().contains("1") && salmonMatch.getSalmonsNumber() == 1)
+            salmonMatch.setSalmon(salmonService.findById(salmonMatch.getSalmon().getId()+5));
     }
 
     private void throwExceptions(Coordinate myCoordinate, Coordinate newCoordinate, Player player) {
@@ -180,17 +160,18 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     private void herons(Player player, Match match, List<Player> players, Integer numPlayers) {
         List<SalmonMatch> salmonMatchesFromPlayer = this.findAllFromPlayerInRiver(player.getId());
-        List<MatchTile> herons = matchService.findHeronWithCoordsFromGame(match.getId());
-        for(MatchTile h : herons) {
-            for(SalmonMatch s: salmonMatchesFromPlayer){
-                if(s.getCoordinate().equals(h.getCoordinate())){
-                    s.setSalmonsNumber(s.getSalmonsNumber()-1);
-                    if(s.getSalmonsNumber()==0) {
-                        this.delete(s.getId()); 
-                        h.setSalmonsNumber(h.getSalmonsNumber()-1);
-                        matchTileService.save(h);
+        List<MatchTile> herons = matchTileService.findHeronWithCoordsFromGame(match.getId());
+        for(MatchTile heron : herons) {
+            for(SalmonMatch salmonMatch: salmonMatchesFromPlayer) {
+                if(salmonMatch.getCoordinate().equals(heron.getCoordinate())) {
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
+                    this.setSalmonImage(salmonMatch);
+                    if(salmonMatch.getSalmonsNumber()==0) {
+                        this.delete(salmonMatch.getId()); 
+                        heron.setSalmonsNumber(heron.getSalmonsNumber()-1);
+                        matchTileService.save(heron);
                     }
-                    else this.save(s);
+                    else this.save(salmonMatch);
                 }
             }   
         }
@@ -323,6 +304,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                     }
                     myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
                     matchTileService.save(myTile);
+                    setSalmonImage(salmonMatch);
                     return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
                 }
             }
@@ -426,18 +408,19 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             matchTileService.save(myTile);
         }
 
-        else throw new NotValidMoveException("Solo puedes moverte de uno en uno"); 
-        if (newCoordinate2 == null ) return processSalmonMovement(salmonMatch, toTravel, player, match, newCoordinate, energyUsed, players, numPlayers);
+        else throw new NotValidMoveException("Solo puedes moverte de uno en uno");
+        setSalmonImage(salmonMatch); 
+        if (newCoordinate2 == null )  return processSalmonMovement(salmonMatch, toTravel, player, match, newCoordinate, energyUsed, players, numPlayers);
         else return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
     }
 
     public List<SalmonMatchDTO> create(Integer playerId) {
         List<SalmonMatch> salmonMatches = new LinkedList<>();
+        Player player = playerService.findById(playerId);
+        Match match = player.getMatch();
         for (int i=0; i < 4; i++) {
             SalmonMatch salmonMatch = new SalmonMatch();
-            Player player = playerService.findById(playerId);
-            Salmon salmon = salmonService.findAll().stream().filter(sal -> sal.getColor().equals(player.getColor())).findFirst().orElse(null);
-            Match match = player.getMatch();
+            Salmon salmon = salmonService.findFirstByColor(player.getColor());
             Coordinate coordinate = new Coordinate(null, null);
             salmonMatch.setPlayer(player);
             salmonMatch.setSalmonsNumber(2);
@@ -445,9 +428,9 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             salmonMatch.setCoordinate(coordinate);
             salmonMatch.setSalmon(salmon);
             salmonMatch.setMatch(match);
-            this.save(salmonMatch);
             salmonMatches.add(salmonMatch);
         }
+        this.saveAll(salmonMatches);
         return salmonMatchMapper.toDTOList(salmonMatches);
     }
 
@@ -521,4 +504,5 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findSalmonsInSpawnFromGame'");
     }
+
 }
