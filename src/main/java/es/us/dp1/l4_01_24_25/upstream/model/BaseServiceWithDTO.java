@@ -1,13 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.model;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
 public abstract class BaseServiceWithDTO<T, D, ID> extends BaseService<T, ID> {
@@ -27,13 +23,6 @@ public abstract class BaseServiceWithDTO<T, D, ID> extends BaseService<T, ID> {
     @Transactional(readOnly = true)
     public D findByIdAsDTO(ID id) {
         return mapper.toDTO(this.findById(id));
-    }
-
-    @Transactional(readOnly = true)
-    public List<D> findListDTO(List<T> sourceList, Function<T, D> mapper) {
-        if (sourceList == null)
-            throw new ResourceNotFoundException("List not found");
-        return sourceList.stream().map(mapper).collect(Collectors.toList());
     }
 
     @Transactional
