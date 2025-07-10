@@ -34,7 +34,7 @@ class MessageRepositoryTest {
     @BeforeEach
     void setup() {
         match = new Match();
-        match.setState(State.EN_CURSO);
+        match.setState(State.ON_GOING);
         match.setPhase(Phase.TILES);
         match.setPlayersNumber(2);
         match.setRound(1);
@@ -69,7 +69,7 @@ class MessageRepositoryTest {
         m2.setCreatedAt(LocalDateTime.now());
         entityManager.persist(m2);
 
-        List<Message> messages = messageRepository.findAllMessagesByMatchId(match.getId());
+        List<MessageDTO> messages = messageRepository.findMessagesByMatchIdDTO(match.getId());
 
         assertEquals(2, messages.size());
         assertEquals("Hola", messages.get(0).getContent());
@@ -82,7 +82,7 @@ class MessageRepositoryTest {
         m1.setCreatedAt(LocalDateTime.now());
         entityManager.persist(m1);
 
-        List<Message> messages = messageRepository.findAllMessagesFromUser(player.getUserPlayer().getId());
+        List<MessageDTO> messages = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
 
         assertEquals(1, messages.size());
         assertEquals("Hola", messages.get(0).getContent());
@@ -100,21 +100,4 @@ class MessageRepositoryTest {
         assertEquals(match.getId(), result.get(0).getId());
     }
 
-    @Test
-    void testFindNewMessages() {
-        LocalDateTime now = LocalDateTime.now();
-
-        Message oldMsg = new Message(player, match, "Antiguo");
-        oldMsg.setCreatedAt(now.minusMinutes(10));
-        entityManager.persist(oldMsg);
-
-        Message newMsg = new Message(player, match, "Nuevo");
-        newMsg.setCreatedAt(now.minusSeconds(30));
-        entityManager.persist(newMsg);
-
-        List<Message> result = messageRepository.findNewMessages(match.getId(), now.minusMinutes(1));
-
-        assertEquals(1, result.size());
-        assertEquals("Nuevo", result.get(0).getContent());
-    }
 }

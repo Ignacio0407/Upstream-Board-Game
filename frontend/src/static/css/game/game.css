@@ -82,7 +82,7 @@
     grid-template-rows: 1fr;
     height: 20%;
     justify-self: flex-end;
-    background-image: url('../../images/tiles/seaTile.png');
+    background-image: url('../../images/sea.png');
     background-position: center;
     background-size: cover;
     background-color:  #3A6B76;

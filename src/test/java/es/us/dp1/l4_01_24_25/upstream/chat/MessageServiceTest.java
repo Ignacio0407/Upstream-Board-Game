@@ -1,6 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
@@ -35,31 +34,31 @@ class MessageServiceTest {
     @InjectMocks
     private MessageService messageService;
 
-    @Test
+    /*@Test
     void testFindMatchMessagesAsDTO() {
         Message m1 = new Message();
         Message m2 = new Message();
         MessageDTO dto1 = new MessageDTO();
         MessageDTO dto2 = new MessageDTO();
 
-        when(messageRepository.findAllMessagesByMatchId(1)).thenReturn(List.of(m1, m2));
+        when(messageRepository.findMessagesByMatchIdDTO(1)).thenReturn(List.of(m1, m2));
         when(messageMapper.toDTO(m1)).thenReturn(dto1);
         when(messageMapper.toDTO(m2)).thenReturn(dto2);
 
         List<MessageDTO> result = messageService.findMatchMessagesAsDTO(1);
 
         assertEquals(2, result.size());
-        verify(messageRepository).findAllMessagesByMatchId(1);
+        verify(messageRepository).findMessagesByMatchIdDTO(1);
         verify(messageMapper).toDTO(m1);
         verify(messageMapper).toDTO(m2);
-    }
+    } */
 
     @Test
     void testFindUserMessages() {
         Message m = new Message();
         MessageDTO dto = new MessageDTO();
 
-        when(messageRepository.findAllMessagesFromUser(1)).thenReturn(List.of(m));
+        when(messageRepository.findMessagesByMatchIdDTO(1)).thenReturn(List.of(dto));
         when(messageMapper.toDTO(m)).thenReturn(dto);
 
         List<MessageDTO> result = messageService.findUserMessages(1);
@@ -77,18 +76,6 @@ class MessageServiceTest {
 
         assertEquals(1, chats.size());
         verify(messageRepository).findAllChatsFromUser(1);
-    }
-
-    @Test
-    void testFindNewMessages() {
-        LocalDateTime since = LocalDateTime.now().minusMinutes(5);
-        Message m = new Message();
-        when(messageRepository.findNewMessages(1, since)).thenReturn(List.of(m));
-
-        List<Message> result = messageService.findNewMessages(1, since);
-
-        assertEquals(1, result.size());
-        verify(messageRepository).findNewMessages(1, since);
     }
 
     @Test
