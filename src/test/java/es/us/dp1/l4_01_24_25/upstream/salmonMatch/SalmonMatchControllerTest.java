@@ -137,7 +137,7 @@ public class SalmonMatchControllerTest {
 
     @Test
     void shouldFindAllFromMatchInSpawn() throws Exception {
-        when(salmonMatchService.findSalmonsInSpawnFromGame(anyInt())).thenReturn(List.of(salmonMatch));
+        when(salmonMatchService.findFromGameInSpawn(anyInt())).thenReturn(List.of(salmonMatch));
 
         mockMvc.perform(get("/api/v1/salmonMatches/match/1/spawn"))
             .andExpect(status().isOk())

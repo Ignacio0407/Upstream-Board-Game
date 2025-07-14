@@ -180,7 +180,7 @@ public class SalmonMatchServiceTest {
             List<SalmonMatch> expected = List.of(salmonMatch1);
             when(salmonMatchRepository.findFromGameInSpawn(1)).thenReturn(expected);
 
-            List<SalmonMatch> result = salmonMatchService.findSalmonsInSpawnFromGame(1);
+            List<SalmonMatch> result = salmonMatchService.findFromGameInSpawn(1);
 
             assertEquals(expected, result);
             verify(salmonMatchRepository).findFromGameInSpawn(1);
