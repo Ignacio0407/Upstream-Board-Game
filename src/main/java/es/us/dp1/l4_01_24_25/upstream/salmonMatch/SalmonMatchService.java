@@ -500,9 +500,4 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         return salmonMatchMapper.toDTO(salmonMatch);
     }
 
-    public List<SalmonMatch> findSalmonsInSpawnFromGame(int i) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findSalmonsInSpawnFromGame'");
-    }
-
 }

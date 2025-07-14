@@ -1,13 +1,16 @@
+import {useState} from 'react'
 import { Table } from "reactstrap";
-import useFetchState from "../util/useFetchState";   
+import useFetchState from "../util/useFetchState";
+import SearchBar from '../util/SearchBar'  
    
 export default function DeveloperList() { 
-    const [developers, setDevelopers] = useFetchState( [], `/api/v1/developers` ); 
+    const [developers, setDevelopers] = useFetchState( [], `/api/v1/developers` );
+    const [filtered, setFiltered] = useState([]) 
 
     const imgnotfound = "https://cdn-icons-png.flaticon.com/512/48/48639.png";  
     
-    const developerList = 
-    developers.map((d) => { 
+    function developersList (developersToList) {
+        developersToList.map((d) => { 
         return ( 
             <tr key={d.id}> 
                 <td className="text-center">{d.name}</td> 
@@ -19,12 +22,14 @@ export default function DeveloperList() {
             </tr> 
         ); 
     });
-
+    }
+    
     return ( 
         <> 
          <div className="admin-page-container"> 
             <h1></h1>
            <h1 className="text-center">Developers</h1>
+           <SearchBar data={developers} setFiltered={setFiltered} placeholder = {'Search developers'} />
            <div> 
                 <Table aria-label="developers" className="mt-4"> 
                     <thead> 
@@ -35,7 +40,7 @@ export default function DeveloperList() {
                             <th className="text-center">Picture</th> 
                         </tr> 
                     </thead> 
-                    <tbody>{developerList}</tbody> 
+                    <tbody>{filtered ? developersList(filtered) : developersList(developers)}</tbody> 
                 </Table> 
             </div> 
             </div> 

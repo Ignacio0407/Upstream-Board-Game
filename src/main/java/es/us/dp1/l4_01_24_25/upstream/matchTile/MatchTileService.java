@@ -65,6 +65,12 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return this.findList(matchTileRepository.findHeronWithCoordFromGame(matchId));
     }
 
+    public Boolean getCoordinate(MatchTile matchTile) {
+        if (matchTile.getCoordinate() == null)
+            throw new ResourceNotFoundException("Matchtile with ID" + matchTile.getId() + "has no coordinates");
+        return matchTile.getCoordinate().y() == 0;
+    }
+
     @Override
     @Transactional
     protected void updateEntityFields(MatchTile newMatchTile, MatchTile matchTileToUpdate) {
