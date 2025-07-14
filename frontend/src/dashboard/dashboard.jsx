@@ -78,7 +78,7 @@ export default function Dashboard() {
     function matchesList(matchesToList) {
       return matchesToList.map((match) => {
         return (
-            <tr key={match.nombre} className='fila'>
+            <tr key={match.name} className='fila'>
                 <td className='celda'>{match.name}</td>
                 <td className='celda'>{match.playersNumber}</td>
                 <td className='celda'>{match.state}</td>

@@ -186,10 +186,10 @@ export default function Game({match}){
             if (!responseSalmon.ok) {
                 const errorData = await responseSalmon.json(); // Parsea el cuerpo de la respuesta
                 alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
-                console.log("Error actualizando salmón:", errorData);
+                console.log("Error updating salmon:", errorData);
             }            
         } catch (error){
-            console.log("Error actualizando salmon", error)
+            console.log("Error updating salmon", error)
             throw error.message;
         }
     }
@@ -199,7 +199,7 @@ export default function Game({match}){
             const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
             if (!responseChangePhase.ok) {
                 const errorData = await responseChangePhase.json();
-                alert(errorData.error || "Error changing phase.");
+                alert(errorData.message || "Error changing phase.");
                 console.log("Error changing phase.", errorData);
             }            
         } catch (error){
@@ -254,7 +254,7 @@ export default function Game({match}){
                 }
 
                 }
-                changephase();
+                await changephase();
             }
             catch (error) {
                 console.error("Error updating tile position or advancing turn:", error);
@@ -332,21 +332,13 @@ export default function Game({match}){
                         </div>
                     ))}
                     </div>}
+                    
                     <div className={match.round < 2 && match.round < 6 ? 'grid1' : 'grid1-100'}>
                     {grid.map((cell, index) => (
-                    <div 
-                        key={index} 
-                        onClick={() => handleGridClick(index)} 
-                        className="grid-item"
-                        style={{ position: 'relative' }}
-                    >
-                        {cell.tile && (<img src={cell.tile.tile.image} alt=""
-                            style={{ 
-                            width: '250px',
-                            ...getRotationStyle(cell.tile)
-                            }}
-                        />
-                        )}
+                    <div key={index} onClick={() => handleGridClick(index)} className="grid-item" style={{ position: 'relative' }}>
+                        
+                        {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px',
+                            ...getRotationStyle(cell.tile)}}/>)}
 
                         {cell.salmons && cell.salmons.map((salmon, sIndex) => {
                             const position = calculateSalmonPosition(sIndex, cell.salmons.length);
