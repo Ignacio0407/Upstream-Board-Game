@@ -136,4 +136,22 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     public Boolean checkPlayerNoEnergy(Player player) {
         return player.getEnergy() == 0;
     }
+
+    public record NextPlayerResult(Player player, int nextIndex) {}
+
+    public NextPlayerResult findNextPlayer (Player player, List<Player> players) {
+        Integer myOrder = player.getPlayerOrder();
+        Integer nPlayers = players.size();
+        Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
+        Integer nextIndex = (currentIndex + 1) % nPlayers;
+        Player nextPlayer = players.get(nextIndex);
+        return new NextPlayerResult(nextPlayer, nextIndex);
+    }
+
+    public List<Player> playersForChangePhase (Integer matchId) {
+        return this.findAlivePlayersByMatch(matchId).stream().filter(
+            p -> !salmonMatchService.findAllFromPlayerInRiver(p.getId()).isEmpty() 
+            || !salmonMatchService.findAllFromPlayerInSea(p.getId()).isEmpty()).toList();
+    }
+
 }

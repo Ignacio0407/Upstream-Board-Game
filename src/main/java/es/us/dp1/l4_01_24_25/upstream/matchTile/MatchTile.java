@@ -4,6 +4,7 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -35,5 +36,10 @@ public class MatchTile extends BaseEntity {
 
     @ManyToOne
     Match match;
+
+    public Boolean isFull () {
+        if (this.match.getPlayersNumber() >= 2 && this.getTile().getType().equals(TileType.ROCK)) return this.getCapacity().equals(this.getSalmonsNumber() -1);
+        else return this.getCapacity().equals(this.getSalmonsNumber()); 
+    }
 
 }

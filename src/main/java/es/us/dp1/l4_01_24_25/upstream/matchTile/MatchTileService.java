@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -87,24 +88,19 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return y <= maxAllowedRow;
     }
     
-    public MatchTile eagleToWater(MatchTile toTravel, Match match) {
-        MatchTile water = new MatchTile();
+    public MatchTile eagleToWater(MatchTile toTravel) {
         Tile waterTile = tileService.findById(1);
-        water.setId(toTravel.getId());
-        water.setCapacity(toTravel.getCapacity());
-        water.setOrientation(0);
-        water.setSalmonsNumber(0);
-        water.setCoordinate(toTravel.getCoordinate());
-        water.setTile(waterTile);
-        water.setMatch(match);
-        matchTileRepository.save(water);
-        return water;
+        toTravel.setTile(waterTile);
+        this.save(toTravel);
+        return toTravel;
+    }
+
+    public MatchTile findMyTile (List<MatchTile> matchTiles, Coordinate myCoordinate) {
+        return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
 
     public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) {
-        
         MatchTile matchTile = this.findById(id);
-
         if(updates.get("y") != 0){
             MatchTile matchTile2 = this.findByMatchId(matchTile.getMatch().getId()).stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
@@ -144,7 +140,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         Tile eagle = tileService.findById(5);
         Tile jump = tileService.findById(6);
         Match match = matchService.findById(id);
-        List<MatchTile> createdTiles = new ArrayList<>();
+        List<MatchTile> createdTiles = new LinkedList<>();
         for (int i = 0; i < 7; i++) {
             MatchTile matchTile = new MatchTile();
             matchTile.setTile(water);
@@ -206,9 +202,8 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
             matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }    
-        Collections.shuffle(createdTiles);
+        Collections.shuffle(new ArrayList<>(createdTiles));
         createdTiles.stream().forEach(mT -> this.save(mT));
-
         return matchTileMapper.toDTOList(createdTiles);
     }
 }

@@ -4,11 +4,10 @@ import useFetchState from "../util/useFetchState";
 import deleteFromList from "../util/deleteFromList";
 import { useState } from "react";
 import jwt_decode from "jwt-decode";
-import getErrorModal from "../util/getErrorModal";
 import '../static/css/achievement/achievement.css'
 import BotonLink from "../util/BotonLink";
 import SearchBar from "../util/SearchBar";
-const imgnotfound = "https://cdn-icons-png.flaticon.com/512/5778/5778223.png";
+const imgnotfound = "/images/achievements/notFoundImage.png";
 
 export default function AchievementList() {
 
@@ -91,9 +90,8 @@ export default function AchievementList() {
                 <div className="achievement-card">
                 <h1 className="text-center">Achievements</h1>
                 <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
-                {<h1></h1>/*Espacio en blanco*/} 
+                { <h1/> /*Espacio en blanco*/} 
                     <div>
-                    
                     <thead>
                         <tr>
                         <th className="text-center table-row">Name</th>

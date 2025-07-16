@@ -16,15 +16,14 @@ INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoint
 INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (11,'SDL0654','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,2,10,20);
 
 INSERT INTO achievement(id, name, description, threshold, badge_image, metric) VALUES 
-(1, 'Basic experience', 'You have played more than 1 game', 1, 'https://cdn-icons-png.flaticon.com/512/5243/5243423.png', 'GAMES_PLAYED'),
-(2, 'Explorer', 'You have played more than 10 games', 10.0, 'https://cdn-icons-png.flaticon.com/512/603/603855.png', 'GAMES_PLAYED'),
+(1, 'Basic experience', 'You have played more than 1 game', 1, '/images/achievements/MoreThan1Game.png', 'GAMES_PLAYED'),
+(2, 'Moderate experience', 'You have played more than 10 games', 10.0, '/images/achievements/Explorer.png', 'GAMES_PLAYED'),
 (3, 'Expert', 'You have won more than 20 games', 20.0, NULL, 'VICTORIES'),
-(4, 'Eager', 'You have consulted the rules', 1, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGX5UO6OsMsjDLmXv_q7qwndH59iXU_B-o20u_D3rYDC3Wknxkezh3tbKYF9aqpelKV4o&usqp=CAU', 'EXPLORER'),
+(4, 'Eager', 'You have consulted the rules', 1, '/images/achievements/Eager.png', 'EXPLORER'),
 (5, 'Gambler', 'You have more than 20 points', 100.0, NULL, 'TOTAL_POINTS');
 
-INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 1);
-INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 2);
-INSERT INTO appusers_logros(user_id, achievement_id) VALUES (4, 3);
+INSERT INTO appusers_achievements(user_id, achievement_id) VALUES 
+(4, 1), (4, 2), (4, 3);
 
 INSERT INTO tile (id, image, type) VALUES 
 (1, '/images/tiles/water.png', 'WATER'),

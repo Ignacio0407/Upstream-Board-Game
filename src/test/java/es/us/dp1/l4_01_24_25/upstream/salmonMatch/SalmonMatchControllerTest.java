@@ -252,7 +252,7 @@ public class SalmonMatchControllerTest {
         
         when(salmonMatchService.findById(anyInt())).thenReturn(salmonMatch);
         when(matchTileService.findByMatchId(anyInt())).thenReturn(List.of(matchTile));
-        when(matchTileService.eagleToWater(any(), any())).thenReturn(matchTile);
+        when(matchTileService.eagleToWater(any())).thenReturn(matchTile);
         when(playerService.findPlayersByMatch(anyInt())).thenReturn(List.of(player));
         when(salmonMatchService.findAllFromMatch(anyInt())).thenReturn(List.of());
 

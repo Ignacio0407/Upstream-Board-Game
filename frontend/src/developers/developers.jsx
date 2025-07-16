@@ -7,7 +7,7 @@ export default function DeveloperList() {
     const [developers, setDevelopers] = useFetchState( [], `/api/v1/developers` );
     const [filtered, setFiltered] = useState([]) 
 
-    const imgnotfound = "https://cdn-icons-png.flaticon.com/512/48/48639.png";  
+    const imgnotfound = "/images/achievements/NotFoundImage.png";  
     
     function developersList (developersToList) {
         developersToList.map((d) => { 
