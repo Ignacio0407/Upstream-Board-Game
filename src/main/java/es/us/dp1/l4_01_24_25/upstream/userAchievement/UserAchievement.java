@@ -11,7 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -20,21 +19,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="appusers_logros")
+@Table(name="appusers_achievements")
 public class UserAchievement {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
     @JsonSerialize(using = UserSerializer.class)
     @JsonDeserialize(using = UserDeserializer.class)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name="achievement_id", nullable = false)
     private Achievement achievement;
 
     public UserAchievement() {}
@@ -43,6 +40,5 @@ public class UserAchievement {
         this.user = user;
         this.achievement = achievement;
     }
-
 
 }
