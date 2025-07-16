@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import tokenService from '../services/token.service';
 import { get, patch } from '../util/fetchers';
 import useFetchState from '../util/useFetchState';
@@ -14,10 +14,7 @@ export default function EndGame({ match }) {
     const fetchPlayers = async () => {
         const playersResponse = await get(`/api/v1/players/match/${match.id}`, jwt);
         const playerData = await playersResponse.json();
-
-        // Ordena los jugadores por puntos de mayor a menor
         playerData.sort((a, b) => b.points - a.points);
-
         setPlayersWithPoints(playerData);
     };
 
@@ -28,7 +25,6 @@ export default function EndGame({ match }) {
                 await fetchPlayers();
                 setInitialized(true);
             };
-    
             initialize();
         }
     }, [initialized, match.id, jwt]);
@@ -58,7 +54,7 @@ export default function EndGame({ match }) {
 
     return (
         <div className="endgame-container">
-            <h2 className="endgame-title">PUNTUAJE</h2>
+            <h2 className="endgame-title">SCORE</h2>
             
             {playersWithPoints.length > 0 && <div>{player}</div>}
             

@@ -20,6 +20,7 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
@@ -110,56 +111,53 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         Player nextInitialPlayer = players.get(nextIndex);
         match.setInitialPlayer(nextInitialPlayer);
         matchRepository.save(match); 
-    }   
-
-    @Transactional
-    public void changePlayerTurn(Player player) {
-        Match match = player.getMatch();
-        List<Player> players = playerService.findAlivePlayersByMatchSortedPlayerOrder(match.getId());
-        Integer myOrder = player.getPlayerOrder();
-        Integer nPlayers = players.size();
-        List<MatchTile> tilesNoCoord = matchTileService.findByMatchIdNoCoord(match.getId());
-        if(match.getRound() > 6){
-            List<Player> playersFinished = playerService.findAlivePlayersByMatch(match.getId()).stream()
-                .filter(p -> salmonMatchService.findAllFromPlayer(p.getId()).stream().allMatch(s -> s.getCoordinate().y()>20)).toList();
-            Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
-            Integer nextIndex = (currentIndex + 1) % nPlayers;
-            Player nextPlayer = players.get(nextIndex);
-            while (playersFinished.contains(nextPlayer)) {
-                nextIndex = (nextIndex + 1) % nPlayers;
-                nextPlayer = players.get(nextIndex);
-                if (nextPlayer.equals(player)) {
-                    // Validar condiciones adicionales antes de finalizar el juego
-                    if (salmonMatchService.findAllFromPlayer(player.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
-                        match.setState(State.FINALIZED);
-                        break;
-                    }
-                }
+    }
+    
+    private Player findNextEligiblePlayer(Player currentPlayer, List<Player> players, List<Player> playersFinished, int currentIndex, Match match) {
+        int nPlayers = players.size();
+        Player nextPlayer = players.get(currentIndex);
+        while (playersFinished.contains(nextPlayer)) {
+            currentIndex = (currentIndex + 1) % nPlayers;
+            nextPlayer = players.get(currentIndex);
+            if (nextPlayer.equals(currentPlayer) &&
+                salmonMatchService.findAllFromPlayer(currentPlayer.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
+                match.setState(State.FINALIZED);
+                break;
             }
+        }
+        return nextPlayer;
+    }
+    private void handleEarlyPhase(Match match, Player player, List<Player> players, List<MatchTile> tilesNoCoord) {
+        if (players.stream().allMatch(p -> p.getEnergy() <= 0)) {
+            if (!tilesNoCoord.isEmpty()) match.setPhase(Phase.TILES);
+            match.setRound(match.getRound() + 1);
+            this.changeInitialPlayer(match);
+            match.setActualPlayer(match.getInitialPlayer());
+        } else {
+            Player nextPlayer = playerService.findNextPlayer(player, players).player();
             match.setActualPlayer(nextPlayer);
         }
-        else {
-            if (players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-                if(!tilesNoCoord.isEmpty()) match.setPhase(Phase.TILES); match.setRound(match.getRound()+1);
-                changeInitialPlayer(match);
-                match.setActualPlayer(match.getInitialPlayer());
-            }
-            else {
-                int currentIndex = players.indexOf(players.stream()
-                .filter(p -> p.getPlayerOrder().equals(myOrder))
-                .findFirst()
-                .get());
-        
-            int nextIndex = (currentIndex + 1) % nPlayers;
-            Player nextPlayer = players.get(nextIndex);
+    }
+
+    @Transactional
+    private void changePlayerTurn(Player player) {
+        Match match = player.getMatch();
+        List<Player> players = playerService.findAlivePlayersByMatchSortedPlayerOrder(match.getId());
+        List<MatchTile> tilesNoCoord = matchTileService.findByMatchIdNoCoord(match.getId());
+        if (match.getRound() > 6) {
+            List<Player> playersFinished = playerService.findAlivePlayersByMatch(match.getId()).stream().filter(
+                p -> salmonMatchService.findAllFromPlayer(p.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)).toList();
+            NextPlayerResult nxt = playerService.findNextPlayer(player, players);
+            Player nextPlayer = this.findNextEligiblePlayer(player, players, playersFinished, nxt.nextIndex(), match);
             match.setActualPlayer(nextPlayer);
-            }
+        } else {
+            this.handleEarlyPhase(match, player, players, tilesNoCoord);
         }
         this.save(match);
     }
 
     @Transactional
-    private void checkGameHasFinished(Match match) {
+    private void checkGameHasFinished (Match match) {
         List<MatchTile> tiles = matchTileService.findByMatchId(match.getId());
         List<SalmonMatch> salmons = salmonMatchService.findAllFromMatch(match.getId());
         List<Player> players = playerService.findPlayersByMatch(match.getId());
@@ -170,28 +168,19 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         }
     }
 
-    public MatchDTO changePhase(Integer matchId, Integer playerId) {
-        Match match = this.findById(matchId);
-        Player player = playerService.findById(playerId);
-        Phase phase = match.getPhase();
-        List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
-        List<Player> players = playerService.findAlivePlayersByMatch(matchId).stream()
-        .filter(p -> !salmonMatchService.findAllFromPlayerInRiver(p.getId()).isEmpty() || !salmonMatchService.findAllFromPlayerInSea(p.getId()).isEmpty()).toList();
-        Integer round = match.getRound();
-
-        if (mtNoC.size() == 0 && phase == Phase.TILES) {
-            players.stream().forEach(p -> p.setEnergy(5));
+    private void noMoreTilesToPlaceRechargeEnergy (List<Player> players, Match match) {
+        players.stream().forEach(p -> p.setEnergy(5));
             playerService.saveAll(players);
             match.setPhase(Phase.MOVING);
             match.setActualPlayer(match.getInitialPlayer());
-        }
-        else if (mtNoC.size() == 0) {
-            match.setPhase(Phase.MOVING);
+    }
+    private void noMoreTilesToPlacePlayers (Match match, Player player, List<Player> players, Integer round) {
+        match.setPhase(Phase.MOVING);
             if(playerService.checkPlayerNoEnergy(player)){
                 this.changePlayerTurn(player);
             }
             if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
-                List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.findFromGameInSpawn(matchId);
+                List<SalmonMatch> salmonMatchesInSpawn = salmonMatchService.findFromGameInSpawn(match.getId());
                 if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
                     List<SalmonMatch> salmonMatchesInSpawnExceptLast = salmonMatchesInSpawn.stream().filter(s -> s.getCoordinate().y() < 25).toList();
                     salmonMatchesInSpawnExceptLast.stream().forEach(s -> {
@@ -202,15 +191,25 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                 playerService.saveAll(players);
                 match.setRound(round+1);
             }
+    }
+
+    public MatchDTO changePhase(Integer matchId, Integer playerId) {
+        Match match = this.findById(matchId);
+        Player player = playerService.findById(playerId);
+        Phase phase = match.getPhase();
+        List<MatchTile> mtNoC = matchTileService.findByMatchIdNoCoord(matchId);
+        List<Player> players = playerService.playersForChangePhase(matchId);
+        Integer round = match.getRound();
+        if (mtNoC.size() == 0 && phase == Phase.TILES) {
+            this.noMoreTilesToPlaceRechargeEnergy(players, match);
         }
-        else if(phase.equals(Phase.TILES)) {
+        else if (mtNoC.size() == 0) {
+            this.noMoreTilesToPlacePlayers(match, player, players, round);
+        }
+        else if (phase.equals(Phase.TILES)) {
             List<Integer> rds = List.of(17, 14, 11, 8, 5, 2, 0);
-            if (rds.contains(mtNoC.size())) {
-                players.stream().forEach(p -> p.setEnergy(5));
-                for(Player p : players) playerService.save(p);
-                match.setPhase(Phase.MOVING);
-                match.setActualPlayer(match.getInitialPlayer());
-            }
+            if (rds.contains(mtNoC.size()))
+                this.noMoreTilesToPlaceRechargeEnergy(players, match);
             if (match.getRound() == 0 && mtNoC.size() != 17) this.changePlayerTurn(player);
         }
         else
@@ -224,13 +223,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             playerService.setPlayerNoEnergy(player); 
             this.changePlayerTurn(player);
         }
-        /**
-         * Muere (sigue teniendo energia)
-         * Muere (se queda justo sin energia)
-         * Termina (sigue teniendo energia)
-         * Termina (no tiene mas energia)
-         */
-
         this.endRound(match);
         this.save(match);
         if (match.round >= 3)
@@ -238,15 +230,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         return matchMapper.toDTO(match);
     }
 
-    private Match endRound(Match match) throws ResourceNotFoundException {
-        List<MatchTile> mt = matchTileService.findByMatchId(match.getId());
-        List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
-        List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(match.getId());
-        List<SalmonMatch> salmonMatches = salmonMatchService.findAllFromMatch(match.getId());
-        Integer round = match.getRound();
-        Phase phase = match.getPhase();
-        List<Player> players = playerService.findPlayersByMatch(match.getId());
-        if(round == 2){ 
+    private void roundEquals2 (Integer round, List<SalmonMatch> salmonMatches, List<Player> players) {
             List<SalmonMatch> mtInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
             for (SalmonMatch sm: mtInOcean) { 
                 salmonMatchService.delete(sm.getId());
@@ -257,55 +241,59 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                 if (dead) playerService.setPlayerDead(p);
                 if (finished) playerService.setPlayerNoEnergy(p);
             }
-        }
-
-        else if (round > 7 && mtNoc.size() == 0){
-            List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
-            for(SalmonMatch sm:mtOutOfPosition) {
+    }
+    private void noMoreTilesToPlace (Integer round, List<SalmonMatch> salmonMatches, List<Player> players, List<MatchTile> mt) {
+        List<SalmonMatch> mtOutOfPosition = salmonMatches.stream().filter(m -> m.getCoordinate().y() == (round - 8)).toList();
+            for (SalmonMatch sm:mtOutOfPosition) {
                 salmonMatchService.delete(sm.getId());
                 playerService.checkPlayerIsDead(sm.getPlayer().getId());
             } 
-            for(MatchTile m:mt) {
+            for (MatchTile m:mt) {
                 if(m.getCoordinate().y() == (round - 8)){
                     matchTileService.delete(m.getId());
                 }
             }
-            for(Player p : players) {
+            for (Player p : players) {
                 Boolean dead = playerService.checkPlayerIsDead(p.getId());
                 Boolean finished = playerService.checkPlayerFinished(p.getId());
                 if (dead) playerService.setPlayerDead(p);
                 if (finished) playerService.setPlayerNoEnergy(p);
             }
-        }
-        
-        else if(round>2 && tilesPerRound.contains(mtNoc.size()) && phase == Phase.TILES){
+    }
+    private void midGame (Integer round, List<SalmonMatch> salmonMatches, List<Player> players, List<MatchTile> mt) {
+        for(SalmonMatch sm:salmonMatches) {
+                if (sm.getCoordinate().y()==0) salmonMatchService.delete(sm.getId());
+                else sm.setCoordinate(new Coordinate(sm.getCoordinate().x(), sm.getCoordinate().y()-1));
+            }
+            salmonMatchService.saveAll(salmonMatches);
 
-            for(SalmonMatch sm:salmonMatches) {
-                if(sm.getCoordinate().y()==0){
-                    salmonMatchService.delete(sm.getId());
-                    playerService.checkPlayerIsDead(sm.getPlayer().getId());
-                } else {
-                    sm.setCoordinate(new Coordinate(sm.getCoordinate().x(), sm.getCoordinate().y()-1));
-                    salmonMatchService.save(sm);
-                }
-            }
-
-            for(MatchTile m:mt) {
-                if(m.getCoordinate() != null && m.getCoordinate().y()==0) {
-                    matchTileService.delete(m.getId());
-                }
-                else if (m.getCoordinate() != null) {
-                    m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
-                    matchTileService.save(m);
-                }
-            }
-            for(Player p : players) {
-                Boolean dead = playerService.checkPlayerIsDead(p.getId());
-                Boolean finished = playerService.checkPlayerFinished(p.getId());
-                if (dead) playerService.setPlayerDead(p);
-                if (finished) playerService.setPlayerNoEnergy(p);
-            }
+        for(MatchTile m:mt) {
+            if(m.getCoordinate() != null && m.getCoordinate().y()==0) matchTileService.delete(m.getId());
+            else if (m.getCoordinate() != null) m.setCoordinate(new Coordinate(m.getCoordinate().x(), m.getCoordinate().y()-1));
         }
+        matchTileService.saveAll(mt);
+
+        for(Player p : players) {
+            Boolean dead = playerService.checkPlayerIsDead(p.getId());
+            Boolean finished = playerService.checkPlayerFinished(p.getId());
+            if (dead) playerService.setPlayerDead(p);
+            if (finished) playerService.setPlayerNoEnergy(p);
+        }
+    }
+
+    private Match endRound (Match match) throws ResourceNotFoundException {
+        List<MatchTile> mt = matchTileService.findByMatchId(match.getId());
+        List<MatchTile> mtNoc = matchTileService.findByMatchIdNoCoord(match.getId());
+        List<SalmonMatch> salmonMatches = salmonMatchService.findAllFromMatch(match.getId());
+        List<Player> players = playerService.findPlayersByMatch(match.getId());
+        List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
+        Integer round = match.getRound();
+        if (round == 2) 
+            this.roundEquals2(round, salmonMatches, players);
+        else if (round > 7 && mtNoc.size() == 0) 
+            this.noMoreTilesToPlace(round, salmonMatches, players, mt);
+        else if (round>2 && tilesPerRound.contains(mtNoc.size()) && match.getPhase() == Phase.TILES)
+            this.midGame(round, salmonMatches, players, mt);
         return match;
     }
 
@@ -315,32 +303,38 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         if (match.getFinalScoreCalculated() == true) {
             throw new ConflictException("Final score for this match has already been calculated");
         }
-        List<User> updatedUsers = new LinkedList<>();
-        for (Player p : players) {
-            User u = p.getUserPlayer();
-            List<SalmonMatch> salmons = salmonMatchService.findSalmonsFromPlayerInSpawn(p.getId());
-            u.setPlayedgames(u.getPlayedgames() + 1);
-            if(!salmons.isEmpty()) {
-                Integer totalPoints = 0;
-                Integer salmonPoints = salmons.stream().mapToInt(s -> salmonMatchService.findPointsFromASalmonInSpawn(s.getId())).sum();
-                Integer filePoints = salmons.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
-                totalPoints = salmonPoints + filePoints;
-                p.setPoints(totalPoints);
-                u.setTotalpoints(u.getTotalpoints() + totalPoints);
-                updatedUsers.add(u);
-            }
-            userAchievementService.checkAndUnlockAchievements(u.getId());
-        }
-        playerService.saveAll(players);
-        userService.saveAll(new ArrayList<>(updatedUsers));
+        this.calculateFinalScore(players);
+        this.findWinner(players);
+        match.setFinalScoreCalculated(true);
+        return matchMapper.toDTO(this.save(match));
+    }
+
+    private void findWinner (List<Player> players) {
         Optional<Player> winner = players.stream().max(Comparator.comparing(Player::getPoints));
         if(winner.isPresent()) {
             User winnerUser = winner.get().getUserPlayer();
             winnerUser.setVictories(winnerUser.getVictories() + 1);
             userService.save(winnerUser);
         }
-        match.setFinalScoreCalculated(true);
-        return matchMapper.toDTO(this.save(match));
+    }
+    private void calculateFinalScore (List<Player> players) {
+        List<User> updatedUsers = new LinkedList<>();
+        for (Player p : players) {
+            User u = p.getUserPlayer();
+            List<SalmonMatch> salmons = salmonMatchService.findSalmonsFromPlayerInSpawn(p.getId());
+            u.setPlayedgames(u.getPlayedgames() + 1);
+            if(!salmons.isEmpty()) {
+                Integer salmonPoints = salmons.stream().mapToInt(s -> salmonMatchService.findPointsFromASalmonInSpawn(s.getId())).sum();
+                Integer filePoints = salmons.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
+                Integer totalPoints = salmonPoints + filePoints;
+                p.setPoints(totalPoints);
+                u.setTotalpoints(u.getTotalpoints() + totalPoints);
+                updatedUsers.add(u);
+            }   
+        }
+        playerService.saveAll(players);
+        userService.saveAll(new ArrayList<>(updatedUsers));
+        updatedUsers.forEach(u -> userAchievementService.checkAndUnlockAchievements(u.getId()));
     }
     
 }

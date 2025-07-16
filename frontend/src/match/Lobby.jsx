@@ -13,14 +13,14 @@ import endGame from '../util/endGame';
 import ColorHandler from '../util/ColorHandler';
 import {get, createWebSocket} from '../util/fetchers'
 
-export default function Lobby({match}){
+export default function Lobby({match}) {
     const jwt = tokenService.getLocalAccessToken();
     const user = tokenService.getUser()
     const [finalUser,setUser] = useFetchState([],`/api/v1/users/${user.id}`,jwt)
     const [players,setPlayers] = useFetchState([],`/api/v1/players/match/${match.id}`,jwt)
     const [matches,setMatches] = useFetchState([],`/api/v1/matches/${match.id}`,jwt)
     const [userPlayer,setUserPlayer] = useState(null);
-    const [showColorPicker, setShowColorPicker] = useState(true); // Empieza en false
+    const [showColorPicker, setShowColorPicker] = useState(true);
     const navigate = useNavigate();
     const [takenColors, setTakenColors] = useState([]);
     const [numjug, Setnumjug] = useState(match.playersNumber);
@@ -86,15 +86,15 @@ stompClient.activate();
     
     const playerList = players.map((p) =>{
         return (
-            <tr key={p.id} className="r">
-                 <PlayerCard name={p.name} color={p.color}/>
-            </tr>
+        <tr key={p.id} className="r">
+            <PlayerCard name={p.name} color={p.color} />
+        </tr>
         )
     })
     
     return(
         <div className='lobbyContainer'>
-        {players.find(p => p.userPlayer === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
+        {players.find(p => p.userId === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined &&(showColorPicker &&
         (
             <ColorHandler matchId={match.id} jwt={jwt} finalUserId={finalUser.id} takenColors={takenColors} 
             onColorChanged={() => setShowColorPicker(false)} stompClient={stompClient} />

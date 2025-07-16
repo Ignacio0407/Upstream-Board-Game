@@ -2,26 +2,6 @@ import { ColorToRgb } from "../util/ColorParser";
 import { patch } from "../util/fetchers";
 import '../static/css/game/game.css'
 
-export const getSalmonImage = (salmonTile, players, images) => {
-    if (!salmonTile) return null;  // Casilla vacia
-            const color = players.filter(p => p.id === salmonTile.playerId)[0].color;
-            const salmonN = salmonTile.salmonsNumber;
-            switch(color){
-                case 'YELLOW':
-                    return salmonN === 1? images.amarillo1 : images.amarillo2;
-                case 'WHITE':
-                    return salmonN === 1? images.blanco1 : images.blanco2;
-                case 'PURPLE':
-                    return salmonN === 1? images.morado1 : images.morado2;
-                case 'RED':
-                    return salmonN === 1? images.rojo1 : images.rojo2;
-                case 'GREEN':
-                    return salmonN === 1? images.verde1 : images.verde2;
-                default:
-                    return null;
-            }
-}
-
 export const handleTileClick = (tile, myPlayer, match, setSelectedTile, setSelectedSalmon) => {
     if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
         setSelectedTile(tile);
@@ -79,28 +59,108 @@ export const generatePlayerList = (players, actualPlayerId) => {
 };
 
 export const calculateSalmonPosition = (index, totalSalmons) => {
-    const radius = 35; // Radio del pentágono
-    const centerOffsetX = 90; // Centro X relativo a la casilla (mitad del ancho de la tile)
-    const centerOffsetY = 30; // Centro Y relativo a la casilla (mitad del alto de la tile)
-    
-    // Si solo hay un salmón, colocarlo en el centro
-    if (totalSalmons === 1) {
+  const tileWidth = 250;
+  const tileHeight = 217;
+  const salmonWidth = 80;
+  const salmonHeight = 77;
+  const centerX = tileWidth / 2 - salmonWidth / 2; // para centrar salmones
+  const centerY = tileHeight / 2 - salmonHeight / 2;
+  if (totalSalmons === 1) {
     return {
-        left: `${centerOffsetX + 15}px`, // 25 es la mitad del ancho del salmón (50px/2)
-        top: `${centerOffsetY + 10}px`
+      left: `${centerX}px`,
+      top: `${centerY}px`
     };
-    }
-
-    // Calcular el ángulo para cada posición
-    const angleStep = (2 * Math.PI) / totalSalmons // Usar 5 posiciones como máximo
-    const angle = index * angleStep - Math.PI / 2; // Empezar desde arriba (-90 grados)
-
-    // Calcular las coordenadas X e Y en el hexagono
-    const x = centerOffsetX + radius * Math.cos(angle) + 10;
-    const y = centerOffsetY + radius * Math.sin(angle) + 10;
-
-    return {
+  }
+  // Para 6 aristas, ángulos en hexágono (empezando arriba): 0, 60, 120, 180, 240, 300
+  const maxPositions = 6;
+  const radius = 80; // distancia del centro a la arista donde estará el salmón
+  const angleStep = (2 * Math.PI) / maxPositions;
+  const angle = index * angleStep - Math.PI / 2; // desde arriba (270°)
+  const x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
+  const y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
+  return {
     left: `${x}px`,
     top: `${y}px`
-    };
+  };
+};
+
+export const updateSalmonPosition = async(salmon,x,y, jwt) => {
+    try {
+        console.log("x: ", x, "y: ", y)
+        const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
+        if (!responseSalmon.ok) {
+            const errorData = await responseSalmon.json(); // Parsea el cuerpo de la respuesta
+            alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
+            console.log("Error updating salmon:", errorData);
+        }            
+    } catch (error){
+        console.log("Error updating salmon", error)
+        throw error.message;
+    }
+};
+
+export const changephase = async(match, jwt) => {
+    try {
+        const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
+        if (!responseChangePhase.ok) {
+            const errorData = await responseChangePhase.json();
+            alert(errorData.message || "Error changing phase.");
+            console.log("Error changing phase.", errorData);
+        }            
+    } catch (error){
+        console.log("Error changing phase.", error)
+        throw error.message;
+    }
+};
+    
+export const updateSpawn = async(salmon, jwt) => {
+    try {
+        const responseSalmon = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
+        if (!responseSalmon.ok) {
+            alert("Movimiento no válido.");
+            console.log("Error actualizando salmon", responseSalmon)
+        }
+    } catch (error){
+        console.log("Error actualizando salmon", error)
+        throw error.message;
+    }
+};
+
+export const updateTilePosition = async (tile, x, y, jwt) => {
+    try {
+        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
+        if (!response.ok) {
+            throw new Error('Invalid tile placement');
+        }
+    } catch (error) {
+        console.error('Error updating tile position:', error);
+        throw error; 
+    }
+};
+
+export const handleGridClick = async (jwt, index, selectedSalmon, setSelectedTile, selectedTile, gridTiles, setSelectedSalmon, match) => {
+    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+    const x = index % gridWidth;
+    const y = gridHeight - 1 - Math.floor(index / gridWidth)
+    try {
+        if (selectedSalmon === null) {
+            await updateTilePosition(selectedTile, x, y, jwt);
+            setSelectedTile(null);
+        }
+        else {
+            const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
+            if (foundTile) {    
+                await updateSalmonPosition(selectedSalmon, x, y, jwt);
+                setSelectedSalmon(null);
+            } else if(x === 1 && y === 5 && match.round >= 6){
+                await updateSpawn(selectedSalmon, jwt);        
+                setSelectedSalmon(null);
+            }
+        }
+            await changephase(match, jwt);
+        }
+        catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+        }
 };
