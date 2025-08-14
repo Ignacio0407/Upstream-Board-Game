@@ -2,7 +2,6 @@ package es.us.dp1.l4_01_24_25.upstream.match;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -318,7 +317,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         }
     }
     private void calculateFinalScore (List<Player> players) {
-        List<User> updatedUsers = new LinkedList<>();
+        List<User> updatedUsers = new ArrayList<>();
         for (Player p : players) {
             User u = p.getUserPlayer();
             List<SalmonMatch> salmons = salmonMatchService.findSalmonsFromPlayerInSpawn(p.getId());
@@ -330,11 +329,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
                 p.setPoints(totalPoints);
                 u.setTotalpoints(u.getTotalpoints() + totalPoints);
                 updatedUsers.add(u);
-            }   
+            }
+            userAchievementService.checkAndUnlockAchievements(u.getId());   
         }
         playerService.saveAll(players);
-        userService.saveAll(new ArrayList<>(updatedUsers));
-        updatedUsers.forEach(u -> userAchievementService.checkAndUnlockAchievements(u.getId()));
+        userService.saveAll(updatedUsers);
     }
     
 }
