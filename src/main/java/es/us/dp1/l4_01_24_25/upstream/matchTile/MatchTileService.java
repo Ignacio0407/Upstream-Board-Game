@@ -2,7 +2,6 @@ package es.us.dp1.l4_01_24_25.upstream.matchTile;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -140,7 +139,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         Tile eagle = tileService.findById(5);
         Tile jump = tileService.findById(6);
         Match match = matchService.findById(id);
-        List<MatchTile> createdTiles = new LinkedList<>();
+        List<MatchTile> createdTiles = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             MatchTile matchTile = new MatchTile();
             matchTile.setTile(water);
@@ -202,8 +201,8 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
             matchTile.setSalmonsNumber(0);
             createdTiles.add(matchTile);
         }    
-        Collections.shuffle(new ArrayList<>(createdTiles));
-        createdTiles.stream().forEach(mT -> this.save(mT));
+        Collections.shuffle(createdTiles);
+        this.saveAll(createdTiles);
         return matchTileMapper.toDTOList(createdTiles);
     }
 }
