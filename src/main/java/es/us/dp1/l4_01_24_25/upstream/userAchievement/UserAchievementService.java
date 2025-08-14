@@ -36,7 +36,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         }
         User pu = userService.findById(user.getId());
         Achievement pa = achievementService.findById(achievement.getId());
-        return userAchievementRepository.findRepeatedUserAchievement(pu, pa);
+        return userAchievementRepository.findByUserAndAchievement(pu, pa);
     }
 
     @Transactional

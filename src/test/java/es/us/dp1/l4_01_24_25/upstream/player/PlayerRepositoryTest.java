@@ -35,9 +35,9 @@ public class PlayerRepositoryTest {
         List<Player> players = new ArrayList<>();
         players.add(player1);
 
-        when(playerRepository.findPlayersByMatch(matchId)).thenReturn(players);
+        when(playerRepository.findByMatchId(matchId)).thenReturn(players);
 
-        List<Player> result = playerRepository.findPlayersByMatch(matchId);
+        List<Player> result = playerRepository.findByMatchId(matchId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -45,9 +45,9 @@ public class PlayerRepositoryTest {
 
         Integer invalidMatchId = 99;
 
-        when(playerRepository.findPlayersByMatch(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(playerRepository.findByMatchId(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        result = playerRepository.findPlayersByMatch(invalidMatchId);
+        result = playerRepository.findByMatchId(invalidMatchId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -66,9 +66,9 @@ public class PlayerRepositoryTest {
         List<Player> alivePlayers = new ArrayList<>();
         alivePlayers.add(alivePlayer);
 
-        when(playerRepository.findAlivePlayersByMatch(matchId)).thenReturn(alivePlayers);
+        when(playerRepository.findByMatchIdAndAliveTrue(matchId)).thenReturn(alivePlayers);
 
-        List<Player> result = playerRepository.findAlivePlayersByMatch(matchId);
+        List<Player> result = playerRepository.findByMatchIdAndAliveTrue(matchId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -76,9 +76,9 @@ public class PlayerRepositoryTest {
 
         Integer invalidMatchId = 99;
 
-        when(playerRepository.findAlivePlayersByMatch(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(playerRepository.findByMatchIdAndAliveTrue(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        result = playerRepository.findAlivePlayersByMatch(invalidMatchId);
+        result = playerRepository.findByMatchIdAndAliveTrue(invalidMatchId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

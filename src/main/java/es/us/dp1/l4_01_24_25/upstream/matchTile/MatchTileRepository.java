@@ -11,17 +11,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MatchTileRepository extends JpaRepository<MatchTile, Integer>{
 
-    @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId")
     List<MatchTile> findByMatchId(Integer matchId);
 
-    @Query("SELECT mt FROM MatchTile mt WHERE mt.match.id = :matchId AND mt.coordinate IS NULL")
-    List<MatchTile> findByMatchIdNoCoord(Integer matchId);
+    List<MatchTile> findByMatchIdAndCoordinateIsNull(Integer matchId);
 
     @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.match.id = :matchId")
     List<MatchTileDTO> findByMatchIdAsDTO(@Param("matchId") Integer matchId);
 
     @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.match.id = :matchId AND mt.coordinate IS NULL")
-    List<MatchTileDTO> findByMatchIdNoCoordAsDTO(@Param("matchId") Integer matchId);
+    List<MatchTileDTO> findByMatchIdAndCoordinateIsNullAsDTO(@Param("matchId") Integer matchId);
 
     @Query("SELECT mt FROM MatchTile mt WHERE mt.tile.type = 'HERON' AND mt.coordinate IS NOT NULL AND mt.match.id = :id")
     public List<MatchTile> findHeronWithCoordFromGame(@Param("id") Integer id);

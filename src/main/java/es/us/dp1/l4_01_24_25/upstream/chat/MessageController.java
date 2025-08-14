@@ -1,6 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +43,7 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
     
     @GetMapping("/match/{matchId}")
     public ResponseEntity<List<MessageDTO>> findMatchMessages(@PathVariable Integer matchId) {
-        List<MessageDTO> messages = messageService.findMatchMessagesAsDTO(matchId);
-        return ResponseEntity.ok(messages != null ? messages : new ArrayList<>());
+        return ResponseEntity.ok(messageService.findMatchMessages(matchId));
     }
     
     @GetMapping("/user/{userId}")

@@ -203,7 +203,7 @@ class MessageRestControllerTest {
             dtos = List.of(dto1, dto2);
         }
 
-        when(messageService.findMatchMessagesAsDTO(matchId)).thenReturn(dtos);
+        when(messageService.findMatchMessages(matchId)).thenReturn(dtos);
 
         mockMvc.perform(get("/api/v1/messages/match/" + matchId))
             .andExpect(status().isOk())

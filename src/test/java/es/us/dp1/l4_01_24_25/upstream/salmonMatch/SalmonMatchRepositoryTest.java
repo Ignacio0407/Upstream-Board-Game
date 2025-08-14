@@ -34,18 +34,18 @@ public class SalmonMatchRepositoryTest {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         salmonMatches.add(sm1);
 
-        when(salmonMatchRepository.findAllFromMatch(matchId)).thenReturn(salmonMatches);
+        when(salmonMatchRepository.findByMatchId(matchId)).thenReturn(salmonMatches);
 
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromMatch(matchId);
+        List<SalmonMatch> result = salmonMatchRepository.findByMatchId(matchId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
 
         Integer invalidMatchId = 99;
 
-        when(salmonMatchRepository.findAllFromMatch(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(salmonMatchRepository.findByMatchId(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        result = salmonMatchRepository.findAllFromMatch(invalidMatchId);
+        result = salmonMatchRepository.findByMatchId(invalidMatchId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -91,18 +91,18 @@ public class SalmonMatchRepositoryTest {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         salmonMatches.add(sm1);
 
-        when(salmonMatchRepository.findAllFromPlayer(playerId)).thenReturn(salmonMatches);
+        when(salmonMatchRepository.findByPlayerId(playerId)).thenReturn(salmonMatches);
 
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayer(playerId);
+        List<SalmonMatch> result = salmonMatchRepository.findByPlayerId(playerId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
 
         Integer invalidPlayerId = 99;
 
-        when(salmonMatchRepository.findAllFromPlayer(invalidPlayerId)).thenReturn(Collections.emptyList());
+        when(salmonMatchRepository.findByPlayerId(invalidPlayerId)).thenReturn(Collections.emptyList());
 
-        result = salmonMatchRepository.findAllFromPlayer(invalidPlayerId);
+        result = salmonMatchRepository.findByPlayerId(invalidPlayerId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -120,18 +120,18 @@ public class SalmonMatchRepositoryTest {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         salmonMatches.add(sm1);
 
-        when(salmonMatchRepository.findAllFromPlayerInSea(playerId)).thenReturn(salmonMatches);
+        when(salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(playerId)).thenReturn(salmonMatches);
 
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInSea(playerId);
+        List<SalmonMatch> result = salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(playerId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
 
         Integer invalidPlayerId = 99;
 
-        when(salmonMatchRepository.findAllFromPlayerInSea(invalidPlayerId)).thenReturn(Collections.emptyList());
+        when(salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(invalidPlayerId)).thenReturn(Collections.emptyList());
 
-        result = salmonMatchRepository.findAllFromPlayerInSea(invalidPlayerId);
+        result = salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(invalidPlayerId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -207,18 +207,18 @@ public class SalmonMatchRepositoryTest {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         salmonMatches.add(sm1);
 
-        when(salmonMatchRepository.findByMatchIdNoCoord(matchId)).thenReturn(salmonMatches);
+        when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId)).thenReturn(salmonMatches);
 
-        List<SalmonMatch> result = salmonMatchRepository.findByMatchIdNoCoord(matchId);
+        List<SalmonMatch> result = salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId);
 
         assertNotNull(result);
         assertEquals(1, result.size());
 
         Integer invalidMatchId = 99;
 
-        when(salmonMatchRepository.findByMatchIdNoCoord(invalidMatchId)).thenReturn(Collections.emptyList());
+        when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(invalidMatchId)).thenReturn(Collections.emptyList());
 
-        result = salmonMatchRepository.findByMatchIdNoCoord(invalidMatchId);
+        result = salmonMatchRepository.findByMatchIdAndCoordinateIsNull(invalidMatchId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

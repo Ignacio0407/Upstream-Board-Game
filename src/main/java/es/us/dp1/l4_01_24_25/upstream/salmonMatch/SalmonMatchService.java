@@ -47,57 +47,57 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     
 	@Transactional(readOnly = true)
 	public List<SalmonMatch> findAllFromMatch(Integer matchId) {
-		return this.findList(salmonMatchRepository.findAllFromMatch(matchId));
+		return salmonMatchRepository.findByMatchId(matchId);
 	}
 
     @Transactional(readOnly = true)
 	public List<SalmonMatchDTO> findAllFromMatchDTO(Integer matchId) {
-		return this.findList(salmonMatchRepository.findAllFromMatchAsDTO(matchId));
+		return salmonMatchRepository.findByMatchIdAsDTO(matchId);
 	}
     
     @Transactional()
 	public List<SalmonMatch> findAllFromPlayer(Integer playerId) {
-		return this.findList(salmonMatchRepository.findAllFromPlayer(playerId));
+		return salmonMatchRepository.findByPlayerId(playerId);
 	}
 
     @Transactional()
 	public List<SalmonMatchDTO> findAllFromPlayerDTO(Integer playerId) {
-		return this.findList(salmonMatchRepository.findAllFromPlayerAsDTO(playerId));
+		return salmonMatchRepository.findByPlayerIdAsDTO(playerId);
 	}
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> findFromGameInSpawn(Integer matchId) {
-        return this.findList(salmonMatchRepository.findFromGameInSpawn(matchId));
+        return salmonMatchRepository.findFromGameInSpawn(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<SalmonMatchDTO> findFromGameInSpawnDTO(Integer matchId) {
-        return this.findList(salmonMatchRepository.findFromGameInSpawnAsDTO(matchId));
+        return salmonMatchRepository.findFromGameInSpawnAsDTO(matchId);
     }
 
     @Transactional
     public List<SalmonMatch> findAllFromPlayerInRiver(Integer playerId) {
-        return this.findList(salmonMatchRepository.findAllFromPlayerInRiver(playerId));
+        return salmonMatchRepository.findAllFromPlayerInRiver(playerId);
     }
 
     @Transactional
     public List<SalmonMatch> findAllFromPlayerInSea(Integer playerId) {
-        return this.findList(salmonMatchRepository.findAllFromPlayerInSea(playerId));
+        return salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(playerId);
     }
 
     @Transactional
     public List<SalmonMatch> findSalmonsInSea(Integer matchId) {
-        return this.findList(salmonMatchRepository.findByMatchIdNoCoord(matchId));
+        return salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> findSalmonsFromPlayerInSpawn(Integer playerId){
-        return this.findList(salmonMatchRepository.findAllFromPlayerInSpawn(playerId));
+        return salmonMatchRepository.findAllFromPlayerInSpawn(playerId);
     }
 
     @Transactional(readOnly = true)
     public List<SalmonMatch> findByMatchIdNoCoord(Integer matchId){
-        return this.findList(salmonMatchRepository.findByMatchIdNoCoord(matchId));
+        return salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId);
     }
 
     @Transactional(readOnly = true)

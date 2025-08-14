@@ -60,7 +60,7 @@ class MatchTileRepositoryTest {
         entityManager.persist(tile2);
 
         // Test
-        List<MatchTile> result = matchTileRepository.findByMatchIdNoCoord(match.getId());
+        List<MatchTile> result = matchTileRepository.findByMatchIdAndCoordinateIsNull(match.getId());
 
         // Verify
         assertEquals(1, result.size());
