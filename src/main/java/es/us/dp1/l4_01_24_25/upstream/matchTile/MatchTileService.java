@@ -37,22 +37,22 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     @Transactional(readOnly = true)
     public List<MatchTile> findByMatchId(Integer matchId) {
-        return this.findList(matchTileRepository.findByMatchId(matchId));
+        return matchTileRepository.findByMatchId(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdAsDTO(Integer matchId) {
-        return this.findList(matchTileRepository.findByMatchIdAsDTO(matchId));
+        return matchTileRepository.findByMatchIdAsDTO(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTile> findByMatchIdNoCoord(Integer matchId) {
-        return this.findList(matchTileRepository.findByMatchIdNoCoord(matchId));
+        return matchTileRepository.findByMatchIdAndCoordinateIsNull(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdNoCoordAsDTO(Integer matchId) {
-        return this.findList(matchTileRepository.findByMatchIdNoCoordAsDTO(matchId));
+        return matchTileRepository.findByMatchIdAndCoordinateIsNullAsDTO(matchId);
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +62,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     @Transactional(readOnly = true)
     public List<MatchTile> findHeronWithCoordsFromGame(Integer matchId){
-        return this.findList(matchTileRepository.findHeronWithCoordFromGame(matchId));
+        return matchTileRepository.findHeronWithCoordFromGame(matchId);
     }
 
     public Boolean getCoordinate(MatchTile matchTile) {

@@ -64,7 +64,7 @@ public class UserService extends BaseService<User,Integer>{
 	}
 
 	public Iterable<User> findAllByAuthority(String auth) {
-		return this.findList(userRepository.findAllByAuthority(auth));
+		return userRepository.findAllByAuthority(auth);
 	}
 
 	@Transactional

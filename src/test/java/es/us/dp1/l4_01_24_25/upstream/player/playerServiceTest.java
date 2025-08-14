@@ -137,9 +137,9 @@ public class PlayerServiceTest {
                                           boolean shouldThrowException) {
         if (shouldThrowException) {
             doThrow(new DataAccessException("DB Error") {})
-                .when(playerRepository).findPlayersByMatch(matchId);
+                .when(playerRepository).findByMatchId(matchId);
         } else {
-            when(playerRepository.findPlayersByMatch(matchId)).thenReturn(dbResponse);
+            when(playerRepository.findByMatchId(matchId)).thenReturn(dbResponse);
         }
 
         if (shouldThrowException) {
