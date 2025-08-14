@@ -90,3 +90,4 @@ coverage/jacoco.xml
 .gitignore
 package-lock.json
 logs/
+node_modules

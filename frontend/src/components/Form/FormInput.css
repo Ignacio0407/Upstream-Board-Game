@@ -1,0 +1,120 @@
+:root {
+  --color-input: #303030;
+  --color-label: #5e5e5e;
+  --color-btn-disabled: #5757577e;
+  --color-error: #cc0033;
+  --color-error-background: #fce4e4;
+  --color-border-disabled: #706c6c;
+  --main-button-hover-dark-color: #23c483;
+  --main-button-hover-light-color: #23c483;
+  --main-button-shadow-hover-color: rgba(0, 0, 0, 0.4);
+  --main-black: #111;
+}
+
+.class-form-group {
+  position: relative;
+  margin-bottom: 25px; /* Espacio entre inputs */
+}
+
+input.class-form-input,
+select.class-form-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--color-input);
+  padding: 0.6em 0.3em;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid var(--main-button-hover-dark-color);
+  background-color: transparent;
+  transition: border-color 0.3s ease;
+}
+
+textarea.class-form-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--color-input);
+  padding: 0.6em 0.3em;
+  border: 1px solid var(--main-button-hover-dark-color);
+  outline: none;
+  background-color: transparent;
+  resize: none;
+  transition: border-color 0.3s ease;
+}
+
+.class-form-label {
+  color: var(--color-label);
+  cursor: text;
+  position: absolute;
+  top: 0;
+  left: 5px;
+  transform: translateY(10px);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  pointer-events: none;
+}
+
+/* Efecto de elevación del label al enfocar o tener valor */
+.class-form-input:focus + .class-form-label,
+.class-form-input:not(:placeholder-shown) + .class-form-label {
+  transform: translateY(-15px) scale(0.7);
+  transform-origin: top left;
+  color: var(--main-button-hover-dark-color);
+}
+
+/* Estilo para select */
+select.class-form-input {
+  font-size: 16px;
+  padding: 0.5em 0;
+}
+
+/* Asterisco rojo para campos requeridos */
+input.class-form-input[required] + .class-form-label::after,
+select.class-form-input[required] + .class-form-label::after,
+textarea.class-form-input[required] + .class-form-label::after {
+  content: '*';
+  color: var(--color-error);
+  margin-left: 2px;
+}
+
+/* Animación de error */
+.class-error-form {
+  animation: shake 0.2s ease-in-out 0s 2;
+  transition: transform 0.5s, color 0.3s;
+}
+
+.class-error-form .class-form-label {
+  color: var(--color-error) !important;
+}
+
+.class-error-form .class-form-input {
+  background-color: var(--color-error-background);
+  border-color: var(--color-error) !important;
+  outline: none;
+}
+
+.class-error-form .class-error-message {
+  display: flex;
+  width: 100%;
+  position: relative;
+  font-size: 0.7em;
+  color: var(--color-error);
+  padding-left: 3px;
+  margin-top: 5px;
+}
+
+/* Animación de shake */
+@keyframes shake {
+  0% { margin-left: 0; }
+  25% { margin-left: 0.5rem; }
+  75% { margin-left: -0.5rem; }
+  100% { margin-left: 0; }
+}
+
+/* Responsive */
+@media screen and (max-width: 450px) {
+  .class-form-group {
+    width: 90% !important;
+    margin-top: 20px;
+  }
+}
