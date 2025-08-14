@@ -37,27 +37,27 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional(readOnly = true)
     public List<Player> findPlayersByMatch(Integer id) {
-        return this.findList(playerRepository.findPlayersByMatch(id));
+        return playerRepository.findByMatchId(id);
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
-        return this.findList(playerRepository.findPlayersByMatchAsDTO(id));
+        return playerRepository.findPlayersByMatchAsDTO(id);
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchSortedPlayerOrderAsDTO(Integer id) {
-        return this.findList(playerRepository.findPlayersByMatchSortedPlayerOrderAsDTO(id));
+        return playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(id);
     }
 
     @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatch(Integer id) {
-        return this.findList(playerRepository.findAlivePlayersByMatch(id));
+        return playerRepository.findByMatchIdAndAliveTrue(id);
     }
 
     @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatchSortedPlayerOrder(Integer id) {
-        return this.findList(playerRepository.findAlivePlayersByMatchSortedPlayerOrder(id));
+        return playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(id);
     }
 
     @Override

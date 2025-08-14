@@ -31,9 +31,9 @@ public class UserAchievementRepositoryTest {
         userAchievement.setUser(user);
         userAchievement.setAchievement(achievement);
 
-        when(userAchievementRepository.findRepeatedUserAchievement(user, achievement)).thenReturn(userAchievement);
+        when(userAchievementRepository.findByUserAndAchievement(user, achievement)).thenReturn(userAchievement);
 
-        UserAchievement result = userAchievementRepository.findRepeatedUserAchievement(user, achievement);
+        UserAchievement result = userAchievementRepository.findByUserAndAchievement(user, achievement);
 
         assertNotNull(result);
         assertEquals(user, result.getUser());
@@ -42,9 +42,9 @@ public class UserAchievementRepositoryTest {
         User invalidUser = new User();
         invalidUser.setId(2);
 
-        when(userAchievementRepository.findRepeatedUserAchievement(invalidUser, achievement)).thenReturn(null);
+        when(userAchievementRepository.findByUserAndAchievement(invalidUser, achievement)).thenReturn(null);
 
-        result = userAchievementRepository.findRepeatedUserAchievement(invalidUser, achievement);
+        result = userAchievementRepository.findByUserAndAchievement(invalidUser, achievement);
 
         assertNull(result);
     }

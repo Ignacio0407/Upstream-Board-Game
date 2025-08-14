@@ -114,37 +114,37 @@ public class SalmonMatchServiceTest {
         @DisplayName("Should get all salmon matches from match successfully")
         void testGetAllFromMatch_Success() {
             List<SalmonMatch> expected = List.of(salmonMatch1, salmonMatch2);
-            when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(expected);
+            when(salmonMatchRepository.findByMatchId(1)).thenReturn(expected);
 
             List<SalmonMatch> result = salmonMatchService.findAllFromMatch(1);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(salmonMatchRepository).findAllFromMatch(1);
+            verify(salmonMatchRepository).findByMatchId(1);
         }
 
         @Test
         @DisplayName("Should return empty list when no salmon matches found for match")
         void testGetAllFromMatch_Empty() {
-            when(salmonMatchRepository.findAllFromMatch(1)).thenReturn(null);
+            when(salmonMatchRepository.findByMatchId(1)).thenReturn(null);
 
             List<SalmonMatch> result = salmonMatchService.findAllFromMatch(1);
 
             assertEquals(List.of(), result);
-            verify(salmonMatchRepository).findAllFromMatch(1);
+            verify(salmonMatchRepository).findByMatchId(1);
         }
 
         @Test
         @DisplayName("Should get all salmon matches from player successfully")
         void testGetAllFromPlayer_Success() {
             List<SalmonMatch> expected = List.of(salmonMatch1, salmonMatch2);
-            when(salmonMatchRepository.findAllFromPlayer(1)).thenReturn(expected);
+            when(salmonMatchRepository.findByPlayerId(1)).thenReturn(expected);
 
             List<SalmonMatch> result = salmonMatchService.findAllFromPlayer(1);
 
             assertNotNull(result);
             assertEquals(expected, result);
-            verify(salmonMatchRepository).findAllFromPlayer(1);
+            verify(salmonMatchRepository).findByPlayerId(1);
         }
     }
 
@@ -190,12 +190,12 @@ public class SalmonMatchServiceTest {
         @DisplayName("Should get salmons in sea")
         void testGetSalmonsInSea() {
             List<SalmonMatch> expected = List.of(salmonMatch2);
-            when(salmonMatchRepository.findByMatchIdNoCoord(1)).thenReturn(expected);
+            when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(1)).thenReturn(expected);
 
             List<SalmonMatch> result = salmonMatchService.findSalmonsInSea(1);
 
             assertEquals(expected, result);
-            verify(salmonMatchRepository).findByMatchIdNoCoord(1);
+            verify(salmonMatchRepository).findByMatchIdAndCoordinateIsNull(1);
         }
 
         @Test

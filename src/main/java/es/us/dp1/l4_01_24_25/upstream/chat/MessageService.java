@@ -27,16 +27,16 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
         this.matchService = matchService;
     }
     
-    public List<MessageDTO> findMatchMessagesAsDTO(Integer matchId) {
-        return this.findList(messageRepository.findMessagesByMatchIdDTO(matchId));
+    public List<MessageDTO> findMatchMessages(Integer matchId) {
+        return messageRepository.findMessagesByMatchIdDTO(matchId);
     } 
     
     public List<MessageDTO> findUserMessages(Integer userId) {
-        return this.findList(messageRepository.findMessagesByUserIdDTO(userId));
+        return messageRepository.findMessagesByUserIdDTO(userId);
     }
     
     public List<Match> findUserChats(Integer userId) {
-        return this.findList(messageRepository.findAllChatsFromUser(userId));
+        return messageRepository.findAllChatsFromUser(userId);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
         Player p = playerService.findById(messageDTO.getPlayerId());
         Match m = matchService.findById(messageDTO.getMatchId());
         Message message = new Message(p, m, messageDTO.getContent());
-        messageRepository.save(message);
+        this.messageRepository.save(message);
         return messageMapper.toDTO(message);
     }
 
