@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.DashboardMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
@@ -62,6 +63,10 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         matchToUpdate.setInitialPlayer(newMatch.getInitialPlayer());
         matchToUpdate.setActualPlayer(newMatch.getActualPlayer());
         matchToUpdate.setMatchCreator(newMatch.getMatchCreator());
+    }
+
+    public List<DashboardMatchDTO> findAllAsDashboardDTO() {
+        return this.matchRepository.findAllAsDashboardDTO();
     }
 
     public MatchDTO createMatchWMatchCreator(Integer userId, Map<String, String> requestBody) { 
