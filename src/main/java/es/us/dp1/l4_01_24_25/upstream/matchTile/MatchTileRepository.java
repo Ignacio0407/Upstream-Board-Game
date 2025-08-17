@@ -3,14 +3,23 @@ package es.us.dp1.l4_01_24_25.upstream.matchTile;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface MatchTileRepository extends JpaRepository<MatchTile, Integer>{
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
 
+@Repository
+public interface MatchTileRepository extends BaseRepository<MatchTile, MatchTileDTO, Integer>{
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.id = :id")
+    Optional<MatchTileDTO> findByIdAsDTO(@Param("id") Integer id);
+    
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt")
+    List<MatchTileDTO> findAllAsDTO();
+    
     List<MatchTile> findByMatchId(Integer matchId);
 
     List<MatchTile> findByMatchIdAndCoordinateIsNull(Integer matchId);
@@ -25,6 +34,6 @@ public interface MatchTileRepository extends JpaRepository<MatchTile, Integer>{
     public List<MatchTile> findHeronWithCoordFromGame(@Param("id") Integer id);
 
     @Query("SELECT mt FROM MatchTile mt WHERE mt.coordinate.x = :x AND mt.coordinate.y = :y")
-    Optional<MatchTile> findByCoordinate(Integer x, Integer y);    
+    Optional<MatchTile> findByCoordinate(Integer x, Integer y);
 
 }
