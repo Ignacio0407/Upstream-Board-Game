@@ -45,8 +45,7 @@ public class UserService extends BaseService<User,Integer>{
 
 	@Transactional(readOnly = true)
 	public User findUserByName(String username) {
-		return userRepository.findByName(username)
-				.orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+		return this.findOrResourceNotFoundException(this.userRepository.findByName(username), "username", username);
 	}
 
 	@Transactional(readOnly = true)
@@ -55,34 +54,31 @@ public class UserService extends BaseService<User,Integer>{
 		if (auth == null)
 			throw new ResourceNotFoundException("Nobody authenticated!");
 		else
-			return userRepository.findByName(auth.getName())
-					.orElseThrow(() -> new ResourceNotFoundException("User", "Username", auth.getName()));
+			return this.findOrResourceNotFoundException(this.userRepository.findByName(auth.getName()), "auth", auth);
 	}
 
 	public Boolean existsUserByName(String username) {
-		return userRepository.existsByName(username);
+		return this.userRepository.existsByName(username);
 	}
 
 	public Iterable<User> findAllByAuthority(String auth) {
-		return userRepository.findAllByAuthority(auth);
+		return this.userRepository.findAllByAuthority(auth);
 	}
 
 	@Transactional
 	public User updateUser(@Valid User user, Integer idToUpdate) {
 		User toUpdate = this.findById(idToUpdate);
 		BeanUtils.copyProperties(user, toUpdate, "id");
-		userRepository.save(toUpdate);
-
-		return toUpdate;
+		return this.save(toUpdate);
 	}
 	
 	@Transactional
 	public List<Achievement> findUserAchievements(Integer userId) {
-		return userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
+		return this.userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
 	}
 
-	@Transactional
 	@Override
+	@Transactional
 	public void delete(Integer id) {
 		if (this.findCurrentUser().getId() != id) {
 			this.delete(id);

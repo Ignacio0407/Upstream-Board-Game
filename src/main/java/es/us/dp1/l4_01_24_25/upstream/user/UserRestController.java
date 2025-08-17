@@ -25,10 +25,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import jakarta.validation.Valid;
@@ -49,21 +47,19 @@ class UserRestController extends BaseRestController<User,Integer>{
 
 	@GetMapping("authorities")
 	public ResponseEntity<List<Authorities>> findAllAuths() {
-		List<Authorities> res = (List<Authorities>) authService.findAll();
+		List<Authorities> res = (List<Authorities>) this.authService.findAll();
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
 	@GetMapping("/{userId}/achievements")
 	public ResponseEntity<List<Achievement>> findUserAchievements(@PathVariable("userId") int userId) {
-		List<Achievement> l = userService.findUserAchievements(userId);
+		List<Achievement> l = this.userService.findUserAchievements(userId);
 		return new ResponseEntity<>(l, HttpStatus.OK);
 	}
 
-	@PutMapping(value = "{userId}")
 	@Override
-	@ResponseStatus(HttpStatus.OK)
+	@PutMapping(value = "{userId}")
 	public ResponseEntity<User> update(@PathVariable("userId") Integer id, @RequestBody @Valid User user) {
-		if (userService.findById(id) == null) throw new ResourceNotFoundException("");
 		return new ResponseEntity<>(this.userService.updateUser(user, id), HttpStatus.OK);
 	}
 
