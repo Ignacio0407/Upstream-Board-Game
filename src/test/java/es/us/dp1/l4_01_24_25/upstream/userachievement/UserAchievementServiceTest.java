@@ -175,13 +175,13 @@ public class UserAchievementServiceTest {
 
     @Test
     void testGetUserAchievementByUandASuccess() {
-        when(userAchievementRepository.findByUserAndAchievement(u1, a1)).thenReturn(ua1);
+        when(userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), a1.getId())).thenReturn(ua1);
 
-        UserAchievement result = userAchievementRepository.findByUserAndAchievement(u1, a1);
+        UserAchievement result = userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), a1.getId());
 
         assertNotNull(result);
         assertEquals(ua1, result);
-        verify(userAchievementRepository).findByUserAndAchievement(u1, a1);
+        verify(userAchievementRepository).findByUserIdAndAchievementId(u1.getId(), a1.getId());
     }
 
     @Test
@@ -190,44 +190,44 @@ public class UserAchievementServiceTest {
 
         when(userRepository.findById(u1.getId())).thenReturn(Optional.of(u1));
         when(achievementRepository.findById(a1.getId())).thenReturn(Optional.of(a1));
-        when(userAchievementRepository.findByUserAndAchievement(u1, a1)).thenThrow(ex);
+        when(userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), a1.getId())).thenThrow(ex);
 
         assertThrows(ResourceNotFoundException.class, () -> userAchievementService.findByUserandAchievement(u1, a1));
         verify(achievementRepository, times(1)).findById(u1.getId());
         verify(userRepository, times(1)).findById(a1.getId());
-        verify(userAchievementRepository, times(1)).findByUserAndAchievement(u1, a1);
+        verify(userAchievementRepository, times(1)).findByUserIdAndAchievementId(u1.getId(), a1.getId());
     }
 
     @Test
     void testGetUserAchievementByUandAReturnsNull() {
         when(userRepository.findById(u1.getId())).thenReturn(Optional.of(u1));
         when(achievementRepository.findById(a1.getId())).thenReturn(Optional.of(a1));
-        when(userAchievementRepository.findByUserAndAchievement(u1, a1)).thenReturn(null);
+        when(userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), a1.getId())).thenReturn(null);
 
         UserAchievement result = userAchievementService.findByUserandAchievement(u1, a1);
 
         assertEquals(null, result);
         verify(achievementRepository, times(1)).findById(u1.getId());
         verify(userRepository, times(1)).findById(a1.getId());
-        verify(userAchievementRepository, times(1)).findByUserAndAchievement(u1, a1);
+        verify(userAchievementRepository, times(1)).findByUserIdAndAchievementId(u1.getId(), a1.getId());
     }
 
     @Test
     void testGetUserAchievementByUandAThrowsExceptionNullUser() {
         ResourceNotFoundException ex = new ResourceNotFoundException("");
-        when(userAchievementRepository.findByUserAndAchievement(null, a1)).thenThrow(ex);
+        when(userAchievementRepository.findByUserIdAndAchievementId(null, a1.getId())).thenThrow(ex);
 
-        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findByUserAndAchievement(null, a1));
-        verify(userAchievementRepository, times(1)).findByUserAndAchievement(null, a1);
+        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findByUserIdAndAchievementId(null, a1.getId()));
+        verify(userAchievementRepository, times(1)).findByUserIdAndAchievementId(null, a1.getId());
     }
 
     @Test
     void testGetUserAchievementByUandAThrowsExceptionNullAchievement() {
         ResourceNotFoundException ex = new ResourceNotFoundException("");
-        when(userAchievementRepository.findByUserAndAchievement(u1, null)).thenThrow(ex);
+        when(userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), null)).thenThrow(ex);
 
-        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findByUserAndAchievement(u1, null));
-        verify(userAchievementRepository, times(1)).findByUserAndAchievement(u1, null);
+        assertThrows(ResourceNotFoundException.class, () -> userAchievementRepository.findByUserIdAndAchievementId(u1.getId(), null));
+        verify(userAchievementRepository, times(1)).findByUserIdAndAchievementId(u1.getId(), null);
     }
 
 }

@@ -20,9 +20,6 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 @AutoConfigureTestDatabase
 class AuthoritiesServiceTests {
 
-//	@Autowired
-//	private UserService userService;
-
 	@Autowired
 	private AuthoritiesService authService;
 
@@ -51,23 +48,12 @@ class AuthoritiesServiceTests {
 		Authorities auth = new Authorities();
 		auth.setAuthority("CLIENT");
 
-		this.authService.saveAuthorities(auth);
+		this.authService.save(auth);
 		assertNotEquals(0, auth.getId().longValue());
 		assertNotNull(auth.getId());
 
 		int finalCount = ((Collection<Authorities>) this.authService.findAll()).size();
 		assertEquals(count + 1, finalCount);
 	}
-
-//	@Test
-//	@Transactional
-//	void shouldAddAuthoritiesToUser() {
-//		User user = userService.findUser("owner1");
-//		assertEquals("OWNER" ,user.getAuthority().getAuthority());
-//		
-//		this.authService.saveAuthorities("owner1", "TEST");
-//		assertEquals("TEST" ,user.getAuthority().getAuthority());
-//
-//	}
 
 }

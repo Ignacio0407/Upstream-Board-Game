@@ -21,9 +21,9 @@ public class AchievementChecker {
     @PostConstruct
     @Transactional
     public void checkAchievements() {
-        Iterable<User> users = userRepository.findAll();
+        Iterable<User> users = this.userRepository.findAll();
         for(User u:users) {
-            userAchievementService.checkAndUnlockAchievements(u.getId());
+            this.userAchievementService.checkAndUnlockAchievements(u.getId());
         }
 
     }

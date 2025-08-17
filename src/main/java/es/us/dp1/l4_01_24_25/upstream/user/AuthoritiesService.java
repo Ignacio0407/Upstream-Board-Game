@@ -16,38 +16,27 @@
 package es.us.dp1.l4_01_24_25.upstream.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 
 @Service
-public class AuthoritiesService {
+public class AuthoritiesService extends BaseService<Authorities, Integer>{
 
 	private AuthoritiesRepository authoritiesRepository;
-//	private UserService userService;
 
 	@Autowired
 	public AuthoritiesService(AuthoritiesRepository authoritiesRepository) {
+		super(authoritiesRepository);
 		this.authoritiesRepository = authoritiesRepository;
-//		this.userService = userService;
-	}
-
-	@Transactional(readOnly = true)
-	public Iterable<Authorities> findAll() {
-		return this.authoritiesRepository.findAll();
 	}
 
 	@Transactional(readOnly = true)
 	public Authorities findByAuthority(String authority) {
 		return this.authoritiesRepository.findByName(authority)
 				.orElseThrow(() -> new ResourceNotFoundException("Authority", "Name", authority));
-	}
-
-	@Transactional
-	public void saveAuthorities(Authorities authorities) throws DataAccessException {
-		authoritiesRepository.save(authorities);
 	}
 
 }

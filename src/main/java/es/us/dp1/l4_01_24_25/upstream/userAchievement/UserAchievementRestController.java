@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 @RestController
 @RequestMapping("/api/v1/usersachievements")
 @SecurityRequirement(name="bearerAuth")
-public class UserAchievementRestController extends BaseRestController<UserAchievement,Integer>{
+public class UserAchievementRestController extends BaseRestController<UserAchievement,Integer> {
     
     UserAchievementService userAchievementService;
     
@@ -28,7 +28,7 @@ public class UserAchievementRestController extends BaseRestController<UserAchiev
     @PostMapping("/unlockrules/{username}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) throws Exception {
-        return new ResponseEntity<>(userAchievementService.unlockRules(username), HttpStatus.CREATED);
+        return new ResponseEntity<>(this.userAchievementService.unlockRules(username), HttpStatus.CREATED);
     }
 
 }

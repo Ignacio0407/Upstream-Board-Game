@@ -1,5 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.userAchievement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -32,29 +35,29 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     @Transactional
     public UserAchievement findByUserandAchievement(User user, Achievement achievement) throws ResourceNotFoundException {
         if (user == null || achievement == null) {
-            throw new ResourceNotFoundException("Usuario o logro no pueden ser nulos.");
+            throw new ResourceNotFoundException("Neither user nor achievement can be null.");
         }
-        User pu = userService.findById(user.getId());
-        Achievement pa = achievementService.findById(achievement.getId());
-        return userAchievementRepository.findByUserAndAchievement(pu, pa);
+        return this.userAchievementRepository.findByUserIdAndAchievementId(user.getId(), achievement.getId());
     }
 
     @Transactional
     public void checkAndUnlockAchievements(Integer userId) {
-        User user = userService.findById(userId);
-        Iterable<Achievement> achievements = achievementService.findAll();
+        User user = this.userService.findById(userId);
+        Iterable<Achievement> achievements = this.achievementService.findAll();
+        List<UserAchievement> toSave = new ArrayList<>();
         for(Achievement a:achievements) {
-                if(achievementUnlocker.checkUnlock(user, a)) {
+                if(this.achievementUnlocker.checkUnlock(user, a)) {
                     UserAchievement ua = new UserAchievement(user, a);
-                    userAchievementRepository.save(ua);
+                    toSave.add(ua);
                 }       
         }
+        this.saveAll(toSave);
     }
 
     @Transactional
     public UserAchievement unlockRules(@PathVariable("username") String username) throws Exception {
-        User u = userService.findUserByName(username);
-        Achievement a = achievementService.findById(4);
+        User u = this.userService.findUserByName(username);
+        Achievement a = this.achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);
         UserAchievement repeated = this.findByUserandAchievement(u, a);
         if(repeated != null) throw new Exception(); 
