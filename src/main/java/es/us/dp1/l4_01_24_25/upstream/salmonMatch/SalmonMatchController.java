@@ -47,32 +47,32 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
 
     @GetMapping("/match/{matchId}")
     public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatch(@PathVariable Integer matchId) {  
-        return new ResponseEntity<>(salmonMatchService.findAllFromMatchDTO(matchId), HttpStatus.OK);
+        return new ResponseEntity<>(this.salmonMatchService.findAllFromMatchDTO(matchId), HttpStatus.OK);
     }
     
     @GetMapping("/match/{matchId}/spawn")
     public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatchInSpawn(@PathVariable Integer matchId) {  
-        return new ResponseEntity<>(salmonMatchService.findFromGameInSpawnDTO(matchId), HttpStatus.OK);
+        return new ResponseEntity<>(this.salmonMatchService.findFromGameInSpawnDTO(matchId), HttpStatus.OK);
     }
 
     @GetMapping("/player/{playerId}")
     public ResponseEntity<List<SalmonMatchDTO>> findAllFromPlayer(@PathVariable Integer playerId) {  
-        return new ResponseEntity<>(salmonMatchService.findAllFromPlayerDTO(playerId), HttpStatus.OK);
+        return new ResponseEntity<>(this.salmonMatchService.findAllFromPlayerDTO(playerId), HttpStatus.OK);
     }
 
     @PatchMapping("/coordinate/{id}")
-    public ResponseEntity<SalmonMatchDTO> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid  Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
-        return ResponseEntity.ok(salmonMatchService.updateCoordinate(id, coordinate));    
+    public ResponseEntity<SalmonMatchDTO> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
+        return ResponseEntity.ok(this.salmonMatchService.updateCoordinate(id, coordinate));    
     }
 
     @PostMapping("/player/{playerId}")
     public ResponseEntity<List<SalmonMatchDTO>> create(@PathVariable("playerId") Integer playerId) {
-        return ResponseEntity.ok(salmonMatchService.create(playerId));
+        return ResponseEntity.ok(this.salmonMatchService.create(playerId));
     }
 
     @PatchMapping("/enterSpawn/{id}")
     public ResponseEntity<SalmonMatchDTO> enterSpawn(@PathVariable Integer id) {
-        return new ResponseEntity<>(salmonMatchService.enterSpawn(id), HttpStatus.OK);
+        return new ResponseEntity<>(this.salmonMatchService.enterSpawn(id), HttpStatus.OK);
     }
 
 }

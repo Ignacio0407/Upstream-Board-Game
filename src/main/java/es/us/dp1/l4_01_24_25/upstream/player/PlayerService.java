@@ -37,27 +37,27 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional(readOnly = true)
     public List<Player> findPlayersByMatch(Integer id) {
-        return playerRepository.findByMatchId(id);
+        return this.playerRepository.findByMatchId(id);
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
-        return playerRepository.findPlayersByMatchAsDTO(id);
+        return this.playerRepository.findPlayersByMatchAsDTO(id);
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchSortedPlayerOrderAsDTO(Integer id) {
-        return playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(id);
+        return this.playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(id);
     }
 
     @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatch(Integer id) {
-        return playerRepository.findByMatchIdAndAliveTrue(id);
+        return this.playerRepository.findByMatchIdAndAliveTrue(id);
     }
 
     @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatchSortedPlayerOrder(Integer id) {
-        return playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(id);
+        return this.playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(id);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         match.setPlayersNumber(match.getPlayersNumber() + 1);
         matchService.save(match);
         this.save(p);
-        return playerMapper.toLobby(p);
+        return this.playerMapper.toLobby(p);
     }
 
     public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
@@ -97,14 +97,14 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         }
         player.setEnergy(player.getEnergy() - energyUsed);
         this.save(player);
-        return playerMapper.toDTO(player);
+        return this.playerMapper.toDTO(player);
     }
 
     public PlayerDTO regenerateEnergy(Integer id) {
         Player player = this.findById(id);
         player.setEnergy(5);
         this.save(player);
-        return playerMapper.toDTO(player);
+        return this.playerMapper.toDTO(player);
     }
 
     @Transactional
@@ -123,13 +123,13 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional
     public Boolean checkPlayerFinished(Integer playerId) {
-        List<SalmonMatch> salmons = salmonMatchService.findAllFromPlayer(playerId);
+        List<SalmonMatch> salmons = this.salmonMatchService.findAllFromPlayer(playerId);
         return !salmons.isEmpty() && salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20);
     }
 
     @Transactional
     public Boolean checkPlayerIsDead(Integer playerId) {
-        return salmonMatchService.findAllFromPlayer(playerId).isEmpty();
+        return this.salmonMatchService.findAllFromPlayer(playerId).isEmpty();
     }
 
     @Transactional

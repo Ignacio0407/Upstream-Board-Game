@@ -24,6 +24,6 @@ public class SalmonService extends BaseService<Salmon,Integer>{
 
     @Transactional(readOnly = true)
     public Salmon findFirstByColor(Color color) {
-        return salmonRepository.findFirstByColor(color);
+        return this.salmonRepository.findFirstByColor(color);
     }
 }

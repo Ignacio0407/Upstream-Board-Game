@@ -2,17 +2,17 @@ package es.us.dp1.l4_01_24_25.upstream.model;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
 public abstract class BaseServiceWithDTO<T, D, ID> extends BaseService<T, ID> {
 
     protected final EntityMapper<T, D> mapper;
-    protected final JpaRepository<T, ID> repository;
+    protected final BaseRepository<T, D, ID> repository;
 
-    protected BaseServiceWithDTO(JpaRepository<T, ID> repository, EntityMapper<T, D> mapper) {
+    protected BaseServiceWithDTO(BaseRepository<T, D, ID> repository, EntityMapper<T, D> mapper) {
         super(repository);
         this.repository = repository;
         this.mapper = mapper;
@@ -20,12 +20,12 @@ public abstract class BaseServiceWithDTO<T, D, ID> extends BaseService<T, ID> {
 
     @Transactional(readOnly = true)
     public List<D> findAllAsDTO() {
-        return this.mapper.toDTOList(this.findAll());
+        return this.repository.findAllAsDTO();
     }
 
     @Transactional(readOnly = true)
     public D findByIdAsDTO(ID id) {
-        return this.mapper.toDTO(this.findById(id));
+        return this.repository.findByIdAsDTO(id).orElseThrow(() -> new ResourceNotFoundException(this.entityName + " not found with ID: " + id));
     }
 
     @Transactional

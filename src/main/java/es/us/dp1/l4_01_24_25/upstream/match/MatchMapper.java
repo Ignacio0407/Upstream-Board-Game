@@ -6,6 +6,7 @@ import org.mapstruct.Named;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
+import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;

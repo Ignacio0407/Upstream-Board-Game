@@ -2,11 +2,12 @@ package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SalmonMatchRepository extends JpaRepository<SalmonMatch, Integer>{
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
+
+public interface SalmonMatchRepository extends BaseRepository<SalmonMatch, SalmonMatchDTO, Integer>{
 
     List<SalmonMatch> findByMatchId(@Param("matchId") Integer matchId);
 

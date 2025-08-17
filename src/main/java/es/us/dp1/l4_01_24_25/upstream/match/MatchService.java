@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
@@ -79,7 +80,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         m.setActualPlayer(null);
         m.setFinalScoreCalculated(false);
         this.save(m);
-        return matchMapper.toDTO(m);
+        return this.matchMapper.toDTO(m);
     }
 
     public MatchDTO startGame(Integer matchId) throws ResourceNotFoundException {
@@ -90,14 +91,14 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         match.setInitialPlayer(player.get(0));
         match.setPlayersNumber(player.size());
         this.save(match);
-        return matchMapper.toDTO(match);
+        return this.matchMapper.toDTO(match);
     }
 
     public MatchDTO updateRound(Integer matchId) {
         Match match = this.findById(matchId);
         match.setRound(match.getRound()+1);
         this.save(match);
-        return matchMapper.toDTO(match);
+        return this.matchMapper.toDTO(match);
     }
 
     @Transactional
@@ -109,7 +110,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         int nextIndex = (currentIndex + 1) % players.size();
         Player nextInitialPlayer = players.get(nextIndex);
         match.setInitialPlayer(nextInitialPlayer);
-        matchRepository.save(match); 
+        this.save(match);
     }
     
     private Player findNextEligiblePlayer(Player currentPlayer, List<Player> players, List<Player> playersFinished, int currentIndex, Match match) {
@@ -226,7 +227,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.save(match);
         if (match.round >= 3)
             this.checkGameHasFinished(match);
-        return matchMapper.toDTO(match);
+        return this.matchMapper.toDTO(match);
     }
 
     private void roundEquals2 (Integer round, List<SalmonMatch> salmonMatches, List<Player> players) {
@@ -305,7 +306,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.calculateFinalScore(players);
         this.findWinner(players);
         match.setFinalScoreCalculated(true);
-        return matchMapper.toDTO(this.save(match));
+        return this.matchMapper.toDTO(this.save(match));
     }
 
     private void findWinner (List<Player> players) {

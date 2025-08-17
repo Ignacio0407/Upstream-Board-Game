@@ -2,12 +2,20 @@ package es.us.dp1.l4_01_24_25.upstream.match;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
+
 @Repository
-public interface MatchRepository extends JpaRepository<Match, Integer> {
+public interface MatchRepository extends BaseRepository<Match, MatchDTO, Integer> {
 
     Optional<Match> findByName(String string);
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO(m.id, m.name, m.password, m.state, m.playersNumber, m.round, m.phase, m.finalScoreCalculated, m.initialPlayer.id, m.actualPlayer.id, m.matchCreator.id) FROM Match m WHERE m.id = :id") 
+    Optional<MatchDTO> findByIdAsDTO(@Param("id") Integer id);
 
 }

@@ -30,28 +30,23 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
 
     @GetMapping("match/{id}")
     public ResponseEntity<List<MatchTileDTO>> findByMatchId(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(matchTileService.findByMatchIdAsDTO(id));
+        return ResponseEntity.ok(this.matchTileService.findByMatchIdAsDTO(id));
     }
     
     @PatchMapping("/{id}")
     public ResponseEntity<MatchTileDTO> updateMatchTile(@PathVariable("id") Integer id, @RequestBody Map<String, Integer> updates) {
-        return ResponseEntity.ok(matchTileService.updateCoordinate(id, updates));
+        return ResponseEntity.ok(this.matchTileService.updateCoordinate(id, updates));
     }
 
     @PatchMapping("/{id}/rotation")
     public ResponseEntity<MatchTileDTO> updateMatchTileRotation(@PathVariable("id") Integer id, @RequestBody Integer rotation) {
-        return ResponseEntity.ok(matchTileService.updateMatchTileRotation(id, rotation));
+        return ResponseEntity.ok(this.matchTileService.updateMatchTileRotation(id, rotation));
     }
 
     @PostMapping("/createMatchTiles/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<List<MatchTileDTO>> createMultipleMatchTiles(@PathVariable("id") Integer id) throws DataAccessException {
-        return new ResponseEntity<>(matchTileService.createMultipleMatchTiles(id), HttpStatus.CREATED);
-    }
-  
-    @GetMapping("/prueba1/{matchId}")
-    public List<MatchTileDTO> findMatchTileCoordinates(@PathVariable("matchId") Integer matchId) {
-        return matchTileService.findByMatchIdNoCoordAsDTO(matchId);
+        return new ResponseEntity<>(this.matchTileService.createMultipleMatchTiles(id), HttpStatus.CREATED);
     }
 
 }
