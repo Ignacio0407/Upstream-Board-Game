@@ -1,14 +1,13 @@
 package es.us.dp1.l4_01_24_25.upstream.model;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BaseService<T, ID> {
     protected JpaRepository<T, ID> repository;
@@ -29,48 +28,40 @@ public abstract class BaseService<T, ID> {
         }
     }
 
+    public T findOrResourceNotFoundException (Optional<T> entity, String variable, Object id) {
+        if (entity.isPresent()) return entity.get(); 
+        else throw new ResourceNotFoundException(this.entityName + " not found with " + variable + ": " + id);
+    }
+
     @Transactional(readOnly = true)
     public List<T> findAll() {
-        return (List<T>) repository.findAll();
+        return (List<T>) this.repository.findAll();
     }
 
     @Transactional(readOnly = true)
     public T findById(ID id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(this.entityName + " not found with ID: " + id));
+        return this.findOrResourceNotFoundException(this.repository.findById(id), "ID", id);
     }
 
     @Transactional
     public T save(@Valid T entity) {
-        return repository.save(entity);
+        return this.repository.save(entity);
     }
 
     @Transactional
     public List<T> saveAll(List<T> entity) {
-        return (List<T>) repository.saveAll(entity);
-    }
-
-    @Transactional
-    public List<T> saveSome(List<T> entities) {
-        List<T> failedToSave = new ArrayList<>();
-        entities.forEach(jugador -> {
-            try {
-                this.save(jugador);
-            } catch (DataAccessException e) {
-                failedToSave.add(jugador);
-            }
-        });
-		return failedToSave;
+        return (List<T>) this.repository.saveAll(entity);
     }
 
     @Transactional
     public void delete(ID id) {
-        repository.deleteById(id);
+        this.repository.deleteById(id);
     }
 
     @Transactional
     public T update(ID id, @Valid T updatedEntity) {
         T existingEntity = this.findById(id);
-        updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
+        this.updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
         return this.save(existingEntity);
     }
 
