@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { post, createWebSocket, createStompClient } from '../util/fetchers.ts';
-import tokenService from '../services/token.service.ts';
-import { ColorToRgb } from '../util/ColorParser.ts';
+import { post, createWebSocket, createStompClient } from '../../util/fetchers.ts';
+import tokenService from '../../services/token.service.ts';
+import { ColorToRgb } from '../../util/ColorParser.ts';
 import '../static/css/chat/chat.css'
-import Match from '../interfaces/Match.ts';
-import Player from '../interfaces/Player.ts';
-import Message from '../interfaces/Message.ts';
+import Match from '../../interfaces/Match.ts';
+import Player from '../../interfaces/Player.ts';
+import Message from '../../interfaces/Message.ts';
 
 interface ChatPrompts {match:Match, players:Player[], currentPlayer:Player};
 

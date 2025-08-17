@@ -546,7 +546,7 @@ Ahora se pueden mover los salmones en el tablero
 
 
 ### Refactorización 4 (Ignacio): 
-En esta refactorización se cambió significativamente botonPlay, pasando a llamarse BotonLink y ser un componente React.
+En esta refactorización se cambió significativamente botonPlay, pasando a llamarse ButtonLink y ser un componente React.
 #### Estado inicial del código
 ```javascript
 /**
@@ -580,7 +580,7 @@ export default function botonPlay(color, direction, text) {
  * @param {string} text - texto del botón.
  * @param {string} colorTexto - Opcional. color del texto del botón. Por defecto blanco
  */
-export default function BotonLink({outline=false, color= "white", direction, text, colorTexto = "white"}) {
+export default function ButtonLink({outline=false, color= "white", direction, text, colorTexto = "white"}) {
     return (
       <>
         <Button outline={outline} color={color} > 

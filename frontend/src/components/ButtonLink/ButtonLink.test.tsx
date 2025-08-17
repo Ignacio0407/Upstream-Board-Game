@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import BotonLink from "./BotonLink";
+import ButtonLink from "./ButtonLink.tsx";
 import "@testing-library/jest-dom";
 
-describe("BotonLink Component", () => {
+describe("ButtonLink Component", () => {
   const defaultProps = {
     direction: "/test-route",
     text: "Test Button",
@@ -12,7 +12,7 @@ describe("BotonLink Component", () => {
   const setup = (props = {}) => {
     const utils = render(
       <MemoryRouter>
-        <BotonLink {...defaultProps} {...props} />
+        <ButtonLink {...defaultProps} {...props} />
       </MemoryRouter>
     );
     const button = screen.getByRole("button");
