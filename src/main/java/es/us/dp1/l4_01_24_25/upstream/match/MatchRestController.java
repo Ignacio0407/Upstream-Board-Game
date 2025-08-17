@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.DashboardMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 
@@ -27,6 +28,11 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
     public MatchRestController(MatchService matchService) {
         super(matchService);
         this.matchService = matchService;
+    }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<List<DashboardMatchDTO>> findAllDashboard() {
+        return ResponseEntity.ok(this.matchService.findAllAsDashboardDTO());
     }
 
     // TODO

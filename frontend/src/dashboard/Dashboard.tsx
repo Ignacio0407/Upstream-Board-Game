@@ -10,15 +10,14 @@ import useFetchState from '../util/useFetchState.ts';
 import SearchBar from '../util/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
 import WhiteSpace from '../util/WhiteSpace.tsx';
-
 import { createWebSocket, createStompClient } from '../util/fetchers.ts'
-import Match from '../interfaces/Match.ts';
+import {DashboardMatch} from '../interfaces/Match.ts';
    
 export default function Dashboard() { 
     const [username, setUsername] = useState("");
     const [filtered, setFiltered] = useState([]);
     const jwt = tokenService.getLocalAccessToken();
-    const [matches, setMatches] = useFetchState<Match[]>([],'/api/v1/matches',jwt);
+    const [matches, setMatches] = useFetchState<DashboardMatch[]>([],'/api/v1/matches/dashboard',jwt);
     const user = tokenService.getUserList()
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [message, setMessage] = useState("");
@@ -33,12 +32,12 @@ export default function Dashboard() {
         };
     }, [jwt])
     
-    function espectate(match:Match) {
+    function espectate(match:DashboardMatch) {
         setSpectatorIds(prevSpectators => [...prevSpectators, user.id]);
         navigate('/matches/'+match.id, { state: { spectatorIds: [...spectatorIds, user.id] } });
     }
 
-    function join(match:Match) {
+    function join(match:DashboardMatch) {
         if (match.password !== "") {
             const password = prompt("Enter the password to join the game");
             if (password !== match.password) {
@@ -61,7 +60,7 @@ export default function Dashboard() {
 
     stompClient.activate();
 
-    function matchesList(matchesToList:Match[]) {
+    function matchesList(matchesToList:DashboardMatch[]) {
       return matchesToList.map((match) => {
         return (
             <tr key={match.name} className='fila'>
