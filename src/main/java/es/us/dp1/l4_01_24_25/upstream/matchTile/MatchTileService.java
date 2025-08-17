@@ -17,6 +17,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
+import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
 @Service
 public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO, Integer>{
@@ -37,32 +38,32 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     @Transactional(readOnly = true)
     public List<MatchTile> findByMatchId(Integer matchId) {
-        return matchTileRepository.findByMatchId(matchId);
+        return this.matchTileRepository.findByMatchId(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdAsDTO(Integer matchId) {
-        return matchTileRepository.findByMatchIdAsDTO(matchId);
+        return this.matchTileRepository.findByMatchIdAsDTO(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTile> findByMatchIdNoCoord(Integer matchId) {
-        return matchTileRepository.findByMatchIdAndCoordinateIsNull(matchId);
+        return this.matchTileRepository.findByMatchIdAndCoordinateIsNull(matchId);
     }
 
     @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdNoCoordAsDTO(Integer matchId) {
-        return matchTileRepository.findByMatchIdAndCoordinateIsNullAsDTO(matchId);
+        return this.matchTileRepository.findByMatchIdAndCoordinateIsNullAsDTO(matchId);
     }
 
     @Transactional(readOnly = true)
     public MatchTile findByCoordinate(Integer x, Integer y) {
-        return matchTileRepository.findByCoordinate(x,y).orElseThrow(() -> new ResourceNotFoundException("Coordinate (" + x + y + ") not found"));
+        return this.matchTileRepository.findByCoordinate(x,y).orElseThrow(() -> new ResourceNotFoundException("Coordinate (" + x + y + ") not found"));
     }
 
     @Transactional(readOnly = true)
     public List<MatchTile> findHeronWithCoordsFromGame(Integer matchId){
-        return matchTileRepository.findHeronWithCoordFromGame(matchId);
+        return this.matchTileRepository.findHeronWithCoordFromGame(matchId);
     }
 
     public Boolean getCoordinate(MatchTile matchTile) {
@@ -121,88 +122,65 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
             matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y")));
         }
         this.save(matchTile);
-        return matchTileMapper.toDTO(matchTile);
+        return this.matchTileMapper.toDTO(matchTile);
     }
 
     public MatchTileDTO updateMatchTileRotation(Integer id, Integer rotation) {
         MatchTile matchTile = this.findById(id);
         matchTile.setOrientation(rotation);
         this.save(matchTile);
-        return matchTileMapper.toDTO(matchTile);
+        return this.matchTileMapper.toDTO(matchTile);
+    }
+
+    private void createMatchTile(MatchTile matchTile, Tile tile, Match match, List<MatchTile> createdTiles) {
+        matchTile.setTile(tile);
+        matchTile.setMatch(match);
+        if (tile.getType().equals(TileType.ROCK)) {
+            if (match.getPlayersNumber() > 2) matchTile.setCapacity(match.getPlayersNumber()-1);
+            else matchTile.setCapacity(2); 
+        }
+        else matchTile.setCapacity(match.getPlayersNumber());
+        matchTile.setOrientation(0);
+        matchTile.setCoordinate(null);
+        matchTile.setSalmonsNumber(0);
+        createdTiles.add(matchTile);
     }
 
     public List<MatchTileDTO> createMultipleMatchTiles(Integer id) throws DataAccessException {
-        Tile water = tileService.findById(1);
-        Tile rock = tileService.findById(2);
-        Tile heron = tileService.findById(3);
-        Tile bear = tileService.findById(4);
-        Tile eagle = tileService.findById(5);
-        Tile jump = tileService.findById(6);
-        Match match = matchService.findById(id);
+        Tile water = this.tileService.findById(1);
+        Tile rock = this.tileService.findById(2);
+        Tile heron = this.tileService.findById(3);
+        Tile bear = this.tileService.findById(4);
+        Tile eagle = this.tileService.findById(5);
+        Tile jump = this.tileService.findById(6);
+        Match match = this.matchService.findById(id);
         List<MatchTile> createdTiles = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(water);
-            matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNumber());
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, water, match, createdTiles);
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(rock);
-            matchTile.setMatch(match);
-            if (match.getPlayersNumber() > 2) matchTile.setCapacity(match.getPlayersNumber()-1);
-            else matchTile.setCapacity(2);
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, rock, match, createdTiles);
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(heron);
-            matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNumber());
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, heron, match, createdTiles);
         }
         for (int i = 0; i < 3; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(bear);
-            matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNumber());
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, bear, match, createdTiles);
         }
         for (int i = 0; i < 5; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(eagle);
-            matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNumber());
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, eagle, match, createdTiles);
         } 
         for (int i = 0; i < 4; i++) {
             MatchTile matchTile = new MatchTile();
-            matchTile.setTile(jump);
-            matchTile.setMatch(match);
-            matchTile.setCapacity(match.getPlayersNumber());
-            matchTile.setOrientation(0);
-            matchTile.setCoordinate(null);
-            matchTile.setSalmonsNumber(0);
-            createdTiles.add(matchTile);
+            this.createMatchTile(matchTile, jump, match, createdTiles);
         }    
         Collections.shuffle(createdTiles);
         this.saveAll(createdTiles);
-        return matchTileMapper.toDTOList(createdTiles);
+        return this.matchTileMapper.toDTOList(createdTiles);
     }
 }

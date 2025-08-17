@@ -19,7 +19,7 @@ public abstract class BaseService<T, ID> {
         this.entityName = extractEntityName(repository);
     }
 
-    private String extractEntityName(JpaRepository<T, ID> repository) {
+    public String extractEntityName(JpaRepository<T, ID> repository) {
         try {
             return ((Class<?>) ((java.lang.reflect.ParameterizedType)
                 repository.getClass().getInterfaces()[0].getGenericInterfaces()[0])

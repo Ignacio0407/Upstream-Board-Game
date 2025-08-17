@@ -3,16 +3,16 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 
 @Repository
-public interface  PlayerRepository extends JpaRepository<Player, Integer>{
-    
+public interface  PlayerRepository extends BaseRepository<Player, PlayerDTO, Integer>{
+
     public Optional<Player> findByName(String name);
 
     public List<Player> findByMatchId(Integer id);
