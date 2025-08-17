@@ -3,7 +3,7 @@ import { Alert } from 'reactstrap';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import '../../static/css/auth/authButton.css';
 import tokenService from '../../services/token.service.ts';
-import BotonLink from '../../util/BotonLink.tsx';
+import ButtonLink from '../../components/ButtonLink/ButtonLink.tsx';
 import { FormInput } from '../../components/Form/FormInput.tsx';
 
 interface LoginFormInputs {
@@ -84,7 +84,7 @@ export default function Login() {
       
       <div className="hero-div">
         <h4>¿No tienes cuenta?</h4>                
-        <BotonLink color="success" direction="/register" text="Regístrate" />
+        <ButtonLink color="success" direction="/register" text="Regístrate" />
       </div>
     </div>
   );

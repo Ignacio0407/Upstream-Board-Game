@@ -5,7 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css'
 import '../static/css/dashboard/dashb.css' 
 import tokenService from '../services/token.service.ts'
 import jwt_decode, { JwtPayload } from "jwt-decode";
-import BotonLink from "../util/BotonLink.tsx";
+import ButtonLink from "../components/ButtonLink/ButtonLink.tsx";
 import useFetchState from '../util/useFetchState.ts';
 import SearchBar from '../util/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
@@ -95,7 +95,7 @@ export default function Dashboard() {
             <WhiteSpace />
             <div>
             <div className='crear-partida'>
-              <BotonLink color={"success"} direction={"/creategame"} text={"Create Game"}></BotonLink>
+              <ButtonLink color={"success"} direction={"/creategame"} text={"Create Game"}></ButtonLink>
               </div>
                 <div className="game-table">
                 <thead>

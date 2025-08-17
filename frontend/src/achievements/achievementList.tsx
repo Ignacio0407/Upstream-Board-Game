@@ -5,8 +5,8 @@ import deleteFromList from '../util/deleteFromList.ts';
 import { useState } from 'react';
 import jwt_decode from 'jwt-decode';
 import '../static/css/achievement/achievement.css';
-import BotonLink from '../util/BotonLink.tsx';
-import SearchBar from '../util/SearchBar.tsx';
+import ButtonLink from '../components/ButtonLink/ButtonLink.tsx';
+import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import Achievement from '../interfaces/Achievement.ts'
 import User from '../interfaces/User.ts'
 import {JwtPayload} from '../interfaces/util.ts'
@@ -52,7 +52,7 @@ export default function AchievementList() {
         <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.metric}</td>
         <td className="table-cell">
           {roles[0] === 'ADMIN' && (
-            <BotonLink outline={true} color="warning" direction={`/achievements/${a.id}`} text="Edit" />
+            <ButtonLink outline={true} color="warning" direction={`/achievements/${a.id}`} text="Edit" />
           )}
         </td>
         {roles[0] === 'ADMIN' && (
@@ -106,7 +106,7 @@ export default function AchievementList() {
           <tbody>{filtered ? achievementList(filtered) : achievementList(achievements)}</tbody>
 
           {roles[0] === 'ADMIN' && (
-            <BotonLink outline={true} color="success" direction="/achievements/new" text="Create achievement" />
+            <ButtonLink outline={true} color="success" direction="/achievements/new" text="Create achievement" />
           )}
         </div>
       </div>

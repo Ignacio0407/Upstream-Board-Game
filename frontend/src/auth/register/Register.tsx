@@ -4,7 +4,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import '../../static/css/auth/authButton.css';
 import '../../static/css/auth/authPage.css';
 import tokenService from '../../services/token.service.ts';
-import BotonLink from '../../util/BotonLink.tsx';
+import ButtonLink from '../../components/ButtonLink/ButtonLink.tsx';
 import { FormInput } from '../../components/Form/FormInput.tsx';
 
 interface RegisterFormInputs {username:string, password:string, firstName:string, lastName:string, authority: 'PLAYER' | 'ADMIN'}
@@ -139,7 +139,7 @@ export default function Register() {
 
       <div className="hero-div">
         <h4>Already have an account?</h4>
-        <BotonLink color="success" direction="/login" text="Sign In" />
+        <ButtonLink color="success" direction="/login" text="Sign In" />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useEffect }  from 'react';
 import '../App.css';
 import '../static/css/home/home.css'; 
 import tokenService from '../services/token.service.ts';
-import BotonLink from '../util/BotonLink.tsx';
+import ButtonLink from '../components/ButtonLink/ButtonLink.tsx';
  
 export default function Home(){
     const jwt = tokenService.getLocalAccessToken(); 
@@ -14,10 +14,10 @@ export default function Home(){
             <div className="pantallaInicio">
                 <img  className="imagenInicio"  src={'/images/logoCentralUPS.jpg'}/>
                 <div className='botonesPantallaInicio'>
-                {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Game List"} /> : 
-                <BotonLink color={"success"} direction={"/dashboard"} text={"Game List"} />}
-                {!jwt ? <BotonLink color={"success"} direction={"/login"} text={"Create Game"} /> : 
-                <BotonLink color={"success"} direction={"/creategame/"} text={"Create Game"} />}
+                {!jwt ? <ButtonLink color={"success"} direction={"/login"} text={"Game List"} /> : 
+                <ButtonLink color={"success"} direction={"/dashboard"} text={"Game List"} />}
+                {!jwt ? <ButtonLink color={"success"} direction={"/login"} text={"Create Game"} /> : 
+                <ButtonLink color={"success"} direction={"/creategame/"} text={"Create Game"} />}
                 </div>
             </div>
         </div>
