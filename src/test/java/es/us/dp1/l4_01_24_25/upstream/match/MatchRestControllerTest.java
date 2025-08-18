@@ -145,6 +145,6 @@ class MatchRestControllerTest {
         mockMvc.perform(delete("/api/v1/matches/1"))
             .andExpect(status().isNoContent());
 
-        verify(matchService).delete(1);
+        verify(matchService).deleteById(1);
     }
 }

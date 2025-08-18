@@ -23,6 +23,7 @@ import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
 import jakarta.validation.Valid;
 
 @RestController

@@ -12,8 +12,8 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
@@ -72,8 +72,8 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {
-        User user = userService.findById(Integer.valueOf(playerDTO.get("user")));
-        Match match = matchService.findById(matchId);
+        User user = this.userService.findById(Integer.valueOf(playerDTO.get("user")));
+        Match match = this.matchService.findById(matchId);
         Player p = new Player();
         p.setName(user.getName());
         p.setColor(Color.valueOf(playerDTO.get("color")));
@@ -84,7 +84,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         p.setPoints(0);
         p.setPlayerOrder(match.getPlayersNumber());
         match.setPlayersNumber(match.getPlayersNumber() + 1);
-        matchService.save(match);
+        this.matchService.save(match);
         this.save(p);
         return this.playerMapper.toLobby(p);
     }
@@ -123,13 +123,13 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional
     public Boolean checkPlayerFinished(Integer playerId) {
-        List<SalmonMatch> salmons = this.salmonMatchService.findAllFromPlayer(playerId);
+        List<SMCoordinateDTO> salmons = this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId);
         return !salmons.isEmpty() && salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20);
     }
 
     @Transactional
     public Boolean checkPlayerIsDead(Integer playerId) {
-        return this.salmonMatchService.findAllFromPlayer(playerId).isEmpty();
+        return this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId).isEmpty();
     }
 
     @Transactional
@@ -150,8 +150,8 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     public List<Player> playersForChangePhase (Integer matchId) {
         return this.findAlivePlayersByMatch(matchId).stream().filter(
-            p -> !salmonMatchService.findAllFromPlayerInRiver(p.getId()).isEmpty() 
-            || !salmonMatchService.findAllFromPlayerInSea(p.getId()).isEmpty()).toList();
+            p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty() 
+            || !this.salmonMatchService.findByPlayerIdInSeaAsCoordinateDTO(p.getId()).isEmpty()).toList();
     }
 
 }

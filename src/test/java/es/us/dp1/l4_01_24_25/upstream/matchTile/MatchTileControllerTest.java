@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
@@ -222,7 +223,7 @@ public class MatchTileControllerTest {
         mockMvc.perform(delete("/api/v1/matchTiles/1"))
                .andExpect(status().isOk());
 
-        verify(matchTileService).delete(1);
+        verify(matchTileService).deleteById(1);
     }
 
     @Test
@@ -351,7 +352,7 @@ public class MatchTileControllerTest {
     void delete_ShouldReturnNoContent() throws Exception {
         // Arrange
         Integer id = 1;
-        doNothing().when(matchTileService).delete(id);
+        doNothing().when(matchTileService).deleteById(id);
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/matchTiles/{id}", id))

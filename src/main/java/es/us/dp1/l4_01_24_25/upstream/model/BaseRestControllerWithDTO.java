@@ -35,7 +35,7 @@ public abstract class BaseRestControllerWithDTO<T, D, ID> {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable ID id) {
-        service.delete(id);
+        service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

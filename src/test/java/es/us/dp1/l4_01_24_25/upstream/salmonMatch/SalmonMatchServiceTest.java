@@ -155,7 +155,7 @@ public class SalmonMatchServiceTest {
         @Test
         @DisplayName("Should delete salmon match successfully")
         void testDelete_Success() {
-            salmonMatchService.delete(1);
+            salmonMatchService.deleteById(1);
             verify(salmonMatchRepository).deleteById(1);
         }
 
@@ -165,7 +165,7 @@ public class SalmonMatchServiceTest {
             doThrow(new DataAccessException("Test Exception") {})
                 .when(salmonMatchRepository).deleteById(1);
 
-            assertThrows(DataAccessException.class, () -> salmonMatchService.delete(1));
+            assertThrows(DataAccessException.class, () -> salmonMatchService.deleteById(1));
             verify(salmonMatchRepository).deleteById(1);
         }
     }
@@ -217,7 +217,7 @@ public class SalmonMatchServiceTest {
             salmonInSpawn.setCoordinate(new Coordinate(5, 25)); // y > 20
             when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonInSpawn));
 
-            Integer points = salmonMatchService.findPointsFromASalmonInSpawn(1);
+            Integer points = salmonMatchService.findPointsFromAllSalmonInSpawn(1);
 
             assertEquals(5, points); // 25 - 20 = 5 points
             verify(salmonMatchRepository).findById(1);
@@ -230,7 +230,7 @@ public class SalmonMatchServiceTest {
             salmonInSpawn.setCoordinate(new Coordinate(5, 15)); // y < 20
             when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonInSpawn));
 
-            Integer points = salmonMatchService.findPointsFromASalmonInSpawn(1);
+            Integer points = salmonMatchService.findPointsFromAllSalmonInSpawn(1);
 
             assertEquals(0, points);
             verify(salmonMatchRepository).findById(1);

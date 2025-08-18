@@ -77,11 +77,10 @@ public class UserService extends BaseService<User,Integer>{
 		return this.userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
 	}
 
-	@Override
 	@Transactional
 	public void delete(Integer id) {
 		if (this.findCurrentUser().getId() != id) {
-			this.delete(id);
+			this.deleteById(id);
 		} else
 			throw new AccessDeniedException("You can't delete yourself!");
 	}

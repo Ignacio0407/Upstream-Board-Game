@@ -145,7 +145,7 @@ class MessageRestControllerTest {
         mockMvc.perform(delete("/api/v1/messages/1"))
             .andExpect(status().isNoContent());
 
-        verify(messageService).delete(1);
+        verify(messageService).deleteById(1);
     }
 
     @Test
