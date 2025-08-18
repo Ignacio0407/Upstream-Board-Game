@@ -10,6 +10,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
 
 @Mapper(componentModel = "spring")
 public abstract class SalmonMatchMapper implements EntityMapper<SalmonMatch, SalmonMatchDTO> {

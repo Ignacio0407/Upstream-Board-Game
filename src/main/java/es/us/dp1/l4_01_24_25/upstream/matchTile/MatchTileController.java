@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 
 @RestController

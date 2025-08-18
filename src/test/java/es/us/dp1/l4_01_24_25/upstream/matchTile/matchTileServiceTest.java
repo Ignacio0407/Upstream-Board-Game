@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 
@@ -220,7 +221,7 @@ class MatchTileServiceTest {
         when(matchTileRepository.findById(id)).thenReturn(Optional.of(tile));
 
         // Act
-        matchTileService.delete(id);
+        matchTileService.deleteById(id);
 
         // Assert
         verify(matchTileRepository).findById(id);

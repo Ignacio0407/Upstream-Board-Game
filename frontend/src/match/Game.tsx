@@ -5,9 +5,9 @@ import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
 import { Client } from '@stomp/stompjs';
 import { get, createWebSocket } from '../util/fetchers.ts';
-import { handleTileClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick } from './matchUtil.tsx';
+import { handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick } from './matchUtil.tsx';
 import { ColorToRgb } from '../util/ColorParser.ts';
-import Chat from '../chat/Chat.tsx'
+import Chat from '../components/chat/Chat.tsx'
 import Match from '../interfaces/Match.ts';
 import Tile from '../interfaces/Tile.ts';
 import MatchTile, {emptyTile} from '../interfaces/MatchTile.ts';
@@ -22,7 +22,6 @@ export default function Game({match}: {match: Match}) {
     const [tilesList,setTilesList] = useFetchState<Tile[]>([], '/api/v1/tiles',jwt); // Siempre igual
     const [matchTilesList, setMatchTilesList] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${match.id}`,jwt) // Todos los front tienen las mismas tiles
     const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${match.id}`, jwt)
-    const [salmonAndImages, setSalmonAndImages] = useState<SalmonMatch[]>([])
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [matchTiles, setMatchTiles] = useState<MatchTile[]>([]);
     const [gridTiles, setGridTiles] = useState<MatchTile[]>([]);
@@ -46,11 +45,9 @@ export default function Game({match}: {match: Match}) {
             setAllDataLoaded(true);
             const matchTilesNoCoord = [...matchTilesList].filter(mT => mT.coordinate === null)
             const matchTilesWCoord = [...matchTilesList].filter(mT => mT.coordinate !== null)
-            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null)
             const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null)
             setMatchTiles(matchTilesNoCoord)
             setGridTiles(matchTilesWCoord)
-            setSalmonAndImages(salmonMatchesNoCoord)
             setGridSalmons(salmonMatchesWCoord)
             const orderedPlayers = [...players].sort(p => p.playerOrder)
             setPlayers(orderedPlayers)
@@ -64,12 +61,7 @@ export default function Game({match}: {match: Match}) {
         setPlayers(playerData);
     };
     
-    const handleSalmonClick = (salmon: SalmonMatch) => {
-        if (myPlayer) {
-            if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === 'MOVING')
-                setSelectedSalmon(salmon);
-        }
-    }
+    
 
     const socket = createWebSocket();
     const stompClient = new Client({
@@ -83,9 +75,7 @@ export default function Game({match}: {match: Match}) {
     onConnect: (frame) => {
         
         stompClient.subscribe('/topic/salmon', (message) => {
-            const salmonMatchesNoCoord = [...salmons].filter(s => s.coordinate === null)
             const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null)
-            setSalmonAndImages(salmonMatchesNoCoord)
             setGridSalmons(salmonMatchesWCoord)
         });
         stompClient.subscribe('/topic/tiles', (message) => {
@@ -261,7 +251,7 @@ export default function Game({match}: {match: Match}) {
                         <img key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleSalmonClick(salmon);}}
+                                handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon)}}
                             style={{...position,
                                 filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)})`,
                                 border: `3px solid ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)}`}}
@@ -277,7 +267,7 @@ export default function Game({match}: {match: Match}) {
             {gridSea.map((salmon:SalmonMatch[], index) => (
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
-                        (s.coordinate === null && <img key = {i} src = {s.salmon.image} alt="" onClick={() => handleSalmonClick(s)}
+                        (s.coordinate === null && <img key = {i} src = {s.salmon.image} alt="" onClick={() => handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
                         style={{                          
                             filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
                             border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`, // Cambia el color y grosor del borde según necesites

@@ -13,6 +13,93 @@ export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, se
     }
 }
 
+export const handleSalmonClick = (salmon: SalmonMatch, myPlayer:Player|null, match:Match, setSelectedSalmon:Function) => {
+    if (myPlayer) {
+        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === 'MOVING')
+            setSelectedSalmon(salmon);
+    }
+}
+
+export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string) => {
+    try {
+        const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
+        if (!responseSalmon.ok) {
+            const errorData = await responseSalmon.json();
+            alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
+            console.log("Error updating salmon:", errorData);
+        }            
+    } catch (error){
+        console.log("Error updating salmon", error)
+        throw error.message;
+    }
+};
+
+export const changephase = async(match:Match, jwt:string) => {
+    try {
+        const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
+        if (!responseChangePhase.ok) {
+            const errorData = await responseChangePhase.json();
+            alert(errorData.message || "Error changing phase.");
+            console.log("Error changing phase.", errorData);
+        }            
+    } catch (error){
+        console.log("Error changing phase.", error)
+        throw error.message;
+    }
+};
+    
+export const updateSpawn = async(salmon:SalmonMatch, jwt:string) => {
+    try {
+        const responseSalmon = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
+        if (!responseSalmon.ok) {
+            alert("Movimiento no válido.");
+            console.log("Error actualizando salmon", responseSalmon)
+        }
+    } catch (error){
+        console.log("Error actualizando salmon", error)
+        throw error.message;
+    }
+};
+
+export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string) => {
+    try {
+        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
+        if (!response.ok) {
+            throw new Error('Invalid tile placement');
+        }
+    } catch (error) {
+        console.error('Error updating tile position:', error);
+        throw error; 
+    }
+};
+
+export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, gridTiles:MatchTile[], setSelectedSalmon:Function, match:Match) => {
+    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
+    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
+    const x = index % gridWidth;
+    const y = gridHeight - 1 - Math.floor(index / gridWidth)
+    try {
+        if (selectedSalmon === null) {
+            if (selectedTile) await updateTilePosition(selectedTile, x, y, jwt);
+            setSelectedTile(null);
+        }
+        else {
+            const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
+            if (foundTile) {    
+                await updateSalmonPosition(selectedSalmon, x, y, jwt);
+                setSelectedSalmon(null);
+            } else if(x === 1 && y === 5 && match.round >= 6){
+                await updateSpawn(selectedSalmon, jwt);        
+                setSelectedSalmon(null);
+            }
+        }
+        await changephase(match, jwt);
+        }
+        catch (error) {
+            console.error("Error updating tile position or advancing turn:", error);
+        }
+};
+
 export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
     try {
         const newOrientation = (tile.orientation + 1) % 7;
@@ -26,9 +113,8 @@ export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
 };
 
 export const getRotationStyle = (tile:MatchTile) => {
-    if (!tile) {
+    if (!tile)
         return {};
-    }
     return {
         transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados
     };
@@ -128,84 +214,4 @@ export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
     left: `${x}px`,
     top: `${y}px`
   };
-};
-
-export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string) => {
-    try {
-        const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
-        if (!responseSalmon.ok) {
-            const errorData = await responseSalmon.json();
-            alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
-            console.log("Error updating salmon:", errorData);
-        }            
-    } catch (error){
-        console.log("Error updating salmon", error)
-        throw error.message;
-    }
-};
-
-export const changephase = async(match:Match, jwt:string) => {
-    try {
-        const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
-        if (!responseChangePhase.ok) {
-            const errorData = await responseChangePhase.json();
-            alert(errorData.message || "Error changing phase.");
-            console.log("Error changing phase.", errorData);
-        }            
-    } catch (error){
-        console.log("Error changing phase.", error)
-        throw error.message;
-    }
-};
-    
-export const updateSpawn = async(salmon:SalmonMatch, jwt:string) => {
-    try {
-        const responseSalmon = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
-        if (!responseSalmon.ok) {
-            alert("Movimiento no válido.");
-            console.log("Error actualizando salmon", responseSalmon)
-        }
-    } catch (error){
-        console.log("Error actualizando salmon", error)
-        throw error.message;
-    }
-};
-
-export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string) => {
-    try {
-        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
-        if (!response.ok) {
-            throw new Error('Invalid tile placement');
-        }
-    } catch (error) {
-        console.error('Error updating tile position:', error);
-        throw error; 
-    }
-};
-
-export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, gridTiles:MatchTile[], setSelectedSalmon:Function, match:Match) => {
-    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-    const x = index % gridWidth;
-    const y = gridHeight - 1 - Math.floor(index / gridWidth)
-    try {
-        if (selectedSalmon === null) {
-            if (selectedTile) await updateTilePosition(selectedTile, x, y, jwt);
-            setSelectedTile(null);
-        }
-        else {
-            const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
-            if (foundTile) {    
-                await updateSalmonPosition(selectedSalmon, x, y, jwt);
-                setSelectedSalmon(null);
-            } else if(x === 1 && y === 5 && match.round >= 6){
-                await updateSpawn(selectedSalmon, jwt);        
-                setSelectedSalmon(null);
-            }
-        }
-            await changephase(match, jwt);
-        }
-        catch (error) {
-            console.error("Error updating tile position or advancing turn:", error);
-        }
 };
