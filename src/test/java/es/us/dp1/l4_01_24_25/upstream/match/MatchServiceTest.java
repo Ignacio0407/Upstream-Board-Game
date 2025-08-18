@@ -87,7 +87,7 @@ class MatchServiceTest {
 
     @Test
     void delete_shouldCallRepositoryDeleteById() {
-        matchService.delete(1);
+        matchService.deleteById(1);
         verify(matchRepository).deleteById(1);
     }
 
@@ -325,7 +325,7 @@ class MatchServiceTest {
         when(playerService.findPlayersByMatch(1)).thenReturn(players);
         when(matchRepository.findById(1)).thenReturn(Optional.of(match));
         when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(salmons);
-        when(salmonMatchService.findPointsFromASalmonInSpawn(1)).thenReturn(10);
+        when(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).thenReturn(10);
         when(matchRepository.save(any())).thenReturn(match);
         when(matchMapper.toDTO(any())).thenReturn(new MatchDTO());
 

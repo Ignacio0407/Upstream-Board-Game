@@ -14,6 +14,8 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
@@ -70,6 +72,14 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         if (matchTile.getCoordinate() == null)
             throw new ResourceNotFoundException("Matchtile with ID" + matchTile.getId() + "has no coordinates");
         return matchTile.getCoordinate().y() == 0;
+    }
+
+    public List<MTCoordinateDTO> findByMatchIdNoCoordAsMTCoordinateDTO (Integer matchId) {
+        return this.matchTileRepository.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
+    }
+
+    public List<MTCoordinateDTO> findByMatchIdAsMTCoordinateDTO (Integer matchId) {
+        return this.matchTileRepository.findByMatchIdAsMTCoordinateDTO(matchId);
     }
 
     @Override

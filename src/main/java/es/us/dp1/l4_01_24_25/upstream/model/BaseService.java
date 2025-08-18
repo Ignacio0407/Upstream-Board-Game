@@ -49,13 +49,23 @@ public abstract class BaseService<T, ID> {
     }
 
     @Transactional
-    public List<T> saveAll(List<T> entity) {
-        return (List<T>) this.repository.saveAll(entity);
+    public List<T> saveAll(List<T> entities) {
+        return (List<T>) this.repository.saveAll(entities);
     }
 
     @Transactional
-    public void delete(ID id) {
+    public void deleteById(ID id) {
         this.repository.deleteById(id);
+    }
+
+    @Transactional
+    public void delete(@Valid T entity) {
+        this.repository.delete(entity);
+    }
+
+    @Transactional
+    public void deleteAllInBatch(List<T> entities) {
+        this.repository.deleteAllInBatch(entities);
     }
 
     @Transactional

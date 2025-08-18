@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile;
+package es.us.dp1.l4_01_24_25.upstream.matchTile.DTO;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;

@@ -172,7 +172,7 @@ class AchievementServiceTest {
         @Test
         @DisplayName("Should delete achievement successfully")
         void testDeleteAchievement_Success() {
-            achievementService.delete(1);
+            achievementService.deleteById(1);
             verify(achievementRepository).deleteById(1);
         }
     }

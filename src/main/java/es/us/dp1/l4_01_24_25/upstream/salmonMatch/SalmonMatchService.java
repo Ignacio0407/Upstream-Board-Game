@@ -22,6 +22,8 @@ import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
 @Service
@@ -101,9 +103,22 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     }
 
     @Transactional(readOnly = true)
-    public Integer findPointsFromASalmonInSpawn(Integer salmonMatchId){
+    public Integer findPointsFromAllSalmonInSpawn(Integer salmonMatchId) {
         SalmonMatch sm = this.findById(salmonMatchId);
         return sm.getCoordinate().y() > 20 ? sm.getCoordinate().y() - 20 : 0;
+    }
+
+    @Transactional
+    public List<SMCoordinateDTO> findByPlayerIdAsCoordinateDTO (Integer playerId) {
+        return this.salmonMatchRepository.findByPlayerIdAsCoordinateDTO(playerId);
+    }
+
+    public List<SMCoordinateDTO> findByPlayerIdInRiverAsCoordinateDTO (Integer playerId) {
+        return this.salmonMatchRepository.findByPlayerIdInRiverAsCoordinateDTO(playerId);
+    }
+
+    public List<SMCoordinateDTO> findByPlayerIdInSeaAsCoordinateDTO (Integer playerId) {
+        return this.salmonMatchRepository.findByPlayerIdInSeaAsCoordinateDTO(playerId);
     }
 
     @Override
@@ -168,7 +183,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                     salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
                     this.setSalmonImage(salmonMatch);
                     if(salmonMatch.getSalmonsNumber()==0) {
-                        this.delete(salmonMatch.getId()); 
+                        this.delete(salmonMatch); 
                         heron.setSalmonsNumber(heron.getSalmonsNumber()-1);
                         this.matchTileService.save(heron);
                     }
@@ -192,7 +207,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if (salmonMatch.getSalmonsNumber() > 0) {
             this.save(salmonMatch);
         } else {
-            this.delete(salmonMatch.getId());
+            this.delete(salmonMatch);
         }
         return this.salmonMatchMapper.toDTO(salmonMatch);
     }
@@ -359,7 +374,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                     salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
                     toTravel2 = this.matchTileService.eagleToWater(toTravel2);
                     if (salmonMatch.getSalmonsNumber().equals(0)) 
-                        this.delete(salmonMatch.getId());
+                        this.delete(salmonMatch);
                 }
                 myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
                 this.matchTileService.save(myTile);
@@ -515,7 +530,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     
         this.playerService.save(player);
         if (salmonMatch.getSalmonsNumber() > 0) this.save(salmonMatch);
-        else this.delete(salmonMatch.getId());
+        else this.delete(salmonMatch);
         return this.salmonMatchMapper.toDTO(salmonMatch);
     }
 
