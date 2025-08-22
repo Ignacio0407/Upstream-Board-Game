@@ -13,15 +13,15 @@ import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
 
 @Repository
 public interface MatchTileRepository extends BaseRepository<MatchTile, MatchTileDTO, Integer>{
-
-    @Override
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt WHERE mt.id = :id")
-    Optional<MatchTileDTO> findByIdAsDTO(@Param("id") Integer id);
     
     @Override
     @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt")
     List<MatchTileDTO> findAllAsDTO();
-    
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO(mt.id, mt.capacity, mt.orientation, mt.salmonsNumber, mt.coordinate, mt.tile, mt.match.id) FROM MatchTile mt where mt.id = :id")
+    Optional<MatchTileDTO> findByIdAsDTO(Integer id);
+
     List<MatchTile> findByMatchId(Integer matchId);
 
     List<MatchTile> findByMatchIdAndCoordinateIsNull(Integer matchId);
@@ -38,10 +38,10 @@ public interface MatchTileRepository extends BaseRepository<MatchTile, MatchTile
     @Query("SELECT mt FROM MatchTile mt WHERE mt.coordinate.x = :x AND mt.coordinate.y = :y")
     Optional<MatchTile> findByCoordinate(Integer x, Integer y);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTInternalDTO(mt.coordinate) FROM MatchTile mt where mt.match.id = :matchId AND mt.cooordinate IS NULL")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO(mt.id, mt.coordinate) FROM MatchTile mt where mt.match.id = :matchId AND mt.coordinate IS NULL")
     List<MTCoordinateDTO> findByMatchIdNoCoordAsMTCoordinateDTO (Integer matchId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTInternalDTO(mt.id, mt.coordinate) FROM MatchTile mt where mt.match.id = :matchId")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO(mt.id, mt.coordinate) FROM MatchTile mt where mt.match.id = :matchId")
     List<MTCoordinateDTO> findByMatchIdAsMTCoordinateDTO (Integer matchId);
 
 }

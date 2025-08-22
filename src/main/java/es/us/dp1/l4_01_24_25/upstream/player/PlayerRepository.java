@@ -11,7 +11,15 @@ import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 
 @Repository
-public interface  PlayerRepository extends BaseRepository<Player, PlayerDTO, Integer>{
+public interface PlayerRepository extends BaseRepository<Player, PlayerDTO, Integer>{
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p where p.id = :id")
+    Optional<PlayerDTO> findByIdAsDTO(Integer id);
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p")
+    List<PlayerDTO> findAllAsDTO();
 
     public Optional<Player> findByName(String name);
 

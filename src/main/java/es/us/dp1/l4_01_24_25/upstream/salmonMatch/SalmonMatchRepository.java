@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,14 @@ import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
 
 public interface SalmonMatchRepository extends BaseRepository<SalmonMatch, SalmonMatchDTO, Integer>{
 
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.id = :id")
+    Optional<SalmonMatchDTO> findByIdAsDTO(Integer id);
+
+    @Override
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm")
+    List<SalmonMatchDTO> findAllAsDTO();
+    
     List<SalmonMatch> findByMatchId(@Param("matchId") Integer matchId);
 
     List<SalmonMatch> findByPlayerId(@Param("playerId") Integer playerId);

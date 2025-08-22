@@ -87,7 +87,7 @@ export default function AchievementList() {
           <tr className="text-playercard">Total points: {finalUser.totalpoints}</tr>
         </Table>
       </div>
-      <SearchBar data={achievements} setFiltered={setFiltered} placeholder="Search achievements" />
+      <SearchBar data={achievements} setFiltered={setFiltered} placeholder="Search achievements" defaultCaseSensitive={true}/>
       <div className="achievement-card">
         <h1 className="text-center">Achievements</h1>
         <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>

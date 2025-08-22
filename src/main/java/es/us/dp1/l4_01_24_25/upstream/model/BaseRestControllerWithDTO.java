@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-public abstract class BaseRestControllerWithDTO<T, D, ID> {
+public abstract class BaseRestControllerWithDTO<T extends BaseEntity, D, ID> {
 
     protected final BaseServiceWithDTO<T, D, ID> service;
 
