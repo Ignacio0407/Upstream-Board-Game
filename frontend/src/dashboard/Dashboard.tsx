@@ -7,22 +7,22 @@ import tokenService from '../services/token.service.ts'
 import jwt_decode, { JwtPayload } from "jwt-decode";
 import ButtonLink from "../components/ButtonLink/ButtonLink.tsx";
 import useFetchState from '../util/useFetchState.ts';
-import SearchBar from '../util/SearchBar.tsx';
+import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
 import WhiteSpace from '../util/WhiteSpace.tsx';
 import { createWebSocket, createStompClient } from '../util/fetchers.ts'
 import {DashboardMatch} from '../interfaces/Match.ts';
    
-export default function Dashboard() { 
-    const [username, setUsername] = useState("");
-    const [filtered, setFiltered] = useState([]);
+export default function Dashboard() {
     const jwt = tokenService.getLocalAccessToken();
+    const user = tokenService.getUserList();
+    const navigate = useNavigate(); 
+    const [username, setUsername] = useState("");
     const [matches, setMatches] = useFetchState<DashboardMatch[]>([],'/api/v1/matches/dashboard',jwt);
-    const user = tokenService.getUserList()
+    const [filtered, setFiltered] = useState<DashboardMatch[]>([]);
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [message, setMessage] = useState("");
     const [visible, setVisible] = useState(false);
-    const navigate = useNavigate();
     const [spectatorIds, setSpectatorIds] = useState<number[]>([]);
 
     useEffect(() => {
@@ -91,7 +91,7 @@ export default function Dashboard() {
             <h1 className='welcome'>
             Game Listing for {username}
             </h1>
-            <SearchBar data={matches} setFiltered={setFiltered} placeholder={"Search matches"} />
+            <SearchBar data={matches} setFiltered={setFiltered} placeholder={"Search matches"} defaultCaseSensitive={true}/>
             <WhiteSpace />
             <div>
             <div className='crear-partida'>

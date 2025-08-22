@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
-public abstract class BaseServiceWithDTO<T, D, ID> extends BaseService<T, ID> {
+public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends BaseService<T, ID> {
 
     protected final EntityMapper<T, D> mapper;
     protected final BaseRepository<T, D, ID> repository;

@@ -2,13 +2,13 @@ import {useState} from 'react'
 import { Table } from "reactstrap";
 import useFetchState from "../util/useFetchState.ts";
 import tokenService from '../services/token.service.ts';
-import SearchBar from '../util/SearchBar.tsx'
+import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import Developer from '../interfaces/Developer.ts'  
    
 export default function DeveloperList() {
     const jwt = tokenService.getLocalAccessToken();
     const [developers, setDevelopers] = useFetchState<Developer[]>([], `/api/v1/developers`, jwt);
-    const [filtered, setFiltered] = useState([]) 
+    const [filtered, setFiltered] = useState<Developer[]>([]) 
 
     const imgnotfound = "/images/achievements/NotFoundImage.png";  
     
@@ -30,7 +30,7 @@ export default function DeveloperList() {
          <div className="admin-page-container"> 
             <h1></h1>
            <h1 className="text-center">Developers</h1>
-           <SearchBar data={developers} setFiltered={setFiltered} placeholder = {'Search developers'} />
+           <SearchBar data={developers} setFiltered={setFiltered} placeholder = {'Search developers'} defaultCaseSensitive={true}/>
            <div> 
                 <Table aria-label="developers" className="mt-4"> 
                     <thead> 

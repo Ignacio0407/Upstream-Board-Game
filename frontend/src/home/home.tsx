@@ -1,6 +1,6 @@
 import { useEffect }  from 'react';
 import '../App.css';
-import '../static/css/home/home.css'; 
+import './home.css'; 
 import tokenService from '../services/token.service.ts';
 import ButtonLink from '../components/ButtonLink/ButtonLink.tsx';
  
