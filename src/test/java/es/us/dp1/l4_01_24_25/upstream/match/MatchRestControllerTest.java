@@ -17,7 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import es.us.dp1.l4_01_24_25.upstream.match.matchDTO.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

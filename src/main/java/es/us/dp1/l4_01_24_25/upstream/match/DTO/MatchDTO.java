@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.match.matchDTO;
+package es.us.dp1.l4_01_24_25.upstream.match.DTO;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.match.State;

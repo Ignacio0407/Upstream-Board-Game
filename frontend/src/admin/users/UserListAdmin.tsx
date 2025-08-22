@@ -6,7 +6,7 @@ import "../../static/css/admin/adminPage.css";
 import deleteFromList from "../../util/deleteFromList.ts";
 import getErrorModal from "../../util/getErrorModal.tsx";
 import useFetchState from "../../util/useFetchState.ts";
-import SearchBar from "../../util/SearchBar.tsx"
+import SearchBar from "../../components/SearchBar/SearchBar.tsx"
 import User from '../../interfaces/User.ts'
 
 const jwt = tokenService.getLocalAccessToken();
@@ -62,7 +62,7 @@ export default function UserListAdmin() {
 
   return (
     <div className="admin-page-container">
-    <SearchBar data={users} setFiltered={setFiltered} placeholder={"Search users"} />
+    <SearchBar data={users} setFiltered={setFiltered} placeholder={"Search users"} defaultCaseSensitive={true}/>
       <h1 className="text-center">Users</h1>
       {alerts.map((a) => a.alert)}
       {modal}

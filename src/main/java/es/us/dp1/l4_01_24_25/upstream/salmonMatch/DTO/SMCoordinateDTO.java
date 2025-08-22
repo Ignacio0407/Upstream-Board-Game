@@ -8,4 +8,7 @@ public class SMCoordinateDTO {
     
     Coordinate coordinate;
 
+    public SMCoordinateDTO(Coordinate coordinate) {
+        this.coordinate = coordinate;
+    }
 }
