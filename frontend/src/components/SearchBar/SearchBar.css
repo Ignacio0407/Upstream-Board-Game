@@ -1,25 +1,318 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
+/* ================================
+   Theme variables (tweak as needed)
+   ================================ */
+:root {
+  --sb-accent: #00BFFF;          /* primary accent (matches search-bar border) */
+  --sb-accent-weak: #e6f8ff;     /* light accent used on hover states */
+  --sb-fg: #1f2a37;              /* text color */
+  --sb-bg: #ffffff;              /* surfaces */
+  --sb-border: #00BFFF;          /* pill + input borders aligned to accent */
+  --sb-shadow: rgba(0, 191, 255, 0.25);
+}
+
+/* ================================
+   Layout wrappers
+   ================================ */
+.search-component {
+  display: block;
+  width: 100%;
+}
+
 .search-container {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;       /* allow wrapping on small screens */
+  gap: 8px 10px;
+}
+
+/* Controls row (pills and chevrons) */
+.search-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+/* ================================
+   Search input and button
+   ================================ */
+.search-bar { 
+  width: 200px; /* Tamaño pequeño */ 
+  padding: 5px; 
+  border: 2px solid #00BFFF; /* Borde celeste */ 
+  border-radius: 15px; /* Esquinas redondeadas */ 
+  outline: none; 
+}
+
+.search-bar:focus {
+  border-color: #00BFFF;
+  box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.25);
+  background: #fff;
+}
+
+.search-button { 
+  background-color: transparent; 
+  border: none; 
+  cursor: pointer; 
+  margin-left: -35px; /* Ajustar para que la lupa se superponga al borde del input */ 
+}
+
+.search-button:focus {
+  outline: none;
+  border-color: #00BFFF;
+  box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.25);
+}
+
+.search-button .fa-search { 
+  font-size: 16px; 
+  color: #13d2e779; /* Color de la lupa */ 
+}
+
+/* ================================
+   Pill-sized dropdown controls
+   (AND/OR and Match Mode)
+   ================================ */
+
+.search-controls {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  gap: 8px 10px;
+  margin-bottom: 2px;
+}
+
+/* Positioning each control explicitly */
+.pill-dropdown-container:nth-of-type(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pill-dropdown-container:nth-of-type(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pill-toggle-single {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+}
+
+/* Wrap to position the floating menu */
+.pill-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Single pill wrapper (for case sensitive toggle) */
+.pill-toggle-single {
+  display: inline-block;
+}
+
+/* The pill itself (shared by all controls) */
+.pill-toggle,
+.pill-toggle-single .pill-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  border: 2px solid var(--sb-border);
+  background: var(--sb-bg);
+  color: var(--sb-accent);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+}
+
+.pill-toggle:hover {
+  background: var(--sb-accent-weak);
+}
+
+.pill-toggle.active,
+.pill-toggle[aria-pressed="true"] {
+  background: var(--sb-accent);
+  color: #fff;
+  border-color: var(--sb-accent);
+  box-shadow: 0 0 0 3px var(--sb-shadow);
+}
+
+.pill-toggle:focus {
+  outline: none;
+  border-color: var(--sb-accent);
+  box-shadow: 0 0 0 3px var(--sb-shadow);
+}
+
+.pill-toggle .fa-chevron-down {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.pill-toggle-label {
+  white-space: nowrap;
+}
+
+/* Floating menu for pill dropdowns */
+.pill-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 160px;
+  z-index: 30;
+  padding: 6px;
+  border-radius: 10px;
+  border: 2px solid var(--sb-border);
+  background: var(--sb-bg);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* Options inside the pill menu */
+.pill-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--sb-fg);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.pill-option:hover,
+.pill-option:focus {
+  background: var(--sb-accent-weak);
+  outline: none;
+}
+
+.pill-option.selected,
+.pill-option[aria-selected="true"] {
+  background: rgba(0, 191, 255, 0.15);
+  color: var(--sb-accent);
+  font-weight: 600;
+}
+
+/* ================================
+   Attribute dropdown (chevron-only)
+   ================================ */
+
+.search-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Chevron trigger aligned to pill height */
+.search-dropdown-toggle {
+  height: 32px;
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--sb-border);
+  background: var(--sb-bg);
+  color: var(--sb-accent);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+}
+
+.search-dropdown-toggle:hover {
+  background: var(--sb-accent-weak);
+}
+
+.search-dropdown-toggle.active,
+.search-dropdown-toggle[aria-expanded="true"] {
+  border-color: var(--sb-accent);
+  box-shadow: 0 0 0 3px var(--sb-shadow);
+  background: var(--sb-accent);
+  color: #fff;
+}
+
+.search-dropdown-toggle .fa-chevron-down {
+  font-size: 12px;
+}
+
+/* Attribute list panel */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 200px;
+  max-height: 280px;
+  overflow: auto;
+  z-index: 25;
+  padding: 6px;
+  border-radius: 10px;
+  border: 2px solid var(--sb-border);
+  background: var(--sb-bg);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.search-dropdown-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--sb-fg);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.search-dropdown-item:hover,
+.search-dropdown-item:focus {
+  background: var(--sb-accent-weak);
+  outline: none;
+}
+
+/* ================================
+   Responsive details
+   ================================ */
+@media (max-width: 640px) {
+  .search-container {
+    gap: 6px 8px;
   }
-  
-  .search-bar {
-    width: 200px; /* Tamaño pequeño */
-    padding: 5px;
-    border: 2px solid #00BFFF; /* Borde celeste */
-    border-radius: 15px; /* Esquinas redondeadas */
-    outline: none;
+  .pill-menu,
+  .search-dropdown {
+    min-width: 180px;
   }
-  
-  .search-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    margin-left: -35px; /* Ajustar para que la lupa se superponga al borde del input */
-  }
-  
-  .search-button .fa-search {
-    font-size: 16px;
-    color: #13d2e779; /* Color de la lupa */
-  }
-  
+}
+
+/* ================================
+   Optional: subtle spacing helpers
+   ================================ */
+.search-controls + .search-bar {
+  margin-left: 2px;
+}

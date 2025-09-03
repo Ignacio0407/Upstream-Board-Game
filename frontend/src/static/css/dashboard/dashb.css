@@ -61,3 +61,10 @@
 .fa-lock {
     color: rgb(189, 189, 35);
 }
+
+.search-matches .search-container {
+  position: relative;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}

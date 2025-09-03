@@ -1,151 +1,324 @@
-import React, { useState, useEffect, useRef } from 'react';
-import '../static/css/others/SearchBar.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import useSearchEngine from "./useSearchEngine.ts";
+import { LogicalOperator, MatchMode } from "./searchEngine.ts";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "./SearchBar.css";
 
-const splitQuery = (queryStr:string) => {
-  const tokens:string[] = [];
-  let currentToken = '';
-  let inQuotes = false;
-  
-  for (const char of queryStr) {
-    if (char === '"') {
-      inQuotes = true;
-    } else if (char === ' ' && !inQuotes) {
-      if (currentToken) {
-        tokens.push(currentToken.trim());
-        currentToken = '';
-      }
-    } else {
-      currentToken += char;
-    }
-  }
-  if (currentToken) tokens.push(currentToken.trim());
-  return tokens;
-};
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
 
-const splitValues = (valueStr:string) => {
-  const values:string[] = [];
-  let currentValue = '';
-  let inQuotes = false;
-  
-  for (const char of valueStr) {
-    if (char === '"') {
-      inQuotes = true;
-    } else if (char === ',' && !inQuotes) {
-      values.push(currentValue.trim());
-      currentValue = '';
-    } else {
-      currentValue += char;
-    }
-  }
-  if (currentValue) values.push(currentValue.trim());
-  
-  return values.map(v => v.replace(/"/g, '').trim().toLowerCase());
-};
+export interface SearchBarProps<T> {
+  data: T[];
+  setFiltered: (data: T[]) => void;
+  placeholder?: string;
+  attributeMap?: Record<string, string>;
+  cacheCapacity?: number;
+  debounceMs?: number;
 
-const getNestedValue = (obj, path) => {
-  return path.split('.').reduce((acc, part) => acc?.[part], obj);
-};
+  defaultOperator?: LogicalOperator;      // AND | OR
+  defaultCaseSensitive?: boolean;         // true = strict case/diacritics/symbols
+  defaultMatchMode?: MatchMode;           // "exact" | "contains" | "startsWith"
+}
 
-const filterData = (data:[], query:string, attributeMap = {}) => {
-  const queryParts = splitQuery(query);
-  const filters: Record<string, string[]> = {};
-  
-  for (const part of queryParts) {
-    const [attr, valueStr] = part.split(':');
-    if (attr && valueStr) {
-      filters[attr.trim()] = splitValues(valueStr);
-    }
-  }
+const SearchBar = <T extends object>({
+  data,
+  setFiltered,
+  placeholder = "Buscar...",
+  attributeMap = {},
+  cacheCapacity = 200,
+  debounceMs = 300,
+  defaultOperator = "AND",
+  defaultCaseSensitive = true,
+  defaultMatchMode = "exact",
+}: SearchBarProps<T>) => {
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [operator, setOperator] = useState<LogicalOperator>(defaultOperator);
+  const [caseSensitive, setCaseSensitive] = useState<boolean>(defaultCaseSensitive);
+  const [matchMode, setMatchMode] = useState<MatchMode>(defaultMatchMode);
 
-  return data.filter(item => {
-    return Object.entries(filters).every(([attr, values]) => {
-      const path = attributeMap[attr] || attr;
-      const fieldValue = getNestedValue(item, path)?.toString().toLowerCase().trim() || '';
-      return values.some(value => fieldValue.includes(value));
-    });
-  });
-};
+  // UI state (dropdowns)
+  const [showAttrDropdown, setShowAttrDropdown] = useState(false);
+  const [showOpDropdown, setShowOpDropdown] = useState(false);
+  const [showModeDropdown, setShowModeDropdown] = useState(false);
 
-export default function SearchBar({ data, setFiltered, placeholder, attributeMap = {} }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
+  // Refs
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [showHelp, setShowHelp] = useState(false);
 
-  useEffect(() => {
-    if (searchTerm === "") {
-      setFiltered(data);
-    }
-  }, [searchTerm, data, setFiltered]);
+  // Engine options
+  const options = useMemo(
+    () => ({ attributeMap, operator, caseSensitive, matchMode }),
+    [attributeMap, operator, caseSensitive, matchMode]
+  );
+  const { search } = useSearchEngine<T>(data, options, cacheCapacity);
 
-  const attributes = React.useMemo(() => {
-    if (!data.length) return [];
-    const dataKeys = Object.keys(data[0]);
-    const mappedKeys = Object.keys(attributeMap);
-    const combined = [...new Set([...mappedKeys, ...dataKeys])];
-    return combined.filter(key => key.toLowerCase() !== 'id');
+  // Discover searchable attributes (explicit map + top-level keys)
+  const searchableAttributes = useMemo(() => {
+    const explicit = Object.keys(attributeMap);
+    const dataAttrs = data[0] ? Object.keys(data[0] as object) : [];
+    return Array.from(new Set([...explicit, ...dataAttrs.filter(a => !a.includes("."))]))
+      .filter(a => a.toLowerCase() !== "id");
   }, [data, attributeMap]);
 
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
+  // Debounced search
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setFiltered(searchTerm ? search(searchTerm) : data);
+    }, debounceMs);
+    return () => clearTimeout(id);
+  }, [searchTerm, data, search, setFiltered, debounceMs]);
 
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
+  // Close any open dropdown when clicking outside
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) {
+        setShowAttrDropdown(false);
+        setShowOpDropdown(false);
+        setShowModeDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  // Insert "attr:" into the search bar
+  const handleAttributeClick = (attr: string) => {
+    setSearchTerm(prev => (prev ? `${prev} ${attr}:` : `${attr}:`));
+    setShowAttrDropdown(false);
+    inputRef.current?.focus();
   };
 
-  const toggleHelp = () => {
-    setShowHelp(!showHelp);
-  };
+  // Execute search immediately (enter key or button)
+  const runSearchNow = () => setFiltered(search(searchTerm));
 
-  const handleAttributeClick = (attribute) => {
-    let prefix = searchTerm.trim();
-    if (prefix && !prefix.endsWith(':')) prefix += ' ';
-    setSearchTerm(prefix + attribute + ':');
-    setShowDropdown(false);
-    requestAnimationFrame(() => inputRef.current?.focus());
-  };
-
-  const handleSearch = () => {
-    const filteredData = filterData(data, searchTerm, attributeMap);
-    setFiltered(filteredData);
+  // Labels for match mode
+  const modeLabel: Record<MatchMode, string> = {
+    exact: "Exact",
+    contains: "Contains",
+    startsWith: "Starts",
   };
 
   return (
-    <>
-    <div className="search-container">
-      <div className="search-dropdown-container">
-        <i className="fa fa-chevron-down search-dropdown-toggle" onClick={toggleDropdown}></i>
-        {showDropdown && (
-          <div className="search-dropdown">
-            {attributes.map((attr) => (
-              <div key={attr} className="search-dropdown-item" onClick={() => handleAttributeClick(attr)}>
-                {attr}
+    <div className="search-component" ref={containerRef}>
+      <div className="search-container">
+        {/* Controls row */}
+        <div className="search-controls">
+          {/* AND/OR pill with chevron dropdown */}
+          <div className="pill-dropdown-container">
+            <button
+              type="button"
+              className={`pill-toggle ${showOpDropdown ? "active" : ""}`}
+              aria-haspopup="listbox"
+              aria-expanded={showOpDropdown}
+              aria-label="Select logical operator AND/OR"
+              onClick={() => {
+                setShowOpDropdown(s => !s);
+                setShowModeDropdown(false);
+                setShowAttrDropdown(false);
+              }}
+            >
+              <span className="pill-toggle-label">{operator}</span>
+              <i className="fa fa-chevron-down" aria-hidden="true" />
+            </button>
+
+            {showOpDropdown && (
+              <div className="pill-menu" role="listbox" aria-label="Logical operator">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={operator === "AND"}
+                  className={`pill-option ${operator === "AND" ? "selected" : ""}`}
+                  onClick={() => {
+                    setOperator("AND");
+                    setShowOpDropdown(false);
+                  }}
+                >
+                  AND
+                </button>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={operator === "OR"}
+                  className={`pill-option ${operator === "OR" ? "selected" : ""}`}
+                  onClick={() => {
+                    setOperator("OR");
+                    setShowOpDropdown(false);
+                  }}
+                >
+                  OR
+                </button>
               </div>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* Case sensitive pill (toggle) */}
+          <div className="pill-toggle-single">
+            <button
+              type="button"
+              className={`pill-toggle ${caseSensitive ? "active" : ""}`}
+              aria-pressed={caseSensitive}
+              aria-label="Toggle case sensitivity"
+              title={
+                caseSensitive
+                  ? "Strict: case/diacritics/symbols are respected"
+                  : "Normalized: lowercased, diacritics/symbols removed"
+              }
+              onClick={() => setCaseSensitive(s => !s)}
+            >
+              <span className="pill-toggle-label">
+                Case sensitive: {caseSensitive ? "ON" : "OFF"}
+              </span>
+            </button>
+          </div>
+
+          {/* Match mode pill with chevron dropdown */}
+          <div className="pill-dropdown-container">
+            <button
+              type="button"
+              className={`pill-toggle ${showModeDropdown ? "active" : ""}`}
+              aria-haspopup="listbox"
+              aria-expanded={showModeDropdown}
+              aria-label="Select match mode"
+              onClick={() => {
+                setShowModeDropdown(s => !s);
+                setShowOpDropdown(false);
+                setShowAttrDropdown(false);
+              }}
+            >
+              <span className="pill-toggle-label">{modeLabel[matchMode]}</span>
+              <i className="fa fa-chevron-down" aria-hidden="true" />
+            </button>
+
+            {showModeDropdown && (
+              <div className="pill-menu" role="listbox" aria-label="Match mode">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={matchMode === "exact"}
+                  className={`pill-option ${matchMode === "exact" ? "selected" : ""}`}
+                  onClick={() => {
+                    setMatchMode("exact");
+                    setShowModeDropdown(false);
+                  }}
+                >
+                  Exact
+                </button>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={matchMode === "contains"}
+                  className={`pill-option ${matchMode === "contains" ? "selected" : ""}`}
+                  onClick={() => {
+                    setMatchMode("contains");
+                    setShowModeDropdown(false);
+                  }}
+                >
+                  Contains
+                </button>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={matchMode === "startsWith"}
+                  className={`pill-option ${matchMode === "startsWith" ? "selected" : ""}`}
+                  onClick={() => {
+                    setMatchMode("startsWith");
+                    setShowModeDropdown(false);
+                  }}
+                >
+                  Starts
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Attribute dropdown (chevron-only trigger) */}
+        <div className="search-dropdown-container">
+          <button
+            type="button"
+            className={`search-dropdown-toggle ${showAttrDropdown ? "active" : ""}`}
+            aria-haspopup="listbox"
+            aria-expanded={showAttrDropdown}
+            aria-label="Show searchable attributes"
+            onClick={() => {
+              setShowAttrDropdown(s => !s);
+              setShowOpDropdown(false);
+              setShowModeDropdown(false);
+            }}
+          >
+            <i className="fa fa-chevron-down" aria-hidden="true" />
+          </button>
+
+          {showAttrDropdown && (
+            <div className="search-dropdown" role="listbox">
+              {searchableAttributes.map(attr => (
+                <div
+                  key={attr}
+                  role="option"
+                  tabIndex={0}
+                  className="search-dropdown-item"
+                  onClick={() => handleAttributeClick(attr)}
+                  onKeyDown={e => (e.key === "Enter" || e.key === " ") && handleAttributeClick(attr)}
+                >
+                  {attr}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Input + search button */}
+        <input
+          ref={inputRef}
+          type="text"
+          className="search-bar"
+          placeholder={placeholder}
+          aria-label="Search input"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") runSearchNow(); }}
+        />
+        <button
+          type="button"
+          className="search-button"
+          aria-label="Run search"
+          onClick={runSearchNow}
+          title="Search"
+        >
+          <i className="fa fa-search" aria-hidden="true" />
+        </button>
       </div>
-      <input
-        className="search-bar"
-        type="text"
-        placeholder={placeholder || "Search..."}
-        value={searchTerm}
-        onChange={handleChange}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        ref={inputRef}
-      />
-      <button className="search-button" onClick={handleSearch}>
-        <i className="fa fa-search"></i>
-      </button>
     </div>
-    <div className="help-icon-container">
-    <i className="fa fa-question-circle help-icon" onClick={toggleHelp}></i>
-    {showHelp && (
-      <div className="help-text">
-        <p>When searching for values with spaces, wrap them in double quotes (e.g., <b>clinic:"Clinic 1"</b>)</p>
-      </div>
-    )}
-  </div>
-  </>
   );
 };
+
+export default React.memo(SearchBar) as typeof SearchBar;

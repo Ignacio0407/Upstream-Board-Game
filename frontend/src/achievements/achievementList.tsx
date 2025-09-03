@@ -2,7 +2,7 @@ import { Table, Button, Alert } from 'reactstrap';
 import tokenService from '../services/token.service.ts';
 import useFetchState from '../util/useFetchState.ts';
 import deleteFromList from '../util/deleteFromList.ts';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import jwt_decode from 'jwt-decode';
 import '../static/css/achievement/achievement.css';
 import ButtonLink from '../components/ButtonLink/ButtonLink.tsx';
@@ -56,26 +56,17 @@ export default function AchievementList() {
           )}
         </td>
         {roles[0] === 'ADMIN' && (
-          <Button
-            outline
-            color="danger"
-            onClick={() =>
-              deleteFromList(
-                `/api/v1/achievements/${a.id}`,
-                a.id,
-                [achievements, setAchievements],
-                [alerts, setAlerts],
-                setMessage,
-                setVisible
-              )
-            }
-          >
+          <Button outline color="danger" onClick={() =>
+              deleteFromList(`/api/v1/achievements/${a.id}`, a.id, [achievements, setAchievements], [alerts, setAlerts],
+                setMessage, setVisible)}>
             Delete
           </Button>
         )}
       </tr>
     ));
   }
+
+  const renderedAchievements = useMemo(() => achievementList(filtered.length ? filtered : achievements), [filtered, achievements]);
 
   return (
     <body className="achievement-container">
@@ -87,7 +78,7 @@ export default function AchievementList() {
           <tr className="text-playercard">Total points: {finalUser.totalpoints}</tr>
         </Table>
       </div>
-      <SearchBar data={achievements} setFiltered={setFiltered} placeholder="Search achievements" defaultCaseSensitive={true}/>
+      <SearchBar data={achievements} setFiltered={setFiltered} placeholder="Search achievements"/>
       <div className="achievement-card">
         <h1 className="text-center">Achievements</h1>
         <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
@@ -103,7 +94,7 @@ export default function AchievementList() {
               {roles[0] === 'ADMIN' && <th className="text-center table-row">Actions</th>}
             </tr>
           </thead>
-          <tbody>{filtered ? achievementList(filtered) : achievementList(achievements)}</tbody>
+          <tbody>{renderedAchievements}</tbody>
 
           {roles[0] === 'ADMIN' && (
             <ButtonLink outline={true} color="success" direction="/achievements/new" text="Create achievement" />

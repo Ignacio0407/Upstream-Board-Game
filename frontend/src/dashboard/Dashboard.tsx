@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Alert, Button } from 'reactstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css'
@@ -85,13 +85,15 @@ export default function Dashboard() {
       })
     }
 
+    const renderedMatches = useMemo(() => matchesList(filtered.length ? filtered : matches), [filtered, matches]);
+
     return ( 
         <> 
         <div className="dashboard-page-container">
             <h1 className='welcome'>
             Game Listing for {username}
             </h1>
-            <SearchBar data={matches} setFiltered={setFiltered} placeholder={"Search matches"} defaultCaseSensitive={true}/>
+            <div className="search-matches"> <SearchBar data={matches} setFiltered={setFiltered} placeholder={"Search matches"}/> </div>
             <WhiteSpace />
             <div>
             <div className='crear-partida'>
@@ -108,7 +110,7 @@ export default function Dashboard() {
                         <th className='cabeza'>Spectate</th>
                     </tr>
                 </thead>
-                <tbody>{filtered ? matchesList(filtered) : matchesList(matches)}</tbody>
+                <tbody>{renderedMatches}</tbody>
                 </div>
             </div>
         </div> 
