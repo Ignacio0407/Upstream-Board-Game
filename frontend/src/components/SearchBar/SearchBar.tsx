@@ -1,9 +1,3 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import useSearchEngine from "./useSearchEngine.ts";
-import { LogicalOperator, MatchMode } from "./searchEngine.ts";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import "./SearchBar.css";
-
 /**
  * -----------------------------------------------------------------------------
  * Autor / Author: Ignacio Gutiérrez Serrera
@@ -33,6 +27,12 @@ import "./SearchBar.css";
  * del código fuente o binario.
  * -----------------------------------------------------------------------------
  */
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import useSearchEngine from "./useSearchEngine.ts";
+import { LogicalOperator, MatchMode } from "./searchEngine.ts";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "./SearchBar.css";
 
 export interface SearchBarProps<T> {
   data: T[];

@@ -1,6 +1,3 @@
-import { useCallback, useEffect, useRef } from "react";
-import { LRUCache, SearchOptions, searchData } from "./searchEngine.ts";
-
 /**
  * -----------------------------------------------------------------------------
  * Autor / Author: Ignacio Gutiérrez Serrera
@@ -30,6 +27,9 @@ import { LRUCache, SearchOptions, searchData } from "./searchEngine.ts";
  * del código fuente o binario.
  * -----------------------------------------------------------------------------
  */
+
+import { useCallback, useEffect, useRef } from "react";
+import { LRUCache, SearchOptions, searchData } from "./searchEngine.ts";
 
 const useSearchEngine = <T,> (
   data: T[],
