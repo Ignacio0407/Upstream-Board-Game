@@ -33,7 +33,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
     return (
         <div style={styles.modalOverlay}>
             <div style={styles.modalContent}>
-                <h3>Escoge un color:</h3>
+                <h3>Pick a color:</h3>
                 <div style={styles.buttonContainer}>
                     {colors.map((color) => (
                         <button key={color}
@@ -42,10 +42,10 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
                                 backgroundColor: color,
                                 border: color === selectedColor ? '3px solid black' : '1px solid #ccc',
                                 cursor: takenColors.includes(color) ? 'not-allowed' : 'pointer',
-                                position: 'relative', // Para superponer la cruz
+                                position: 'relative', // Superpose the X
                             }}
                             onClick={() => handleColorClick(color)}
-                            disabled={takenColors.includes(color)} // Deshabilita el botón si el color está tomado
+                            disabled={takenColors.includes(color)}
                         >
                             {takenColors.includes(color) && (
                                 <div style={styles.crossOverlay}>✖</div>
@@ -54,7 +54,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
                     ))}
                 </div>
                 <button onClick={handleAccept} style={styles.acceptButton}>
-                    Aceptar
+                    Accept
                 </button>
             </div>
         </div>

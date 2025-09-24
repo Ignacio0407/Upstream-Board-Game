@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, ButtonGroup, Table } from "reactstrap";
 import tokenService from "../../services/token.service.ts";
@@ -58,7 +58,9 @@ export default function UserListAdmin() {
     );
   });
   }
+
   const modal = getErrorModal(setVisible, visible, message);
+  const renderedPlayers = useMemo(() => userList(filtered.length ? filtered : users), [filtered, users]);
 
   return (
     <div className="admin-page-container">
@@ -78,7 +80,7 @@ export default function UserListAdmin() {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>{filtered ? userList(filtered) : userList(users)}</tbody>
+          <tbody>{renderedPlayers}</tbody>
         </Table>
       </div>
     </div>
