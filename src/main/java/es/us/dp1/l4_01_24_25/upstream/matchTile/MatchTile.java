@@ -38,7 +38,7 @@ public class MatchTile extends BaseEntity {
     Match match;
 
     public Boolean isFull () {
-        if (this.match.getPlayersNumber() >= 2 && this.getTile().getType().equals(TileType.ROCK)) return this.getCapacity().equals(this.getSalmonsNumber() -1);
+        if (this.match.getPlayersNumber() > 2 && this.getTile().getType().equals(TileType.ROCK)) return this.getCapacity().equals(this.getSalmonsNumber() -1);
         else return this.getCapacity().equals(this.getSalmonsNumber()); 
     }
 

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
@@ -210,6 +211,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
 
     public MatchDTO changePhase(Integer matchId, Integer playerId) {
         Match match = this.findById(matchId);
+        if (match.getActualPlayer().getId() != playerId)
+            throw new NotValidMoveException("It is not your turn!");
         Player player = this.playerService.findById(playerId);
         Phase phase = match.getPhase();
         List<MTCoordinateDTO> mtNoC = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
@@ -242,6 +245,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.save(match);
         if (match.round >= 3)
             this.checkGameHasFinished(match);
+        this.playerService.notifyPlayersUpdate(matchId);
         return this.matchMapper.toDTO(match);
     }
 

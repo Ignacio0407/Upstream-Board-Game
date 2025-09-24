@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +24,12 @@ import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, MatchTileDTO, Integer>{
 
     MatchTileService matchTileService;
+    SimpMessagingTemplate messagingTemplate;
 
-    public MatchTileController(MatchTileService matchTileService) {
+    public MatchTileController(MatchTileService matchTileService, SimpMessagingTemplate messagingTemplate) {
         super(matchTileService);
         this.matchTileService = matchTileService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping("match/{id}")

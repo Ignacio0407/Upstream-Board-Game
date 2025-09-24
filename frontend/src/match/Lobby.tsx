@@ -10,10 +10,11 @@ import { ColorToRgb } from '../util/ColorParser.ts';
 import startGame from '../util/startGame.ts';
 import endGame from '../util/endGame.ts';
 import ColorHandler from '../util/ColorHandler.tsx';
-import {get, createWebSocket} from '../util/fetchers.ts'
+import {createWebSocket} from '../util/fetchers.ts'
 import Match, {emptyMatch} from '../interfaces/Match.ts';
 import Player, {emptyPlayer} from '../interfaces/Player.ts';
 import User, { emptyUser } from '../interfaces/User.ts';
+import { fetchPlayers } from './matchUtil.tsx';
 
 export default function Lobby({match}: {match: Match}) {
     const jwt = tokenService.getLocalAccessToken();
@@ -27,7 +28,7 @@ export default function Lobby({match}: {match: Match}) {
     const [takenColors, setTakenColors] = useState<string[]>([]);
     const [playersNum, setnumjug] = useState<number>(match.playersNumber);
     const [loading, setLoading] = useState(false);
-    const spectatorIds = useLocation().state?.spectatorIds||[];
+    const spectatorIds:number[] = useLocation().state?.spectatorIds||[];
     
     const socket = createWebSocket();
     const stompClient = new Client({
@@ -42,7 +43,7 @@ export default function Lobby({match}: {match: Match}) {
         //console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/refresh', (message) => {
             //console.log('Message received: ' + message.body);
-            fetchPlayers();
+            fetchPlayers(match, jwt, setPlayers);
         });
         stompClient.subscribe('/topic/game', (message) => {
             //console.log('Message received: ' + message.body);
@@ -58,7 +59,7 @@ export default function Lobby({match}: {match: Match}) {
     }
     });
 
-stompClient.activate();
+    stompClient.activate();
     
     useEffect(() => {
         const playerUser = players.find(player => player.userId === user.id);
@@ -71,12 +72,6 @@ stompClient.activate();
             navigate("/dashboard");
         }
     }, [players, match.id, user.id, matches.state]);
- 
-    const fetchPlayers = async () => {
-        const response = await get("/api/v1/players/match/"+match.id, jwt);
-        const data = await response.json();
-        setPlayers(data);
-    };
 
     const startingGame = async () => {
         await startGame({matchId: match.id, jwt, stompClient, finalUser, setLoading});
@@ -86,11 +81,9 @@ stompClient.activate();
         await endGame({match, players, user, jwt, spectatorIds, navigate, playersNum, setMatches});
     };
     
-    const playerList = players.map((p) =>{
+    const playerList = players.map((p, id) =>{
         return (
-        <tr key={p.id} className="r">
-            <PlayerCard name={p.name} color={p.color} />
-        </tr>
+            <PlayerCard key={id} name={p.name} color={p.color} />
         )
     })
     
@@ -104,27 +97,25 @@ stompClient.activate();
         )}
         <div className='lobbyTitleContainer'>
         <h1>
-            Nombre de la sala: {match.name}
+            Room name: {match.name}
         </h1>
         {match.password !== "" &&
          <h4 className='passwordContainer'>
             Password: {match.password}
         </h4>}
         <h4 className='passwordContainer'>
-            Número de jugadores: {match.playersNumber}
+            Players number: {match.playersNumber}
         </h4>
         </div>
         <div className='lobbyMainContainer'>
         
-        <Table className='lobbyPlayerContainer'>
-        <thead> 
-            <h2>
-            Jugadores 
-            </h2>
-        </thead>
-        {playerList}
-        </Table>
-       
+        <div className='lobbyUtilContainer' tabIndex={0}>
+            <h2>Players</h2>
+            {playerList}
+        </div>
+
+        <h1/>
+
         <div className='lobbyUtilContainer' tabIndex={0} 
         onKeyDown={(e) => {
             if (e.key === "Enter" && match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && playersNum >= 1) {
@@ -133,13 +124,13 @@ stompClient.activate();
         }}>
         {match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && playersNum>=2 &&
         <Button color='success' onClick={startingGame} className='buttonStart'>
-            Iniciar
+            Start
         </Button>}
         {loading && <div>Loading tiles...</div>}
 
         <Button color='danger' onClick={endingGame} className='buttonExit'>
-            Salir
-            </Button>
+            Exit
+        </Button>
 
         </div>
         </div>

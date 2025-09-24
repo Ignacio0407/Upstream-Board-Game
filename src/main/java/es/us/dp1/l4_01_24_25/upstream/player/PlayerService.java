@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
@@ -25,14 +26,16 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     SalmonMatchService salmonMatchService;
     UserService userService;
     MatchService matchService;
+    SimpMessagingTemplate messagingTemplate;
 
-    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, @Lazy SalmonMatchService salmonMatchService , @Lazy UserService userService, @Lazy MatchService matchService) {
+    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, @Lazy SalmonMatchService salmonMatchService , @Lazy UserService userService, @Lazy MatchService matchService, SimpMessagingTemplate messagingTemplate) {
         super(playerRepository, playerMapper);
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
         this.salmonMatchService = salmonMatchService;
         this.userService = userService;
         this.matchService = matchService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -152,6 +155,11 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return this.findAlivePlayersByMatch(matchId).stream().filter(
             p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty() 
             || !this.salmonMatchService.findByPlayerIdInSeaAsCoordinateDTO(p.getId()).isEmpty()).toList();
+    }
+
+    public void notifyPlayersUpdate(Integer matchId) { 
+        List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
+        messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
     }
 
 }

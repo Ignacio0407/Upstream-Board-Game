@@ -1,10 +1,11 @@
 import { ColorToRgb } from "../util/ColorParser.ts";
-import { patch } from "../util/fetchers.ts";
+import { get, patch } from "../util/fetchers.ts";
 import '../static/css/game/game.css'
 import MatchTile from '../interfaces/MatchTile.ts'
 import Player from '../interfaces/Player.ts'
 import Match from "../interfaces/Match.ts";
 import SalmonMatch from "../interfaces/SalmonMatch.ts";
+import { JSX } from "react";
 
 export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile:Function, setSelectedSalmon:Function) => {
     if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
@@ -20,84 +21,94 @@ export const handleSalmonClick = (salmon: SalmonMatch, myPlayer:Player|null, mat
     }
 }
 
-export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string) => {
-    try {
-        const responseSalmon = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
-        if (!responseSalmon.ok) {
-            const errorData = await responseSalmon.json();
-            alert(errorData.error || "Movimiento no válido."); // Usa el mensaje del backend o un mensaje por defecto
+export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string, match:Match, actualPlayerId:number|undefined, myPlayerId:number|undefined) => {
+    if (match.phase === "MOVING" && actualPlayerId === myPlayerId) {
+        try {
+        const response = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(errorData.error);
             console.log("Error updating salmon:", errorData);
-        }            
-    } catch (error){
-        console.log("Error updating salmon", error)
+        }
+        return response;
+    } catch (error:any) {
+        console.log("Error updating salmon from catch.", error)
         throw error.message;
     }
+    }
+    else alert("Now it's tiles placing phase!")
 };
 
-export const changephase = async(match:Match, jwt:string) => {
+export const changephase = async(match:Match, jwt:string, myPlayerId:number) => {
     try {
-        const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${match.actualPlayerId}`, jwt)
+        const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${myPlayerId}`, jwt)
         if (!responseChangePhase.ok) {
             const errorData = await responseChangePhase.json();
-            alert(errorData.message || "Error changing phase.");
+            alert(errorData.error);
             console.log("Error changing phase.", errorData);
         }            
-    } catch (error){
-        console.log("Error changing phase.", error)
+    } catch (error:any) {
+        console.log("Error changing phase from catch.", error)
         throw error.message;
     }
 };
     
 export const updateSpawn = async(salmon:SalmonMatch, jwt:string) => {
     try {
-        const responseSalmon = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
-        if (!responseSalmon.ok) {
-            alert("Movimiento no válido.");
-            console.log("Error actualizando salmon", responseSalmon)
+        const response = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(errorData.error);
+            console.log("Error updating salmon:", errorData);
         }
-    } catch (error){
-        console.log("Error actualizando salmon", error)
+    } catch (error:any) {
+        console.log("Error updating salmon from catch:", error)
         throw error.message;
     }
 };
 
-export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string) => {
-    try {
-        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
+export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
+    if (match.phase === "TILES" && actualPlayerId === myPlayerId) {
+        try {
+        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {actualPlayerId, myPlayerId, x,y});
+        console.log(response)
         if (!response.ok) {
-            throw new Error('Invalid tile placement');
+            const errorData = await response.json();
+            alert(errorData.error);
+            console.log("Error positioning tile:", errorData);
         }
+        return response;
     } catch (error) {
         console.error('Error updating tile position:', error);
         throw error; 
     }
+    }
+    else alert("Now it's salmon moving phase!")
 };
 
-export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, gridTiles:MatchTile[], setSelectedSalmon:Function, match:Match) => {
+export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, setSelectedSalmon:Function, match:Match, actualPlayerId:number|undefined, myPlayerId:number, gridTiles:MatchTile[]) => {
     const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
     const gridHeight = 6; // Altura de la cuadrícula (número de filas)
     const x = index % gridWidth;
     const y = gridHeight - 1 - Math.floor(index / gridWidth)
-    try {
-        if (selectedSalmon === null) {
-            if (selectedTile) await updateTilePosition(selectedTile, x, y, jwt);
-            setSelectedTile(null);
+    let updateTilePositionResponse = null;
+    let updateSalmonPositionResponse = null;
+    if (selectedSalmon === null) {
+        if (selectedTile) updateTilePositionResponse = await updateTilePosition(selectedTile, x, y, jwt, actualPlayerId, myPlayerId, match);
+        setSelectedTile(null);
+    }
+    else {
+        const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
+        if (foundTile) {    
+            updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
+            setSelectedSalmon(null);
+        } else if(x === 1 && y === 5 && match.round >= 6){
+            await updateSpawn(selectedSalmon, jwt);        
+            setSelectedSalmon(null);
         }
-        else {
-            const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
-            if (foundTile) {    
-                await updateSalmonPosition(selectedSalmon, x, y, jwt);
-                setSelectedSalmon(null);
-            } else if(x === 1 && y === 5 && match.round >= 6){
-                await updateSpawn(selectedSalmon, jwt);        
-                setSelectedSalmon(null);
-            }
-        }
-        await changephase(match, jwt);
-        }
-        catch (error) {
-            console.error("Error updating tile position or advancing turn:", error);
-        }
+    }
+    if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === "TILES") await changephase(match, jwt, myPlayerId);
+    else if (updateSalmonPositionResponse != null && updateSalmonPositionResponse.ok && match.phase === "MOVING") await changephase(match, jwt, myPlayerId);
 };
 
 export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
@@ -147,6 +158,35 @@ export const generatePlayerList = (players:Player[], actualPlayerId:number) => {
     ));
 };
 
+export const renderPlayerList = (playerList:JSX.Element[]) => {
+    return <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Name</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Color</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Points</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Alive</th>
+                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Energy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {playerList}
+                </tbody>
+            </table>
+}
+
+export const fetchPlayers = async (match:Match, jwt:string, setPlayers:Function) => {
+    const response = await get("/api/v1/players/match/"+match.id, jwt);
+    const data = await response.json();
+    setPlayers(data);
+}
+
+export const fetchSortedPlayers = async (match:Match, jwt:string, setPlayers:Function) => {
+    const response = await get("/api/v1/players/match/sorted/"+match.id, jwt);
+    const data = await response.json();
+    setPlayers(data);
+}
+
 export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
   const tileWidth = 250;
   const tileHeight = 217;
@@ -169,7 +209,7 @@ export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
 
   // Para 2 o más, usamos diferentes figuras
   let angle = 0;
-  let x, y;
+  let x:number, y:number;
 
   switch (totalSalmons) {
     case 2: {
