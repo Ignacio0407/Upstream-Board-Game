@@ -92,10 +92,10 @@ export default function CreateGame() {
 
                 <div className="custom-button-row">
                 <Button color='success' onClick={handleSubmit} className='button-create'>
-                         Crear
+                         Create
                 </Button>
                 <Button color='danger' onClick={() => navigate('/dashboard')} className='button-cancel'>
-                         Cancelar
+                         Cancel
                 </Button>
                 </div>
             </Form>

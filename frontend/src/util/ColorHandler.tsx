@@ -3,7 +3,7 @@ import ColorPickerModal from './ColorPickerModal.tsx';
 import {post} from './fetchers.ts'
 import { JSX } from 'react';
 
-interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, takenColors:string[], onColorChanged:Function, stompClient:Client};
+interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, takenColors:string[], onColorChanged:Function, stompClient:Client|null};
 
 export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged, stompClient }:ColorHandlerProps): JSX.Element {
     async function handleColorChange(color:string) {
@@ -13,10 +13,12 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
 
             if (response.ok) {
                 const createdPlayer = await response.json();
-                stompClient.publish({
-                    destination: "/app/hello",
-                    body: JSON.stringify({ action: "colorChanged", userId: finalUserId }),
-                });
+                if (stompClient) {
+                    stompClient.publish({
+                        destination: "/app/hello",
+                        body: JSON.stringify({ action: "colorChanged", userId: finalUserId }),
+                    });
+                }
 
                 const req = post(`/api/v1/salmonMatches/player/${createdPlayer.id}`, jwt);
 
