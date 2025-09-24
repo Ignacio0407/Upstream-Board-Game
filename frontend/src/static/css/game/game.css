@@ -242,7 +242,7 @@
 .move-your-salmons {
   position: fixed;
   bottom: 50vh;
-  left: 2vw;
+  left: -15vw;
   cursor: pointer;
   z-index: 1000;
 }

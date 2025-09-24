@@ -40,6 +40,7 @@ public class UserService extends BaseService<User,Integer>{
 	@Autowired
 	public UserService(UserRepository userRepository, UserAchievementRepository userAchievementRepository) {
 		super(userRepository);
+		this.userRepository = userRepository;
 		this.userAchievementRepository = userAchievementRepository;
 	}
 

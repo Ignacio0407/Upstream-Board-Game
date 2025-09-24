@@ -8,15 +8,18 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
@@ -28,14 +31,18 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     MatchTileMapper matchTileMapper;
     TileService tileService;
     MatchService matchService;
+    PlayerService playerService;
+    SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService) {
+    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService, PlayerService playerService, SimpMessagingTemplate messagingTemplate) {
         super(matchTileRepository, matchTileMapper);
         this.matchTileRepository = matchTileRepository;
         this.matchTileMapper = matchTileMapper;
         this.tileService = tileService;
         this.matchService = matchService;
+        this.playerService = playerService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -102,14 +109,23 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         Tile waterTile = tileService.findById(1);
         toTravel.setTile(waterTile);
         this.save(toTravel);
+        //MatchTileDTO dto = matchTileMapper.toDTO(toTravel);
+        //this.messagingTemplate.convertAndSend("/topic/tiles/eagle", dto);
         return toTravel;
+    }
+
+    public void toDTOAndSendToWS(MatchTile entity) {
+        MatchTileDTO updated = this.matchTileMapper.toDTO(entity);
+        this.messagingTemplate.convertAndSend("/topic/tiles", updated);
     }
 
     public MatchTile findMyTile (List<MatchTile> matchTiles, Coordinate myCoordinate) {
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
 
-    public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) {
+    public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
+        if (updates.get("actualPlayerId") != updates.get("myPlayerId")) 
+            throw new NotValidMoveException("It is not your turn!");
         MatchTile matchTile = this.findById(id);
         if(updates.get("y") != 0){
             MatchTile matchTile2 = this.findByMatchId(matchTile.getMatch().getId()).stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
@@ -132,14 +148,19 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
             matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y")));
         }
         this.save(matchTile);
-        return this.matchTileMapper.toDTO(matchTile);
+        MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
+        this.messagingTemplate.convertAndSend("/topic/tiles/place", updatedTile);
+        this.playerService.notifyPlayersUpdate(updatedTile.getMatchId());
+        return updatedTile;
     }
 
     public MatchTileDTO updateMatchTileRotation(Integer id, Integer rotation) {
         MatchTile matchTile = this.findById(id);
         matchTile.setOrientation(rotation);
         this.save(matchTile);
-        return this.matchTileMapper.toDTO(matchTile);
+        MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
+        this.messagingTemplate.convertAndSend("/topic/tiles/rotation", updatedTile);
+        return updatedTile;
     }
 
     private void createMatchTile(MatchTile matchTile, Tile tile, Match match, List<MatchTile> createdTiles) {
