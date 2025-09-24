@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { Alert } from 'reactstrap';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import '../../static/css/auth/authButton.css';
+import { useState } from 'react';
 import tokenService from '../../services/token.service.ts';
 import ButtonLink from '../../components/ButtonLink/ButtonLink.tsx';
-import { FormInput } from '../../components/Form/FormInput.tsx';
+import { FormGenerator } from '../../components/Form/FormGenerator.tsx';
+import validators from '../validators.ts';
 
 interface LoginFormInputs {
   username: string;
@@ -13,26 +12,22 @@ interface LoginFormInputs {
 
 export default function Login() {
   const [message, setMessage] = useState<string | null>(null);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormInputs>({
-    defaultValues: {
-      username: '',
-      password: ''
-    }
-  });
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+  const loginFields = [
+    { tag: "Username", name: "username", type: "text", isRequired: true, validators: validators.username },
+    { tag: "Password", name: "password", type: "password", isRequired: true, validators: validators.password }
+  ];
+
+  const onSubmit = async (data: LoginFormInputs) => {
     setMessage(null);
-    
     try {
       const response = await fetch("/api/v1/auth/signin", {
         headers: { "Content-Type": "application/json" },
         method: "POST",
-        body: JSON.stringify(data)});
-      
-      if (!response.ok) {
-        throw new Error("Invalid login attempt");
-      }
-      
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error("Invalid login attempt");
+
       const userData = await response.json();
       tokenService.setUser(userData);
       tokenService.updateLocalAccessToken(userData.token);
@@ -44,47 +39,22 @@ export default function Login() {
 
   return (
     <div className="auth-page-container">
-      {message && (
-        <Alert color="primary">{message}</Alert>
-      )}
-
+      {message && <Alert color="primary">{message}</Alert>}
       <h1>Login</h1>
 
       <div className="auth-form-container">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <FormInput
-            tag="Username"
-            name="username"
-            type="text"
-            register={register}
-            errors={errors}
-            isRequired={true}
-          />
-          
-          <FormInput
-            tag="Password"
-            name="password"
-            type="password"
-            register={register}
-            errors={errors}
-            isRequired={true}
-          />
-          
-          <div className="custom-button-row">
-            <button 
-              type="submit" 
-              className="auth-button"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Cargando...' : 'Login'}
-            </button>
-          </div>
-        </form>
+        <FormGenerator<LoginFormInputs>
+          fields={loginFields}
+          defaultValues={{ username: '', password: '' }}
+          onSubmit={onSubmit}
+          submitText="Login"
+          loadingText="Loading..."
+        />
       </div>
-      
+
       <div className="hero-div">
-        <h4>¿No tienes cuenta?</h4>                
-        <ButtonLink color="success" direction="/register" text="Regístrate" />
+        <h4>¿Don't have an account yet?</h4>                
+        <ButtonLink color="success" direction="/register" text="Register" />
       </div>
     </div>
   );
