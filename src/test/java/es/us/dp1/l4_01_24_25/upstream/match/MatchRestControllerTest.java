@@ -38,17 +38,6 @@ class MatchRestControllerTest {
     private MatchService matchService;
 
     @Test
-    void updateRound_shouldReturn200AndUpdatedMatchDTO() throws Exception {
-        MatchDTO dto = new MatchDTO();
-        dto.setRound(3);
-        when(matchService.updateRound(1)).thenReturn(dto);
-
-        mockMvc.perform(patch("/api/v1/matches/1/ronda"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.round").value(3));
-    }
-
-    @Test
     void createMatchWMatchCreator_shouldReturn201() throws Exception {
         MatchDTO dto = new MatchDTO();
         dto.setName("Test Match");

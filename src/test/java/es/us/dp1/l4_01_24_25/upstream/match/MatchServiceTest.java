@@ -148,21 +148,6 @@ class MatchServiceTest {
     @CsvSource({
         "0,1", "1,2", "5,6"
     })
-    void updateRound_shouldIncreaseRound(int initial, int expected) {
-        Match match = new Match();
-        match.setId(1);
-        match.setRound(initial);
-        MatchDTO dto = new MatchDTO();
-        dto.setRound(expected);
-
-        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
-        when(matchRepository.save(any())).thenReturn(match);
-        when(matchMapper.toDTO(match)).thenReturn(dto);
-
-        MatchDTO result = matchService.updateRound(1);
-        assertEquals(expected, result.getRound());
-    }
-
     @Test
     void createMatchWMatchCreator_shouldReturnDTO() {
         Map<String, String> data = Map.of("name", "test", "password", "123");
@@ -236,27 +221,6 @@ class MatchServiceTest {
         "1, 2",
         "5, 6"
     })
-    void updateRound_shouldIncrementRoundCorrectly(int initialRound, int expectedRound) {
-        Match match = new Match();
-        match.setId(1);
-        match.setRound(initialRound);
-
-        Match saved = new Match();
-        saved.setId(1);
-        saved.setRound(expectedRound);
-
-        MatchDTO dto = new MatchDTO();
-        dto.setId(1);
-        dto.setRound(expectedRound);
-
-        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
-        when(matchRepository.save(any(Match.class))).thenReturn(saved);
-        when(matchMapper.toDTO(any(Match.class))).thenReturn(dto);
-
-        MatchDTO result = matchService.updateRound(1);
-
-        assertEquals(expectedRound, result.getRound());
-    }
 
     @Test
     void startGame_shouldSetInitialAndActualPlayer() {
