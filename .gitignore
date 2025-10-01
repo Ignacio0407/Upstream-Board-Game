@@ -91,3 +91,5 @@ coverage/jacoco.xml
 package-lock.json
 logs/
 node_modules
+
+src/main/resources/static
