@@ -1,11 +1,11 @@
 import { useForm, SubmitHandler, FieldValues, RegisterOptions } from 'react-hook-form';
 import { FormInput } from './FormInput.tsx';
 
-interface FieldDef {tag: string, name: string, type: string, isRequired?: boolean, validators?: RegisterOptions, 
+export interface FieldDef {tag: string, name: string, type: string, isRequired?: boolean, validators?: RegisterOptions, 
   defaultValue?: string, values?: any[], min?: number, max?: number, disabled?: boolean, numberOfColumns?: number;
 }
 
-interface FormGeneratorProps<T extends FieldValues> {fields: FieldDef[], defaultValues: Partial<T>, onSubmit: SubmitHandler<T>,
+export interface FormGeneratorProps<T extends FieldValues> {fields: FieldDef[], defaultValues: Partial<T>, onSubmit: SubmitHandler<T>,
   submitText?: string;       // Text when not submitted.
   loadingText?: string;      // Text uppon sending.
   className?: string;        // Optional css for the form.
