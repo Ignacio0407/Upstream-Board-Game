@@ -18,10 +18,11 @@ public class AchievementService extends BaseService<Achievement,Integer>{
 
     @Override
     @Transactional
-    protected void updateEntityFields (Achievement newAchievement, Achievement achievementToUpdate) {
-        achievementToUpdate.setDescription(newAchievement.getDescription());
-        achievementToUpdate.setBadgeImage(newAchievement.getBadgeImage());
-        achievementToUpdate.setThreshold(newAchievement.getThreshold());
-        achievementToUpdate.setMetric(newAchievement.getMetric());
+    protected void updateEntityFields(Achievement existingEntity, Achievement updatedEntity) {
+        existingEntity.setName(updatedEntity.getName());
+        existingEntity.setDescription(updatedEntity.getDescription());
+        existingEntity.setBadgeImage(updatedEntity.getBadgeImage());
+        existingEntity.setThreshold(updatedEntity.getThreshold());
+        existingEntity.setMetric(updatedEntity.getMetric());
     }
 }
