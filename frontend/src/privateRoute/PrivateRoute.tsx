@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import tokenService from '../services/token.service.ts';
 import Login from '../auth/login/Login.tsx';
 
-//interface PrivateRouteProps {children: React.ReactNode};
-// : React.FC<PrivateRouteProps>
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children }: {children: React.ReactNode}) => {
   const jwt = tokenService.getLocalAccessToken();
   const [isLoading, setIsLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -50,7 +48,7 @@ const PrivateRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
-  return isValid ? <> {children}</> : <Login message={message} navigation={!jwt} />;
+  return isValid ? <> {children}</> : <Login />;
 };
 
 export default PrivateRoute;
