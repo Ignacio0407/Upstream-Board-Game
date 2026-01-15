@@ -6,7 +6,7 @@ public class AUVictories implements AchievementStrategy{
 
     @Override
     public boolean isUnlockedByUser(User user, Achievement achievement) {
-        return user.getVictories() >= achievement.getThreshold();
+        return user.getVictories() != null && user.getVictories() >= achievement.getThreshold();
     }
     
 }
