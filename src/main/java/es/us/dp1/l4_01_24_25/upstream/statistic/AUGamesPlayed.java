@@ -6,8 +6,7 @@ public class AUGamesPlayed implements AchievementStrategy{
 
     @Override
     public boolean isUnlockedByUser(User user, Achievement achievement) {
-        return user.getPlayedgames() >= achievement.getThreshold();
+        return user.getPlayedgames() != null && user.getPlayedgames() >= achievement.getThreshold();
     }
-
 
 }

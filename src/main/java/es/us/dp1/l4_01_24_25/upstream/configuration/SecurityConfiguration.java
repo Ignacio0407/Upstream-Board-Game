@@ -27,9 +27,6 @@ public class SecurityConfiguration {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
-    @SuppressWarnings("unused")
-    private static final String ADMIN = "ADMIN";
-
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         http

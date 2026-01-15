@@ -7,17 +7,17 @@ import es.us.dp1.l4_01_24_25.upstream.user.User;
 
 public class AchievementUnlocker {
 
-    private Map<Metric, AchievementStrategy> estrategias = new HashMap<>();
+    private Map<Metric, AchievementStrategy> strategies = new HashMap<>();
 
     public AchievementUnlocker() {
-        estrategias.put(Metric.GAMES_PLAYED, new AUGamesPlayed());
-        estrategias.put(Metric.TOTAL_POINTS, new AUTotalPoints());
-        estrategias.put(Metric.VICTORIES, new AUVictories());
+        strategies.put(Metric.GAMES_PLAYED, new AUGamesPlayed());
+        strategies.put(Metric.TOTAL_POINTS, new AUTotalPoints());
+        strategies.put(Metric.VICTORIES, new AUVictories());
     }
 
     public boolean checkUnlock(User user, Achievement achievement) {
-        AchievementStrategy estrategia = estrategias.get(achievement.getMetric());
-        if(estrategia!=null) return estrategia.isUnlockedByUser(user, achievement);
+        AchievementStrategy strategy = strategies.get(achievement.getMetric());
+        if(strategy!=null) return strategy.isUnlockedByUser(user, achievement);
         return false;
     }
 
