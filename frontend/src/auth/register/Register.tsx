@@ -72,6 +72,7 @@ export default function Register() {
           onSubmit={onSubmit}
           submitText="Register"
           loadingText="Registering..."
+          deactivateSecurity={true}
           extraBeforeSubmit={
             <div className="class-form-group" style={{ marginTop: '20px', marginLeft: '200px' }}>
               <label style={{ display: 'block', marginBottom: '10px' }}>Select Role:</label>

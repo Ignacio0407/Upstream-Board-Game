@@ -29,16 +29,24 @@
  */
 
 import { useForm, FieldValues, DefaultValues } from 'react-hook-form';
+import { useNavigate } from "react-router-dom";
 import { FormInput } from './FormInput.tsx';
 import { FieldDef, FormGeneratorProps } from './FormGenerator.tsx';
+import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
+import { BaseUser } from '../../interfaces/User.ts';
 
 interface EditFormGeneratorProps<T extends FieldValues> extends Omit<FormGeneratorProps<T>, 'fields' | 'defaultValues'> {
-  entityToEdit: T, selectOptions?: Record<string, string[]>
+  entityToEdit: T, selectOptions?: Record<string, string[]>, actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean,
+  onUnauthorizedRedirect?: string, deactivateSecurity?: boolean
 }
 
 export function EditFormGenerator<T extends FieldValues>({entityToEdit, onSubmit, submitText = 'Submit', loadingText = 'Loading...',
-  className, extraBeforeSubmit, selectOptions = {}}: EditFormGeneratorProps<T>) {
+  className, extraBeforeSubmit, selectOptions, actualUser, requiredAuth, checkAuth, onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: EditFormGeneratorProps<T>) {
 
+  const navigate = useNavigate();
+  if (!deactivateSecurity) {  
+    navigateToUnauthorized(checkAuth, actualUser, requiredAuth, navigate, onUnauthorizedRedirect);
+  }
   const fields: FieldDef[] = buildFieldsFromEntity(entityToEdit, selectOptions);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<T>({

@@ -30,6 +30,9 @@
 
 import { useForm, SubmitHandler, FieldValues, RegisterOptions } from 'react-hook-form';
 import { FormInput } from './FormInput.tsx';
+import { BaseUser } from '../../interfaces/User.ts';
+import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
+import { useNavigate } from 'react-router-dom';
 
 export interface FieldDef {tag: string, name: string, type: string, isRequired?: boolean, validators?: RegisterOptions, 
   defaultValue?: string, values?: any[], min?: number, max?: number, disabled?: boolean, numberOfColumns?: number;
@@ -40,11 +43,17 @@ export interface FormGeneratorProps<T extends FieldValues> {fields: FieldDef[], 
   loadingText?: string;      // Text uppon sending.
   className?: string;        // Optional css for the form.
   extraBeforeSubmit?: React.ReactNode;
+  actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean, onUnauthorizedRedirect?: string, deactivateSecurity?: boolean
 }
 
 export function FormGenerator<T extends FieldValues> ({fields, defaultValues, onSubmit, submitText = 'Submit',
-  loadingText = 'Loading...', className, extraBeforeSubmit}: FormGeneratorProps<T>) {
+  loadingText = 'Loading...', className, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: FormGeneratorProps<T>) {
   
+  const navigate = useNavigate();
+  if (!deactivateSecurity) {
+    navigateToUnauthorized(checkAuth, actualUser, requiredAuth, navigate, onUnauthorizedRedirect);
+  }
+
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<T>({...defaultValues});
 
   return (

@@ -49,6 +49,7 @@ export default function Login() {
           onSubmit={onSubmit}
           submitText="Login"
           loadingText="Loading..."
+          deactivateSecurity={true}
         />
       </div>
 
