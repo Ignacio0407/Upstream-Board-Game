@@ -1,0 +1,104 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
+.dh-container {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 70%);
+  color: #fff;
+}
+
+.dh-overlay {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 7vh;
+}
+
+.dh-title {
+  font-size: 2.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dh-subtitle {
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.dh-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dh-flag {
+  position: absolute;
+  top: -10vh;                 /* starts out of screen */
+  will-change: transform;     /* performance hint */
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+  animation-name: dh-fall, dh-wiggle;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+/* Vertical fall */
+@keyframes dh-fall {
+  0%   { transform: translateY(-10vh); opacity: 0.9; }
+  95%  { opacity: 0.95; }
+  100% { transform: translateY(110vh); opacity: 0.0; }
+}
+
+/* Little horizontal movement and rotation */
+@keyframes dh-wiggle {
+  0%   { transform: translateY(-10vh) translateX(0) rotate(0deg); }
+  25%  { transform: translateY(25vh) translateX(-1.2vw) rotate(-2deg); }
+  50%  { transform: translateY(50vh) translateX(1.2vw) rotate(2deg); }
+  75%  { transform: translateY(75vh) translateX(-1vw) rotate(-1deg); }
+  100% { transform: translateY(110vh) translateX(0) rotate(0deg); }
+}
+
+/* Accesible mode: reduce movement if the user prefers */
+@media (prefers-reduced-motion: reduce) {
+  .dh-flag {
+    animation: none;
+    position: static;
+    display: inline-block;
+    margin: 0.25rem;
+  }
+  .dh-stage {
+    position: relative;
+    text-align: center;
+    padding: 2rem;
+  }
+}
