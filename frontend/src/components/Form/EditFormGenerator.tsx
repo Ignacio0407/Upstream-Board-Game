@@ -29,38 +29,60 @@
  */
 
 import { useForm, FieldValues, DefaultValues } from 'react-hook-form';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FormInput } from './FormInput.tsx';
 import { FieldDef, FormGeneratorProps } from './FormGenerator.tsx';
 import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
 import { BaseUser } from '../../interfaces/User.ts';
+import { get } from '../../util/fetchers.ts';
+import tokenService from '../../services/token.service.ts';
+import { useEffect, useState } from 'react';
 
 interface EditFormGeneratorProps<T extends FieldValues> extends Omit<FormGeneratorProps<T>, 'fields' | 'defaultValues'> {
-  entityToEdit: T, selectOptions?: Record<string, string[]>, actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean,
-  onUnauthorizedRedirect?: string, deactivateSecurity?: boolean
+  entityToEdit: T, cancelButtonActivated?:boolean, selectOptions?: Record<string, string[]>, actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean,
+  onUnauthorizedRedirect?: string, deactivateSecurity?: boolean, baseUriToFetchEntity?: string
 }
 
 export function EditFormGenerator<T extends FieldValues>({entityToEdit, onSubmit, submitText = 'Submit', loadingText = 'Loading...',
-  className, extraBeforeSubmit, selectOptions, actualUser, requiredAuth, checkAuth, onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: EditFormGeneratorProps<T>) {
+  className, cancelButtonActivated=true, selectOptions, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, 
+  onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false, baseUriToFetchEntity = "/api/v1"}: EditFormGeneratorProps<T>) {
+  const [entity, setEntity] = useState<T | null>(entityToEdit ?? null);
+  const [fields, setFields] = useState<FieldDef[] | null>(buildFieldsFromEntity(entity!, selectOptions) ?? null);
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<T>({defaultValues: entity as DefaultValues<T>});
+  
+  const jwt = tokenService.getLocalAccessToken();
+  const location = useLocation();
+  useEffect(() => {
+    if (entity == null) {
+      get(baseUriToFetchEntity + location.pathname, jwt).then(res => res.json())
+        .then(data => {
+          console.log('Fetched entity to edit:', data);
+          setEntity(data as T);
+          reset(data);
+          setFields(buildFieldsFromEntity(data, selectOptions));
+        });
+    } else {
+      reset(entity);
+    }
+  }, [entity, jwt, location.pathname, reset]);
 
   const navigate = useNavigate();
   if (!deactivateSecurity) {  
     navigateToUnauthorized(checkAuth, actualUser, requiredAuth, navigate, onUnauthorizedRedirect);
   }
-  const fields: FieldDef[] = buildFieldsFromEntity(entityToEdit, selectOptions);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<T>({
-    defaultValues: entityToEdit as DefaultValues<T>});
+  const parentPath = location.pathname.split('/').slice(0, -1).join('/') || '/';
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={className}>
-      {fields.map((field, idx) => (
+      {fields?.map((field, idx) => (
         <FormInput key={idx} {...field} register={register} errors={errors} />
       ))}
 
       {extraBeforeSubmit}
 
       <div className="custom-button-row">
+        {cancelButtonActivated && <button type="button" className="auth-button" onClick={() => navigate(parentPath)}> Cancel</button>}
         <button type="submit" className="auth-button" disabled={isSubmitting}>
           {isSubmitting ? loadingText : submitText}
         </button>
@@ -69,7 +91,10 @@ export function EditFormGenerator<T extends FieldValues>({entityToEdit, onSubmit
   );
 }
 
-function buildFieldsFromEntity(entity: object, selectOptions: Record<string, string[]> = {}, fieldConfig: Record<string, Partial<FieldDef>> = {}): FieldDef[] {
+function buildFieldsFromEntity(entity: object | null, selectOptions: Record<string, string[]> = {}, fieldConfig: Record<string, Partial<FieldDef>> = {}): FieldDef[] {
+  if (entity == null) {
+    return [];
+  }
   return Object.keys(entity)
     .filter((key) => key !== 'id')
     .map((key) => {
