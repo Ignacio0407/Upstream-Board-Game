@@ -91,13 +91,14 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     @Override
     @Transactional
-    protected void updateEntityFields(MatchTile newMatchTile, MatchTile matchTileToUpdate) {
+    protected MatchTile updateEntityFields(MatchTile newMatchTile, MatchTile matchTileToUpdate) {
         matchTileToUpdate.setCapacity(newMatchTile.getCapacity());
         matchTileToUpdate.setOrientation(newMatchTile.getOrientation());
         matchTileToUpdate.setSalmonsNumber(newMatchTile.getSalmonsNumber());
         matchTileToUpdate.setCoordinate(newMatchTile.getCoordinate());
         matchTileToUpdate.setTile(newMatchTile.getTile());
         matchTileToUpdate.setMatch(newMatchTile.getMatch());
+        return matchTileToUpdate;
     }
 
     public Boolean validateTilePlacement(Integer round, Integer y) {

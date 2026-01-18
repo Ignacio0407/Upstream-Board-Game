@@ -127,13 +127,14 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     @Override
     @Transactional
-    protected void updateEntityFields (SalmonMatch newSalmonMatch, SalmonMatch salmonMatchToUpdate) {
+    protected SalmonMatch updateEntityFields (SalmonMatch newSalmonMatch, SalmonMatch salmonMatchToUpdate) {
         salmonMatchToUpdate.setPlayer(newSalmonMatch.getPlayer());
         salmonMatchToUpdate.setSalmonsNumber(newSalmonMatch.getSalmonsNumber());
         salmonMatchToUpdate.setSpawningNumber(newSalmonMatch.getSpawningNumber());
         salmonMatchToUpdate.setCoordinate(newSalmonMatch.getCoordinate());
         salmonMatchToUpdate.setSalmon(newSalmonMatch.getSalmon());
         salmonMatchToUpdate.setMatch(newSalmonMatch.getMatch());
+        return salmonMatchToUpdate;
     }
 
     public void setSalmonImage (SalmonMatch salmonMatch) {

@@ -18,8 +18,9 @@ public class SalmonService extends BaseService<Salmon,Integer>{
 
     @Override
     @Transactional
-    protected void updateEntityFields(Salmon newSalmon, Salmon salmonToUpdate) {
+    protected Salmon updateEntityFields(Salmon newSalmon, Salmon salmonToUpdate) {
         salmonToUpdate.setImage(newSalmon.getImage());
+        return salmonToUpdate;
     }
 
     @Transactional(readOnly = true)

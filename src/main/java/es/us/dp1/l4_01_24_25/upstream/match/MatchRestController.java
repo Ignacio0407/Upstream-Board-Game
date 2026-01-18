@@ -41,11 +41,6 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
         return null;
     }
 
-    @PatchMapping("/{matchId}/ronda")
-    public ResponseEntity<MatchDTO> updateRound(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        return ResponseEntity.ok(this.matchService.updateRound(matchId));
-    }
-
     @PostMapping("/matchCreator/{userId}")
     public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
         return new ResponseEntity<>(this.matchService.createMatchWMatchCreator(userId, requestBody), HttpStatus.CREATED);
