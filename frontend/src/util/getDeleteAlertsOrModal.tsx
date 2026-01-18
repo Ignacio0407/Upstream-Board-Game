@@ -1,3 +1,4 @@
+import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, Dispatch, SetStateAction } from "react";
 import { Alert } from "reactstrap";
 
 /**
@@ -6,7 +7,7 @@ import { Alert } from "reactstrap";
  * @param {string} id - The unique identifier of the alert to be dismissed.
  * @param {React.Dispatch<React.SetStateAction<Alert[]>>} setAlerts - A function to update the list of alerts by removing the dismissed alert.
  */
-function dismiss(alerts, id:string, setAlerts:React.Dispatch<React.SetStateAction<Alert[]>>) {
+function dismiss(alerts: any[], id:string, setAlerts:React.Dispatch<React.SetStateAction<Alert[]>>) {
     setAlerts(alerts.filter(a => a.id !== id))
 }
 
@@ -26,10 +27,10 @@ function dismiss(alerts, id:string, setAlerts:React.Dispatch<React.SetStateActio
  * getDeleteAlertsOrModal(responseJson, "123", currentAlerts, setCurrentAlerts, setModalMessage, setModalVisible);
  */
 
-export default function getDeleteAlertsOrModal(json, id:number, alerts, setAlerts, setMessage, setVisible) {
+export default function getDeleteAlertsOrModal(json: { statusCode: any; message: any }, id:number, alerts: any[], setAlerts: Dispatch<SetStateAction<Alert[]>>, setMessage: ((message:string) => void) | undefined, setVisible: ((visible: boolean) => void) | undefined) {
     if (json.statusCode) {
-        setMessage(json.message);
-        setVisible(true);
+        if (setMessage) setMessage(json.message);
+        if (setVisible)setVisible(true);
     }
     else {
         const alertId = `alert-${id}`

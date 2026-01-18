@@ -49,7 +49,7 @@ export const post = async (uri:string, jwt:string|null, data?:any) => {
 };
 
 export const deleteEntity = async (uri:string, jwt:string|null, id:number) => {
-    return fetch(uri + "/" + {id}, {
+    return fetch(uri + "/" + id, {
       method: "DELETE",
       headers: {
           Authorization: `Bearer ${jwt}`,

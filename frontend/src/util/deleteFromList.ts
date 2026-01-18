@@ -1,7 +1,7 @@
+import { Alert } from "reactstrap";
 import tokenService from "../services/token.service.ts";
 import getDeleteAlertsOrModal from "./getDeleteAlertsOrModal.tsx";
 import { deleteEntity} from "./fetchers.ts"
-import { Alert } from "reactstrap";
 /**
  * Function to delete an item from a list via a DELETE request and update the state accordingly.
  * This function also handles alerts and modals based on the server's response.
