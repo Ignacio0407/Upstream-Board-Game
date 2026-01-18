@@ -1,5 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.userAchievement;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -32,6 +35,7 @@ public class UserAchievement {
     private User user;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Achievement achievement;
 
     public UserAchievement() {}

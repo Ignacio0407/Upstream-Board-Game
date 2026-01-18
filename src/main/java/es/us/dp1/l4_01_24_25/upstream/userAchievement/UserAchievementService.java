@@ -14,7 +14,7 @@ import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
 @Service
@@ -28,8 +28,17 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     @Autowired
     public UserAchievementService( UserAchievementRepository userAchievementRepository, @Lazy UserService userService, AchievementService achievementService) {
         super(userAchievementRepository);
+        this.userAchievementRepository = userAchievementRepository;
         this.userService = userService;
         this.achievementService = achievementService;
+    }
+
+    @Transactional
+    public List<UserAchievement> findByUserId(Integer userId) throws ResourceNotFoundException {
+        if (userId == null) {
+            throw new ResourceNotFoundException("User ID cannot be null.");
+        }
+        return this.userAchievementRepository.findByUserId(userId);
     }
 
     @Transactional
@@ -43,13 +52,17 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     @Transactional
     public void checkAndUnlockAchievements(Integer userId) {
         User user = this.userService.findById(userId);
-        Iterable<Achievement> achievements = this.achievementService.findAll();
+        List<Achievement> achievements = this.achievementService.findAll();
+        List<Integer> currentAchievements = this.findByUserId(userId).stream().map(ua -> ua.getAchievement().getId()).toList();
         List<UserAchievement> toSave = new ArrayList<>();
+        
         for(Achievement a:achievements) {
-                if(this.achievementUnlocker.checkUnlock(user, a)) {
-                    UserAchievement ua = new UserAchievement(user, a);
-                    toSave.add(ua);
-                }       
+            boolean alreadyAchieved = currentAchievements.stream().anyMatch(ua -> ua.equals(a.getId()));
+            
+            if(!alreadyAchieved && this.achievementUnlocker.checkUnlock(user, a)) {
+                UserAchievement ua = new UserAchievement(user, a);
+                toSave.add(ua);
+            }
         }
         this.saveAll(toSave);
     }

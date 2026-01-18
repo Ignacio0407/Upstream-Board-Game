@@ -5,13 +5,14 @@ export default interface User {
   username: string;
   password: string,
   authority: Authority,
+  roles?: string[];
   victories: number;
   playedgames: number;
   totalpoints: number;
 }
 
 export const emptyUser: User = 
-{id: 0, username: "", password: "", authority: emptyAuthority, victories: 0, playedgames: 0, totalpoints: 0};
+{id: 0, username: "", password: "", authority: emptyAuthority, roles: [], victories: 0, playedgames: 0, totalpoints: 0};
 
 export interface UserList {
   id: number;
@@ -19,6 +20,14 @@ export interface UserList {
   password: string,
   authority: Authority,
   roles: string;
+}
+
+export interface BaseUser {
+  id: number;
+  username: string;
+  password?: string,
+  authority?: Authority,
+  roles?: string[];
 }
 
 export const emptyUserList:UserList = {id:0, username:"", password:"", authority:emptyAuthority, roles:""}; 

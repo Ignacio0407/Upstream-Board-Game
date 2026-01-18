@@ -21,6 +21,8 @@ import CreateGame from './createGame/CreateGame.tsx';
 import Rules from './rules/rules.tsx';
 import Match from './match/Match.tsx';
 import {JwtPayload} from './interfaces/util'
+import DoNotHackMyApp from './components/DoNotHackMyApp/DoNotHackMyApp.tsx';
+import AchievementCreate from './achievements/achievementCreate.tsx';
 
 const ErrorFallback: React.FC<{error: Error; resetErrorBoundary: () => void;}> = ({ error, resetErrorBoundary }) => {
   return (
@@ -57,24 +59,29 @@ const App: React.FC = () => {
     if (role === 'ADMIN') {
       adminRoutes = (
         <>
+          <Route path="/rules" element={<Rules />} />
           <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
           <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
           <Route path="/developers" element={<DeveloperList />} />
           <Route path="/achievements/" element={<PrivateRoute><AchievementList /></PrivateRoute>} />
           <Route path="/achievements/:achievementId" element={<PrivateRoute><AchievementEdit /></PrivateRoute>} />
+          <Route path="/achievements/new" element={<PrivateRoute><AchievementCreate /></PrivateRoute>} />
           <Route path="/matches/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />
           <Route path="/docs" element={<SwaggerDocs />} />
+          <Route path="/do-not-hack-my-app" element={<DoNotHackMyApp/>} />
         </>
       );
     }
     if (role === 'PLAYER') {
       ownerRoutes = (
         <>
+          <Route path="/rules" element={<Rules />} />
           <Route path="/matches/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
           <Route path="/achievements/" element={<PrivateRoute><AchievementList /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />
           <Route path="/developers" element={<DeveloperList />} />
+          <Route path="/do-not-hack-my-app" element={<DoNotHackMyApp/>} />
         </>
       );
     }
@@ -83,18 +90,22 @@ const App: React.FC = () => {
   if (!jwt) {
     publicRoutes = (
       <>
+        <Route path="/rules" element={<Rules />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rules" element={<Rules />} />
+        <Route path="/do-not-hack-my-app" element={<DoNotHackMyApp/>} />
       </>
     );
   } else {
     userRoutes = (
       <>
+        <Route path="/rules" element={<Rules />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rules" element={<Rules />} />
+        <Route path="/do-not-hack-my-app" element={<DoNotHackMyApp/>} />
       </>
     );
   }

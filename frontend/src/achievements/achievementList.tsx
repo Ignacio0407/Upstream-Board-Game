@@ -1,106 +1,94 @@
-import { Table, Button, Alert } from 'reactstrap';
-import tokenService from '../services/token.service.ts';
-import useFetchState from '../util/useFetchState.ts';
-import deleteFromList from '../util/deleteFromList.ts';
-import { useMemo, useState } from 'react';
-import jwt_decode from 'jwt-decode';
-import '../static/css/achievement/achievement.css';
-import ButtonLink from '../components/ButtonLink/ButtonLink.tsx';
-import SearchBar from '../components/SearchBar/SearchBar.tsx';
-import Achievement from '../interfaces/Achievement.ts'
-import User from '../interfaces/User.ts'
-import {JwtPayload} from '../interfaces/util.ts'
-const imgnotfound = '/images/achievements/notFoundImage.png';
+import { useState, useEffect } from "react";
+import { Alert, Button } from "reactstrap";
+import tokenService from "../services/token.service.ts";
+import useFetchState from "../util/useFetchState.ts";
+import deleteFromList from "../util/deleteFromList.ts";
+import jwt_decode from "jwt-decode";
+import "./achievement.css";
+import ListGenerator from "../components/ListGenerator/ListGenerator.tsx";
+import Achievement from "../interfaces/Achievement.ts";
+import User from "../interfaces/User.ts";
+import { JwtPayload } from "../interfaces/util.ts";
+import { get } from "../util/fetchers.ts";
+import ButtonLink from "../components/ButtonLink/ButtonLink.tsx";
+import { useNavigate } from "react-router-dom";
+import deleteSomeFromList from "../util/deleteSomeFromList.ts";
+
+const imgnotfound = "/images/achievements/notFoundImage.png";
 
 export default function AchievementList() {
+
   const jwt = tokenService.getLocalAccessToken();
-  const [message, setMessage] = useState<string | null>(null);
-  const [visible, setVisible] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [achievements, setAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements`, jwt);
-  const [filtered, setFiltered] = useState<Achievement[]>([]);
-  const user = tokenService.getUser() as User;
+  const [achievements, setAchievements] = useState<Achievement[]>([])
+  useEffect(() => {get(`/api/v1/achievements`, jwt).then(res => res.json()).then(data => setAchievements(data))}, [jwt]);
+  const user = tokenService.getUser();
   const [finalUser] = useFetchState<User>({} as User, `/api/v1/users/${user.id}`, jwt);
   const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/users/${user.id}/achievements`, jwt);
+  const navigate = useNavigate();
 
   let roles: string[] = [];
   if (jwt) {
-    try {
-      roles = getRolesFromJWT(jwt);
-    } catch (e) {
-      console.error('Invalid JWT token');
-    }
+    try { roles = getRolesFromJWT(jwt); }
+    catch (e) { console.error("Invalid JWT token"); }
   }
 
   function getRolesFromJWT(token: string): string[] {
     return jwt_decode<JwtPayload>(token).authorities;
   }
 
-  function isAchievedByUser(achievementId: number): boolean {
-    return userAchievements.some((ua) => ua.id === achievementId);
-  }
-
-  function achievementList(achievementsToList: Achievement[]) {
-    return achievementsToList.map((a) => (
-      <tr key={a.id} className="table-row">
-        <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.name}</td>
-        <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.description}</td>
-        <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>
+  function renderAchievement(a: Achievement) {
+    const achievedClass = userAchievements.some(ua => ua.id === a.id) ? "achieved" : "text-center table-cell";
+    return (
+      <>
+        <td className={achievedClass}>{a.name}</td>
+        <td className={achievedClass}>{a.description}</td>
+        <td className={achievedClass}>
           <img src={a.badgeImage ? a.badgeImage : imgnotfound} alt={a.name} width="50px" />
         </td>
-        <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.threshold}</td>
-        <td className={isAchievedByUser(a.id) ? 'achieved' : 'text-center table-cell'}>{a.metric}</td>
-        <td className="table-cell">
-          {roles[0] === 'ADMIN' && (
-            <ButtonLink outline={true} color="warning" direction={`/achievements/${a.id}`} text="Edit" />
-          )}
-        </td>
-        {roles[0] === 'ADMIN' && (
-          <Button outline color="danger" onClick={() =>
-              deleteFromList(`/api/v1/achievements/${a.id}`, a.id, [achievements, setAchievements], [alerts, setAlerts],
-                setMessage, setVisible)}>
-            Delete
-          </Button>
-        )}
-      </tr>
-    ));
+        <td className={achievedClass}>{a.threshold}</td>
+        <td className={achievedClass}>{a.metric}</td>
+      </>
+    );
   }
 
-  const renderedAchievements = useMemo(() => achievementList(filtered.length ? filtered : achievements), [filtered, achievements]);
-
   return (
-    <body className="achievement-container">
+    <div className="achievement-container">
+
       <div className="playercard-container">
-        <Table>
-          <h2 className="title-playercard">{finalUser.username}</h2>
-          <tr className="text-playercard">Total wins: {finalUser.victories}</tr>
-          <tr className="text-playercard">Total games: {finalUser.playedgames}</tr>
-          <tr className="text-playercard">Total points: {finalUser.totalpoints}</tr>
-        </Table>
+      <h2 className="title-playercard">{finalUser.username}</h2>
+        <div className="playercard-stats">
+          <div className="playercard-row"> Total wins: {finalUser.victories} </div>
+          <div className="playercard-row"> Total games: {finalUser.playedgames} </div>
+          <div className="playercard-row"> Total points: {finalUser.totalpoints} </div>
+        </div>
       </div>
-      <SearchBar data={achievements} setFiltered={setFiltered} placeholder="Search achievements"/>
+
       <div className="achievement-card">
         <h1 className="text-center">Achievements</h1>
         <h6 className="text-center">You will see a green Achievement if you have completed it!</h6>
-        <h1 /> {/* Espacio en blanco */}
-        <div>
-          <thead>
-            <tr>
-              <th className="text-center table-row">Name</th>
-              <th className="text-center table-row">Description</th>
-              <th className="text-center table-row">Image</th>
-              <th className="text-center table-row">Threshold</th>
-              <th className="text-center table-row">Metric</th>
-              {roles[0] === 'ADMIN' && <th className="text-center table-row">Actions</th>}
-            </tr>
-          </thead>
-          <tbody>{renderedAchievements}</tbody>
 
-          {roles[0] === 'ADMIN' && (
-            <ButtonLink outline={true} color="success" direction="/achievements/new" text="Create achievement" />
-          )}
-        </div>
+        <ListGenerator<Achievement>
+          data={achievements}
+          actualUser={{ id: user.id, username: user.username, roles: user.roles }}
+          columns={["name","description","badgeImage","threshold","metric"]}
+          idKey="id"
+          customRender={renderAchievement}
+          requiredAuth="PLAYER"
+          createButton={user.roles && user.roles[0] === "ADMIN" ? "/achievements/new" : undefined}
+          createButtonPosition="bottom"
+          editCondition={user.roles && user.roles[0] === "ADMIN"}
+          editButton={(a) => <ButtonLink outline={false} color="warning" direction={`/achievements/${a.id}`} state={{ achievement: a }} text="Edit" />}
+          deleteCondition={user.roles?.[0] === "ADMIN"}
+          deleteButton={(a) => deleteFromList(`/api/v1/achievements`, a.id, [achievements, setAchievements], [alerts, setAlerts])}
+          customLabels={{ badgeImage: "Badge Image" }}
+          massEditButton={<Button outline={false} color="warning" style={{ color: "#fff" }}>Edit</Button>}
+          massEditUri="/api/v1/achievements/some"
+          massDeleteButton={(items: Achievement[]) => deleteSomeFromList("/api/v1/achievements", items, "ADMIN", undefined, false, achievements, setAchievements, navigate, { confirmField: "name" })}
+          searchBarPlaceholder={"Search achievements"}
+          massRequiredAuth="ADMIN"
+        />
       </div>
-    </body>
+    </div>
   );
 }

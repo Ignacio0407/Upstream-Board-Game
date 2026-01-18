@@ -1,0 +1,63 @@
+.achievement-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3vw;
+    padding: 2vw;
+}
+
+.playercard-container {
+    width: 17vw;
+    max-width: 400px;
+    min-width: 250px;
+    background-color: rgb(25, 135, 84);
+    border-radius: 2vw;
+    margin-top: 5vh;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.achieved {
+    background-color: #d4f8e8;
+}
+
+.list-generator-container .table .achieved {
+  background-color: #d4f8e8;
+}
+
+.title-playercard {
+    text-align: center;
+    font-size: 2vw;
+    margin: 1vw 0;
+}
+
+.playercard-row {
+    font-size: 1.4vw;
+    text-align: center;
+    padding: 0.5vw 0;
+}
+
+.playercard-row:first-child {
+    border-top: none;
+}
+
+@media (max-width: 768px) {
+    .achievement-container {
+        flex-direction: column;
+        gap: 2vw;
+    }
+
+    .playercard-container {
+        width: 90vw;
+        margin: 0 auto;
+        border-radius: 4vw;
+    }
+
+    .title-playercard {
+        font-size: 5vw;
+    }
+
+    .playercard-row {
+        font-size: 3vw;
+    }
+}
