@@ -65,13 +65,14 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Override
     @Transactional
-    protected void updateEntityFields (Player newPlayer, Player playerToUpdate) {
+    protected Player updateEntityFields (Player newPlayer, Player playerToUpdate) {
         playerToUpdate.setName(newPlayer.getName());
         playerToUpdate.setColor(newPlayer.getColor());
         playerToUpdate.setAlive(newPlayer.getAlive());
         playerToUpdate.setEnergy(newPlayer.getEnergy());
         playerToUpdate.setPoints(newPlayer.getPoints());
         playerToUpdate.setPlayerOrder(newPlayer.getPlayerOrder());
+        return playerToUpdate;
     }
 
     public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {

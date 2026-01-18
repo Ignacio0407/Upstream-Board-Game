@@ -51,11 +51,12 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
 
     @Override
     @Transactional
-    protected void updateEntityFields (Message newMessage, Message messageToUpdate) {
+    protected Message updateEntityFields (Message newMessage, Message messageToUpdate) {
         messageToUpdate.setPlayer(newMessage.getPlayer());
         messageToUpdate.setContent(newMessage.getContent());
         messageToUpdate.setCreatedAt(newMessage.getCreatedAt());
         messageToUpdate.setMatch(newMessage.getMatch());
+        return messageToUpdate; 
     }
 
 }

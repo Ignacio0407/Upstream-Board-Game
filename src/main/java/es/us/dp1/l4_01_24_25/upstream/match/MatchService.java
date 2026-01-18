@@ -55,7 +55,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
 
     @Override
     @Transactional
-    protected void updateEntityFields(Match newMatch, Match matchToUpdate) {
+    protected Match updateEntityFields(Match newMatch, Match matchToUpdate) {
         matchToUpdate.setPassword(newMatch.getPassword());
         matchToUpdate.setState(newMatch.getState());
         matchToUpdate.setPlayersNumber(newMatch.getPlayersNumber());
@@ -65,6 +65,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         matchToUpdate.setInitialPlayer(newMatch.getInitialPlayer());
         matchToUpdate.setActualPlayer(newMatch.getActualPlayer());
         matchToUpdate.setMatchCreator(newMatch.getMatchCreator());
+        return matchToUpdate;
     }
 
     public List<DashboardMatchDTO> findAllAsDashboardDTO() {

@@ -74,4 +74,9 @@ public abstract class BaseRestController<T, ID> {
     public ResponseEntity<T> update(@PathVariable ID id, @RequestBody T entity) {
         return ResponseEntity.ok(service.update(id, entity));
     }
+
+    @PutMapping("/some")
+    public ResponseEntity<List<T>> updateSome(@RequestBody UpdateSomeDTO<ID, T> request) {
+        return ResponseEntity.ok(service.updateSome(request.getIds(), request.getEntities()));
+    }
 }

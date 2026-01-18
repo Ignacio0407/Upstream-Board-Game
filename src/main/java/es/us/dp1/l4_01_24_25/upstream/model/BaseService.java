@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public abstract class BaseService<T, ID> {
                 repository.getClass().getInterfaces()[0].getGenericInterfaces()[0])
                 .getActualTypeArguments()[0]).getSimpleName();
         } catch (Exception e) {
-            return "Resource"; // Fallback elegante si falla la reflexión
+            return "Resource";
         }
     }
 
@@ -105,7 +106,23 @@ public abstract class BaseService<T, ID> {
         return this.save(existingEntity);
     }
 
-    protected void updateEntityFields(@Valid T existing, @Valid T updated) {
+    @Transactional
+    public List<T> updateSome(@Valid List<ID> ids, @Valid List<T> updatedEntities) {
+        if (ids.size() != updatedEntities.size())
+            throw new IllegalArgumentException("Ids and entities size mismatch");
+        List<T> toSave = new ArrayList<>();
+        Integer index = 0;
+        for (T updated : updatedEntities) {
+            ID id = ids.get(index);
+            T existing = this.findById(id);
+            updateEntityFields(existing, updated);
+            toSave.add(existing);
+            index++;
+        }
+        return repository.saveAll(toSave);
+    }
+
+    protected T updateEntityFields(@Valid T existing, @Valid T updated) {
         throw new UnsupportedOperationException("updateEntityFields no implementado");
     }
 

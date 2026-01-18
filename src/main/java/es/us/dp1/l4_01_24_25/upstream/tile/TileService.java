@@ -16,9 +16,10 @@ public class TileService extends BaseService<Tile,Integer>{
 
     @Override
     @Transactional
-    protected void updateEntityFields (Tile newTile, Tile tileToUpdate) {
+    protected Tile updateEntityFields (Tile newTile, Tile tileToUpdate) {
         tileToUpdate.setImage(newTile.getImage());
         tileToUpdate.setType(newTile.getType());
+        return tileToUpdate;
     }
     
 }

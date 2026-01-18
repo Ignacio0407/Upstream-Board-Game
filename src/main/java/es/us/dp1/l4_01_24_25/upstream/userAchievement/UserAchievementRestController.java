@@ -20,7 +20,7 @@ public class UserAchievementRestController extends BaseRestController<UserAchiev
     UserAchievementService userAchievementService;
     
     @Autowired
-    public UserAchievementRestController(UserAchievementService userAchievementService, AchievementChecker achievementChecker) {
+    public UserAchievementRestController(UserAchievementService userAchievementService) {
         super(userAchievementService);
         this.userAchievementService = userAchievementService;
     }
