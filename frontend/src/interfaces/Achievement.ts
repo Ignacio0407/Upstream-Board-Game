@@ -9,4 +9,4 @@ export default interface Achievement {
 }
 
 export const emptyAchievement: Achievement = {id: 0, name: '', description: '', badgeImage: '',
-    threshold: 1, metric: 'GAMES_PLAYED', actualDescription: '',};
+    threshold: 0, metric: '', actualDescription: '',};

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,20 +29,20 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 import jakarta.validation.Valid;
 
 @Service
-public class UserService extends BaseService<User,Integer>{
+public class UserService extends BaseService<User,Integer> {
 
 	UserRepository userRepository;
-	UserAchievementRepository userAchievementRepository;
+	UserAchievementService userAchievementService;
 
 	@Autowired
-	public UserService(UserRepository userRepository, UserAchievementRepository userAchievementRepository) {
+	public UserService(UserRepository userRepository, @Lazy UserAchievementService userAchievementService) {
 		super(userRepository);
 		this.userRepository = userRepository;
-		this.userAchievementRepository = userAchievementRepository;
+		this.userAchievementService = userAchievementService;
 	}
 
 	@Transactional(readOnly = true)
@@ -62,7 +63,7 @@ public class UserService extends BaseService<User,Integer>{
 		return this.userRepository.existsByName(username);
 	}
 
-	public Iterable<User> findAllByAuthority(String auth) {
+	public List<User> findAllByAuthority(String auth) {
 		return this.userRepository.findAllByAuthority(auth);
 	}
 
@@ -75,7 +76,8 @@ public class UserService extends BaseService<User,Integer>{
 	
 	@Transactional
 	public List<Achievement> findUserAchievements(Integer userId) {
-		return this.userAchievementRepository.findByUserId(userId).stream().map(userAchivement -> userAchivement.getAchievement()).toList();
+		this.userAchievementService.checkAndUnlockAchievements(userId);
+		return this.userAchievementService.findByUserId(userId).stream().map(ua -> ua.getAchievement()).toList();
 	}
 
 	@Transactional
