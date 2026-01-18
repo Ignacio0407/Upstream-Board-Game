@@ -32,24 +32,21 @@ import React from "react";
 import { Button } from "reactstrap";
 import { Link } from "react-router-dom";
 
-interface ButtonLinkProps {outline?: boolean; color?: string; direction: string; text: string; textColor?: string}
+interface ButtonLinkProps {outline?: boolean; color?: string; direction: string; text: string; textColor?: string, state?: any}
 
 /**
  * @param outline - Whether the button color is applied to the border. Default: false.
  * @param color - Button background or border color. Default: white.
  * @param direction - Path to navigate to when clicked.
  * @param text - Text to display inside the button.
- * @param colorTexto - Optional text color. Default: white.
+ * @param textColor - Optional text color. Default: white.
+ * @param state - Optional state to pass to the Link.
  * @returns a styled button that navigates to a route via React Router.
  */
-const ButtonLink: React.FC<ButtonLinkProps> = ({outline = false, color = "white", direction, text, textColor = "white"}) => {
+const ButtonLink: React.FC<ButtonLinkProps> = ({outline = false, color = "white", direction, text, textColor = "white", state}) => {
   return (
     <Button outline={outline} color={color}>
-      <Link
-        to={direction}
-        className="btn sm"
-        style={{ textDecoration: "none", color: textColor }}
-      >
+      <Link to={direction} state={state} className="btn sm" style={{ textDecoration: "none", color: textColor }}>
         {text}
       </Link>
     </Button>
