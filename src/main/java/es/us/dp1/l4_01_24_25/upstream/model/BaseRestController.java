@@ -51,32 +51,32 @@ public abstract class BaseRestController<T, ID> {
 
     @GetMapping
     public ResponseEntity<List<T>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok(this.service.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<T> findById(@PathVariable ID id) {
-        return ResponseEntity.ok(service.findById(id));
+        return ResponseEntity.ok(this.service.findById(id));
     }
 
     @PostMapping
     public ResponseEntity<T> save(@RequestBody T entity) {
-        return new ResponseEntity<>((service.save(entity)), HttpStatus.CREATED);
+        return new ResponseEntity<>((this.service.save(entity)), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable ID id) {
-        service.deleteById(id);
+        this.service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<T> update(@PathVariable ID id, @RequestBody T entity) {
-        return ResponseEntity.ok(service.update(id, entity));
+        return ResponseEntity.ok(this.service.update(id, entity));
     }
 
     @PutMapping("/some")
     public ResponseEntity<List<T>> updateSome(@RequestBody UpdateSomeDTO<ID, T> request) {
-        return ResponseEntity.ok(service.updateSome(request.getIds(), request.getEntities()));
+        return ResponseEntity.ok(this.service.updateSome(request.getIds(), request.getEntities()));
     }
 }
