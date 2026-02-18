@@ -15,6 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -92,12 +93,11 @@ public class UserServiceTest {
 	@Transactional
 	void shouldUpdateUser() {
 		int idToUpdate = 1;
-		String newName="Change";
-		User user = this.userService.findById(idToUpdate);
-		user.setName(newName);
+		String newName = "Change";
+		UserListAdmin user = new UserListAdmin(1, newName, Authority.ADMIN);
 		userService.updateUser(user, idToUpdate);
-		user = this.userService.findById(idToUpdate);
-		assertEquals(newName, user.getName());
+		User updatedUser = this.userService.findById(idToUpdate);
+		assertEquals(newName, updatedUser.getName());
 	}
 
 	@Test

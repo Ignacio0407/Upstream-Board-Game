@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 
 @WebMvcTest(controllers = UserRestController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class), excludeAutoConfiguration = SecurityConfiguration.class)
 public class UserControllerTest {
@@ -166,7 +167,7 @@ public class UserControllerTest {
 		user.setPassword("CHANGED");
 
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
+		when(this.userService.updateUser(any(UserListAdmin.class), any(Integer.class))).thenReturn(user);
 
 		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(user))).andExpect(status().isOk())
@@ -180,7 +181,7 @@ public class UserControllerTest {
 		user.setPassword("UPDATED");
 
 		when(this.userService.findById(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
-		when(this.userService.updateUser(any(User.class), any(Integer.class))).thenReturn(user);
+		when(this.userService.updateUser(any(UserListAdmin.class), any(Integer.class))).thenReturn(user);
 
 		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(user))).andExpect(status().isNotFound());

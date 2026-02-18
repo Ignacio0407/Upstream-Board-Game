@@ -29,6 +29,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
+import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 import jakarta.validation.Valid;
 
@@ -80,7 +81,7 @@ public class UserService extends BaseService<User,Integer> {
 	}
 
 	@Transactional
-	public User updateUser(@Valid User user, Integer idToUpdate) {
+	public User updateUser(@Valid UserListAdmin user, Integer idToUpdate) {
 		User toUpdate = this.findById(idToUpdate);
 		BeanUtils.copyProperties(user, toUpdate, "id");
 		return this.save(toUpdate);
@@ -98,6 +99,14 @@ public class UserService extends BaseService<User,Integer> {
 			this.deleteById(id);
 		} else
 			throw new AccessDeniedException("You can't delete yourself!");
+	}
+
+	@Transactional
+	public List<UserListAdmin> findAllListing() {
+		if (!this.findCurrentUser().hasAuthority(Authority.ADMIN)) {
+			throw new AccessDeniedException("Only admins can list all users!");
+		}
+		return this.userRepository.findAllListAdmin();
 	}
 
 }
