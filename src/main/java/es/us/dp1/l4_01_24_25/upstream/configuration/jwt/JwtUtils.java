@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.configuration.jwt;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -12,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsImpl;
-import es.us.dp1.l4_01_24_25.upstream.user.Authorities;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -42,9 +43,9 @@ public class JwtUtils {
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 
-	public String generateTokenFromUsername(String username, Authorities authority) {
+	public String generateTokenFromUsername(String username, Authority authority) {
 		Map<String, Object> claims = new HashMap<>();
-		claims.put("authorities", authority.getAuthority());
+		claims.put("authorities", List.of(authority.name()));
 		return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date())
 				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();

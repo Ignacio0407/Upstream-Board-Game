@@ -38,7 +38,6 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 public class UserControllerTest {
 
 	private static final int TEST_USER_ID = 1;
-	private static final int TEST_AUTH_ID = 1;
 	private static final String BASE_URL = "/api/v1/users";
 
 	@SuppressWarnings("unused")
@@ -48,30 +47,24 @@ public class UserControllerTest {
 	@MockBean
 	private UserService userService;
 
-	@MockBean
-	private AuthoritiesService authService;
-
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
 	private MockMvc mockMvc;
 
-	private Authorities auth;
+	private Authority auth;
 	private User user, logged;
 
 	@BeforeEach
-        @SuppressWarnings("unused")
+    @SuppressWarnings("unused")
 	void setup() {
-		auth = new Authorities();
-		auth.setId(TEST_AUTH_ID);
-		auth.setAuthority("VET");
 
 		user = new User();
 		user.setId(1);
 		user.setName("user");
 		user.setPassword("password");
-		user.setAuthority(auth);
+		user.setAuthority(Authority.PLAYER);
 
 		when(this.userService.findCurrentUser()).thenReturn(getUserFromDetails(
 				(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()));
@@ -81,11 +74,9 @@ public class UserControllerTest {
 		logged = new User();
 		logged.setName(details.getUsername());
 		logged.setPassword(details.getPassword());
-		Authorities aux = new Authorities();
 		for (GrantedAuthority auth : details.getAuthorities()) {
-			aux.setAuthority(auth.getAuthority());
+			logged.setAuthority(Authority.valueOf(auth.getAuthority()));
 		}
-		logged.setAuthority(aux);
 		return logged;
 	}
 
@@ -111,39 +102,32 @@ public class UserControllerTest {
 	@Test
 	@WithMockUser("admin")
 	void shouldFindAllWithAuthority() throws Exception {
-		Authorities aux = new Authorities();
-		aux.setId(2);
-		aux.setAuthority("AUX");
 
 		User sara = new User();
 		sara.setId(2);
 		sara.setName("Sara");
-		sara.setAuthority(aux);
+		sara.setAuthority(Authority.PLAYER);
 
 		User juan = new User();
 		juan.setId(3);
 		juan.setName("Juan");
-		juan.setAuthority(auth);
+		juan.setAuthority(Authority.ADMIN);
 
-		when(this.userService.findAllByAuthority(auth.getAuthority())).thenReturn(List.of(user, juan));
+		when(this.userService.findAllByAuthority(Authority.ADMIN.toString())).thenReturn(List.of(juan));
 
-		mockMvc.perform(get(BASE_URL).param("auth", "VET")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(2)).andExpect(jsonPath("$[?(@.id == 1)].username").value("user"))
-				.andExpect(jsonPath("$[?(@.id == 3)].username").value("Juan"));
+		mockMvc.perform(get(BASE_URL).param("auth", "ADMIN")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[?(@.id == 3)].username").value("Juan"));
 	}
 
 	@Test
 	@WithMockUser("admin")
 	void shouldFindAllAuths() throws Exception {
-		Authorities aux = new Authorities();
-		aux.setId(2);
-		aux.setAuthority("AUX");
 
-		when(this.authService.findAll()).thenReturn(List.of(auth, aux));
+		when(this.userService.findAllAuthorities()).thenReturn(List.of(Authority.values()));
 
 		mockMvc.perform(get(BASE_URL + "/authorities")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(2)).andExpect(jsonPath("$[?(@.id == 1)].authority").value("VET"))
-				.andExpect(jsonPath("$[?(@.id == 2)].authority").value("AUX"));
+				.andExpect(jsonPath("$.size()").value(2)).andExpect(jsonPath("$[?(@.id == 1)].authority").value("ADMIN"))
+				.andExpect(jsonPath("$[?(@.id == 2)].authority").value("PLAYER"));
 	}
 
 	@Test
@@ -153,7 +137,7 @@ public class UserControllerTest {
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(TEST_USER_ID))
 				.andExpect(jsonPath("$.username").value(user.getName()))
-				.andExpect(jsonPath("$.authority").value(user.getAuthority().getAuthority()));
+				.andExpect(jsonPath("$.authority").value(user.getAuthority()));
 	}
 
 	@Test

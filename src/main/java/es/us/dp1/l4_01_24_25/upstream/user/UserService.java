@@ -45,6 +45,18 @@ public class UserService extends BaseService<User,Integer> {
 		this.userAchievementService = userAchievementService;
 	}
 
+	@Override
+    @Transactional
+    protected User updateEntityFields(User existingUser, User newUser) {
+        existingUser.setName(newUser.getName());
+        existingUser.setAuthority(newUser.getAuthority());
+        return existingUser;
+    }
+
+	public List<Authority> findAllAuthorities() {
+		return List.of(Authority.values());
+	}
+
 	@Transactional(readOnly = true)
 	public User findUserByName(String username) {
 		return this.findOrResourceNotFoundException(this.userRepository.findByName(username), "username", username);

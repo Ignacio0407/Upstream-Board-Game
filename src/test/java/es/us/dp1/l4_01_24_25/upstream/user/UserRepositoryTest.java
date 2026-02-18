@@ -25,14 +25,10 @@ public class UserRepositoryTest {
 
         User user1 = new User();
         user1.setName("admin_user");
-        Authorities auth1 = new Authorities();
-        auth1.setAuthority("ADMIN");
-        user1.setAuthority(auth1);
+        user1.setAuthority(Authority.ADMIN);
 
         User user2 = new User();
-        Authorities auth2 = new Authorities();
-        auth2.setAuthority("USER");
-        user2.setAuthority(auth2);
+        user2.setAuthority(Authority.PLAYER);
 
         List<User> users = new ArrayList<>();
         users.add(user1);

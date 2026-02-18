@@ -8,8 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.request.SignupRequest;
-import es.us.dp1.l4_01_24_25.upstream.user.Authorities;
-import es.us.dp1.l4_01_24_25.upstream.user.AuthoritiesService;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
@@ -17,19 +16,14 @@ import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 public class AuthService {
 
 	private final PasswordEncoder encoder;
-	private final AuthoritiesService authoritiesService;
 	private final UserService userService;
 	//private final PlayerService playerService;
 	
 
 	@Autowired
-	public AuthService(PasswordEncoder encoder, AuthoritiesService authoritiesService, UserService userService
-			// PlayerService playerService
-			) {
+	public AuthService(PasswordEncoder encoder, UserService userService) {
 		this.encoder = encoder;
-		this.authoritiesService = authoritiesService;
-		this.userService = userService;
-		//this.playerService = ownerService;		
+		this.userService = userService;		
 	}
 
 	@Transactional
@@ -38,17 +32,14 @@ public class AuthService {
 		user.setName(request.getUsername());
 		user.setPassword(encoder.encode(request.getPassword()));
 		String strRoles = request.getAuthority();
-		Authorities role;
 
 		switch (strRoles.toLowerCase()) {
-		case "vet" -> {
-                    role = authoritiesService.findByAuthority("ADMIN");
-                    user.setAuthority(role);
+		case "admin" -> {
+                    user.setAuthority(Authority.ADMIN);
                     userService.save(user);
                 }
 		default -> {
-                    role = authoritiesService.findByAuthority("PLAYER");
-                    user.setAuthority(role);
+                    user.setAuthority(Authority.PLAYER);
                     userService.save(user);
                 }
 		}
