@@ -23,10 +23,6 @@ public class UserServiceTest {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private AuthoritiesService authService;
-
-
 	@Test
 	@WithMockUser(username = "player1", password = "0wn3r")
 	void shouldFindCurrentUser() {
@@ -112,7 +108,7 @@ public class UserServiceTest {
 		User user = new User();
 		user.setName("Sam");
 		user.setPassword("password");
-		user.setAuthority(authService.findByAuthority("ADMIN"));
+		user.setAuthority(Authority.ADMIN);
 
 		this.userService.save(user);
 		assertNotEquals(0, user.getId().longValue());

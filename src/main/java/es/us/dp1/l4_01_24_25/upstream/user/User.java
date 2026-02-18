@@ -1,14 +1,13 @@
 package es.us.dp1.l4_01_24_25.upstream.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -21,8 +20,13 @@ import lombok.Setter;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User extends NamedEntity {
 
+	@Column(nullable = false)
 	@JsonIgnore
 	String password;
+
+	@Enumerated(EnumType.STRING)
+	@NotNull
+	Authority authority;
 	
 	Integer victories;
 	
@@ -30,23 +34,8 @@ public class User extends NamedEntity {
 	
 	Integer totalpoints;
 
-	@NotNull
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "authority")
-	@JsonSerialize(using = AuthoritySerializer.class)
-	Authorities authority;
-
-	public Boolean hasAuthority(String auth) {
-		return authority.getAuthority().equals(auth);
-	}
-
-	public Boolean hasAnyAuthority(String... authorities) {
-		Boolean cond = false;
-		for (String auth : authorities) {
-			if (auth.equals(authority.getAuthority()))
-				cond = true;
-		}
-		return cond;
+	public Boolean hasAuthority(Authority auth) {
+		return this.getAuthority().toString().toLowerCase().equals(auth.toString().toLowerCase());
 	}
 
 }

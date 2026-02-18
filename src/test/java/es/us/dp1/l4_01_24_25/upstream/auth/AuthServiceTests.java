@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.request.SignupRequest;
-import es.us.dp1.l4_01_24_25.upstream.user.AuthoritiesService;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
@@ -19,9 +19,7 @@ public class AuthServiceTests {
 	@Autowired
 	protected AuthService authService;
 	@Autowired
-	protected UserService userService;	
-	@Autowired
-	protected AuthoritiesService authoritiesService;
+	protected UserService userService;
 
 	@Test
 	@Transactional
@@ -40,12 +38,9 @@ public class AuthServiceTests {
 	public void shouldCreatePlayerUser() {
 		SignupRequest request = createRequest("PLAYER", "playertest");
 		int userFirstCount = ((Collection<User>) this.userService.findAll()).size();
-		//int playerFirstCount = ((Collection<Player>) this.playerService.findAll()).size();
 		this.authService.createUser(request);
 		int userLastCount = ((Collection<User>) this.userService.findAll()).size();
-		//int playerLastCount = ((Collection<Player>) this.playerService.findAll()).size();
 		assertEquals(userFirstCount + 1, userLastCount);
-		//assertEquals(playFirstCount + 1, playerLastCount);
 	}
 
 	private SignupRequest createRequest(String auth, String username) {
@@ -63,7 +58,7 @@ public class AuthServiceTests {
 			User playerUser = new User();
 			playerUser.setName("clinicOwnerTest");
 			playerUser.setPassword("clinicOwnerTest");
-			playerUser.setAuthority(authoritiesService.findByAuthority("PLAYER"));
+			playerUser.setAuthority(Authority.PLAYER);
 			userService.save(playerUser);			
 		}
 
