@@ -1,5 +1,3 @@
-import Authority, {emptyAuthority} from "./Authority.ts";
-
 export default interface User {
   id: number;
   username: string;
@@ -11,15 +9,17 @@ export default interface User {
   totalpoints: number;
 }
 
+export enum Authority {
+    ADMIN = "ADMIN", PLAYER = "PLAYER"
+}
+
 export const emptyUser: User = 
-{id: 0, username: "", password: "", authority: emptyAuthority, roles: [], victories: 0, playedgames: 0, totalpoints: 0};
+{id: 0, username: "", password: "", authority: Authority.PLAYER, roles: [], victories: 0, playedgames: 0, totalpoints: 0};
 
 export interface UserList {
   id: number;
-  username: string;
-  password: string,
-  authority: Authority,
-  roles: string;
+  name: string;
+  authority: Authority
 }
 
 export interface BaseUser {
@@ -30,4 +30,4 @@ export interface BaseUser {
   roles?: string[];
 }
 
-export const emptyUserList:UserList = {id:0, username:"", password:"", authority:emptyAuthority, roles:""}; 
+export const emptyUserList:UserList = {id:0, name:"", authority:Authority.PLAYER}; 

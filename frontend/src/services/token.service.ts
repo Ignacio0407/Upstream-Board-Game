@@ -1,4 +1,4 @@
-import User, {emptyUser, emptyUserList, UserList} from '../interfaces/User.ts'
+import User, {emptyUser} from '../interfaces/User.ts'
 
 interface UserWithRefreshToken extends User {refreshToken?: string};
 
@@ -24,11 +24,6 @@ class TokenService {
   getUser(): User {
     const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : emptyUser;
-  }
-
-  getUserList(): UserList {
-    const stored = localStorage.getItem("user");
-    return stored ? JSON.parse(stored) : emptyUserList;
   }
 
   setUser(user: User): void {
