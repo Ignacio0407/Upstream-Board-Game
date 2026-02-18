@@ -9,9 +9,6 @@ import lombok.Getter;
 @Getter
 public class AccessDeniedException extends RuntimeException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1461835347378078101L;
 
 	public AccessDeniedException() {

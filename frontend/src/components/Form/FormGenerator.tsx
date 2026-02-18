@@ -32,7 +32,7 @@ import { useForm, SubmitHandler, FieldValues, RegisterOptions } from 'react-hook
 import { FormInput } from './FormInput.tsx';
 import { BaseUser } from '../../interfaces/User.ts';
 import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export interface FieldDef {tag: string, name: string, type: string, isRequired?: boolean, validators?: RegisterOptions, 
   defaultValue?: string, values?: any[], min?: number, max?: number, disabled?: boolean, numberOfColumns?: number;
@@ -43,18 +43,25 @@ export interface FormGeneratorProps<T extends FieldValues> {fields: FieldDef[], 
   loadingText?: string;      // Text uppon sending.
   className?: string;        // Optional css for the form.
   extraBeforeSubmit?: React.ReactNode;
+  cancelButtonActivated?:boolean;
+  navigateOnCancel?: string;
   actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean, onUnauthorizedRedirect?: string, deactivateSecurity?: boolean
 }
 
 export function FormGenerator<T extends FieldValues> ({fields, defaultValues, onSubmit, submitText = 'Submit',
-  loadingText = 'Loading...', className, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: FormGeneratorProps<T>) {
+  loadingText = 'Loading...', className, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, 
+  cancelButtonActivated = false, navigateOnCancel = '', onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: FormGeneratorProps<T>) {
   
+  const location = useLocation();
   const navigate = useNavigate();
   if (!deactivateSecurity) {
     navigateToUnauthorized(checkAuth, actualUser, requiredAuth, navigate, onUnauthorizedRedirect);
   }
 
+  let navigatePath = navigateOnCancel;
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<T>({...defaultValues});
+  if (!(navigateOnCancel === '' && cancelButtonActivated))
+    navigatePath = location.pathname.split('/').slice(0, -1).join('/') || '/';
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={className}>
@@ -65,6 +72,7 @@ export function FormGenerator<T extends FieldValues> ({fields, defaultValues, on
       {extraBeforeSubmit}
 
       <div className="custom-button-row">
+        {cancelButtonActivated && <button type="button" className="auth-button" onClick={() => navigate(navigatePath)}> Cancel</button>}
         <button type="submit" className="auth-button" disabled={isSubmitting}>
           {isSubmitting ? loadingText : submitText}
         </button>

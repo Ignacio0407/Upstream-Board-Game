@@ -119,7 +119,7 @@ public abstract class BaseService<T, ID> {
             toSave.add(existing);
             index++;
         }
-        return repository.saveAll(toSave);
+        return this.repository.saveAll(toSave);
     }
 
     protected T updateEntityFields(@Valid T existing, @Valid T updated) {
