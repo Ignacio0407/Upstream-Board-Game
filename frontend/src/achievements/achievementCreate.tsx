@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../util/fetchers.ts';
-import Achievement, { emptyAchievement } from '../interfaces/Achievement.ts';
+import Achievement, { emptyAchievement, Metric } from '../interfaces/Achievement.ts';
 import { EditFormGenerator } from '../components/Form/EditFormGenerator.tsx';
 import { SubmitHandler } from 'react-hook-form';
 import tokenService from '../services/token.service.ts';
@@ -24,7 +24,7 @@ export default function AchievementCreate() {
       <h2 className="text-center">Create Achievement</h2>
       <div className="auth-form-container">
         <EditFormGenerator<Achievement> entityToEdit={achievement} onSubmit={onSubmit} submitText="Save" loadingText="Saving..."
-          selectOptions={{ metric: ['GAMES_PLAYED', 'VICTORIES', 'TOTAL_PLAY_TIME', 'EXPLORER', 'TOTAL_POINTS'] }}
+          selectOptions={{ metric: Object.values(Metric) }}
         />
       </div>
     </div>
