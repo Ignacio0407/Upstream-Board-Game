@@ -1,19 +1,17 @@
 -- One admin user, named admin1 with passwor 4dm1n and authority admin
-INSERT INTO authorities(id,authority) VALUES (1,'ADMIN');
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (1,'admin1','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS',1,20,30,100);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (1,'admin1','$2a$10$nMmTWAhPTqXqLDJTag3prumFrAJpsYtroxf0ojesFYq0k4PmcbWUS','ADMIN',20,30,100);
 
 -- Ten player users, named player1 with passwor 0wn3r
-INSERT INTO authorities(id,authority) VALUES (2,'PLAYER');
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (2,'player1','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,0,9,99);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (3,'player2','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,0,9,99);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (4,'player3','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,0,9,99);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (5,'player4','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,30,40,120);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (6,'player5','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,30,40,120);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (7,'KCG5658','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,3,10,40);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (8,'FSL4030','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,5,20,60);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (9,'NHD9927','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,10,15,200);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (10,'NBL3749','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,1,5,10);
-INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (11,'SDL0654','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e',2,2,10,20);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (2,'player1','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',0,9,99);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (3,'player2','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',0,9,99);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (4,'player3','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',0,9,99);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (5,'player4','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',30,40,120);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (6,'player5','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',30,40,120);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (7,'KCG5658','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',3,10,40);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (8,'FSL4030','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',5,20,60);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (9,'NHD9927','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',10,15,200);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (10,'NBL3749','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',1,5,10);
+INSERT INTO appusers(id,name,password,authority,victories,playedgames,totalpoints) VALUES (11,'SDL0654','$2a$10$DaS6KIEfF5CRTFrxIoGc7emY3BpZZ0.fVjwA3NiJ.BjpGNmocaS3e','PLAYER',2,10,20);
 
 INSERT INTO achievement(id, name, description, threshold, badge_image, metric) VALUES 
 (1, 'Basic experience', 'You have played more than 1 game', 1, '/images/achievements/MoreThan1Game.png', 'GAMES_PLAYED'),
