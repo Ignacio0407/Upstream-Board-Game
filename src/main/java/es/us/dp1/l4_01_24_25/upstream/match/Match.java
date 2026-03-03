@@ -1,12 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import es.us.dp1.l4_01_24_25.upstream.model.NamedEntity;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
-import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
-import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Entity;
@@ -28,13 +23,11 @@ import lombok.Setter;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Match extends NamedEntity {
 
-	// Esto para unirse
 	String password;
 	
 	@Enumerated(EnumType.STRING)
 	State state;
-	
-	// Esto para jugar en sí
+
 	@ValidNumber(min=0,max=5)
 	Integer playersNumber;
     
@@ -56,8 +49,6 @@ public class Match extends NamedEntity {
 
 	@ManyToOne
 	@JoinColumn(name="match_creator")
-	@JsonSerialize(using = UserSerializer.class)
-	@JsonDeserialize(using = UserDeserializer.class)
 	User matchCreator;
 
 	public Match() {}
