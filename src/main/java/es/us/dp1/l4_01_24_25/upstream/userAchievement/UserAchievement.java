@@ -3,11 +3,6 @@ package es.us.dp1.l4_01_24_25.upstream.userAchievement;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import es.us.dp1.l4_01_24_25.upstream.player.UserDeserializer;
-import es.us.dp1.l4_01_24_25.upstream.player.UserSerializer;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import jakarta.persistence.Entity;
@@ -30,8 +25,6 @@ public class UserAchievement {
     private Integer id;
 
     @ManyToOne
-    @JsonSerialize(using = UserSerializer.class)
-    @JsonDeserialize(using = UserDeserializer.class)
     private User user;
 
     @ManyToOne
