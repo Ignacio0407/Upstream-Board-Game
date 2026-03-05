@@ -100,6 +100,11 @@ public abstract class BaseService<T, ID> {
     }
 
     @Transactional
+    public void deleteAll(List<T> entities) {
+        this.repository.deleteAll(entities);
+    }
+
+    @Transactional
     public T update(ID id, @Valid T updatedEntity) {
         T existingEntity = this.findById(id);
         this.updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
