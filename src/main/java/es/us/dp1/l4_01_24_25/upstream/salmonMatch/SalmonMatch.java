@@ -11,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +32,7 @@ public class SalmonMatch extends BaseEntity{
     Integer spawningNumber;
     
     @Embedded
+    @Valid
     Coordinate coordinate;
     
     @NotNull

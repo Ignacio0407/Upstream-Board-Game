@@ -10,6 +10,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,7 @@ public class MatchTile extends BaseEntity {
     Integer salmonsNumber;
 
     @Embedded
+    @Valid
     Coordinate coordinate;
 
     @ManyToOne
