@@ -4,6 +4,7 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;
 import jakarta.persistence.Embedded;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,7 @@ public class MatchTileDTO {
     Integer salmonsNumber;
 
     @Embedded
+    @Valid
     Coordinate coordinate;
 
     Tile tile;
