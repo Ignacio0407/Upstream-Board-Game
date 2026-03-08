@@ -210,7 +210,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             this.handleEarlyPhase(match, player, players, tilesNoCoord);
         }
         this.save(match);
-        //this.salmonMatchService.findSalmonsByMatchIdAndNotifyUpdate(player.getMatch().getId());
     }
 
     @Transactional
@@ -284,7 +283,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             this.changePlayerTurn(player);
         }
         this.endRound(match);
-        //this.save(match);
         if (match.getRound() >= 3)
             this.checkGameHasFinished(match);
         this.playerService.notifyPlayersUpdate(matchId);

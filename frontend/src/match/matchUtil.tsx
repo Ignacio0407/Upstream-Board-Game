@@ -233,23 +233,6 @@ export function buildGridFromSnapshot(tiles: MatchTile[], salmons: SalmonMatch[]
     return grid;
 }
 
-/*export const updateGridWithSalmon = (prevGrid: GridCell[], updatedSalmon: SalmonMatch): GridCell[] => {
-  const newGrid = prevGrid.map(cell => ({
-    ...cell,
-    salmons: cell.salmons.filter(s => s.id !== updatedSalmon.id),
-  }));
-
-  const { x, y } = updatedSalmon.coordinate;
-  if (y >= 0 && y < GRID_HEIGHT) {
-    const index = coordToIndex(x, y);
-    newGrid[index] = {
-      ...newGrid[index],
-      salmons: [...newGrid[index].salmons, updatedSalmon],
-    };
-  }
-  return newGrid;
-}; */
-
 export const updateGridWithMovement = (prevGrid: GridCell[], salmon: SalmonMatch, myTile: MatchTile, toTravel: MatchTile): GridCell[] => {
   const newGrid = [...prevGrid];
   const fromIndex = coordToIndex(myTile.coordinate.x, myTile.coordinate.y);
