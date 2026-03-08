@@ -1,3 +1,5 @@
+import { Phase } from "./Phase";
+
 export default interface Match {
     id: number,
     name: string,
@@ -5,7 +7,7 @@ export default interface Match {
     state: string,
     playersNumber: number,
     round: number,
-    phase: string,
+    phase: Phase,
     finalScoreCalculated: boolean,
     initialPlayerId?: number,
     actualPlayerId?: number,
@@ -20,4 +22,4 @@ export interface DashboardMatch {
     playersNumber: number,
 }
 
-export const emptyMatch: Match = { id: 0, name: "", password: "", state: "", playersNumber: 0, round: 0, phase: "", finalScoreCalculated: false, initialPlayerId: undefined, actualPlayerId: undefined, matchCreatorId: 0 };
+export const emptyMatch: Match = { id: 0, name: "", password: "", state: "", playersNumber: 0, round: 0, phase: Phase.MOVING, finalScoreCalculated: false, initialPlayerId: undefined, actualPlayerId: undefined, matchCreatorId: 0 };

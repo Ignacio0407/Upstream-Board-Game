@@ -7,6 +7,7 @@ import Match from "../interfaces/Match.ts";
 import SalmonMatch from "../interfaces/SalmonMatch.ts";
 import { JSX } from "react";
 import { TileType } from "../interfaces/Tile.ts";
+import { Phase } from "../interfaces/Phase.ts";
 
 export const GRID_WIDTH = 3;
 export const GRID_HEIGHT = 6;
@@ -20,7 +21,7 @@ function isFull (playersNumber:number, tile:MatchTile) {
 }
 
 export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile:Function, setSelectedSalmon:Function) => {
-    if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
+    if (myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES) {
         setSelectedTile(tile);
         setSelectedSalmon(null);
     }
@@ -28,13 +29,13 @@ export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, se
 
 export const handleSalmonClick = (salmon: SalmonMatch, myPlayer:Player|null, match:Match, setSelectedSalmon:Function) => {
     if (myPlayer) {
-        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === 'MOVING')
+        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === Phase.MOVING)
             setSelectedSalmon(salmon);
     }
 }
 
 export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string, match:Match, actualPlayerId:number|undefined, myPlayerId:number|undefined) => {
-    if (match.phase === "MOVING" && actualPlayerId === myPlayerId) {
+    if (match.phase === Phase.MOVING && actualPlayerId === myPlayerId) {
         try {
         const response = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
         if (!response.ok) {
@@ -90,7 +91,7 @@ export const enterSpawn = async(salmon:SalmonMatch, jwt:string) => {
 };
 
 export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
-    if (match.phase === "TILES" && actualPlayerId === myPlayerId) {
+    if (match.phase === Phase.TILES && actualPlayerId === myPlayerId) {
         try {
         const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {actualPlayerId, myPlayerId, x,y});
         if (!response.ok) {
@@ -136,9 +137,9 @@ export const handleGridClick = async (jwt:string, index:number, selectedSalmon:S
             setSelectedSalmon(null);
         }
     }
-    if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === "TILES") await changephase(match, jwt, myPlayerId);
-    else if (updateSalmonPositionResponse != null && updateSalmonPositionResponse.ok && match.phase === "MOVING") await changephase(match, jwt, myPlayerId);
-    else if (updateSpawnReponse != null && updateSpawnReponse.ok && match.phase === "MOVING") await changephase(match, jwt, myPlayerId);
+    if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === Phase.TILES) await changephase(match, jwt, myPlayerId);
+    else if (updateSalmonPositionResponse != null && updateSalmonPositionResponse.ok && match.phase === Phase.MOVING) await changephase(match, jwt, myPlayerId);
+    else if (updateSpawnReponse != null && updateSpawnReponse.ok && match.phase === Phase.MOVING) await changephase(match, jwt, myPlayerId);
 };
 
 export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
