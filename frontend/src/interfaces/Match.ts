@@ -1,10 +1,11 @@
 import { Phase } from "./Phase";
+import { State } from "./State";
 
 export default interface Match {
     id: number,
     name: string,
     password: string,
-    state: string,
+    state: State,
     playersNumber: number,
     round: number,
     phase: Phase,
@@ -22,4 +23,4 @@ export interface DashboardMatch {
     playersNumber: number,
 }
 
-export const emptyMatch: Match = { id: 0, name: "", password: "", state: "", playersNumber: 0, round: 0, phase: Phase.MOVING, finalScoreCalculated: false, initialPlayerId: undefined, actualPlayerId: undefined, matchCreatorId: 0 };
+export const emptyMatch: Match = { id: 0, name: "", password: "", state: State.WAITING, playersNumber: 0, round: 0, phase: Phase.TILES, finalScoreCalculated: false, initialPlayerId: undefined, actualPlayerId: undefined, matchCreatorId: 0 };

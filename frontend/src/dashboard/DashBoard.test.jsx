@@ -74,7 +74,7 @@ describe('Dashboard Component', () => {
             id: 1,
             name: 'Match 1',
             playersNum: 4,
-            state: 'WATIING',
+            state: State.WAITING,
             password: '',
           },
         ],
