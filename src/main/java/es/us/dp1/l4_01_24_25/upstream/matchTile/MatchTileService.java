@@ -117,11 +117,6 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return this.save(toTravel);
     }
 
-    /*public void toDTOAndSendToWS(MatchTile entity) {
-        MatchTileDTO updated = this.matchTileMapper.toDTO(entity);
-        this.messagingTemplate.convertAndSend("/topic/tile/" + entity.getMatch().getId(), updated);
-    } */
-
     public MatchTile findMyTile (List<MatchTile> matchTiles, Coordinate myCoordinate) {
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
@@ -135,7 +130,6 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         MatchTile matchTile = this.findById(id);
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
         if(updates.get("y") != 0) {
-            // REVISAR ESTA CONDICIÓN
             MatchTile matchTile2 = matchTiles.stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
             if(matchTile2 == null){
