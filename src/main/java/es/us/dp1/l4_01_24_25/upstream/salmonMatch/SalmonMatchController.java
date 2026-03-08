@@ -54,7 +54,8 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
 
     @PatchMapping("/coordinate/{id}")
     public ResponseEntity<SalmonMatchDTO> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
-        return ResponseEntity.ok(this.salmonMatchService.updateCoordinate(id, coordinate));
+        this.salmonMatchService.updateCoordinate(id, coordinate);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/player/{playerId}")
@@ -64,7 +65,8 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
 
     @PatchMapping("/enterSpawn/{id}")
     public ResponseEntity<SalmonMatchDTO> enterSpawn(@PathVariable Integer id) {
-        return ResponseEntity.ok(this.salmonMatchService.enterSpawn(id));
+        this.salmonMatchService.enterSpawn(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

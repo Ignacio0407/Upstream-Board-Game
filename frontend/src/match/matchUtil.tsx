@@ -1,11 +1,23 @@
 import { ColorToRgb } from "../util/ColorParser.ts";
-import { get, patch } from "../util/fetchers.ts";
+import { get, patch, put } from "../util/fetchers.ts";
 import '../static/css/game/game.css'
-import MatchTile from '../interfaces/MatchTile.ts'
+import MatchTile, { emptyTile } from '../interfaces/MatchTile.ts'
 import Player from '../interfaces/Player.ts'
 import Match from "../interfaces/Match.ts";
 import SalmonMatch from "../interfaces/SalmonMatch.ts";
 import { JSX } from "react";
+import { TileType } from "../interfaces/Tile.ts";
+
+export const GRID_WIDTH = 3;
+export const GRID_HEIGHT = 6;
+export const coordToIndex = (x: number, y: number) => { return (GRID_HEIGHT - 1 - y) * GRID_WIDTH + x; };
+export type GridCell = {tile: MatchTile, salmons: SalmonMatch[]};
+
+function isFull (playersNumber:number, tile:MatchTile) {
+    if (tile.capacity === 0) return false;
+    if (playersNumber > 2 && (tile.tile.type === TileType.ROCK)) return tile.capacity === (tile.salmonsNumber - 1);
+    else return tile.capacity === tile.salmonsNumber; 
+}
 
 export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile:Function, setSelectedSalmon:Function) => {
     if (myPlayer.id === match.actualPlayerId && match.phase === 'TILES') {
@@ -27,7 +39,8 @@ export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number
         const response = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
         if (!response.ok) {
             const errorData = await response.json();
-            alert(errorData.error);
+            if (errorData.error) alert(errorData.error) 
+            else alert(errorData.message);
             console.log("Error updating salmon:", errorData);
         }
         return response;
@@ -52,8 +65,16 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
         throw error.message;
     }
 };
+
+export const passTurn = (match:Match, jwt:string, myPlayer:Player) => {
+    return (<button onClick={() => {
+        myPlayer.energy = myPlayer.energy -1;
+        put(`/api/v1/players/${myPlayer.id}`, jwt, myPlayer)
+        changephase(match, jwt, myPlayer.id)
+     }}>Pass Turn</button>)
+};
     
-export const updateSpawn = async(salmon:SalmonMatch, jwt:string) => {
+export const enterSpawn = async(salmon:SalmonMatch, jwt:string) => {
     try {
         const response = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
         if (!response.ok) {
@@ -61,6 +82,7 @@ export const updateSpawn = async(salmon:SalmonMatch, jwt:string) => {
             alert(errorData.error);
             console.log("Error updating salmon:", errorData);
         }
+        return response;
     } catch (error:any) {
         console.log("Error updating salmon from catch:", error)
         throw error.message;
@@ -71,10 +93,9 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
     if (match.phase === "TILES" && actualPlayerId === myPlayerId) {
         try {
         const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {actualPlayerId, myPlayerId, x,y});
-        console.log(response)
         if (!response.ok) {
             const errorData = await response.json();
-            alert(errorData.error);
+            alert(errorData.message);
             console.log("Error positioning tile:", errorData);
         }
         return response;
@@ -86,29 +107,38 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
     else alert("Now it's salmon moving phase!")
 };
 
-export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, setSelectedSalmon:Function, match:Match, actualPlayerId:number|undefined, myPlayerId:number, gridTiles:MatchTile[]) => {
-    const gridWidth = 3; // Ancho de la cuadrícula (número de columnas)
-    const gridHeight = 6; // Altura de la cuadrícula (número de filas)
-    const x = index % gridWidth;
-    const y = gridHeight - 1 - Math.floor(index / gridWidth)
+export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, setSelectedSalmon:Function, match:Match, actualPlayerId:number|undefined, myPlayerId:number, grid:GridCell[]) => {
+    const x = index % GRID_WIDTH;
+    const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
     let updateTilePositionResponse = null;
     let updateSalmonPositionResponse = null;
+    let updateSpawnReponse = null;
+    let confirmed;
     if (selectedSalmon === null) {
         if (selectedTile) updateTilePositionResponse = await updateTilePosition(selectedTile, x, y, jwt, actualPlayerId, myPlayerId, match);
         setSelectedTile(null);
     }
     else {
-        const foundTile = gridTiles.find(tile => tile.coordinate?.x === x && tile.coordinate?.y === y);
-        if (foundTile) {    
-            updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
+        const foundTileAndSalmons = grid[index]?.tile;
+        if (isFull(match.playersNumber, foundTileAndSalmons)) {
+            confirmed = window.confirm("This tile is full of salmons, you must spend 3 energy points to jump to the next one (If the next one is also full, this move will not be valid). Do you want to jump?");
+            if (confirmed) {
+                updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
+                setSelectedSalmon(null);
+            }
+        }
+        else if(x === 1 && y === 5 && match.round >= 6) {
+            updateSpawnReponse = await enterSpawn(selectedSalmon, jwt);        
             setSelectedSalmon(null);
-        } else if(x === 1 && y === 5 && match.round >= 6){
-            await updateSpawn(selectedSalmon, jwt);        
+        }
+        else {
+            updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
             setSelectedSalmon(null);
         }
     }
     if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === "TILES") await changephase(match, jwt, myPlayerId);
     else if (updateSalmonPositionResponse != null && updateSalmonPositionResponse.ok && match.phase === "MOVING") await changephase(match, jwt, myPlayerId);
+    else if (updateSpawnReponse != null && updateSpawnReponse.ok && match.phase === "MOVING") await changephase(match, jwt, myPlayerId);
 };
 
 export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
@@ -127,7 +157,7 @@ export const getRotationStyle = (tile:MatchTile) => {
     if (!tile)
         return {};
     return {
-        transform: `rotate(${tile.orientation * 60}deg)` // Si orientation va de 0 a 6, rota en incrementos de 60 grados
+        transform: `rotate(${tile.orientation * 60}deg)` // If orientation goes from 0 to 6, rotates in 60 degrees increments
     };
 };
 
@@ -181,11 +211,124 @@ export const fetchPlayers = async (match:Match, jwt:string, setPlayers:Function)
     setPlayers(data);
 }
 
-export const fetchSortedPlayers = async (match:Match, jwt:string, setPlayers:Function) => {
-    const response = await get("/api/v1/players/match/sorted/"+match.id, jwt);
-    const data = await response.json();
-    setPlayers(data);
+export function buildGridFromSnapshot(tiles: MatchTile[], salmons: SalmonMatch[]): GridCell[] {
+    const grid: GridCell[] = Array(18).fill(null).map(() => ({
+        tile: emptyTile,
+        salmons: [],
+    }));
+    tiles.forEach(tile => {
+        if (!tile.coordinate) return;
+        const { x, y } = tile.coordinate;
+        if (y < 0 || y >= GRID_HEIGHT) return;
+        const index = coordToIndex(x, y);
+        grid[index].tile = tile;
+    });
+    salmons.forEach(salmon => {
+        if (!salmon.coordinate) return;
+        const { x, y } = salmon.coordinate;
+        if (y < 0 || y >= GRID_HEIGHT) return;
+        const index = coordToIndex(x, y);
+        grid[index].salmons.push(salmon);
+    });
+    return grid;
 }
+
+/*export const updateGridWithSalmon = (prevGrid: GridCell[], updatedSalmon: SalmonMatch): GridCell[] => {
+  const newGrid = prevGrid.map(cell => ({
+    ...cell,
+    salmons: cell.salmons.filter(s => s.id !== updatedSalmon.id),
+  }));
+
+  const { x, y } = updatedSalmon.coordinate;
+  if (y >= 0 && y < GRID_HEIGHT) {
+    const index = coordToIndex(x, y);
+    newGrid[index] = {
+      ...newGrid[index],
+      salmons: [...newGrid[index].salmons, updatedSalmon],
+    };
+  }
+  return newGrid;
+}; */
+
+export const updateGridWithMovement = (prevGrid: GridCell[], salmon: SalmonMatch, myTile: MatchTile, toTravel: MatchTile): GridCell[] => {
+  const newGrid = [...prevGrid];
+  const fromIndex = coordToIndex(myTile.coordinate.x, myTile.coordinate.y);
+  const toIndex = coordToIndex(toTravel.coordinate.x, toTravel.coordinate.y);
+  // Remove salmon from current tile
+  newGrid[fromIndex] = {...newGrid[fromIndex],
+    tile: myTile,
+    salmons: newGrid[fromIndex].salmons.filter(s => s.id !== salmon.id),
+  };
+  // Add salmon to new tile
+    newGrid[toIndex] = {...newGrid[toIndex],
+    tile: toTravel,
+    salmons: salmon.salmonsNumber > 0 ? [...newGrid[toIndex].salmons, salmon] : newGrid[toIndex].salmons
+    };
+    console.log("myTile", newGrid[fromIndex])
+    console.log("toTravel", newGrid[toIndex])
+  return newGrid;
+};
+
+export const updateGridWithMovementFromSea = (prevGrid: GridCell[], salmon: SalmonMatch, toTravel: MatchTile): GridCell[] => {
+  const newGrid = [...prevGrid];
+  const toIndex = coordToIndex(toTravel.coordinate.x, toTravel.coordinate.y);
+  // Add salmon to new tile
+  if (salmon.salmonsNumber > 0) {
+    newGrid[toIndex] = {
+    ...newGrid[toIndex],
+    tile: toTravel,
+    salmons: [...newGrid[toIndex].salmons, salmon],
+    };
+  }
+  return newGrid;
+};
+
+export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile): GridCell[] => {
+  const { x, y } = updatedTile.coordinate;
+  const index = coordToIndex(x, y);
+  const newGrid = [...prevGrid];
+  newGrid[index] = {
+    ...newGrid[index],
+    tile: updatedTile,
+  };
+  return newGrid;
+};
+
+export const updateGridWithSalmons = (prevGrid: GridCell[], updatedSalmons: SalmonMatch[]): GridCell[] => {
+  const updatedMap = new Map(updatedSalmons.map(s => [s.id, s]));
+
+  return prevGrid.map(cell => {
+    if (cell.salmons.length === 0) return cell;
+
+    const newSalmons = cell.salmons
+      .map(s => updatedMap.get(s.id) ?? s)
+      .filter(s => updatedMap.has(s.id) || (s as any).salmonsNumber > 0); // ⚠️ revisa esta condición
+
+    if (newSalmons === cell.salmons) {
+      return cell;
+    }
+
+    return { ...cell, salmons: newSalmons };
+  });
+};
+
+export const updateGridWithHerons=(prevGrid:GridCell[],updatedTiles:MatchTile[],updatedSalmons:SalmonMatch[],deletedIds?:number[]):GridCell[]=>{
+ const newGrid=[...prevGrid];
+ const salmonMap=new Map(updatedSalmons.map(s=>[s.id,s]));
+ newGrid.forEach((cell,index)=>{
+  if(cell.salmons.length===0) return;
+  const newSalmons=cell.salmons.filter(s=>!deletedIds?.includes(s.id)).map(s=>salmonMap.get(s.id)??s);
+  if(newSalmons!==cell.salmons)
+   newGrid[index]={...cell,salmons:newSalmons};
+ });
+ updatedTiles.forEach(tile=>{
+  if(!tile.coordinate)return;
+  const {x,y}=tile.coordinate;
+  const index=coordToIndex(x,y);
+  newGrid[index]={...newGrid[index],tile};
+ });
+ return newGrid;
+};
 
 export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
   const tileWidth = 250;

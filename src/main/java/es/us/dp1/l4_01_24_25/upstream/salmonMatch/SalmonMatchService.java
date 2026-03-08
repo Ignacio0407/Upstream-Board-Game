@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -19,6 +20,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
@@ -32,7 +34,7 @@ import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMatchDTO, Integer>{
     
     SalmonMatchRepository salmonMatchRepository;
-    SalmonMatchMapper salmonMatchMapper;
+    public SalmonMatchMapper salmonMatchMapper;
     PlayerService playerService;
     SalmonService salmonService;
     MatchTileService matchTileService;
@@ -125,6 +127,23 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         return this.salmonMatchRepository.findByPlayerIdInSeaAsCoordinateDTO(playerId);
     }
 
+    public void notifySalmonMatchesUpdateToDTO (List<SalmonMatch> salmonMatches) {
+        this.messagingTemplate.convertAndSend("/topic/herons/" + salmonMatches.get(0).getMatch().getId(), this.salmonMatchMapper.toDTOList(salmonMatches));
+    }
+
+    public void findSalmonsByMatchIdAndNotifyUpdate (Integer matchId) {
+        List<SalmonMatchDTO> salmonMatches = this.findAllFromMatchDTO(matchId);
+        this.messagingTemplate.convertAndSend("/topic/salmons/" + matchId, salmonMatches);
+    }
+
+    public void notifySalmonMatchSpawnUpdate (List<SalmonMatch> salmonMatches) {
+        this.messagingTemplate.convertAndSend("/topic/salmons/spawn/" + salmonMatches.get(0).getMatch().getId(), "Update salmons in spawn");
+    }
+
+    public List<SalmonMatchDTO> toDTOList(List<SalmonMatch> salmonMatches) {
+        return this.salmonMatchMapper.toDTOList(salmonMatches);
+    }
+
     @Override
     @Transactional
     protected SalmonMatch updateEntityFields (SalmonMatch newSalmonMatch, SalmonMatch salmonMatchToUpdate) {
@@ -162,10 +181,10 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     private MatchTile tileFullNull(SalmonMatch salmonMatch, List<MatchTile> matchTiles, Coordinate newCoordinate) {
         Coordinate newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
-        MatchTile toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).toList().get(0);
+        MatchTile toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).findFirst().orElseThrow(() -> new NotValidMoveException("No tile exists at coordinate " + newCoordinate2));;
         TileType toTravelType2 = toTravel2.getTile().getType();
         if(toTravelType2.equals(TileType.BEAR) && List.of(0, 1).contains(toTravel2.getOrientation())) 
-            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1); // Posible socket -> OK
         return toTravel2;
     }
 
@@ -176,7 +195,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if (toTravel2 == null) throw new NotValidMoveException("You cannot go to the tile or it has not still been placed!");
         TileType toTravelType2 = toTravel2.getTile().getType();
         if (bearBoolean(myTile, toTravel2, myCoordinateType, toTravelType2, from, to) || bearBoolean(myTile, toTravel, myCoordinateType, toTravelType, from, to)) {
-            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1);
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber() - 1); // Posible socket -> OK
         }
         return toTravel2;
     }
@@ -185,49 +204,64 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         return new Coordinate(newCoordinate.x()+x, newCoordinate.y() + y);
     }
 
-    private void herons(Player player, Match match, List<Player> players, Integer numPlayers) {
+    private void herons(Player player, Match match, Integer numPlayers) {
         List<SalmonMatch> salmonMatchesFromPlayer = this.findAllFromPlayerInRiver(player.getId());
         List<MatchTile> herons = this.matchTileService.findHeronWithCoordsFromGame(match.getId());
+        Map<Coordinate, List<SalmonMatch>> salmonsByCoord = salmonMatchesFromPlayer.stream().collect(Collectors.groupingBy(SalmonMatch::getCoordinate));
         List<SalmonMatch> salmonMatchesUpdated = new ArrayList<>();
+        List<MatchTile> heronsUpdated = new ArrayList<>();
+        List<SalmonMatch> salmonMatchesToDelete = new ArrayList<>();
+        List<Integer> deletedSalmonsIds = new ArrayList<>();
         for(MatchTile heron : herons) {
-            for(SalmonMatch salmonMatch: salmonMatchesFromPlayer) {
-                if(salmonMatch.getCoordinate().equals(heron.getCoordinate())) {
-                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                    this.setSalmonImage(salmonMatch);
-                    if(salmonMatch.getSalmonsNumber()==0) {
-                        this.delete(salmonMatch); 
-                        heron.setSalmonsNumber(heron.getSalmonsNumber()-1);
-                        this.matchTileService.save(heron);
-                    }
+            List<SalmonMatch> salmonsHere = salmonsByCoord.get(heron.getCoordinate());
+            if (salmonsHere != null && !salmonsHere.isEmpty()) {
+                SalmonMatch target = salmonsHere.stream().filter(s -> s.getSalmonsNumber() == 2).findFirst().orElse(salmonsHere.get(0));
+                target.setSalmonsNumber(target.getSalmonsNumber()-1);
+                this.setSalmonImage(target);
+                if(target.getSalmonsNumber()==0) {
+                    salmonMatchesToDelete.add(target);
+                    heron.setSalmonsNumber(heron.getSalmonsNumber()-1);
+                    heronsUpdated.add(this.matchTileService.save(heron));
+                    deletedSalmonsIds.add(target.getId());
                 }
-                salmonMatchesUpdated = this.saveAll(salmonMatchesFromPlayer);
-            }   
+                else salmonMatchesUpdated.add(target);
+            }
         }
-        List<SalmonMatchDTO> salmonMatchesHerons = this.salmonMatchMapper.toDTOList(salmonMatchesUpdated);
-        this.messagingTemplate.convertAndSend("/topic/salmons/herons", salmonMatchesHerons);
-        this.matchService.save(match);
+        if (!salmonMatchesToDelete.isEmpty()) {
+            this.deleteAll(salmonMatchesToDelete);
+            if (!heronsUpdated.isEmpty() && salmonMatchesUpdated.isEmpty()) this.matchService.notifyHeronsUpdated(salmonMatchesUpdated, heronsUpdated, deletedSalmonsIds, match.getId());
+        }
+        else if (!salmonMatchesUpdated.isEmpty()) {
+            salmonMatchesUpdated = this.saveAll(salmonMatchesUpdated);
+            if (!heronsUpdated.isEmpty() && !deletedSalmonsIds.isEmpty()) this.matchService.notifyHeronsUpdated(salmonMatchesUpdated, heronsUpdated, deletedSalmonsIds, match.getId());
+            else this.notifySalmonMatchesUpdateToDTO(salmonMatchesUpdated);
+        }
     }
 
-    private SalmonMatchDTO processSalmonMovement(SalmonMatch salmonMatch, MatchTile toTravel, Player player, Match match, 
+    private SalmonMatchDTO processSalmonMovement(SalmonMatch salmonMatch, MatchTile myTile, MatchTile toTravel, Player player, Match match, 
             Coordinate newCoordinate, Integer energyUsed, List<Player> players, Integer numPlayers) {
         salmonMatch.setCoordinate(newCoordinate);
-        toTravel.setSalmonsNumber(toTravel.getSalmonsNumber() + 1);
-        MatchTile toTravelToSend = this.matchTileService.save(toTravel);
         player.setEnergy(player.getEnergy() - energyUsed);
-        if (player.getEnergy() == 0) {
-            herons(player, match, players, numPlayers);
-        }
         this.playerService.save(player);
         if (salmonMatch.getSalmonsNumber() > 0) {
+            if (!toTravel.isFull()) toTravel.setSalmonsNumber(toTravel.getSalmonsNumber() + 1);
+            this.matchTileService.save(toTravel);
             this.save(salmonMatch);
-        } else {
-            this.delete(salmonMatch);
         }
-        SalmonMatchDTO updated = this.salmonMatchMapper.toDTO(salmonMatch);
-        this.messagingTemplate.convertAndSend("/topic/salmon", updated);
-        this.matchTileService.toDTOAndSendToWS(toTravelToSend);
-        this.playerService.notifyPlayersUpdate(match.getId());
-        return updated;
+        else this.delete(salmonMatch);
+        if (player.getEnergy() == 0) {
+            herons(player, match, numPlayers);
+        }
+        SalmonMatchDTO salmon = this.salmonMatchMapper.toDTO(salmonMatch);
+        MatchTileDTO tileToTravel = this.matchTileService.toDTO(toTravel);
+        MatchTileDTO myTileDTO = this.matchTileService.toDTO(myTile);
+        if (myTile != null) {
+            this.matchTileService.save(myTile);
+            this.messagingTemplate.convertAndSend("/topic/movingSalmon/" + match.getId(), Map.of("salmon", salmon, "myTile", myTileDTO, "toTravel", tileToTravel));
+        }
+        else this.messagingTemplate.convertAndSend("/topic/movingSalmonFromSea/" + match.getId(), Map.of("salmon", salmon, "toTravel", tileToTravel));
+        this.matchService.notifyPlayerAndMatchUpdate(player, match);
+        return salmon;
     }
 
     private Boolean bearBoolean(MatchTile myTile, MatchTile toTravel, TileType myCoordinateType, TileType toTravelType, List<Integer> from, List<Integer> to) {
@@ -237,11 +271,12 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     private record CoordinateInteger(Coordinate coordinate, MatchTile toTravel, Integer energyUsed) {}
 
-    private CoordinateInteger fromSea (MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, List<MatchTile> matchTiles, Coordinate newCoordinate, Integer energyUsed, Coordinate newCoordinate2, TileType toTravelType) {
+    private CoordinateInteger fromSea (MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, List<MatchTile> matchTiles, Coordinate newCoordinate, Integer energyUsed, Coordinate newCoordinate2, TileType toTravelType, Player player) {
         if (toTravel.isFull()) {
                 toTravel2 = tileFullNull(salmonMatch, matchTiles, newCoordinate);
                 if (!toTravel2.isFull()) {
                     energyUsed = 3;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                     newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
                     if (toTravelType.equals(TileType.BEAR)) salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
                     if (toTravel2.getTile().getType().equals(TileType.EAGLE)) {
@@ -252,10 +287,14 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                 else throw new NotValidMoveException("The next tile is also full!");
         }
         else if (toTravelType.equals(TileType.BEAR) && List.of(0, 1).contains(toTravel.getOrientation())) {
-            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
             energyUsed = 2;
+            this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+            salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
         } 
-        else if(toTravelType.equals(TileType.JUMP) && List.of(0, 1, 5).contains(toTravel.getOrientation())) energyUsed = 2;
+        else if(toTravelType.equals(TileType.JUMP) && List.of(0, 1, 5).contains(toTravel.getOrientation())) {
+            energyUsed = 2;
+            this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+        }
         else if(toTravelType.equals(TileType.EAGLE)) {
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
             toTravel = this.matchTileService.eagleToWater(toTravel);
@@ -263,97 +302,130 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         return new CoordinateInteger(newCoordinate2, toTravel2, energyUsed); 
     }
 
-    private Integer above (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch) {
-        Boolean cond1 = toTravelType.equals(TileType.BEAR) && List.of(0,1).contains(toTravel.getOrientation());
-        Boolean cond2 = toTravelType.equals(TileType.JUMP) && List.of(0,1,5).contains(toTravel.getOrientation());
+    private Integer above (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
+        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(0,1).contains(toTravel.getOrientation());
+        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,1,5).contains(toTravel.getOrientation());
         if(myCoordinateType.equals(TileType.BEAR)) {
             if(List.of(3,4).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                if (toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-2:toTravelHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
             }
         }
         else if(myCoordinateType.equals(TileType.JUMP)) {
             if(List.of(2,3,4).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                if(toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
             }
         }
         else {
-            if(cond1 || cond2) energyUsed = 2;
-                salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            if(toTravelBearHasJump || toTravelHasJump) {
+                energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            }
         }
         return energyUsed;
     }
 
-    private Integer left (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch) {
-        Boolean cond1 = toTravelType.equals(TileType.BEAR) && List.of(0,5).contains(toTravel.getOrientation());
-        Boolean cond2 = toTravelType.equals(TileType.JUMP) && List.of(0,4,5).contains(toTravel.getOrientation());
+    private Integer left (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
+        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(0,5).contains(toTravel.getOrientation());
+        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,4,5).contains(toTravel.getOrientation());
         if(myCoordinateType.equals(TileType.BEAR)) {
             if(List.of(2,3).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                if(toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-2:toTravelHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                }
             }
         }
         else if(myCoordinateType.equals(TileType.JUMP)) {
             if(List.of(1,2,3).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                if(toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
             }
         }
         else {
-            if(cond1 || cond2) energyUsed = 2;
-                salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            if(toTravelBearHasJump || toTravelHasJump) {
+                energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            }
         }
         return energyUsed;
     }
 
-    private Integer right (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch) {
-        Boolean cond1 = toTravelType.equals(TileType.BEAR) && List.of(1,2).contains(toTravel.getOrientation());
-        Boolean cond2 = toTravelType.equals(TileType.JUMP) && List.of(0,1,2).contains(toTravel.getOrientation());
+    private Integer right (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
+        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(1,2).contains(toTravel.getOrientation());
+        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,1,2).contains(toTravel.getOrientation());
         if(myCoordinateType.equals(TileType.BEAR)) {
             if(List.of(4,5).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-2:salmonMatch.getSalmonsNumber()-1);
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-2:cond2?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                if(toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-2:toTravelHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber()); 
+                }
             }
         }
         else if(myCoordinateType.equals(TileType.JUMP)) {
             if(List.of(3,4,5).contains(myTile.getOrientation())) {
                 energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber((toTravelType.equals(TileType.BEAR))?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
             }
             else {
-                if(cond1 || cond2) energyUsed = 2;
-                    salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                if(toTravelBearHasJump || toTravelHasJump) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                    salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+                }
             }
         }
         else {
-            if(cond1 || cond2) energyUsed = 2;
-                salmonMatch.setSalmonsNumber(cond1?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            if(toTravelBearHasJump || toTravelHasJump) {
+                energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                salmonMatch.setSalmonsNumber(toTravelBearHasJump?salmonMatch.getSalmonsNumber()-1:salmonMatch.getSalmonsNumber());
+            }
         }
         return energyUsed;
     }
 
-    private SalmonMatchDTO fromGridFull (List<MatchTile> matchTiles, Coordinate myCoordinate, Coordinate newCoordinate, 
+    private CoordinateInteger fromGridFull (List<MatchTile> matchTiles, Coordinate myCoordinate, Coordinate newCoordinate, 
     MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, Integer energyUsed, Coordinate newCoordinate2, 
     Player player, Match match, List<Player> players, Integer numPlayers, TileType toTravelType, MatchTile myTile, TileType myCoordinateType) {
         if (null != myCoordinate.x()) {
@@ -384,20 +456,19 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
             }
-            else throw new NotValidMoveException("The destination tile and there are none to jump to!");
+            else throw new NotValidMoveException("The destination tile is full and there are none to jump to!");
             if (newCoordinate2 != null) {
-                if (player.getEnergy() < 3) 
+                if (player.getEnergy() < 3)
                     throw new NotValidMoveException("You need 3 energy points to jump a full tile!");
                 if (toTravel2.getTile().getType().equals(TileType.EAGLE)) {
-                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                    toTravel2 = this.matchTileService.eagleToWater(toTravel2);
-                    if (salmonMatch.getSalmonsNumber().equals(0)) 
-                        this.delete(salmonMatch);
+                    if (salmonMatch.getSalmonsNumber() > 0) salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); // Posible socket -> OK
+                    toTravel2 = this.matchTileService.eagleToWater(toTravel2); // Posible socket -> OK
                 }
-                myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
-                this.matchTileService.save(myTile);
-                this.setSalmonImage(salmonMatch);
-                return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
+                myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1); // Posible socket -> ADDED NOW
+                //this.matchTileService.save(myTile);
+                this.setSalmonImage(salmonMatch); // Posible socket -> ok
+                //return processSalmonMovement(salmonMatch, myTile, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
+                return new CoordinateInteger(newCoordinate2, toTravel2, energyUsed);
             }
         }
         throw new IllegalStateException("Move from full tile couldn't be calculated");
@@ -411,24 +482,24 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if(toTravelType.equals(TileType.EAGLE)) {
             salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
             toTravel = this.matchTileService.eagleToWater(toTravel);
-        } 
-        // SI SUBO
-        if(newCoordinate.x().equals(myCoordinate.x()) && newCoordinate.y().equals(myCoordinate.y()+1))
-            energyUsed = this.above(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch);
-        // SI VOY A LA IZQUIERDA
-        if(newCoordinate.x().equals(myCoordinate.x()-1))
-            energyUsed = this.left(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch);
-        // SI VOY A LA DERECHA
-        if(newCoordinate.x().equals(myCoordinate.x()+1)) {
-            energyUsed = this.right(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch);
         }
-        myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
-        this.matchTileService.save(myTile);
+        // Goes up
+        if(newCoordinate.x().equals(myCoordinate.x()) && newCoordinate.y().equals(myCoordinate.y()+1))
+            energyUsed = this.above(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player);
+        // Goes left
+        if(newCoordinate.x().equals(myCoordinate.x()-1))
+            energyUsed = this.left(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player);
+        // Goes right
+        if(newCoordinate.x().equals(myCoordinate.x()+1)) {
+            energyUsed = this.right(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player);
+        }
+        myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1); // Posible socket -> ADDED NOW
+        //this.matchTileService.save(myTile);
         return energyUsed;
     }
 
     @Transactional
-    public SalmonMatchDTO updateCoordinate(Integer id, Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
+    public void updateCoordinate(Integer id, Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {
         SalmonMatch salmonMatch = this.findById(id);
         Match match = salmonMatch.getMatch();
         if (match.getPhase() != Phase.MOVING)
@@ -439,6 +510,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(coordinate.get("x"), coordinate.get("y"));
         List<MatchTile> matchTiles = this.matchTileService.findByMatchId(match.getId());
+        MatchTile myTile = null;
         MatchTile toTravel = this.matchTileService.findMyTile(matchTiles, newCoordinate);
         TileType toTravelType = toTravel.getTile().getType();
         Coordinate newCoordinate2 = null;
@@ -447,24 +519,28 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         this.throwExceptionsInitial(myCoordinate, newCoordinate, player, toTravel);
 
         if (myCoordinate == null) {
-            CoordinateInteger aux = this.fromSea(toTravel, toTravel2, salmonMatch, matchTiles, newCoordinate, energyUsed, newCoordinate2, toTravelType);
+            CoordinateInteger aux = this.fromSea(toTravel, toTravel2, salmonMatch, matchTiles, newCoordinate, energyUsed, newCoordinate2, toTravelType, player);
             newCoordinate2 = aux.coordinate();
             energyUsed = aux.energyUsed();
             toTravel2 = aux.toTravel();
         }
         // I'm in grid
         else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
-            MatchTile myTile = this.matchTileService.findMyTile(matchTiles, myCoordinate);
+            myTile = this.matchTileService.findMyTile(matchTiles, myCoordinate);
             TileType myCoordinateType = myTile.getTile().getType();;
-            if (toTravel.isFull())
-                return this.fromGridFull(matchTiles, myCoordinate, newCoordinate, toTravel, toTravel2, salmonMatch, energyUsed, newCoordinate2, player, match, players, numPlayers, toTravelType, myTile, myCoordinateType);
+            if (toTravel.isFull()) {
+                CoordinateInteger aux = this.fromGridFull(matchTiles, myCoordinate, newCoordinate, toTravel, toTravel2, salmonMatch, energyUsed, newCoordinate2, player, match, players, numPlayers, toTravelType, myTile, myCoordinateType);
+                newCoordinate2 = aux.coordinate();
+                toTravel2 = aux.toTravel();
+                energyUsed = aux.energyUsed();
+            }
             else
                 energyUsed = this.fromGrid(myCoordinate, myTile, myCoordinateType, newCoordinate, toTravel, toTravelType, salmonMatch, energyUsed, player);
         }
         else throw new NotValidMoveException("You can only move from 1 to 1");
-        setSalmonImage(salmonMatch); 
-        if (newCoordinate2 == null )  return processSalmonMovement(salmonMatch, toTravel, player, match, newCoordinate, energyUsed, players, numPlayers);
-        else return processSalmonMovement(salmonMatch, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
+        setSalmonImage(salmonMatch);
+        if (newCoordinate2 == null )  this.processSalmonMovement(salmonMatch, myTile, toTravel, player, match, newCoordinate, energyUsed, players, numPlayers);
+        else this.processSalmonMovement(salmonMatch, myTile, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
     }
 
     public List<SalmonMatchDTO> create(Integer playerId) {
@@ -490,70 +566,79 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     private void enterSpawnMovement (Coordinate myCoordinate, Coordinate newCoordinate, TileType tileType, MatchTile myTile, 
     SalmonMatch salmonMatch, Coordinate updateCoordinate, Integer energyUsed, Player player) {
         if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
-            // Para subir 
+            // Go up
             if(newCoordinate.y() == myCoordinate.y() + 1 && myCoordinate.x().equals(newCoordinate.x())) { 
                 if(tileType.equals(TileType.BEAR) && List.of(3,4).contains(myTile.getOrientation())) {
-                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                    energyUsed = 2;    
+                    energyUsed = 2; 
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);  
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1); 
                 }
-                else if(tileType.equals(TileType.JUMP) && List.of(2,3,4).contains(myTile.getOrientation()))
-                    energyUsed = 2;    
+                else if(tileType.equals(TileType.JUMP) && List.of(2,3,4).contains(myTile.getOrientation())) {
+                    energyUsed = 2;
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                }
             }
-            // Si vengo desde la izquierda
+            // From left
             else if(newCoordinate.x().equals(myCoordinate.x() + 1)) { 
                 if(tileType.equals(TileType.BEAR) && List.of(4,5).contains(myTile.getOrientation())) {
-                        salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                        energyUsed = 2;    
+                    energyUsed = 2; 
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);  
+                    salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
                 }
-                else if(tileType.equals(TileType.JUMP) && List.of(3,4,5).contains(myTile.getOrientation()))
-                    energyUsed = 2;    
+                else if(tileType.equals(TileType.JUMP) && List.of(3,4,5).contains(myTile.getOrientation())) {
+                    energyUsed = 2; 
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);  
+                }
             }
-            // Vengo de la derecha
+            // From right
             else if(newCoordinate.x().equals(myCoordinate.x() - 1)){
                 if(tileType.equals(TileType.BEAR) && List.of(2,3).contains(myTile.getOrientation())) {
+                    energyUsed = 2; 
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);  
                     salmonMatch.setSalmonsNumber(salmonMatch.getSalmonsNumber()-1);
-                    energyUsed = 2;    
                 }
-                else if(tileType.equals(TileType.JUMP) && List.of(1,2,3).contains(myTile.getOrientation()))
-                    energyUsed = 2;    
+                else if(tileType.equals(TileType.JUMP) && List.of(1,2,3).contains(myTile.getOrientation())) {
+                    energyUsed = 2; 
+                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);  
+                }
             }
 
             myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
             this.matchTileService.save(myTile);
             salmonMatch.setCoordinate(updateCoordinate);
             player.setEnergy(player.getEnergy() - energyUsed);
+            if (salmonMatch.getSalmonsNumber() > 0) this.save(salmonMatch);
+            else this.delete(salmonMatch);
         }
     }
 
-    public SalmonMatchDTO enterSpawn(Integer id) {
+    public void enterSpawn(Integer id) {
         SalmonMatch salmonMatch = this.findById(id);
-        Player player = salmonMatch.getPlayer();
         Match match = salmonMatch.getMatch();
-        List<Player> players = this.playerService.findPlayersByMatch(match.getId());
-        Integer numPlayers = match.getPlayersNumber();
+        if (match.getRound() < 6) throw new NotValidMoveException("You can only enter the spawn from round 6!");
+        Player player = salmonMatch.getPlayer();
+        //List<Player> players = this.playerService.findPlayersByMatch(match.getId());
+        //Integer numPlayers = match.getPlayersNumber();
         Coordinate myCoordinate = salmonMatch.getCoordinate();
         Coordinate newCoordinate = new Coordinate(1,5);
         Coordinate updateCoordinate = new Coordinate(1, 21);
         Integer energyUsed = 1;
-        MatchTile myTile = this.matchTileService.findByMatchId(match.getId()).stream()
-            .filter(m -> salmonMatch.getCoordinate().equals(m.getCoordinate())).findFirst().orElse(null);
+        MatchTile myTile = this.matchTileService.findMyTile(this.matchTileService.findByMatchId(match.getId()), myCoordinate);
         TileType tileType = myTile.getTile().getType();
 
         this.enterSpawnMovement(myCoordinate, newCoordinate, tileType, myTile, salmonMatch, updateCoordinate, energyUsed, player);
     
-        if(player.getEnergy() == 0) {
+        /*if (player.getEnergy() == 0) {
             Integer myOrder = player.getPlayerOrder();
             Player nextPlayer = players.stream().filter(pl -> pl.getPlayerOrder().equals((myOrder + 1)%numPlayers)).findFirst().orElse(null);
             match.setActualPlayer(nextPlayer);
             this.matchService.save(match);
-        }
-    
-        this.playerService.save(player);
-        if (salmonMatch.getSalmonsNumber() > 0) this.save(salmonMatch);
-        else this.delete(salmonMatch);
+        } */
+
         SalmonMatchDTO updated = this.salmonMatchMapper.toDTO(salmonMatch);
-        this.messagingTemplate.convertAndSend("/topic/salmon", updated);
-        return updated;
+        this.messagingTemplate.convertAndSend("/topic/salmon/spawn/enter/" + match.getId(), Map.of("salmonMatch", updated, "matchTile", this.matchTileService.toDTO(myTile)));
+        this.playerService.save(player);
+        this.matchService.notifyPlayerAndMatchUpdate(player, match);
     }
 
 }

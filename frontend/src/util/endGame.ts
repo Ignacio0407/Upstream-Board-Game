@@ -4,16 +4,16 @@ import Player from '../interfaces/Player.ts'
 import User from '../interfaces/User.ts'
 
 interface endGamePrompts {match:Match, players:Player[], user:User, jwt:string, spectatorIds:number[], 
-    navigate:Function, playersNum:number, setMatches:Function}
+    navigate:Function, setMatch:Function}
 
-export default async function endGame ({ match, players, user, jwt, spectatorIds, navigate, playersNum, setMatches }:endGamePrompts) {
+export default async function endGame ({ match, players, user, jwt, spectatorIds, navigate, setMatch }:endGamePrompts) {
     
     if (spectatorIds.find((p) => p === user.id)) {
         navigate("/dashboard");
         return;
     }
 
-    let playersNumber = playersNum - 1;
+    let playersNumber = match.playersNumber - 1;
 
     if (match.matchCreatorId === user.id)
         playersNumber = 0;
@@ -36,7 +36,7 @@ export default async function endGame ({ match, players, user, jwt, spectatorIds
     try {
         await deleteEntity(`/api/v1/players`, jwt, playerId);
         await put(`/api/v1/matches/${match.id}`, jwt, match);
-        setMatches(match);
+        setMatch(match);
         navigate("/dashboard");
     } catch (error) {
         console.error("Error exiting from match:", error);

@@ -10,12 +10,13 @@ import useFetchState from '../util/useFetchState.ts';
 import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
 import WhiteSpace from '../util/WhiteSpace.tsx';
-import { createWebSocket, createStompClient } from '../util/fetchers.ts'
 import {DashboardMatch} from '../interfaces/Match.ts';
+import WebSocketManager from '../util/webSocketManager.ts';
+import Match from '../interfaces/Match.ts';
    
 export default function Dashboard() {
     const jwt = tokenService.getLocalAccessToken();
-    const user = tokenService.getUserList();
+    const user = tokenService.getUser();
     const navigate = useNavigate(); 
     const [username, setUsername] = useState("");
     const [matches, setMatches] = useFetchState<DashboardMatch[]>([],'/api/v1/matches/dashboard',jwt);
@@ -34,7 +35,7 @@ export default function Dashboard() {
     
     function espectate(match:DashboardMatch) {
         setSpectatorIds(prevSpectators => [...prevSpectators, user.id]);
-        navigate('/matches/'+match.id, { state: { spectatorIds: [...spectatorIds, user.id] } });
+        navigate('/matches/'+match.id+"/game", { state: { spectatorIds: [...spectatorIds, user.id] } });
     }
 
     function join(match:DashboardMatch) {
@@ -45,20 +46,22 @@ export default function Dashboard() {
                 return;
             }
         }
-        navigate('/matches/'+match.id);
+        navigate('/matches/'+match.id+"/waiting");
     }
 
-    const socket = createWebSocket();
-    const stompClient = createStompClient(socket, jwt);
-    
-    stompClient.onConnect = () => {
-    stompClient.subscribe('/topic/reload', (message) => {
-        console.log('Message received: ' + message.body);
-        window.location.reload();
-    });
-};
+    useEffect(() => {
+        const wsManager = new WebSocketManager(jwt);
+        wsManager.initConnection();
 
-    stompClient.activate();
+        wsManager.addSubscription<Match>(`matches/dashboard`, (updatedMatch) => {
+            setMatches(prevMatches => {
+            const filtered = prevMatches.filter(match => match.id !== updatedMatch.id);
+            return [...filtered, updatedMatch];
+            });
+        });
+
+        return () => { wsManager.deactivate() };
+    }, []); // It only opens the connection once
 
     function matchesList(matchesToList:DashboardMatch[]) {
       return matchesToList.map((match) => {
@@ -74,7 +77,7 @@ export default function Dashboard() {
                 <td className='celda'>{(match.state === 'ON_GOING' || match.state === 'WAITING') &&
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
-                {user.roles[0] == "ADMIN" && <Button color="danger" onClick={() =>
+                {user.roles && user.roles[0] == "ADMIN" && <Button color="danger" onClick={() =>
                     deleteFromList(`/api/v1/matches/${match.id}`, match.id, [matches, setMatches], [alerts, setAlerts],
                     setMessage, setVisible)}>
                     {<i className="fa fa-trash"></i>}
@@ -100,7 +103,8 @@ export default function Dashboard() {
               <ButtonLink color={"success"} direction={"/creategame"} text={"Create Game"}></ButtonLink>
               </div>
                 <div className="game-table">
-                <thead>
+                <table>
+                    <thead>
                     <tr className='fila'>
                         <th className='cabeza'>Game</th>
                         <th className='cabeza'>Players</th>
@@ -109,9 +113,13 @@ export default function Dashboard() {
                         <th className='cabeza'>Join</th>
                         <th className='cabeza'>Spectate</th>
                     </tr>
-                </thead>
-                <tbody>{renderedMatches}</tbody>
+                    </thead>
+                    <tbody>
+                    {renderedMatches}
+                    </tbody>
+                </table>
                 </div>
+
             </div>
         </div> 
         </> 

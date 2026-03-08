@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,12 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
     public PlayerRestController(PlayerService playerService) {
         super(playerService);
         this.playerService = playerService;
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        this.playerService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/match/{id}")

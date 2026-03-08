@@ -28,7 +28,7 @@ public class Player extends BaseEntity{
     
     Boolean alive;
 
-    @ValidNumber(min=0)
+    @ValidNumber(min=0, max=28)
     Integer points;
     
     @ValidNumber(min=0, max=5)

@@ -1,98 +1,191 @@
 import { useState, useEffect, JSX } from 'react';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
-import { handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick, renderPlayerList, fetchSortedPlayers } from './matchUtil.tsx';
+import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick, renderPlayerList, passTurn, buildGridFromSnapshot, updateGridWithSalmons, updateGridWithTile, updateGridWithMovement, coordToIndex, updateGridWithMovementFromSea, updateGridWithHerons } from './matchUtil.tsx';
 import { ColorToRgb } from '../util/ColorParser.ts';
 import Chat from '../components/chat/Chat.tsx'
-import Match from '../interfaces/Match.ts';
-import Tile from '../interfaces/Tile.ts';
+import Match, { emptyMatch } from '../interfaces/Match.ts';
 import MatchTile, {emptyTile} from '../interfaces/MatchTile.ts';
 import SalmonMatch from '../interfaces/SalmonMatch.ts';
 import Player from '../interfaces/Player.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
+import { TileType } from '../interfaces/Tile.ts';
 
-export default function Game({match}: {match: Match}) {
-    type GridCell = {tile: MatchTile, salmons: SalmonMatch[]};
+export default function Game() {
+    const navigate = useNavigate();
     const jwt = tokenService.getLocalAccessToken();
+    const { matchId } = useParams<{ matchId: string }>();
+    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${matchId}` : null, jwt);
     const user = tokenService.getUser();
-    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${match.id}`,jwt);
-    const [tilesList,setTilesList] = useFetchState<Tile[]>([], '/api/v1/tiles',jwt); // Siempre igual
-    const [matchTilesNoCoordinate, setMatchTilesNoCoordinate] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${match.id}`,jwt) // Todos los front tienen las mismas tiles
-    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${match.id}`, jwt);
+    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${matchId}`,jwt);
+    const [matchTiles, setMatchTiles] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${matchId}`, jwt);
+    const [matchTilesNoCoordinate, setMatchTilesNoCoordinate] = useState<MatchTile[]>([]);
+    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${matchId}`, jwt);
     const [allDataLoaded, setAllDataLoaded] = useState(false);
-    const [gridTiles, setGridTiles] = useState<MatchTile[]>([]);
-    const [gridSalmons, setGridSalmons] = useState<SalmonMatch[]>([]);
-    const [spawnSalmons, setSpawnSalmons] = useState<SalmonMatch[]>([]);
     const [selectedTile, setSelectedTile] = useState<MatchTile | null>(null);
     const [selectedSalmon, setSelectedSalmon] = useState<SalmonMatch | null>(null);
-    const [grid, setGrid] = useState<GridCell[]>(Array(18).fill(null).reverse()); // Each cell will be an empty array.
+    const [grid, setGrid] = useState<GridCell[]>(Array(18).fill(null).reverse().map(() => ({ tile: emptyTile, salmons: [] })));
     const [gridSea, setGridSea] = useState<SalmonMatch[][]>(Array(4).fill(null).map(() => []));
-    const [gridDesove, setGridDesove] = useState<SalmonMatch[][]>(Array(5).fill(null).map(() => []));
+    const [gridSpawn, setGridSpawn] = useState<SalmonMatch[][]>(Array(5).fill(null).map(() => []));
     const [myPlayer, setMyPlayer] = useState<Player | null>(null);
     let playerList: JSX.Element[] = [];
     if (match.actualPlayerId) playerList = generatePlayerList(players, match.actualPlayerId);
     const location = useLocation();
     const spectatorIds:number[] = location.state?.spectatorIds || [];
     const currentUserIsSpectator = spectatorIds.includes(user.id);
+    interface TilesAndSalmons { salmonMatches: SalmonMatch[], matchTiles: MatchTile[] }
+    interface SalmonMovement { salmon: SalmonMatch, myTile: MatchTile, toTravel: MatchTile }
+    interface TileAndSalmon { salmonMatch: SalmonMatch, matchTile: MatchTile }
 
     // Cada vez que cambian los salmones o los matchTiles pueden cambiar los jugadores, y mejor devolverlos siempre ordenados.
 
+    // To keep everything right after reloading the page.
     useEffect(() => {
-        if (players.length > 0 && tilesList.length > 0 && matchTilesNoCoordinate.length > 0 && salmons.length > 0) {
-            setAllDataLoaded(true);
-            fetchSortedPlayers(match, jwt, setPlayers);
-            const matchTilesWithCoordinate = matchTilesNoCoordinate.filter(mt => mt.coordinate != null)
-            //setGridTiles(matchTilesWithCoordinate);
-            const salmonsWithCoordinate = salmons.filter(s => s.coordinate != null);
-            //setGridSalmons(salmonsWithCoordinate)
+        if (!allDataLoaded) return;
+        setMatchTilesNoCoordinate(matchTiles.filter(t => !t.coordinate));
+        setGrid(buildGridFromSnapshot(matchTiles.filter(t => t.coordinate !== null), salmons));
+        if (match.round >= 6) {
+            const newGridDesove: SalmonMatch[][] = Array(5).fill(null).map(() => []);
+            let spawnIndex: number | null = null;
+            salmons.forEach(s => {
+            if (s.coordinate) spawnIndex = s.coordinate.y - 21;
+            if (spawnIndex !== null && spawnIndex >= 0 && spawnIndex <= newGridDesove.length)
+                newGridDesove[spawnIndex].push(s);
+            });
+            setGridSpawn(newGridDesove);
         }
-    }, [match.id])
+    }, [allDataLoaded]);
 
     useEffect(() => {
-        const salmonMatchesWCoord = [...salmons].filter(s => s.coordinate !== null);
-        setGridSalmons(salmonMatchesWCoord);
-    }, [salmons]);
+        if (match && players.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+            setAllDataLoaded(true);
+        }
+    }, [match, players, matchTiles, salmons]);
 
     useEffect(() => {
-        setMyPlayer(players.filter(p => p.userId === user.id)[0]);
-    }, [salmons, gridTiles])
+        const me = players.find(p => p.userId === user.id);
+        if (me) setMyPlayer(me);
+    }, [players, match, salmons, matchTiles]);
 
     useEffect(() => {
         const wsManager = new WebSocketManager(jwt);
         wsManager.initConnection();
 
-        wsManager.addSubscription<SalmonMatch>('salmon', (updatedSalmon) => {
-            setSalmons(prev => prev.map(s => s.id === updatedSalmon.id ? updatedSalmon : s));
+        wsManager.addSubscription<Match>(`match/${matchId}`, (updatedMatch) => {
+            setMatch(updatedMatch)
+            if (updatedMatch.state === "FINALIZED")
+                navigate(`/matches/${matchId}/end`)
         });
 
-        wsManager.addSubscription<SalmonMatch[]>('salmons/herons', (updatedSalmons) => {
-            setSalmons(prev =>
-                prev.map(s => {
-                    const updated = updatedSalmons.find(u => u.id === s.id);
-                    return updated ? updated : s;   
+        wsManager.addSubscription<SalmonMovement>(`movingSalmon/${matchId}`, ({ salmon, myTile, toTravel }) => {
+            console.log("salmon", salmon)
+            setMatchTiles(prev => prev.map(tile => {
+                if (tile.id === myTile.id) return myTile;
+                if (tile.id === toTravel.id) return toTravel;
+                return tile;
                 })
             );
+            setSalmons(prev => prev.map(s => s.id === salmon.id ? salmon : s).filter(s => s.salmonsNumber > 0));
+            setGrid(prev => updateGridWithMovement(prev, salmon, myTile, toTravel));
         });
 
-        wsManager.addSubscription<MatchTile>('tiles/place', (updatedTile) => {
+        wsManager.addSubscription<SalmonMovement>(`movingSalmonFromSea/${matchId}`, ({ salmon, toTravel }) => {
+            console.log("salmon from sea", salmon)
+            setSalmons(prev => prev.map(s => s.id === salmon.id ? salmon : s).filter(s => s.salmonsNumber > 0));
+            setMatchTiles(prev => prev.map(tile => {
+                if (tile.id === toTravel.id) return toTravel;
+                return tile;
+                })
+            );
+            setGrid(prev => updateGridWithMovementFromSea(prev, salmon, toTravel));
+        });
+
+        wsManager.addSubscription<SalmonMatch[]>(`salmons/${matchId}`, (updatedSalmons) => {
+            setSalmons(updatedSalmons);
+            setGrid(prev => updateGridWithSalmons(prev, updatedSalmons));
+        });
+        
+        wsManager.addSubscription<TileAndSalmon>(`salmon/spawn/enter/${matchId}`, ({salmonMatch, matchTile}) => {
+            setSalmons(prev => prev.map(s => s.id === salmonMatch.id ? salmonMatch : s));
+            setGrid(prev => {
+                const newGrid = [...prev];
+                const index = coordToIndex(matchTile.coordinate.x, matchTile.coordinate.y);
+                newGrid[index] = {...newGrid[index],
+                    tile: matchTile,
+                    salmons: newGrid[index].salmons.filter(s => s.id !== salmonMatch.id),
+                };
+                return newGrid;
+            });
+            setGridSpawn(prev => {
+                const newGridSpawn = [...prev];
+                if (!newGridSpawn[0].some(s => s.id === salmonMatch.id)) newGridSpawn[0].push(salmonMatch);
+                return newGridSpawn;
+            });
+        });
+
+        wsManager.addSubscription<SalmonMatch[]>(`salmons/spawn/${matchId}`, () => {
+            setGridSpawn(prev => {
+                const newGridSpawn = prev.map(row => [...row]); // Deep copy
+                // i = 3 into i=4, delete i=3, i=2 into i=3, delete i=2 ...
+                for (let i = newGridSpawn.length - 2; i >= 0; i--) {
+                    newGridSpawn[i + 1] = [...newGridSpawn[i + 1], ...newGridSpawn[i]];
+                    newGridSpawn[i] = [];
+                }
+                return newGridSpawn;
+            });
+        });
+
+        // Update tile when placed on the board.
+        wsManager.addSubscription<MatchTile>(`tiles/place/${matchId}`, (updatedTile) => { 
             setMatchTilesNoCoordinate(prev => {
-                const copy = [...prev];
-                copy.shift();
-                return copy});
-            setGridTiles(prev => [...prev, updatedTile]);
+                const newTiles = [...prev];
+                newTiles.shift();
+                return newTiles;
+            });
+            setMatchTiles(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
+            setGrid(prev => updateGridWithTile(prev, updatedTile));
         });
 
-        wsManager.addSubscription<MatchTile>('tiles', (updatedTile) => {
-            setGridTiles(prev => [...prev, updatedTile]);
+        // Update tile when a salmon moves on it.
+        wsManager.addSubscription<MatchTile>(`tile/${matchId}`, (updatedTile) => {
+            setMatchTiles(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
+            setGrid(prev => updateGridWithTile(prev, updatedTile));
         });
 
-        wsManager.addSubscription<MatchTile>('tiles/rotation', (updatedTile) => {
+        wsManager.addSubscription<TilesAndSalmons>(`tilesAndSalmons/${matchId}`, ({ matchTiles, salmonMatches }) => {
+            setSalmons(salmonMatches);
+            setMatchTiles(matchTiles);
+            setGrid(buildGridFromSnapshot(matchTiles, salmonMatches));
+        });
+
+        wsManager.addSubscription<SalmonMatch[]>(`herons/${matchId}`, (salmonMatches) => {
+            setSalmons(prev => {
+            const updatedMap = new Map(salmonMatches.map(s => [s.id, s]));
+            const merged = prev.map(s => updatedMap.get(s.id) ?? s)
+            return merged;
+            });
+            setGrid(prev => updateGridWithSalmons(prev, salmonMatches));
+        });
+
+        wsManager.addSubscription<TilesAndSalmons & { deletedSalmonIds?: number[] }>(`heronsUpdated/${matchId}`, ({ matchTiles, salmonMatches, deletedSalmonIds }) => {
+            console.log("deletedIds", deletedSalmonIds)
+            setSalmons(prev => { const updatedMap = new Map(salmonMatches.map(s => [s.id, s]));
+            return prev.filter(s => !deletedSalmonIds?.includes(s.id)).map(s => updatedMap.get(s.id) ?? s);
+            });
+            setMatchTiles(prev => prev.map(tile => {
+                const updated = matchTiles.find(t => t.id === tile.id);
+                return updated ?? tile;
+            }));
+            setGrid(prev => updateGridWithHerons(prev, matchTiles, salmonMatches, deletedSalmonIds));
+        });
+
+        wsManager.addSubscription<MatchTile>(`tiles/rotation/${matchId}`, (updatedTile) => {
             setMatchTilesNoCoordinate(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
         });
 
-        wsManager.addSubscription(`players/${match.id}`, (updatedPlayers:Player[]) => {
+        wsManager.addSubscription(`players/${matchId}`, (updatedPlayers:Player[]) => {
             setPlayers(updatedPlayers);
             setMyPlayer(updatedPlayers.filter(p => p.userId === user.id)[0]);
         });
@@ -100,53 +193,21 @@ export default function Game({match}: {match: Match}) {
         return () => {
             wsManager.deactivate(); // 🔹 Closes on game exit.
         };
-    }, [match.id]); // Using match.id as trigger, it only opens the connection once.
+    }, []); // It only opens the connection once.
 
     useEffect(() => {
-        const newGrid:GridCell[] = Array(18).fill(null).map(() => ({
-            tile: emptyTile, 
-            salmons: [] 
-        }));
-    
-        const gridWidth = 3;
-        const gridHeight = 6;
-    
-        gridTiles.forEach((tile) => {
-            const index = (gridHeight - 1 - tile.coordinate.y) * gridWidth + tile.coordinate.x;
-            newGrid[index].tile = tile
-        });
-    
-        gridSalmons.forEach((salmon) => {
-            if (salmon.coordinate.y < 6) {
-                const index = (gridHeight - 1 - salmon.coordinate.y) * gridWidth + salmon.coordinate.x;   
-                newGrid[index].salmons.push(salmon);
-            }
-        });
-        setGrid(newGrid);
-    }, [gridTiles, gridSalmons]);    
-
-    useEffect(() => {
-        const salmonsPerPlayer = 4;
-        const newGridSea:SalmonMatch[][] = Array(salmonsPerPlayer).fill(null).map(() => []);
-        players.forEach((p) => {
-            const pSalmons = salmons.filter(s => s.playerId === p.id);
-            if(pSalmons.length > 0) {
-                for (let i = 0; i < pSalmons.length; i++) {
-                newGridSea[i].push(pSalmons[i]) }
-        }})
-        setGridSea(newGridSea);
-    }, [salmons, players])
-
-    useEffect(() => {
-        const newGridDesove:SalmonMatch[][] = Array(5).fill(null).map(() => []);
-        const coords: { [key: number]: number } = {21: 4, 22: 3, 23: 2, 24: 1, 25: 0};
-        if(spawnSalmons.length > 0) {
-            for (let i = 0; i < spawnSalmons.length; i++) {
-            const index = coords[spawnSalmons[i].coordinate.y]
-            newGridDesove[index].push(spawnSalmons[i]); }
+        if (match.round < 2) {
+            const salmonsPerPlayer = 4;
+            const newGridSea:SalmonMatch[][] = Array(salmonsPerPlayer).fill(null).map(() => []);
+            players.forEach((p) => {
+                const pSalmons = salmons.filter(s => s.playerId === p.id);
+                if(pSalmons.length > 0) {
+                    for (let i = 0; i < pSalmons.length; i++) {
+                    newGridSea[i].push(pSalmons[i]) }
+            }})
+            setGridSea(newGridSea);
         }
-        setGridDesove(newGridDesove)
-    }, [spawnSalmons])
+    }, [salmons, players])
 
     if (!allDataLoaded) {
         return <div style={{justifySelf:'center'}}>Loading data</div>;
@@ -160,6 +221,7 @@ export default function Game({match}: {match: Match}) {
             {!currentUserIsSpectator && myPlayer && myPlayer.id === match.actualPlayerId && match.phase === 'MOVING' && 
             <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
             {renderPlayerList(playerList)}
+            {myPlayer && passTurn(match, jwt, myPlayer)}
             
         {matchTilesNoCoordinate.length > 0 && myPlayer &&
         <div key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
@@ -172,8 +234,7 @@ export default function Game({match}: {match: Match}) {
                 {<img onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
                 src={matchTilesNoCoordinate[0].tile.image} alt='' style={{width: '150px', ...getRotationStyle(matchTilesNoCoordinate[0])} }></img>}
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && 
-                (tilesList[matchTilesNoCoordinate[0].tile.id-1].type === 'BEAR' || 
-                    tilesList[matchTilesNoCoordinate[0].tile.id-1].type === 'JUMP')
+                (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
                 && <button onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
         </div>
         }
@@ -182,10 +243,10 @@ export default function Game({match}: {match: Match}) {
         { 
         <div className='game-container'>
             {match.round >= 6 && <div className='grid3'>
-                {gridDesove.map((salmon:SalmonMatch[], index) => (
+                {[...gridSpawn].reverse().map((salmons:SalmonMatch[], index) => (
                 <div key={index} className="grid-item3">    
                     <div className='salmons-containerSpawn'>
-                    {salmon.map((s, i) => ((s.coordinate.y > 20 && <img key = {i} src = {s.salmon.image} alt=""
+                    {salmons.map((s, i) => ((s.coordinate.y > 20 && <img key = {i} src = {s.salmon.image} alt=""
                         style={{                          
                             filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
                             border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
@@ -204,7 +265,7 @@ export default function Game({match}: {match: Match}) {
             <div className={`grid1 ${match.round < 6 ? 'grid1-80' : 'grid1-100'}`}>
             {myPlayer && grid.map((cell, index) => (
             <div key={index} className="grid-item" style={{ position: 'relative' }} onClick={() =>
-                handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, gridTiles)}>
+                handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid)}>
                 
                 {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
 

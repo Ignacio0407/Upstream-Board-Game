@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
@@ -65,7 +66,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Override
     @Transactional
-    protected Player updateEntityFields (Player newPlayer, Player playerToUpdate) {
+    protected Player updateEntityFields (Player playerToUpdate, Player newPlayer) {
         playerToUpdate.setName(newPlayer.getName());
         playerToUpdate.setColor(newPlayer.getColor());
         playerToUpdate.setAlive(newPlayer.getAlive());
@@ -73,6 +74,22 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         playerToUpdate.setPoints(newPlayer.getPoints());
         playerToUpdate.setPlayerOrder(newPlayer.getPlayerOrder());
         return playerToUpdate;
+    }
+
+    public void notifyNewPlayer (LobbyPlayerDTO lobbyPlayer) {
+        this.messagingTemplate.convertAndSend("/topic/match/newPlayer/" + lobbyPlayer.getMatchId(), lobbyPlayer);
+    }
+
+    public void notifyPlayersUpdate(Integer matchId) { 
+        List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
+        this.messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
+    }
+
+    public void throwExceptionNotEnoughEnergy(Player player, Integer energyUsed) {
+        if (player.getEnergy() - energyUsed < 0) {
+            throw new InsufficientEnergyException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
+                player.getEnergy(), energyUsed));
+        }
     }
 
     public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {
@@ -89,8 +106,23 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         p.setPlayerOrder(match.getPlayersNumber());
         match.setPlayersNumber(match.getPlayersNumber() + 1);
         this.matchService.save(match);
+        this.matchService.notifyMatchUpdate(match);
+        this.matchService.notifyMatchUpdateDashboard(match);
         this.save(p);
-        return this.playerMapper.toLobby(p);
+        LobbyPlayerDTO result = this.playerMapper.toLobby(p);
+        this.notifyNewPlayer(result);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Integer id) {
+        Player player = this.findById(id);
+        Match match = player.getMatch();
+        match.setPlayersNumber(match.getPlayersNumber() - 1);
+        this.matchService.save(match);
+        this.matchService.notifyMatchUpdate(match);
+        this.repository.deleteById(id);
     }
 
     public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
@@ -136,6 +168,15 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId).isEmpty();
     }
 
+    public void checkPlayersDeadOrFinished (List<Player> players) {
+        for(Player p : players) {
+            Boolean dead = this.checkPlayerIsDead(p.getId());
+            Boolean finished = this.checkPlayerFinished(p.getId());
+            if (dead) this.setPlayerDead(p);
+            if (finished) this.setPlayerNoEnergy(p);
+        }
+    }
+
     @Transactional
     public Boolean checkPlayerNoEnergy(Player player) {
         return player.getEnergy() == 0;
@@ -156,11 +197,6 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return this.findAlivePlayersByMatch(matchId).stream().filter(
             p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty() 
             || !this.salmonMatchService.findByPlayerIdInSeaAsCoordinateDTO(p.getId()).isEmpty()).toList();
-    }
-
-    public void notifyPlayersUpdate(Integer matchId) { 
-        List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
-        messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
     }
 
 }

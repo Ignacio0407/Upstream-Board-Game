@@ -75,12 +75,6 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return this.matchTileRepository.findHeronWithCoordFromGame(matchId);
     }
 
-    public Boolean getCoordinate(MatchTile matchTile) {
-        if (matchTile.getCoordinate() == null)
-            throw new ResourceNotFoundException("Matchtile with ID" + matchTile.getId() + "has no coordinates");
-        return matchTile.getCoordinate().y() == 0;
-    }
-
     public List<MTCoordinateDTO> findByMatchIdNoCoordAsMTCoordinateDTO (Integer matchId) {
         return this.matchTileRepository.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
     }
@@ -101,6 +95,17 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return matchTileToUpdate;
     }
 
+    public MatchTileDTO toDTO(MatchTile matchTile) {
+        if (matchTile == null) {
+            return null;
+        }
+        return this.matchTileMapper.toDTO(matchTile);
+    }
+
+    public List<MatchTileDTO> toDTOList(List<MatchTile> matchTiles) {
+        return this.matchTileMapper.toDTOList(matchTiles);
+    }
+
     public Boolean validateTilePlacement(Integer round, Integer y) {
         int maxAllowedRow = round - 1;  
         return y <= maxAllowedRow;
@@ -109,34 +114,36 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     public MatchTile eagleToWater(MatchTile toTravel) {
         Tile waterTile = tileService.findById(1);
         toTravel.setTile(waterTile);
-        this.save(toTravel);
-        //MatchTileDTO dto = matchTileMapper.toDTO(toTravel);
-        //this.messagingTemplate.convertAndSend("/topic/tiles/eagle", dto);
-        return toTravel;
+        return this.save(toTravel);
     }
 
-    public void toDTOAndSendToWS(MatchTile entity) {
+    /*public void toDTOAndSendToWS(MatchTile entity) {
         MatchTileDTO updated = this.matchTileMapper.toDTO(entity);
-        this.messagingTemplate.convertAndSend("/topic/tiles", updated);
-    }
+        this.messagingTemplate.convertAndSend("/topic/tile/" + entity.getMatch().getId(), updated);
+    } */
 
     public MatchTile findMyTile (List<MatchTile> matchTiles, Coordinate myCoordinate) {
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
 
     public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
-        if (updates.get("actualPlayerId") != updates.get("myPlayerId")) 
+        Integer actual = Integer.valueOf(updates.get("actualPlayerId").toString());
+        Integer mine = Integer.valueOf(updates.get("myPlayerId").toString());
+        if (!actual.equals(mine)) {
             throw new NotValidMoveException("It is not your turn!");
+        }
         MatchTile matchTile = this.findById(id);
-        if(updates.get("y") != 0){
-            MatchTile matchTile2 = this.findByMatchId(matchTile.getMatch().getId()).stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
+        List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
+        if(updates.get("y") != 0) {
+            // REVISAR ESTA CONDICIÓN
+            MatchTile matchTile2 = matchTiles.stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
             && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
             }
         }
     
-        Boolean positionOccupied = this.findByMatchId(matchTile.getMatch().getId()).stream()
+        Boolean positionOccupied = matchTiles.stream()
         .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x() == updates.get("x") && mT.getCoordinate().y() == updates.get("y"));
         if (positionOccupied)
             throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
@@ -150,8 +157,10 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         }
         this.save(matchTile);
         MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
-        this.messagingTemplate.convertAndSend("/topic/tiles/place", updatedTile);
+        this.messagingTemplate.convertAndSend("/topic/tiles/place/" + updatedTile.getMatchId(), updatedTile);
         this.playerService.notifyPlayersUpdate(updatedTile.getMatchId());
+        Match match = this.matchService.findById(updatedTile.getMatchId());
+        this.matchService.notifyMatchUpdate(match);
         return updatedTile;
     }
 
@@ -160,7 +169,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         matchTile.setOrientation(rotation);
         this.save(matchTile);
         MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
-        this.messagingTemplate.convertAndSend("/topic/tiles/rotation", updatedTile);
+        this.messagingTemplate.convertAndSend("/topic/tiles/rotation/" + updatedTile.getMatchId(), updatedTile);
         return updatedTile;
     }
 
@@ -178,7 +187,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         createdTiles.add(matchTile);
     }
 
-    public List<MatchTileDTO> createMultipleMatchTiles(Integer id) throws DataAccessException {
+    public void createMultipleMatchTiles(Integer id) throws DataAccessException {
         Tile water = this.tileService.findById(1);
         Tile rock = this.tileService.findById(2);
         Tile heron = this.tileService.findById(3);
@@ -213,6 +222,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         }    
         Collections.shuffle(createdTiles);
         this.saveAll(createdTiles);
-        return this.matchTileMapper.toDTOList(createdTiles);
+        this.matchService.notifyMatchStarts(match.getId());
     }
+
 }

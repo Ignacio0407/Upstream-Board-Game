@@ -47,10 +47,11 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
         return ResponseEntity.ok(this.matchTileService.updateMatchTileRotation(id, rotation));
     }
 
-    @PostMapping("/createMatchTiles/{id}")
+    @PostMapping("/createMatchTiles/{matchId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<List<MatchTileDTO>> createMultipleMatchTiles(@PathVariable("id") Integer id) throws DataAccessException {
-        return new ResponseEntity<>(this.matchTileService.createMultipleMatchTiles(id), HttpStatus.CREATED);
+    public ResponseEntity<List<MatchTileDTO>> createMultipleMatchTiles(@PathVariable("matchId") Integer matchId) throws DataAccessException {
+        this.matchTileService.createMultipleMatchTiles(matchId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }
