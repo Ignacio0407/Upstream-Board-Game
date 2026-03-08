@@ -113,7 +113,9 @@ class MatchTileServiceTest {
         when(matchTileMapper.toDTOList(any())).thenReturn(Collections.emptyList());
 
         // Test
-        List<MatchTileDTO> result = matchTileService.createMultipleMatchTiles(1);
+        matchTileService.createMultipleMatchTiles(1);
+
+        List<MatchTileDTO> result = matchTileService.findByMatchIdAsDTO(1);
 
         // Verify
         verify(matchTileRepository, atLeastOnce()).save(any());
