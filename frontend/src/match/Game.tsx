@@ -13,6 +13,7 @@ import Player from '../interfaces/Player.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
 import { TileType } from '../interfaces/Tile.ts';
 import { Phase } from '../interfaces/Phase.ts';
+import { State } from '../interfaces/State.ts';
 
 export default function Game() {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ export default function Game() {
 
         wsManager.addSubscription<Match>(`match/${matchId}`, (updatedMatch) => {
             setMatch(updatedMatch)
-            if (updatedMatch.state === "FINALIZED")
+            if (updatedMatch.state === State.FINALIZED)
                 navigate(`/matches/${matchId}/end`)
         });
 

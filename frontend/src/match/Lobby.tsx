@@ -13,6 +13,7 @@ import Match, {emptyMatch} from '../interfaces/Match.ts';
 import Player, {emptyPlayer} from '../interfaces/Player.ts';
 import User, { emptyUser } from '../interfaces/User.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
+import { State } from '../interfaces/State.ts';
 
 export default function Lobby () {
     const jwt = tokenService.getLocalAccessToken();
@@ -52,7 +53,7 @@ export default function Lobby () {
         if (playerUser) setUserPlayer(playerUser);
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
-        if(match.state === "FINALIZED") navigate("/dashboard");
+        if(match.state === State.FINALIZED) navigate("/dashboard");
     }, [players, user.id, match.state]);
 
     const startingGame = async () => {

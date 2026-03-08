@@ -2,6 +2,7 @@ import { deleteEntity, put } from "./fetchers.ts";
 import Match from '../interfaces/Match.ts'
 import Player from '../interfaces/Player.ts'
 import User from '../interfaces/User.ts'
+import { State } from "../interfaces/State.ts";
 
 interface endGamePrompts {match:Match, players:Player[], user:User, jwt:string, spectatorIds:number[], 
     navigate:Function, setMatch:Function}
@@ -28,9 +29,9 @@ export default async function endGame ({ match, players, user, jwt, spectatorIds
     match.playersNumber = playersNumber;
 
     if (playersNumber === 0) {
-        match.state = "FINALIZED";
+        match.state = State.FINALIZED;
     } else {
-        match.state = "WATIING";
+        match.state = State.WAITING;
     }
 
     try {

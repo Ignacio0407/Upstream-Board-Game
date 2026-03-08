@@ -13,6 +13,7 @@ import WhiteSpace from '../util/WhiteSpace.tsx';
 import {DashboardMatch} from '../interfaces/Match.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
 import Match from '../interfaces/Match.ts';
+import { State } from '../interfaces/State.ts';
    
 export default function Dashboard() {
     const jwt = tokenService.getLocalAccessToken();
@@ -71,10 +72,10 @@ export default function Dashboard() {
                 <td className='celda'>{match.playersNumber}</td>
                 <td className='celda'>{match.state}</td>
                 <td className='celda'>{match.password != "" && <i className="fa fa-lock"></i>}</td>
-                <td className='celda'>{match.state === 'WAITING' &&
+                <td className='celda'>{match.state === State.WAITING &&
                 <Button color={"success"} onClick={() => join(match)}>Join game</Button>
                 }</td>
-                <td className='celda'>{(match.state === 'ON_GOING' || match.state === 'WAITING') &&
+                <td className='celda'>{(match.state === State.ON_GOING || match.state === State.WAITING) &&
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
                 {user.roles && user.roles[0] == "ADMIN" && <Button color="danger" onClick={() =>
