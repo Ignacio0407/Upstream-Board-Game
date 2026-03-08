@@ -12,6 +12,7 @@ import SalmonMatch from '../interfaces/SalmonMatch.ts';
 import Player from '../interfaces/Player.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
 import { TileType } from '../interfaces/Tile.ts';
+import { Phase } from '../interfaces/Phase.ts';
 
 export default function Game() {
     const navigate = useNavigate();
@@ -218,7 +219,7 @@ export default function Game() {
             <h1 className="game-title game-name">Game: {match.name}</h1>
             <h1 className="game-title game-round">Round: {match.round}</h1>
             <h1 className="game-title game-phase">Phase: {match.phase}</h1>
-            {!currentUserIsSpectator && myPlayer && myPlayer.id === match.actualPlayerId && match.phase === 'MOVING' && 
+            {!currentUserIsSpectator && myPlayer && myPlayer.id === match.actualPlayerId && match.phase === Phase.MOVING && 
             <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
             {renderPlayerList(playerList)}
             {myPlayer && passTurn(match, jwt, myPlayer)}
@@ -228,12 +229,12 @@ export default function Game() {
             onClick={() =>
             handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
             }>
-                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && <h2>Pick the tile!</h2>}
+                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
                 {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
                 <h2>Next tile:</h2>
                 {<img onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
                 src={matchTilesNoCoordinate[0].tile.image} alt='' style={{width: '150px', ...getRotationStyle(matchTilesNoCoordinate[0])} }></img>}
-                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === 'TILES' && 
+                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
                 (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
                 && <button onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
         </div>
