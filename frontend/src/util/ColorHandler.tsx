@@ -1,24 +1,17 @@
-import { Client } from '@stomp/stompjs';
 import ColorPickerModal from './ColorPickerModal.tsx';
 import {post} from './fetchers.ts'
 import { JSX } from 'react';
 
-interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, takenColors:string[], onColorChanged:Function, stompClient:Client|null};
+interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, takenColors:string[], onColorChanged:Function, 
+    setNewPlayer?:Function};
 
-export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged, stompClient }:ColorHandlerProps): JSX.Element {
+export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged }:ColorHandlerProps): JSX.Element {
     async function handleColorChange(color:string) {
-        console.log(color)
         try {
             const response = await post(`/api/v1/players/match/${matchId}`, jwt, { color: color, user: finalUserId });
 
             if (response.ok) {
                 const createdPlayer = await response.json();
-                if (stompClient) {
-                    stompClient.publish({
-                        destination: "/app/hello",
-                        body: JSON.stringify({ action: "colorChanged", userId: finalUserId }),
-                    });
-                }
 
                 const req = post(`/api/v1/salmonMatches/player/${createdPlayer.id}`, jwt);
 
@@ -33,7 +26,5 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
         }
     }
 
-    return (
-        <ColorPickerModal onColorSelect={handleColorChange} takenColors={takenColors} />
-    );
+    return ( <ColorPickerModal onColorSelect={handleColorChange} takenColors={takenColors} /> );
 }

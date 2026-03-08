@@ -1,106 +1,66 @@
-import { useState } from 'react';
-import { Form, Input, Label, Button } from "reactstrap"; 
-import tokenService from '../services/token.service.ts'
-import { useNavigate } from "react-router-dom";
-import useFetchState from '../util/useFetchState.ts';
-import '../static/css/createGame/createGame.css'
-import '../static/css/admin/adminPage.css'
-import { post, createWebSocket, createStompClient } from '../util/fetchers.ts'
-import User, { emptyUser } from '../interfaces/User.ts'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SubmitHandler } from 'react-hook-form';
+import tokenService from '../services/token.service.ts';
+import { post, createWebSocket, createStompClient } from '../util/fetchers.ts';
+import { FormGenerator, FieldDef } from '../components/Form/FormGenerator.tsx';
+import '../static/css/createGame/createGame.css';
+import '../static/css/admin/adminPage.css';
 
-export default function CreateGame() { 
-    const [name, setName] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-    const jwt = tokenService.getLocalAccessToken();
-    const user = tokenService.getUser()
-    const [finalUser, setUser] = useFetchState<User>(emptyUser,`/api/v1/users/${user.id}`,jwt)
-    const navigate = useNavigate();
+interface CreateGameFormData {name: string, password: string}
 
-    const socket = createWebSocket();
-    const stompClient = createStompClient(socket, jwt);
-    stompClient.activate();
+export default function CreateGame() {
+  const jwt = tokenService.getLocalAccessToken();
+  const user = tokenService.getUser();
+  const navigate = useNavigate();
 
-    async function handleSubmit(event) {
-      event.preventDefault();
+  const fields: FieldDef[] = [
+    {tag: 'Name', name: 'name', type: 'text', isRequired: true, 
+        validators: {
+        minLength: { value: 3, message: 'Name must be at least 3 characters' },
+        maxLength: { value: 50, message: 'Name must be at most 50 characters' },
+        }
+    },
+    {tag: 'Password', name: 'password', type: 'text', isRequired: false},
+  ];
 
-      await post(`/api/v1/matches/matchCreator/${finalUser.id}`, jwt, { name, password })
-      .then(response => {
-          if (!response.ok) {
-              return response.text().then(err => {
-                  throw new Error(err);
-              });
-          }
-          return response.json();
-      })
-      .then(createdMatch => {
-          console.log("Match creado:", createdMatch);
+  const onSubmit: SubmitHandler<CreateGameFormData> = async (data) => {
+    const { name, password } = data;
 
-          try {
-              stompClient.publish({
-                  destination: "/app/dash",
-                  body: JSON.stringify({ action: "colorChanged", matchId: createdMatch.id }),
-              });
-          } catch (e) {
-              console.log("Error al publicar en WebSocket:", e);
-          }
+    try {
+      const response = await post(`/api/v1/matches/matchCreator/${user.id}`, jwt, { name, password });
 
-          navigate(`/matches/${createdMatch.id}`);
-      })
-      .catch(error => {
-          console.error("Error al crear la partida:", error);
-          alert(`Error al crear la partida: ${error.message}`);
-      });
-  }
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || 'Unknown error');
+      }
+      const createdMatch = await response.json();
+
+      navigate(`/matches/${createdMatch.id}/waiting`);
+    } catch (error: any) {
+      console.error('Error al crear la partida:', error);
+      alert(`Error al crear la partida: ${error.message}`);
+    }
+  };
 
   return (
-    <div className='createGame-page-container'>
-        <h2 className="title-creategame">
-            Create Game
-        </h2>
+    <div className="createGame-page-container">
+      <h2 className="title-creategame">Create Game</h2>
 
-        <div className="form-container">
-            <Form onSubmit={handleSubmit}>
-                <div className="">
-                    <Label for="name" className="label-input">
-                        Name
-                    </Label>
-                    <Input
-                        type="text"
-                        required
-                        name="name"
-                        placeholder='Mínimo 3 caracteres, máximo 50 caracteres'
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="input-table"
-                    />
-                </div>
-
-                <div className="password-container">
-                    <Label for="password" className="label-input">
-                        Password
-                    </Label>
-                    <Input
-                        type="text"
-                        name="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="input-table"
-                    />
-                </div>
-
-                <div className="custom-button-row">
-                <Button color='success' onClick={handleSubmit} className='button-create'>
-                         Create
-                </Button>
-                <Button color='danger' onClick={() => navigate('/dashboard')} className='button-cancel'>
-                         Cancel
-                </Button>
-                </div>
-            </Form>
-        </div>
+      <div className="form-container">
+        <FormGenerator<CreateGameFormData>
+          fields={fields}
+          defaultValues={{ name: '', password: '' }}
+          onSubmit={onSubmit}
+          submitText="Create"
+          loadingText="Creating..."
+          className="create-game-form"
+          cancelButtonActivated={true}
+          navigateOnCancel='/dashboard'
+          actualUser={user}
+          requiredAuth='PLAYER'
+        />
+      </div>
     </div>
-);
-
+  );
 }

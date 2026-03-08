@@ -1,31 +1,13 @@
 import {patch, post} from './fetchers.ts';
-import { Client } from '@stomp/stompjs';
-import User from '../interfaces/User.ts'
+import { NavigateFunction } from 'react-router-dom';
 
-interface startGamePrompts {matchId:number, jwt:string, stompClient:Client, finalUser:User, setLoading:Function};
+interface startGamePrompts {matchId:number, jwt:string, setLoading:Function, navigate:NavigateFunction};
 
-const startGame = async ({ matchId, jwt, stompClient, finalUser, setLoading }:startGamePrompts) => {
+const startGame = async ({ matchId, jwt, setLoading, navigate }:startGamePrompts) => {
     setLoading(true);
-    
-    const requests = async () => {
-        await patch(`/api/v1/matches/${matchId}/startGame`, jwt);
-        await post(`/api/v1/matchTiles/createMatchTiles/${matchId}`, jwt);
-    };
-
-    try {
-        await requests();
-        stompClient.publish({
-            destination: "/app/start",
-            body: JSON.stringify({ action: "colorChanged", userId: finalUser.id }),
-        });
-        console.log("All matchTiles have been created in random order.");
-    } catch (error) {
-        console.error("Error creating some matchTiles:", error);
-    } finally {
-        setLoading(false);
-    }
-    
-    window.location.reload();
+    await patch(`/api/v1/matches/${matchId}/startGame`, jwt);
+    await post(`/api/v1/matchTiles/createMatchTiles/${matchId}`, jwt);
+    navigate(`/matches/${matchId}/game`);
 };
 
 export default startGame;

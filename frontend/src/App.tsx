@@ -4,7 +4,7 @@ import jwt_decode from 'jwt-decode';
 import { ErrorBoundary } from 'react-error-boundary';
 import AppNavbar from './AppNavbar.tsx';
 import Home from './home/home.tsx';
-import PrivateRoute from './privateRoute/PrivateRoute';
+import PrivateRoute from './privateRoute/PrivateRoute.tsx';
 import Register from './auth/register/Register.tsx';
 import Login from './auth/login/Login.tsx';
 import Logout from './auth/logout/Logout.tsx';
@@ -19,7 +19,9 @@ import AchievementEdit from './achievements/achievementEdit.tsx';
 import Dashboard from './dashboard/Dashboard.tsx';
 import CreateGame from './createGame/CreateGame.tsx';
 import Rules from './rules/rules.tsx';
-import Match from './match/Match.tsx';
+import Game from './match/Game.tsx';
+import Lobby from './match/Lobby.tsx';
+import EndGame from './match/EndGame.tsx';
 import {JwtPayload} from './interfaces/util'
 import DoNotHackMyApp from './components/DoNotHackMyApp/DoNotHackMyApp.tsx';
 import AchievementCreate from './achievements/achievementCreate.tsx';
@@ -51,7 +53,7 @@ const App: React.FC = () => {
   }
 
   let adminRoutes: React.ReactNode = null;
-  let ownerRoutes: React.ReactNode = null;
+  let playerRoutes: React.ReactNode = null;
   let userRoutes: React.ReactNode = null;
   let publicRoutes: React.ReactNode = null;
 
@@ -66,7 +68,9 @@ const App: React.FC = () => {
           <Route path="/achievements/" element={<PrivateRoute><AchievementList /></PrivateRoute>} />
           <Route path="/achievements/:achievementId" element={<PrivateRoute><AchievementEdit /></PrivateRoute>} />
           <Route path="/achievements/new" element={<PrivateRoute><AchievementCreate /></PrivateRoute>} />
-          <Route path="/matches/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
+          <Route path="/matches/:matchId/waiting" element={<PrivateRoute><Lobby /></PrivateRoute>} />
+          <Route path="/matches/:matchId/game" element={<PrivateRoute><Game /></PrivateRoute>} />
+          <Route path="/matches/:matchId/end" element={<PrivateRoute><EndGame /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />
           <Route path="/docs" element={<SwaggerDocs />} />
           <Route path="/do-not-hack-my-app" element={<DoNotHackMyApp/>} />
@@ -74,10 +78,12 @@ const App: React.FC = () => {
       );
     }
     if (role === 'PLAYER') {
-      ownerRoutes = (
+      playerRoutes = (
         <>
           <Route path="/rules" element={<Rules />} />
-          <Route path="/matches/:matchId" element={<PrivateRoute><Match /></PrivateRoute>} />
+          <Route path="/matches/:matchId/waiting" element={<PrivateRoute><Lobby /></PrivateRoute>} />
+          <Route path="/matches/:matchId/game" element={<PrivateRoute><Game /></PrivateRoute>} />
+          <Route path="/matches/:matchId/end" element={<PrivateRoute><EndGame /></PrivateRoute>} />
           <Route path="/achievements/" element={<PrivateRoute><AchievementList /></PrivateRoute>} />
           <Route path="/creategame/" element={<CreateGame />} />
           <Route path="/developers" element={<DeveloperList />} />
@@ -90,7 +96,6 @@ const App: React.FC = () => {
   if (!jwt) {
     publicRoutes = (
       <>
-        <Route path="/rules" element={<Rules />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/rules" element={<Rules />} />
@@ -100,7 +105,6 @@ const App: React.FC = () => {
   } else {
     userRoutes = (
       <>
-        <Route path="/rules" element={<Rules />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/login" element={<Login />} />
@@ -120,7 +124,7 @@ const App: React.FC = () => {
           {publicRoutes}
           {userRoutes}
           {adminRoutes}
-          {ownerRoutes}
+          {playerRoutes}
         </Routes>
       </ErrorBoundary>
     </div>

@@ -42,18 +42,21 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
     }
 
     @PostMapping("/matchCreator/{userId}")
-    public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) { 
-        return new ResponseEntity<>(this.matchService.createMatchWMatchCreator(userId, requestBody), HttpStatus.CREATED);
+    public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) {
+        MatchDTO created = this.matchService.createMatchWMatchCreator(userId, requestBody);
+        return ResponseEntity.status(HttpStatus.CREATED).header("Content-Type", "application/json").body(created);
     }
 
     @PatchMapping("/{matchId}/startGame")
     public ResponseEntity<MatchDTO> startGame(@PathVariable("matchId") Integer matchId) throws ResourceNotFoundException {
-        return new ResponseEntity<>(this.matchService.startGame(matchId), HttpStatus.OK);
+        this.matchService.startGame(matchId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping("/{matchId}/changephase/{playerId}")
     public ResponseEntity<MatchDTO> changePhase(@PathVariable("matchId") Integer matchId, @PathVariable("playerId") Integer playerId) {
-        return new ResponseEntity<>(this.matchService.changePhase(matchId, playerId), HttpStatus.OK);
+        this.matchService.changePhase(matchId, playerId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping("/finalscore/{id}")
