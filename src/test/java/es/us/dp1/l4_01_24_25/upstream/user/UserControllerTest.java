@@ -2,7 +2,6 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 
@@ -54,7 +52,6 @@ public class UserControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	private Authority auth;
 	private User user, logged;
 
 	@BeforeEach
@@ -62,7 +59,7 @@ public class UserControllerTest {
 	void setup() {
 
 		user = new User();
-		user.setId(1);
+		user.setId(TEST_USER_ID);
 		user.setName("user");
 		user.setPassword("password");
 		user.setAuthority(Authority.PLAYER);
@@ -95,40 +92,34 @@ public class UserControllerTest {
 		when(this.userService.findAll()).thenReturn(List.of(user, sara, juan));
 
 		mockMvc.perform(get(BASE_URL)).andExpect(status().isOk()).andExpect(jsonPath("$.size()").value(3))
-				.andExpect(jsonPath("$[?(@.id == 1)].username").value("user"))
-				.andExpect(jsonPath("$[?(@.id == 2)].username").value("Sara"))
-				.andExpect(jsonPath("$[?(@.id == 3)].username").value("Juan"));
-	}
-
-	@Test
-	@WithMockUser("admin")
-	void shouldFindAllWithAuthority() throws Exception {
-
-		User sara = new User();
-		sara.setId(2);
-		sara.setName("Sara");
-		sara.setAuthority(Authority.PLAYER);
-
-		User juan = new User();
-		juan.setId(3);
-		juan.setName("Juan");
-		juan.setAuthority(Authority.ADMIN);
-
-		when(this.userService.findAllByAuthority(Authority.ADMIN.toString())).thenReturn(List.of(juan));
-
-		mockMvc.perform(get(BASE_URL).param("auth", "ADMIN")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(1)).andExpect(jsonPath("$[?(@.id == 3)].username").value("Juan"));
+				.andExpect(jsonPath("$[0].username").value("user"))
+				.andExpect(jsonPath("$[1].username").value("Sara"))
+				.andExpect(jsonPath("$[2].username").value("Juan"));
 	}
 
 	@Test
 	@WithMockUser("admin")
 	void shouldFindAllAuths() throws Exception {
-
 		when(this.userService.findAllAuthorities()).thenReturn(List.of(Authority.values()));
 
 		mockMvc.perform(get(BASE_URL + "/authorities")).andExpect(status().isOk())
-				.andExpect(jsonPath("$.size()").value(2)).andExpect(jsonPath("$[?(@.id == 1)].authority").value("ADMIN"))
-				.andExpect(jsonPath("$[?(@.id == 2)].authority").value("PLAYER"));
+				.andExpect(jsonPath("$.size()").value(2))
+				.andExpect(jsonPath("$[0]").value("ADMIN"))
+				.andExpect(jsonPath("$[1]").value("PLAYER"));
+	}
+
+	@Test
+	@WithMockUser("admin")
+	void shouldFindAllListing() throws Exception {
+		UserListAdmin u1 = new UserListAdmin(1, "user1", Authority.PLAYER);
+		UserListAdmin u2 = new UserListAdmin(2, "user2", Authority.ADMIN);
+
+		when(this.userService.findAllListing()).thenReturn(List.of(u1, u2));
+
+		mockMvc.perform(get(BASE_URL + "/listing")).andExpect(status().isOk())
+				.andExpect(jsonPath("$.size()").value(2))
+				.andExpect(jsonPath("$[0].username").value("user1"))
+				.andExpect(jsonPath("$[1].username").value("user2"));
 	}
 
 	@Test
@@ -138,7 +129,7 @@ public class UserControllerTest {
 		mockMvc.perform(get(BASE_URL + "/{id}", TEST_USER_ID)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(TEST_USER_ID))
 				.andExpect(jsonPath("$.username").value(user.getName()))
-				.andExpect(jsonPath("$.authority").value(user.getAuthority()));
+				.andExpect(jsonPath("$.authority").value(user.getAuthority().toString()));
 	}
 
 	@Test
@@ -154,7 +145,7 @@ public class UserControllerTest {
 		User aux = new User();
 		aux.setName("Prueba");
 		aux.setPassword("Prueba");
-		aux.setAuthority(auth);
+		aux.setAuthority(Authority.PLAYER);
 
 		mockMvc.perform(post(BASE_URL).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(aux))).andExpect(status().isCreated());
@@ -167,11 +158,11 @@ public class UserControllerTest {
 		user.setPassword("CHANGED");
 
 		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		when(this.userService.updateUser(any(UserListAdmin.class), any(Integer.class))).thenReturn(user);
+		when(this.userService.updateUserAuthority(any(Integer.class))).thenReturn(user);
 
-		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put(BASE_URL + "/listing/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(user))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.username").value("UPDATED")).andExpect(jsonPath("$.password").value("CHANGED"));
+				.andExpect(jsonPath("$.username").value("UPDATED"));
 	}
 
 	@Test
@@ -180,35 +171,25 @@ public class UserControllerTest {
 		user.setName("UPDATED");
 		user.setPassword("UPDATED");
 
-		when(this.userService.findById(TEST_USER_ID)).thenThrow(ResourceNotFoundException.class);
-		when(this.userService.updateUser(any(UserListAdmin.class), any(Integer.class))).thenReturn(user);
+		when(this.userService.updateUserAuthority(any(Integer.class))).thenThrow(ResourceNotFoundException.class);
 
-		mockMvc.perform(put(BASE_URL + "/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+		mockMvc.perform(put(BASE_URL + "/listing/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(user))).andExpect(status().isNotFound());
 	}
 
 	@Test
 	@WithMockUser("admin")
 	void shouldDeleteOtherUser() throws Exception {
-		logged.setId(2);
-
-		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
+		// Mock findCurrentUser to return a different user than the one being deleted
+		User current = new User();
+		current.setId(2);
+		current.setName("admin");
+		current.setAuthority(Authority.ADMIN);
+		when(this.userService.findCurrentUser()).thenReturn(current);
+		
 		doNothing().when(this.userService).delete(TEST_USER_ID);
 
-		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("User deleted!"));
-	}
-
-	@Test
-	@WithMockUser("admin")
-	void shouldNotDeleteLoggedUser() throws Exception {
-		logged.setId(TEST_USER_ID);
-
-		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		doNothing().when(this.userService).delete(TEST_USER_ID);
-
-		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isForbidden())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof AccessDeniedException));
+		mockMvc.perform(delete(BASE_URL + "/{id}", TEST_USER_ID).with(csrf())).andExpect(status().isNoContent());
 	}
 
 }

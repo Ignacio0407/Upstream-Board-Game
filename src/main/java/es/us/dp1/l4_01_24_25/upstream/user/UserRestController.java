@@ -21,16 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -55,9 +53,9 @@ class UserRestController extends BaseRestController<User,Integer>{
 		return new ResponseEntity<>(l, HttpStatus.OK);
 	}
 
-	@PutMapping(value = "/listing/{userId}")
-	public ResponseEntity<User> update(@PathVariable("userId") Integer id, @RequestBody @Valid UserListAdmin user) {
-		return new ResponseEntity<>(this.userService.updateUser(user, id), HttpStatus.OK);
+	@PatchMapping(value = "/listing/{userId}")
+	public ResponseEntity<UserListAdmin> updateUserAuthority(@PathVariable("userId") Integer id) {
+		return new ResponseEntity<>(this.userService.updateUserAuthority(id), HttpStatus.OK);
 	}
 
 	@GetMapping("/listing")

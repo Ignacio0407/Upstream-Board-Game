@@ -8,6 +8,7 @@ import getErrorModal from "../../util/getErrorModal.tsx";
 import ListGenerator from "../../components/ListGenerator/ListGenerator.tsx";
 import { UserList } from "../../interfaces/User.ts";
 import "../../static/css/admin/adminPage.css";
+import { patch } from "../../util/fetchers.ts";
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -29,6 +30,23 @@ export default function UserListAdmin() {
     );
   }
 
+  const updateUserAuthority = async (u: UserList) => {
+  try {
+    const response = await patch(`/api/v1/users/listing/${u.id}`, jwt);
+    const updatedUser = await response.json();
+    setUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.id === u.id
+          ? { ...user, authority: updatedUser.authority }
+          : user
+      )
+    );
+  } catch (error) {
+    setMessage("Error updating authority");
+    setVisible(true);
+  }
+};
+
   return (
     <div className="admin-page-container">
       <h1 className="text-center">Users</h1>
@@ -47,13 +65,9 @@ export default function UserListAdmin() {
         /* 🔐 Security */
         requiredAuth="ADMIN"
 
-        /* ➕ Create */
-        createButton="/users/new"
-        createButtonPosition="top"
-
         /* ✏️ Edit */
         editCondition={true}
-        editButton={(u) => (<Button size="sm" color="primary" tag={Link} to={`/users/${u.id}`} state={{ user: u }}> Edit </Button>)}
+        editButton={(u) => (<Button size="sm" color="primary" onClick={() => updateUserAuthority(u)}> Change authority </Button>)}
 
         /* 🗑️ Delete */
         deleteCondition={true}
