@@ -1,5 +1,5 @@
-import { Phase } from "./Phase";
-import { State } from "./State";
+import { Phase } from "./Phase.ts";
+import { State } from "./State.ts";
 
 export default interface Match {
     id: number,
