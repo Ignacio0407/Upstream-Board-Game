@@ -1,15 +1,16 @@
-import AppNavbar from "./AppNavbar";
+import AppNavbar from "./AppNavbar.tsx";
 import { render, screen, fireEvent } from "./test-utils";
-import tokenService from './services/token.service';
+import tokenService from './services/token.service.ts';
 
 jest.mock('./services/token.service');
 jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["PLAYER"], sub: "user123" }));
+const getLocalAccessTokenMock = tokenService.getLocalAccessToken as jest.MockedFunction<typeof tokenService.getLocalAccessToken>;
 
 describe('AppNavbar', () => {
 
     // Test para verificar que se renderizan correctamente los enlaces públicos cuando no hay JWT
     test('renders public links when not authenticated', () => {
-        tokenService.getLocalAccessToken.mockReturnValue(null); // No hay JWT
+        getLocalAccessTokenMock.mockReturnValue(""); // No hay JWT
 
         render(<AppNavbar />);
 
@@ -26,7 +27,7 @@ describe('AppNavbar', () => {
 
     // Test para verificar que se renderizan correctamente los enlaces para un jugador autenticado
     test('renders player links when authenticated', () => {
-        tokenService.getLocalAccessToken.mockReturnValue('fake-jwt'); // Hay un JWT simulado
+        getLocalAccessTokenMock.mockReturnValue('fake-jwt'); // Hay un JWT simulado
 
         render(<AppNavbar />);
 
@@ -40,7 +41,7 @@ describe('AppNavbar', () => {
 
     // Test para verificar que se renderizan los enlaces de un admin cuando tiene el rol adecuado
     test('renders admin links when admin role is present', () => {
-        tokenService.getLocalAccessToken.mockReturnValue('fake-jwt-admin');
+        getLocalAccessTokenMock.mockReturnValue('fake-jwt-admin');
         jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["ADMIN"], sub: "admin123" }));
 
         render(<AppNavbar />);
@@ -61,7 +62,7 @@ describe('AppNavbar', () => {
 
     // Test para verificar que el enlace de "Logout" aparece cuando el usuario está autenticado
     test('renders logout link when authenticated', () => {
-        tokenService.getLocalAccessToken.mockReturnValue('fake-jwt');
+        getLocalAccessTokenMock.mockReturnValue('fake-jwt');
 
         render(<AppNavbar />);
 
@@ -71,7 +72,7 @@ describe('AppNavbar', () => {
 
     // Test para verificar que el método unlockAchievement es llamado correctamente
     test('calls unlockAchievement on click', async () => {
-        tokenService.getLocalAccessToken.mockReturnValue('fake-jwt');
+        getLocalAccessTokenMock.mockReturnValue('fake-jwt');
         jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["PLAYER"], sub: "user123" }));
 
         const mockUnlockAchievement = jest.fn();

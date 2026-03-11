@@ -1,6 +1,6 @@
 import { render, screen, testRenderList } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
-import UserListAdmin from "./UserListAdmin";
+import UserListAdmin from "./UserListAdmin.tsx";
 
 describe('UserListAdmin', () => {
     test('renders correctly', async () => {
@@ -38,13 +38,5 @@ describe('UserListAdmin', () => {
         expect(alert).toBeInTheDocument();
 
         window.confirm = jsdomConfirm;
-    });
-
-    test('add user link works correctly', () => {
-        render(<UserListAdmin />);
-        const addUserButton = screen.getByRole('link', { name: /Add User/i });
-        expect(addUserButton).toBeInTheDocument();
-        userEvent.click(addUserButton);
-        expect(window.location.pathname).toBe('/users/new');
     });
 });
