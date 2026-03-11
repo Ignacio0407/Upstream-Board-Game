@@ -1,5 +1,5 @@
 {
-  "proxy": "http://localhost:8080",
+  "proxy": "https://localhost:8080",
   "name": "dp1-game-template",
   "version": "0.1.0",
   "private": true,
