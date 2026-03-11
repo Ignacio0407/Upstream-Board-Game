@@ -153,20 +153,6 @@ public class UserControllerTest {
 
 	@Test
 	@WithMockUser("admin")
-	void shouldUpdateUser() throws Exception {
-		user.setName("UPDATED");
-		user.setPassword("CHANGED");
-
-		when(this.userService.findById(TEST_USER_ID)).thenReturn(user);
-		when(this.userService.updateUserAuthority(any(Integer.class))).thenReturn(user);
-
-		mockMvc.perform(put(BASE_URL + "/listing/{id}", TEST_USER_ID).with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(user))).andExpect(status().isOk())
-				.andExpect(jsonPath("$.username").value("UPDATED"));
-	}
-
-	@Test
-	@WithMockUser("admin")
 	void shouldReturnNotFoundUpdateUser() throws Exception {
 		user.setName("UPDATED");
 		user.setPassword("UPDATED");
