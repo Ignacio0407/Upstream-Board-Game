@@ -11,7 +11,6 @@ import Logout from './auth/logout/Logout.tsx';
 import PlanList from './public/plan/PlanList.tsx';
 import tokenService from './services/token.service.ts';
 import UserListAdmin from './admin/users/UserListAdmin.tsx';
-import UserEditAdmin from './admin/users/UserEditAdmin.tsx';
 import SwaggerDocs from './public/swagger/Swagger.tsx';
 import DeveloperList from './developers/developers.tsx';
 import AchievementList from './achievements/achievementList.tsx';
@@ -63,7 +62,6 @@ const App: React.FC = () => {
         <>
           <Route path="/rules" element={<Rules />} />
           <Route path="/users" element={<PrivateRoute><UserListAdmin /></PrivateRoute>} />
-          <Route path="/users/:username" element={<PrivateRoute><UserEditAdmin /></PrivateRoute>} />
           <Route path="/developers" element={<DeveloperList />} />
           <Route path="/achievements/" element={<PrivateRoute><AchievementList /></PrivateRoute>} />
           <Route path="/achievements/:achievementId" element={<PrivateRoute><AchievementEdit /></PrivateRoute>} />
