@@ -76,6 +76,12 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return playerToUpdate;
     }
 
+    @Transactional(readOnly = true)
+    public Boolean isUserInMatch(String username, Integer matchId) {
+        return this.findPlayersByMatch(matchId).stream()
+            .anyMatch(p -> p.getUserPlayer().getName().equals(username));
+    }
+
     public void notifyNewPlayer (LobbyPlayerDTO lobbyPlayer) {
         this.messagingTemplate.convertAndSend("/topic/match/newPlayer/" + lobbyPlayer.getMatchId(), lobbyPlayer);
     }

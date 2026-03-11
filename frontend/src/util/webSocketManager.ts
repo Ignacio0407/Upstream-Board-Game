@@ -35,10 +35,26 @@ class WebSocketManager {
   // Obtain dynamic URL
   private buildSocketUrl(): string {
     if (this.baseUrl) return this.baseUrl; // Manual url
-    const host:string = window.location.hostname;
-    return `http://${host}:8080/ws-upstream`;
-  }
+    
+    const host = window.location.hostname;
+    const protocol = window.location.protocol; // http: or https:
+    const port = window.location.port;
 
+    // In development (localhost:3000), we usually need to point to :8080
+    // In production/ngrok, we usually use the same port as the page (proxy)
+    let socketPort = "";
+    let socketProtocol = protocol;
+    if (host === "localhost" || host === "127.0.0.1") {
+      socketPort = ":8080";
+      socketProtocol = "https:"; // Backend now requires TLS
+    } else if (port) {
+      socketPort = `:${port}`;
+    }
+
+    // This will result in https://... (wss via SockJS)
+    return `${socketProtocol}//${host}${socketPort}/ws-upstream`;
+  }
+  
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
