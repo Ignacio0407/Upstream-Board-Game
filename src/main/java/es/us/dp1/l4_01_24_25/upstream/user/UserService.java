@@ -17,7 +17,6 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -31,7 +30,6 @@ import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
-import jakarta.validation.Valid;
 
 @Service
 public class UserService extends BaseService<User,Integer> {
@@ -76,15 +74,17 @@ public class UserService extends BaseService<User,Integer> {
 		return this.userRepository.existsByName(username);
 	}
 
-	public List<User> findAllByAuthority(String auth) {
+	public List<User> findAllByAuthority(Authority auth) {
 		return this.userRepository.findAllByAuthority(auth);
 	}
 
 	@Transactional
-	public User updateUser(@Valid UserListAdmin user, Integer idToUpdate) {
+	public UserListAdmin updateUserAuthority(Integer idToUpdate) {
 		User toUpdate = this.findById(idToUpdate);
-		BeanUtils.copyProperties(user, toUpdate, "id");
-		return this.save(toUpdate);
+		if (toUpdate.getAuthority().equals(Authority.PLAYER)) toUpdate.setAuthority(Authority.ADMIN);
+		else toUpdate.setAuthority(Authority.PLAYER);
+		this.save(toUpdate);
+		return new UserListAdmin(idToUpdate, toUpdate.getName(), toUpdate.getAuthority());
 	}
 	
 	@Transactional

@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Integer>{
 	public Boolean existsByName(@Param("name") String name);
 
 	@Query("SELECT u FROM User u WHERE u.authority = :auth")
-	List<User> findAllByAuthority(String auth);
+	List<User> findAllByAuthority(Authority auth);
 
 	@Query("SELECT new es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin(u.id, u.name, u.authority) FROM User u")
 	List<UserListAdmin> findAllListAdmin();

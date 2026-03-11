@@ -21,14 +21,14 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindAllByAuthority() {
-        String auth = "ADMIN";
+        Authority auth = Authority.ADMIN;
 
         User user1 = new User();
         user1.setName("admin_user");
         user1.setAuthority(Authority.ADMIN);
 
         User user2 = new User();
-        user2.setAuthority(Authority.PLAYER);
+        user2.setAuthority(Authority.ADMIN);
 
         List<User> users = new ArrayList<>();
         users.add(user1);
@@ -41,11 +41,11 @@ public class UserRepositoryTest {
         assertNotNull(result);
         assertEquals(2, result.size());
 
-        String invalidAuth = "USER";
+        Authority playerAuth = Authority.PLAYER;
 
-        when(userRepository.findAllByAuthority(invalidAuth)).thenReturn(Collections.emptyList());
+        when(userRepository.findAllByAuthority(playerAuth)).thenReturn(Collections.emptyList());
 
-        result = userRepository.findAllByAuthority(invalidAuth);
+        result = userRepository.findAllByAuthority(playerAuth);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
