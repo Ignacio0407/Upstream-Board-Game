@@ -88,7 +88,7 @@ _site/
 /.apt_generated/
 coverage/jacoco.xml
 .gitignore
-package-lock.json
+.package-lock.json
 logs/
 node_modules
 
