@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "types": ["jest", "@testing-library/jest-dom"],
+    "types": ["vitest", "node"],
     "allowImportingTsExtensions": true,
     "noEmit": true
   },

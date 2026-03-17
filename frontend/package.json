@@ -8,6 +8,7 @@
     "@splidejs/react-splide": "^0.7.12",
     "@stomp/stompjs": "^7.1.1",
     "@types/reactstrap": "^8.7.1",
+    "@ungap/structured-clone": "^1.3.0",
     "bootstrap": "^5.2.3",
     "dp1-game-template": "file:",
     "filepond": "^4.30.4",
@@ -33,6 +34,9 @@
     "swagger-ui-react": "^5.32.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^28.0.0",
     "@types/mocha": "^10.0.10",
@@ -49,7 +53,7 @@
     "cross-env": "^7.0.3",
     "identity-obj-proxy": "^3.0.0",
     "jsdom": "^29.0.0",
-    "msw": "^1.2.1",
+    "msw": "^2.12.13",
     "nth-check": "^2.1.1",
     "prettier": "^2.8.8",
     "source-map-loader": "^4.0.1",
