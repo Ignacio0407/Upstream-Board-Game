@@ -25,13 +25,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	@Autowired
 	private UserDetailsServiceImpl userDetailsService;
 
-//	private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
-
-	@SuppressWarnings("null")
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		try {
+			if (request.getServletPath().startsWith("/ws-upstream")) {
+				filterChain.doFilter(request, response);
+				return;
+			}
 			String jwt = parseJwt(request);
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);

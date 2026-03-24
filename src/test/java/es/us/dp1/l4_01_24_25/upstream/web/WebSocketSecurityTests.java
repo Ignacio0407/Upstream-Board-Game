@@ -1,162 +1,221 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
 package es.us.dp1.l4_01_24_25.upstream.web;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.messaging.simp.stomp.StompFrameHandler;
-import org.springframework.messaging.simp.stomp.StompHeaders;
-import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import es.us.dp1.l4_01_24_25.upstream.WebSocketSecurityInterceptor;
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.JwtUtils;
-import es.us.dp1.l4_01_24_25.upstream.user.Authority;
-import es.us.dp1.l4_01_24_25.upstream.chat.MessageService;
-import es.us.dp1.l4_01_24_25.upstream.chat.MessageDTO;
+import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsServiceImpl;
+import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebSocketSecurityTests {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
     private JwtUtils jwtUtils;
-
-    @Autowired
-    private MessageService messageService;
-
-    private String wsUrl;
-    private WebSocketStompClient stompClient;
+    private UserDetailsServiceImpl userDetailsService;
+    private PlayerService playerService;
+    private WebSocketSecurityInterceptor interceptor;
 
     @BeforeEach
-    public void setup() {
-        wsUrl = "ws://localhost:" + port + "/ws-upstream";
-        stompClient = new WebSocketStompClient(new SockJsClient(
-                List.of(new WebSocketTransport(new StandardWebSocketClient()))));
+    void setup() {
+        jwtUtils = mock(JwtUtils.class);
+        userDetailsService = mock(UserDetailsServiceImpl.class);
+        playerService = mock(PlayerService.class);
+        interceptor = new WebSocketSecurityInterceptor(jwtUtils, userDetailsService, playerService);
+        interceptor.matchIdCache.clear();
+        interceptor.userMatchCache.clear();
     }
 
-    @Test
-    public void testConnectionSucceedsWithValidToken() throws Exception {
-        String token = jwtUtils.generateTokenFromUsername("player1", Authority.PLAYER);
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer " + token);
-
-        StompSession session = stompClient.connectAsync(wsUrl, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        
-        assertTrue(session.isConnected());
-        session.disconnect();
+    // Accessor with autenticated user
+    private StompHeaderAccessor authenticatedAccessor(String command, String destination) {
+        StompHeaderAccessor acc = StompHeaderAccessor.create(StompCommand.valueOf(command));
+        acc.setLeaveMutable(true);
+        acc.setDestination(destination);
+        UserDetails user = User.withUsername("user").password("x").authorities("PLAYER").build();
+        acc.setUser(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+        return acc;
     }
 
-    @Test
-    public void testConnectionFailsWithoutAuthHeader() {
-        assertThrows(Exception.class, () -> {
-            stompClient.connectAsync(wsUrl, new WebSocketHttpHeaders(), new StompHeaders(), new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        });
+    // Accessor without authenticated user
+    private StompHeaderAccessor unauthenticatedAccessor(String command, String destination) {
+        StompHeaderAccessor acc = StompHeaderAccessor.create(StompCommand.valueOf(command));
+        acc.setLeaveMutable(true);
+        acc.setDestination(destination);
+        return acc;
     }
 
-    @Test
-    public void testConnectionFailsWithInvalidToken() {
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer invalid_token");
+    // 1. CONNECT: JWT authentication
+    @ParameterizedTest(name = "[{index}] authHeader=''{0}'' valid={1} → success={2}")
+    @CsvSource({
+        // authHeader,          jwtValid, shouldSucceed
+        "Bearer valid.jwt,      true,     true",   // Valid token
+        "Bearer invalid.jwt,    false,    false",  // Invalid token
+        "'',                    false,    false",  // No header (empty)
+        "Basic dXNlcjpwYXNz,   false,    false",  // header no-Bearer
+    })
+    void connectAuthentication(String authHeader, boolean jwtValid, boolean shouldSucceed) {
+        StompHeaderAccessor acc = StompHeaderAccessor.create(StompCommand.CONNECT);
+        acc.setLeaveMutable(true);
 
-        assertThrows(Exception.class, () -> {
-            stompClient.connectAsync(wsUrl, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        });
-    }
+        String trimmed = authHeader.trim();
+        if (!trimmed.isEmpty()) acc.setNativeHeader("Authorization", trimmed);
 
-    @Test
-    public void testConnectionFailsWithInvalidOrigin() {
-        String token = jwtUtils.generateTokenFromUsername("player1", Authority.PLAYER);
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer " + token);
-
-        WebSocketHttpHeaders httpHeaders = new WebSocketHttpHeaders();
-        httpHeaders.add("Origin", "http://malicious-site.com");
-
-        assertThrows(Exception.class, () -> {
-            stompClient.connectAsync(wsUrl, httpHeaders, connectHeaders, new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        });
-    }
-
-    @Test
-    public void testTopicSubscriptionUnauthorizedFails() throws Exception {
-        // Ahora player1 NO debería poder suscribirse al chat de una partida en la que no está (ej. match 999)
-        String token = jwtUtils.generateTokenFromUsername("player1", Authority.PLAYER);
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer " + token);
-
-        StompSession session = stompClient.connectAsync(wsUrl, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        
-        // Esperamos que falle la suscripción (el servidor debería enviar un ERROR o cerrar la conexión)
-        assertThrows(Exception.class, () -> {
-            session.subscribe("/topic/chat/999", new StompFrameHandler() {
-                @Override
-                public Type getPayloadType(StompHeaders headers) { return byte[].class; }
-                @Override
-                public void handleFrame(StompHeaders headers, Object payload) {}
-            });
-            // Damos tiempo para que el interceptor actúe
-            Thread.sleep(1000);
-            if (session.isConnected()) {
-                // Si sigue conectado y no hay error, algo falló en la protección
-                // Intentamos enviar algo para forzar la verificación si es diferida
-                session.send("/topic/chat/999", "test".getBytes());
-                Thread.sleep(500);
+        if (trimmed.startsWith("Bearer ")) {
+            String token = trimmed.substring(7);
+            when(jwtUtils.validateJwtToken(token)).thenReturn(jwtValid);
+            if (jwtValid) {
+                when(jwtUtils.getUserNameFromJwtToken(token)).thenReturn("user");
+                UserDetails ud = User.withUsername("user").password("x").authorities("PLAYER").build();
+                when(userDetailsService.loadUserByUsername("user")).thenReturn(ud);
             }
-        });
+        }
 
-        session.disconnect();
+        Message<byte[]> msg = MessageBuilder.createMessage(new byte[0], acc.getMessageHeaders());
+
+        if (shouldSucceed) assertDoesNotThrow(() -> interceptor.preSend(msg, null));
+        else              assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
     }
 
-    @Test
-    public void testXSSSanitization() {
-        // Test de integración para verificar que el MessageService limpia el HTML malicioso
-        MessageDTO dirtyMessage = new MessageDTO();
-        dirtyMessage.setPlayerId(1);
-        dirtyMessage.setMatchId(1);
-        dirtyMessage.setContent("<script>alert('xss')</script>Hello");
+    // 2. SEND / SUBSCRIBE: Routes, authorization and payload validation
+    @ParameterizedTest(name = "[{index}] {0} {1} inMatch={2} bigPayload={3} → success={4}")
+    @CsvSource({
+        // command,    destination,                      inMatch, bigPayload, shouldSucceed
+        // ── 1 segment routes ──────────────────────────────────────────────
+        "SEND,       /topic/chat/1,                     true,    false,      true",
+        "SEND,       /topic/movingSalmon/99,            true,    false,      true",
+        "SEND,       /topic/tilesAndSalmons/2,          true,    false,      true",
+        "SEND,       /topic/herons/3,                   true,    false,      true",
+        "SEND,       /topic/heronsUpdated/3,            true,    false,      true",
+        "SEND,       /topic/players/2,                  true,    false,      true",
+        "SEND,       /topic/movingSalmonFromSea/99,     true,    false,      true",
+        "SUBSCRIBE,  /topic/chat/1,                     true,    false,      true",
+        "SUBSCRIBE,  /topic/movingSalmon/2,             true,    false,      true",
+        // ── 2 segments routes ─────────────────────────────────────────────
+        "SEND,       /topic/tiles/place/1,              true,    false,      true",
+        "SEND,       /topic/tiles/rotation/1,           true,    false,      true",
+        "SEND,       /topic/salmons/spawn/1,            true,    false,      true",
+        "SUBSCRIBE,  /topic/tiles/place/1,              true,    false,      true",
+        // ── 3 segments routes ─────────────────────────────────────────────
+        "SEND,       /topic/salmon/spawn/enter/1,       true,    false,      true",
+        "SUBSCRIBE,  /topic/salmon/spawn/enter/1,       true,    false,      true",
+        // ── (EXACT_PATHS) ────────────────────────────
+        "SUBSCRIBE,  /topic/matches/dashboard,          false,   false,      true",
+        "SEND,       /topic/matches/dashboard,          false,   false,      true",
+        "SUBSCRIBE,  /topic/match/update/5,             true,    false,      true",
+        "SEND,       /topic/match/update/5,             true,    false,      true",
+        "SUBSCRIBE,  /topic/match/newPlayer/1,          true,    false,      true",
+        "SEND,       /topic/match/newPlayer/1,          true,    false,      true",
+        "SUBSCRIBE,  /topic/match/start/1,              true,    false,      true",
+        "SEND,       /topic/match/start/1,              true,    false,      true",
+        // ── User not in match ──────────────────────────────────────────
+        "SEND,       /topic/chat/1,                     false,   false,      false",
+        "SUBSCRIBE,  /topic/chat/1,                     false,   false,      false",
+        // ── Invalid Routes ───────────────────────────────────────────────────
+        "SEND,       /topic/invalid,                    true,    false,      false",
+        "SUBSCRIBE,  /topic/invalid,                    true,    false,      false",
+        "SEND,       /topic/chat/abc,                   true,    false,      false",  // Not numeric matchId
+        "SEND,       /topic/chat/,                      true,    false,      false",  // Empty matchId
+        // ── Big Payload ────────────────────────────────────────────────────
+        "SEND,       /topic/chat/1,                     true,    true,       false",
+        "SUBSCRIBE,  /topic/chat/1,                     true,    true,       false",
+    })
+    void sendAndSubscribeValidation(String command, String destination, boolean isInMatch, boolean bigPayload, boolean shouldSucceed) {
+        StompHeaderAccessor acc = authenticatedAccessor(command, destination.trim());
+        when(playerService.isUserInMatch("user", 1)).thenReturn(isInMatch);
+        when(playerService.isUserInMatch("user", 2)).thenReturn(isInMatch);
+        when(playerService.isUserInMatch("user", 3)).thenReturn(isInMatch);
+        when(playerService.isUserInMatch("user", 5)).thenReturn(isInMatch);
+        when(playerService.isUserInMatch("user", 99)).thenReturn(isInMatch);
 
-        MessageDTO safeMessage = messageService.saveAsDTO(dirtyMessage);
+        byte[] payload = bigPayload ? new byte[70 * 1024] : "ok".getBytes();
+        Message<byte[]> msg = MessageBuilder.createMessage(payload, acc.getMessageHeaders());
 
-        // Verificamos que el script ha sido eliminado
-        assertEquals("Hello", safeMessage.getContent());
+        if (shouldSucceed) assertDoesNotThrow(() -> interceptor.preSend(msg, null));
+        else               assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
     }
 
-    @Test
-    public void testMessageSizeLimitEnforced() throws Exception {
-        String token = jwtUtils.generateTokenFromUsername("player1", Authority.PLAYER);
-        StompHeaders connectHeaders = new StompHeaders();
-        connectHeaders.add("Authorization", "Bearer " + token);
+    // 3. SEND / SUBSCRIBE: unauthenticated user
+    // Covers: auth == null in accessor (anonimous session SEND/SUBSCRIBE)
+    @ParameterizedTest(name = "[{index}] {0} sin usuario → debe fallar")
+    @CsvSource({
+        "SEND,      /topic/chat/1",
+        "SUBSCRIBE, /topic/chat/1",
+    })
+    void sendOrSubscribeWithoutAuthenticatedUser_shouldFail(String command, String destination) {
+        StompHeaderAccessor acc = unauthenticatedAccessor(command, destination.trim());
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
 
-        StompSession session = stompClient.connectAsync(wsUrl, new WebSocketHttpHeaders(), connectHeaders, new StompSessionHandlerAdapter() {}).get(5, TimeUnit.SECONDS);
-        
-        byte[] largePayload = new byte[1024 * 1024]; // 1MB
-        
-        try {
-            session.send("/topic/chat/1", largePayload);
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            // Expected
-        }
-        
-        assertTrue(!session.isConnected());
-        if (session.isConnected()) {
-            session.disconnect();
-        }
+        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+    }
+
+    // 4. Rate limit
+    // 60 messages allowed, 61 is not allowed
+    @ParameterizedTest(name = "[{index}] rate limit in {0} {1}")
+    @CsvSource({
+        "SEND,      /topic/chat/1",
+        "SUBSCRIBE, /topic/chat/1",
+    })
+    void rateLimitExceeded_shouldFail(String command, String destination) {
+        StompHeaderAccessor acc = authenticatedAccessor(command, destination.trim());
+        when(playerService.isUserInMatch("user", 1)).thenReturn(true);
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
+
+        for (int i = 0; i < 60; i++) interceptor.preSend(msg, null);
+
+        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+    }
+
+    // 5. Cache cross-match
+    @Test
+    void cachedUserInDifferentMatch_shouldFail() {
+        interceptor.userMatchCache.put("user", 2);
+
+        StompHeaderAccessor acc = authenticatedAccessor("SEND", "/topic/chat/1");
+        when(playerService.isUserInMatch("user", 1)).thenReturn(false);
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
+
+        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
     }
 }

@@ -1,3 +1,33 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
 import SockJS from 'sockjs-client';
 import { Client, Message, StompSubscription } from '@stomp/stompjs';
 
@@ -21,50 +51,39 @@ class WebSocketManager {
   private baseUrl?: string;
   private events: ConnectionEvents;
   private useSockJS: boolean;
+  private static lastInstance: WebSocketManager | null = null;
 
   constructor(jwt: string, options?: { baseUrl?: string; events?: ConnectionEvents; useSockJS?: boolean }) {
+    if (WebSocketManager.lastInstance) 
+      WebSocketManager.lastInstance.deactivate();
+    WebSocketManager.lastInstance = this;
     this.jwt = jwt;
     this.subscriptions = [];
     this.client = new Client();
     this.activated = false;
     this.baseUrl = options?.baseUrl;
     this.events = options?.events || {};
-    this.useSockJS = options?.useSockJS ?? true; // Por defecto SockJS
+    this.useSockJS = options?.useSockJS ?? false; // By default pure WS
   }
 
   // Obtain dynamic URL
   private buildSocketUrl(): string {
-    if (this.baseUrl) return this.baseUrl; // Manual url
+    if (this.baseUrl) return this.baseUrl;
     
     const host = window.location.hostname;
-    const protocol = window.location.protocol; // http: or https:
     const port = window.location.port;
-
-    // In development (localhost:3000), we usually need to point to :8080
-    // In production/ngrok, we usually use the same port as the page (proxy)
+    
+    //const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsProtocol = "wss:";
+    
     let socketPort = "";
-    let socketProtocol = protocol;
     if (host === "localhost" || host === "127.0.0.1") {
-      socketPort = ":8080";
-      socketProtocol = "https:"; // Backend now requires TLS
+        socketPort = ":8080";
     } else if (port) {
-      socketPort = `:${port}`;
+        socketPort = `:${port}`;
     }
-
-    // This will result in https://... (wss via SockJS)
-    return `${socketProtocol}//${host}${socketPort}/ws-upstream`;
-  }
-  
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-
-  private reconnectDelay() {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.warn('Max reconnection attempts reached');
-      return 0; // Stop reconnections
-    }
-    this.reconnectAttempts++;
-    return Math.min(30000, 1000 * Math.pow(2, this.reconnectAttempts)); // 1s, 2s, 4s...
+    
+    return `${wsProtocol}//${host}${socketPort}/ws-upstream`;
   }
 
   initConnection(): void {
@@ -74,26 +93,25 @@ class WebSocketManager {
       webSocketFactory: () =>
         this.useSockJS
           ? new SockJS(this.buildSocketUrl())
-          : new WebSocket(this.buildSocketUrl().replace(/^http/, 'ws')),
+          : new WebSocket(this.buildSocketUrl()),
       connectHeaders: {
         Authorization: `Bearer ${this.jwt}`,
       },
-      reconnectDelay: this.reconnectDelay(),
+      reconnectDelay: 0,
       onConnect: () => {
-        this.reconnectAttempts = 0; // Reset uponc connecting
         this.resubscribeAll();
         this.events.onConnect?.();
       },
       onStompError: (frame) => {
         console.error('❌ STOMP error', frame);
         this.events.onError?.(frame);
+        this.client.deactivate();
       },
       onWebSocketError: (error) => {
         console.warn('⚠️ WebSocket error', error);
         this.events.onError?.(error);
       }
       });
-
       this.client.activate();
       this.activated = true;
   }
