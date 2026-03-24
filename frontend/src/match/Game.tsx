@@ -75,7 +75,7 @@ export default function Game() {
         const wsManager = new WebSocketManager(jwt);
         wsManager.initConnection();
 
-        wsManager.addSubscription<Match>(`match/${matchId}`, (updatedMatch) => {
+        wsManager.addSubscription<Match>(`match/update/${matchId}`, (updatedMatch) => {
             setMatch(updatedMatch)
             if (updatedMatch.state === State.FINALIZED)
                 navigate(`/matches/${matchId}/end`)
@@ -102,11 +102,6 @@ export default function Game() {
                 })
             );
             setGrid(prev => updateGridWithMovementFromSea(prev, salmon, toTravel));
-        });
-
-        wsManager.addSubscription<SalmonMatch[]>(`salmons/${matchId}`, (updatedSalmons) => {
-            setSalmons(updatedSalmons);
-            setGrid(prev => updateGridWithSalmons(prev, updatedSalmons));
         });
         
         wsManager.addSubscription<TileAndSalmon>(`salmon/spawn/enter/${matchId}`, ({salmonMatch, matchTile}) => {
@@ -146,12 +141,6 @@ export default function Game() {
                 newTiles.shift();
                 return newTiles;
             });
-            setMatchTiles(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
-            setGrid(prev => updateGridWithTile(prev, updatedTile));
-        });
-
-        // Update tile when a salmon moves on it.
-        wsManager.addSubscription<MatchTile>(`tile/${matchId}`, (updatedTile) => {
             setMatchTiles(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
             setGrid(prev => updateGridWithTile(prev, updatedTile));
         });

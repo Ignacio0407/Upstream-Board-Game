@@ -17,6 +17,11 @@ export default defineConfig({
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false
+      },
+      "/ws-upstream": {
+        target: "wss://localhost:8080",
+        ws: true,
+        secure: false
       }
     }
   },

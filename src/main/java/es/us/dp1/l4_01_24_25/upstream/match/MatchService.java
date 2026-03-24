@@ -83,11 +83,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }
 
     public void notifyMatchUpdate (Match match) {
-        this.messagingTemplate.convertAndSend("/topic/match/" + match.getId(), this.matchMapper.toDTO(match));
+        this.messagingTemplate.convertAndSend("/topic/match/update/" + match.getId(), this.matchMapper.toDTO(match));
     }
 
     public void notifyMatchUpdateDTO (MatchDTO matchDTO) {
-        this.messagingTemplate.convertAndSend("/topic/match/" + matchDTO.getId(), matchDTO);
+        this.messagingTemplate.convertAndSend("/topic/match/update/" + matchDTO.getId(), matchDTO);
     }
 
     public void notifyMatchUpdateDashboard (Match match) {

@@ -33,7 +33,7 @@ export default function Lobby () {
         const wsManager = new WebSocketManager(jwt);
         wsManager.initConnection();
 
-        wsManager.addSubscription<Match>(`match/${matchId}`, (updatedMatch) => {
+        wsManager.addSubscription<Match>(`match/update/${matchId}`, (updatedMatch) => {
             setMatch(updatedMatch)
         });
 
@@ -70,7 +70,7 @@ export default function Lobby () {
         <div className='lobbyContainer'>
             {players.find(p => p.userId === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined && (showColorPicker &&
             (
-                <ColorHandler matchId={match.id} jwt={jwt} finalUserId={finalUser.id} takenColors={takenColors} 
+                <ColorHandler matchId={Number(matchId)} jwt={jwt} finalUserId={finalUser.id} takenColors={takenColors} 
                 onColorChanged={() => setShowColorPicker(false)} /> )
             )}
             <div className='lobbyTitleContainer'>

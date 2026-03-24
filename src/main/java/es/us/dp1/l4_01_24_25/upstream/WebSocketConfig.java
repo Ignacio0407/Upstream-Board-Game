@@ -1,23 +1,44 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
 package es.us.dp1.l4_01_24_25.upstream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.JwtUtils;
 import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsServiceImpl;
@@ -47,64 +68,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-upstream")
             .setAllowedOriginPatterns(
-                "http://localhost:8080",
-                "https://localhost:8080",
-                "http://localhost:3000",
-                "https://localhost:3000",
-                "http://127.0.0.1:3000",
-                "https://127.0.0.1:3000",
-                "http://192.168.*.*:3000",
-                "https://192.168.*.*:3000",
+                "http://localhost:*",
+                "https://localhost:*",
+                "http://127.0.0.1:*",
+                "https://127.0.0.1:*",
+                "http://192.168.*.*",
+                "https://192.168.*.*",
                 "https://*.ngrok-free.app"
-            )
-            .withSockJS();
+            );
     }
 
+    // 🛡️ DoS (Denial of Service) Protection (OWASP)
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+        registry.setMessageSizeLimit(64 * 1024);
+        registry.setSendBufferSizeLimit(512 * 1024);
+        registry.setSendTimeLimit(20 * 1000);
+    }
+
+    // 🔐 Centralized Security in WebSocketSecurityInterceptor
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new ChannelInterceptor() {
-            @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-                
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    String authHeader = accessor.getFirstNativeHeader("Authorization");
-                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                        String jwt = authHeader.substring(7);
-                        if (jwtUtils.validateJwtToken(jwt)) {
-                            String username = jwtUtils.getUserNameFromJwtToken(jwt);
-                            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
-                            SecurityContextHolder.getContext().setAuthentication(authentication);
-                            accessor.setUser(authentication);
-                        } else {
-                            throw new org.springframework.messaging.MessageDeliveryException(message, "Invalid JWT token");
-                        }
-                    } else {
-                        throw new org.springframework.messaging.MessageDeliveryException(message, "Missing Authorization header");
-                    }
-                } else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-                    String destination = accessor.getDestination();
-                    if (destination != null && destination.startsWith("/topic/chat/")) {
-                        try {
-                            Integer matchId = Integer.parseInt(destination.substring("/topic/chat/".length()));
-                            Authentication auth = (Authentication) accessor.getUser();
-                            if (auth != null) {
-                                String username = auth.getName();
-                                if (!playerService.isUserInMatch(username, matchId)) {
-                                    throw new org.springframework.messaging.MessageDeliveryException(message, "You are not a player in this match");
-                                }
-                            } else {
-                                throw new org.springframework.messaging.MessageDeliveryException(message, "Not authenticated");
-                            }
-                        } catch (NumberFormatException e) {
-                            // Ignorar si no es un número válido
-                        }
-                    }
-                }
-                return message;
-            }
-        });
+        registration.interceptors(new WebSocketSecurityInterceptor(this.jwtUtils, this.userDetailsService, this.playerService));
     }
 }

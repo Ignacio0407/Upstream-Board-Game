@@ -50,12 +50,11 @@ public class SecurityConfiguration {
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/developers")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/plan")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/dashboard")).permitAll()
+            .requestMatchers("/ws-upstream/**").permitAll()
             
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/ws-upstream/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements/**")).authenticated()
             .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}/**").authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/usersachievements/unlockrules/**")).authenticated()
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/local/ws-upstream/**")).authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/salmons")).authenticated()
 
