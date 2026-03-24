@@ -16,7 +16,7 @@ const root = ReactDOM.createRoot(container);
 root.render(
   <React.StrictMode>
     <DndProvider backend={HTML5Backend}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true}}>
         <App />
       </BrowserRouter>
     </DndProvider>
