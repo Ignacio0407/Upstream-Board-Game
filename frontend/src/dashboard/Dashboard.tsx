@@ -71,7 +71,7 @@ export default function Dashboard() {
                 <td className='celda'>{match.name}</td>
                 <td className='celda'>{match.playersNumber}</td>
                 <td className='celda'>{match.state}</td>
-                <td className='celda'>{match.password != "" && <i className="fa fa-lock"></i>}</td>
+                <td className='celda'>{match.password != "" && <i aria-label="private game" className="fa fa-lock"></i>}</td>
                 <td className='celda'>{match.state === State.WAITING &&
                 <Button color={"success"} onClick={() => join(match)}>Join game</Button>
                 }</td>
