@@ -78,8 +78,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional(readOnly = true)
     public Boolean isUserInMatch(String username, Integer matchId) {
-        return this.findPlayersByMatch(matchId).stream()
-            .anyMatch(p -> p.getUserPlayer().getName().equals(username));
+        return this.playerRepository.existsByUsernameAndMatchId(username, matchId);
     }
 
     public void notifyNewPlayer (LobbyPlayerDTO lobbyPlayer) {
