@@ -1,9 +1,9 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { put } from '../util/fetchers.ts';
-import Achievement, { Metric } from '../interfaces/Achievement.ts';
-import { EditFormGenerator } from '../components/Form/EditFormGenerator.tsx';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { put } from '../../util/fetchers.ts';
+import Achievement, { Metric } from '../../interfaces/Achievement.ts';
+import { EditFormGenerator } from '../../components/Form/EditFormGenerator.tsx';
 import { SubmitHandler } from 'react-hook-form';
-import tokenService from '../services/token.service.ts';
+import tokenService from '../../services/token.service.ts';
 
 const jwt = tokenService.getLocalAccessToken();
 
