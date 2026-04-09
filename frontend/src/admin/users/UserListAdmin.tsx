@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "reactstrap";
-import { Link } from "react-router-dom";
 import tokenService from "../../services/token.service.ts";
 import useFetchState from "../../util/useFetchState.ts";
 import deleteFromList from "../../util/deleteFromList.ts";
