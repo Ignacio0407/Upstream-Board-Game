@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Alert, Button } from "reactstrap";
-import tokenService from "../services/token.service.ts";
-import useFetchState from "../util/useFetchState.ts";
-import deleteFromList from "../util/deleteFromList.ts";
+import tokenService from "../../services/token.service.ts";
+import useFetchState from "../../util/useFetchState.ts";
+import deleteFromList from "../../util/deleteFromList.ts";
 import jwt_decode from "jwt-decode";
 import "./achievement.css";
-import ListGenerator from "../components/ListGenerator/ListGenerator.tsx";
-import Achievement from "../interfaces/Achievement.ts";
-import User from "../interfaces/User.ts";
-import { JwtPayload } from "../interfaces/util.ts";
-import { get } from "../util/fetchers.ts";
-import ButtonLink from "../components/ButtonLink/ButtonLink.tsx";
+import ListGenerator from "../../components/ListGenerator/ListGenerator.tsx";
+import Achievement from "../../interfaces/Achievement.ts";
+import User from "../../interfaces/User.ts";
+import { JwtPayload } from "../../interfaces/util.ts";
+import { get } from "../../util/fetchers.ts";
+import ButtonLink from "../../components/ButtonLink/ButtonLink.tsx";
 import { useNavigate } from "react-router-dom";
-import deleteSomeFromList from "../util/deleteSomeFromList.ts";
+import deleteSomeFromList from "../../util/deleteSomeFromList.ts";
 
 const imgnotfound = "/images/achievements/notFoundImage.png";
 
