@@ -37,4 +37,7 @@ public interface PlayerRepository extends BaseRepository<Player, PlayerDTO, Inte
 
     List<Player> findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(@Param("matchId") Integer matchId);
 
+    @Query("SELECT COUNT(p) > 0 FROM Player p WHERE p.userPlayer.name = :username AND p.match.id = :matchId")
+    Boolean existsByUsernameAndMatchId(@Param("username") String username, @Param("matchId") Integer matchId);
+
 }

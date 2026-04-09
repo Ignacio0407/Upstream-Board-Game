@@ -51,12 +51,8 @@ class WebSocketManager {
   private baseUrl?: string;
   private events: ConnectionEvents;
   private useSockJS: boolean;
-  private static lastInstance: WebSocketManager | null = null;
 
   constructor(jwt: string, options?: { baseUrl?: string; events?: ConnectionEvents; useSockJS?: boolean }) {
-    if (WebSocketManager.lastInstance) 
-      WebSocketManager.lastInstance.deactivate();
-    WebSocketManager.lastInstance = this;
     this.jwt = jwt;
     this.subscriptions = [];
     this.client = new Client();
