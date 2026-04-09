@@ -29,13 +29,14 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { post, createWebSocket, createStompClient } from '../../util/fetchers.ts';
+import { post } from '../../util/fetchers.ts';
 import tokenService from '../../services/token.service.ts';
 import { ColorToRgb } from '../../util/ColorParser.ts';
 import './chat.css'
 import Match from '../../interfaces/Match.ts';
 import Player from '../../interfaces/Player.ts';
 import Message from '../../interfaces/Message.ts';
+import WebSocketManager from '../../util/webSocketManager.ts';
 
 interface ChatPrompts {match:Match, players:Player[], currentPlayer:Player};
 
@@ -47,17 +48,14 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
   const jwt = tokenService.getLocalAccessToken();
 
   useEffect(() => {
-    const socket = createWebSocket(); // move inside useEffect
-    const stompClient = createStompClient(socket, jwt);
-    stompClient.onConnect = () => {
-      stompClient.subscribe(`/topic/chat/${match.id}`, (message) => {
-        const newMessage = JSON.parse(message.body);
-        setMessages((prev) => [...prev, newMessage]);
-        scrollToBottom();
-      });
-    };
-    stompClient.activate();
-    return () => {stompClient.deactivate()};
+    const wsManager = new WebSocketManager(jwt);
+        wsManager.initConnection();
+
+    wsManager.addSubscription<Message>(`chat/${match.id}`, (message) => {
+      setMessages((prev) => [...prev, message]);
+      scrollToBottom();
+    });
+    return () => { wsManager.deactivate() };
   }, [match.id]);
 
   const handleSendMessage = async (e:React.FormEvent<HTMLFormElement>) => {
@@ -99,18 +97,10 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
           </div>
 
           <div className="chat-messages" ref={chatContainerRef}>
-            {messages && messages.map((message) => (
-              <div
-                key={message.id}
-                className={`chat-message ${
-                  message.playerId === currentPlayer.id ? 'own-message' : ''
-                }`}
-              >
+            {messages.map((message) => (
+              <div key={message.id} className={`chat-message ${message.playerId === currentPlayer.id ? 'own-message' : ''}`}>
                 <div className="message-content">
-                  <span
-                    className="message-username"
-                    style={{ color: getPlayerColor(message.playerId) }}
-                  >
+                  <span className="message-username" style={{ color: getPlayerColor(message.playerId) }}>
                     {message.playerName}
                   </span>
                   <p>{message.content}</p>
