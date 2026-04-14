@@ -1,0 +1,117 @@
+import { vi } from 'vitest';
+import { render, screen, fireEvent } from "@testing-library/react";
+import MassEditWizard from "./MassEditWizard";
+
+// Mocking external dependencies
+vi.mock("../Form/EditFormGenerator.tsx", () => ({
+  EditFormGenerator: ({ entityToEdit, onSubmit, extraBeforeSubmit }: any) => (
+    <div data-testid="form-gen">
+      <span data-testid="current-name">{entityToEdit.name}</span>
+      {extraBeforeSubmit}
+      <button onClick={() => onSubmit({ ...entityToEdit, name: entityToEdit.name + " edited" })}>
+        Submit
+      </button>
+    </div>
+  )
+}));
+
+vi.mock("./ReviewModal.tsx", () => ({
+  ReviewModal: ({ onConfirm }: any) => (
+    <div role="dialog" aria-label="Review Modal">
+      <button onClick={onConfirm}>Confirm all</button>
+    </div>
+  )
+}));
+
+vi.mock("../../util/fetchers.ts", () => ({
+  put: vi.fn(() => Promise.resolve({ json: () => Promise.resolve([{ id: 1, name: "Charlie edited" }]) }))
+}));
+
+vi.mock("../../services/token.service.ts", () => ({
+  default: { getLocalAccessToken: () => "fake-jwt" }
+}));
+
+const items = [
+  { id: 1, name: "Charlie" },
+  { id: 2, name: "Alpha" }
+];
+
+describe("MassEditWizard — History and Navigation", () => {
+
+  test("Initializes with first item", () => {
+    render(
+      <MassEditWizard 
+        items={items} 
+        massEditUri="/uri" 
+        renderItem={(i) => <span>{i.name}</span>} 
+        actualUser={{}} 
+        massRequiredAuth="auth" 
+        onClose={vi.fn()} 
+      />
+    );
+    expect(screen.getByText("Editing 1 / 2")).toBeInTheDocument();
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Charlie");
+  });
+
+  test("Navigates between items using arrows", () => {
+    render(
+      <MassEditWizard items={items} massEditUri="/uri" renderItem={vi.fn()} actualUser={{}} massRequiredAuth="auth" onClose={vi.fn()} />
+    );
+    
+    fireEvent.click(screen.getByText("→"));
+    expect(screen.getByText("Editing 2 / 2")).toBeInTheDocument();
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Alpha");
+
+    fireEvent.click(screen.getByText("←"));
+    expect(screen.getByText("Editing 1 / 2")).toBeInTheDocument();
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Charlie");
+  });
+
+  test("Undo and Redo logic", () => {
+    render(
+      <MassEditWizard items={items} massEditUri="/uri" renderItem={vi.fn()} actualUser={{}} massRequiredAuth="auth" onClose={vi.fn()} />
+    );
+
+    // Initial state
+    var undoBtn; var redoBtn;
+    undoBtn = screen.getByText("Undo");
+    redoBtn = screen.getByText("Redo");
+    expect(undoBtn).toBeDisabled();
+    expect(redoBtn).toBeDisabled();
+
+    // Perform edit
+    fireEvent.click(screen.getByText("Submit")); // Charlie -> Charlie edited
+    // It auto-advances to index 1 (Alpha), let's go back to Charlie (index 0)
+    fireEvent.click(screen.getByText("←"));
+
+    // Verify it's back on Charlie and edited
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Charlie edited");
+    
+    // Undo
+    undoBtn = screen.getByText("Undo");
+    expect(undoBtn).not.toBeDisabled();
+    fireEvent.click(undoBtn);
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Charlie");
+    
+    // Redo
+    redoBtn = screen.getByText("Redo");
+    expect(redoBtn).not.toBeDisabled();
+    fireEvent.click(redoBtn);
+    expect(screen.getByTestId("current-name")).toHaveTextContent("Charlie edited");
+  });
+
+  test("Shows ReviewModal on last item submit", () => {
+    render(
+      <MassEditWizard items={items} massEditUri="/uri" renderItem={vi.fn()} actualUser={{}} massRequiredAuth="auth" onClose={vi.fn()} />
+    );
+
+    // Edit first item (Charlie) -> advances to Alpha
+    fireEvent.click(screen.getByText("Submit"));
+    
+    // Edit second item (Alpha) -> triggers review
+    fireEvent.click(screen.getByText("Submit"));
+
+    expect(screen.getByLabelText("Review Modal")).toBeInTheDocument();
+  });
+
+});

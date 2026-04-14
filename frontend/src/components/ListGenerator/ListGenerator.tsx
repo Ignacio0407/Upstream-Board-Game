@@ -71,17 +71,27 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
   const [page, setPage] = useState(1);
   const [sortedData, setSortedData] = useState<T[]>(data);
   const [selectedIds, setSelectedIds] = useState<Set<any>>(new Set());
-  const [filtered, setFiltered] = useState<T[]>([]);
+  const [filtered, setFiltered] = useState<T[]>(data);
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [outsideClicks, setOutsideClicks] = useState(0);
 
-  useEffect(() => { setSortedData(data); }, [data]);
+  useEffect(() => { setSortedData(data); setFiltered(data); }, [data]);
 
-  const paginatedData = useMemo(() => { const start = (page - 1) * pageSize; return sortedData.slice(start, start + pageSize); },
-    [sortedData, page, pageSize]);
+  // Reset page when filtering changes to avoid being stuck on a page that doesn't exist in the filtered results
+  useEffect(() => {
+    setPage(1);
+  }, [filtered]);
 
-  const visibleData = useMemo(() => searchBarPlaceholder ? (filtered.length ? filtered : paginatedData) : paginatedData,
-    [filtered, paginatedData, searchBarPlaceholder]);
+  const filteredData = useMemo(() => {
+    return (searchBarPlaceholder && filtered) ? filtered : sortedData;
+  }, [filtered, sortedData, searchBarPlaceholder]);
+
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, page, pageSize]);
+
+  const visibleData = paginatedData;
   
   const selectedItems = visibleData.filter(item => selectedIds.has(item[idKey as keyof T]));
 
@@ -141,6 +151,9 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
 
       {showMassEdit && (
         <div className="mass-edit-overlay" 
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mass edit modal"
           onClick={() => {
             setOutsideClicks(c => {
               if (c + 1 >= 2) {
@@ -166,14 +179,14 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
         </div>
       )}
 
-      {searchBarPlaceholder && <SearchBar data={paginatedData} setFiltered={setFiltered} placeholder={searchBarPlaceholder} defaultCaseSensitive={true}/>}
+      {searchBarPlaceholder && <SearchBar data={sortedData} setFiltered={setFiltered} placeholder={searchBarPlaceholder} defaultCaseSensitive={true}/>}
 
       {createButtonPosition === "top" && createButton &&
         <Button color="success" tag={Link} to={createButton} className="mt-3">Create</Button>}
 
       {renderedData}
 
-      <ListPagination totalItems={sortedData.length} pageSize={pageSize} currentPage={page} onPageChange={handlePageChange}/>
+      <ListPagination totalItems={filteredData.length} pageSize={pageSize} currentPage={page} onPageChange={handlePageChange}/>
 
       {createButtonPosition === "bottom" && createButton &&
         <Button color="success" tag={Link} to={createButton} className="mt-3">Create</Button>}
