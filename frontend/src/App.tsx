@@ -13,8 +13,8 @@ import tokenService from './services/token.service.ts';
 import UserListAdmin from './admin/users/UserListAdmin.tsx';
 import SwaggerDocs from './public/swagger/Swagger.tsx';
 import DeveloperList from './developers/developers.tsx';
-import AchievementList from './achievements/achievementList.tsx';
-import AchievementEdit from './achievements/achievementEdit.tsx';
+import AchievementList from './achievements/achievementList/AchievementList.tsx';
+import AchievementEdit from './achievements/achievementEdit/AchievementEdit.tsx';
 import Dashboard from './dashboard/Dashboard.tsx';
 import CreateGame from './createGame/CreateGame.tsx';
 import Rules from './rules/rules.tsx';
@@ -23,7 +23,7 @@ import Lobby from './match/Lobby.tsx';
 import EndGame from './match/EndGame.tsx';
 import {JwtPayload} from './interfaces/util'
 import DoNotHackMyApp from './components/DoNotHackMyApp/DoNotHackMyApp.tsx';
-import AchievementCreate from './achievements/achievementCreate.tsx';
+import AchievementCreate from './achievements/achievementCreate/AchievementCreate.tsx';
 
 const ErrorFallback: React.FC<{error: Error; resetErrorBoundary: () => void;}> = ({ error, resetErrorBoundary }) => {
   return (
