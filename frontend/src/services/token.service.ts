@@ -2,7 +2,7 @@ import User, {emptyUser} from '../interfaces/User.ts'
 
 interface UserWithRefreshToken extends User {refreshToken?: string};
 
-class TokenService {
+export class TokenService {
 
   getLocalRefreshToken(): string | undefined {
     const stored = localStorage.getItem("user");

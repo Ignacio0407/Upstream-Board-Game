@@ -28,6 +28,26 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/setupTests.js',
+    setupFiles: './src/setupTests.ts',
+    coverage: {
+      exclude: [
+        'node_modules/**',
+        'build/**',
+        'src/mocks/**',
+        'src/__mocks__/**',
+        '**/*.d.ts',
+        '**/*.css',
+        '**/*.svg',
+        '**/*.png',
+        '**/*.jpg',
+        '**/*.jpeg',
+        '**/*.gif',
+        '**/*.pdf',
+        'src/reportWebVitals.ts',
+        'src/setupTests.ts',
+        'src/index.tsx',
+        'src/test-utils.tsx',
+      ]
+    }
   },
 });
