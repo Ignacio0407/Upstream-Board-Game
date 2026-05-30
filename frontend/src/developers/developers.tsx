@@ -8,7 +8,6 @@ import Developer from '../interfaces/Developer.ts'
 export default function DeveloperList() {
     const jwt = tokenService.getLocalAccessToken();
     const [developers, setDevelopers] = useFetchState<Developer[]>([], `/api/v1/developers`, jwt);
-    const [filtered, setFiltered] = useState<Developer[]>([]) 
 
     const imgnotfound = "/images/achievements/NotFoundImage.png";  
     
@@ -30,7 +29,6 @@ export default function DeveloperList() {
          <div className="admin-page-container"> 
             <h1></h1>
            <h1 className="text-center">Developers</h1>
-           <SearchBar data={developers} setFiltered={setFiltered} placeholder = {'Search developers'} defaultCaseSensitive={true}/>
            <div> 
                 <Table aria-label="developers" className="mt-4"> 
                     <thead> 
@@ -41,7 +39,7 @@ export default function DeveloperList() {
                             <th className="text-center">Picture</th> 
                         </tr> 
                     </thead> 
-                    <tbody>{filtered ? developersList(filtered) : developersList(developers)}</tbody> 
+                    <tbody>{developersList(developers)}</tbody> 
                 </Table> 
             </div> 
             </div> 
