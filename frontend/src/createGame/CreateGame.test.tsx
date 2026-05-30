@@ -1,25 +1,47 @@
+import { vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import CreateGame from "./CreateGame"
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-jest.mock("../services/token.service", () => ({
-  getLocalAccessToken: jest.fn(() => "mock-jwt-token"),
-  getUser: jest.fn(() => ({ id: 1 })),
+import * as reactRouterDom from "react-router-dom";
+
+vi.mock("../services/token.service", () => ({
+  default: {
+    getLocalAccessToken: vi.fn(() => "mock-jwt-token"),
+    getUser: vi.fn(() => ({ id: 1 })),
+  }
 }));
 
-jest.mock("../util/useFetchState", () => jest.fn(() => [[], jest.fn()]));
+vi.mock("../util/useFetchState", () => ({
+  default: vi.fn(() => [[], vi.fn()])
+}));
 
-jest.mock('sockjs-client', () => jest.fn());
-jest.mock('@stomp/stompjs', () => ({
-  Client: jest.fn().mockImplementation(() => ({
-    activate: jest.fn(),
-    publish: jest.fn(),
-    deactivate: jest.fn(),
+vi.mock('sockjs-client', () => ({ default: vi.fn() }));
+vi.mock('@stomp/stompjs', () => ({
+  Client: vi.fn().mockImplementation(() => ({
+    activate: vi.fn(),
+    publish: vi.fn(),
+    deactivate: vi.fn(),
   })),
 }));
 
+vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
+    return {
+        ...actual,
+        useNavigate: vi.fn(),
+    };
+});
+
 describe("CreateGame Component", () => {
+  const mockNavigate = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(reactRouterDom.useNavigate).mockReturnValue(mockNavigate);
+  });
+
   test("renders form elements correctly", () => {
     render(
       <MemoryRouter>
@@ -29,14 +51,12 @@ describe("CreateGame Component", () => {
 
     expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Crear/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Cancelar/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Create/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cancel/i })).toBeInTheDocument();
   });
 
   test("validates and submits form", async () => {
     const user = userEvent.setup();
-    const mockNavigate = jest.fn();
-    jest.spyOn(require("react-router-dom"), "useNavigate").mockReturnValue(mockNavigate);
 
     render(
       <MemoryRouter>
@@ -45,7 +65,7 @@ describe("CreateGame Component", () => {
     );
 
     const nameInput = screen.getByLabelText(/Name/i);
-    const createButton = screen.getByRole("button", { name: /Crear/i });
+    const createButton = screen.getByRole("button", { name: /Create/i });
 
     // Input validation
     await user.type(nameInput, "Test Game");
@@ -58,8 +78,6 @@ describe("CreateGame Component", () => {
 
   test("cancel button navigates back", async () => {
     const user = userEvent.setup();
-    const mockNavigate = jest.fn();
-    jest.spyOn(require("react-router-dom"), "useNavigate").mockReturnValue(mockNavigate);
 
     render(
       <MemoryRouter>
@@ -67,7 +85,7 @@ describe("CreateGame Component", () => {
       </MemoryRouter>
     );
 
-    const cancelButton = screen.getByRole("button", { name: /Cancelar/i });
+    const cancelButton = screen.getByRole("button", { name: /Cancel/i });
     await user.click(cancelButton);
     expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
   });
