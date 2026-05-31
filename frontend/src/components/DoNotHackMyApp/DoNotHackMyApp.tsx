@@ -95,6 +95,9 @@ export default function DoNotHackMyApp({density = 40, spawnIntervalMs = 120, min
     <div ref={containerRef} className="dh-container">
       <div className="dh-overlay">
         <h1 className="dh-title">Don' t Hack My App 😎</h1>
+        <h2 className="dh-hacker-detected" style={{ color: '#ff0000', textTransform: 'uppercase', letterSpacing: '0.2rem', marginBottom: '1rem' }}>
+            HACKER DETECTED
+        </h2>
         <p className="dh-subtitle">Security mode: fun and relentless 🛡️</p>
       </div>
 
