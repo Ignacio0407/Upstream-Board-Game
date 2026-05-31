@@ -1,88 +1,159 @@
-import AppNavbar from "./AppNavbar.tsx";
-import { render, screen, fireEvent } from "./test-utils";
+import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { Authority } from './interfaces/User.ts';
 import tokenService from './services/token.service.ts';
+import * as jwtDecode from 'jwt-decode';
+import * as fetchers from './util/fetchers.ts';
+import AppNavbar from "./AppNavbar.tsx";
+import { render, screen, fireEvent, waitFor } from "./test-utils";
 
-jest.mock('./services/token.service');
-jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["PLAYER"], sub: "user123" }));
-const getLocalAccessTokenMock = tokenService.getLocalAccessToken as jest.MockedFunction<typeof tokenService.getLocalAccessToken>;
+vi.mock('./services/token.service');
+vi.mock('./util/fetchers.ts');
+
+vi.mock("jwt-decode", () => ({
+  default: vi.fn(() => ({
+    authorities: [Authority.PLAYER],
+    sub: "user123"
+  }))
+}));
+
+const getLocalAccessTokenMock = vi.mocked(tokenService.getLocalAccessToken);
+const jwtDecodeMock = vi.mocked(jwtDecode.default);
+const postMock = vi.mocked(fetchers.post);
 
 describe('AppNavbar', () => {
 
-    // Test para verificar que se renderizan correctamente los enlaces públicos cuando no hay JWT
-    test('renders public links when not authenticated', () => {
-        getLocalAccessTokenMock.mockReturnValue(""); // No hay JWT
+  beforeEach(() => {
+    jwtDecodeMock.mockReturnValue({ authorities: [Authority.PLAYER], sub: "user123" });
+    postMock.mockResolvedValue({ ok: true } as Response);
+  });
 
-        render(<AppNavbar />);
+  // --- No auth ---
 
-        // Verificar que los enlaces de "Pricing Plans", "Register", y "Login" se renderizan correctamente
-        const linkPlansElement = screen.getByRole('link', { name: 'Pricing Plans' });
-        expect(linkPlansElement).toBeInTheDocument();
+  test('NO JWT: shows public links and hides user ones', () => {
+    getLocalAccessTokenMock.mockReturnValue("");
+    render(<AppNavbar />);
 
-        const linkRegisterElement = screen.getByRole('link', { name: 'Register' });
-        expect(linkRegisterElement).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Pricing Plans' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Register' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument();
 
-        const linkLoginElement = screen.getByRole('link', { name: 'Login' });
-        expect(linkLoginElement).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Logout' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Dashboard' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Rules' })).not.toBeInTheDocument();
+  });
+
+  // --- Auth/Rol PLAYER ---
+
+  test('JWT and rol PLAYER: shows player links and hides public ones', () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt');
+    render(<AppNavbar />);
+
+    expect(screen.getByRole('link', { name: 'Achievements' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Developers' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Rules' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Logout' })).toBeInTheDocument();
+
+    // Login and Register must NOT appear when authenticated
+    expect(screen.queryByRole('link', { name: 'Register' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument();
+
+    // Admin links must NOT appear
+    expect(screen.queryByRole('link', { name: 'Users' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Docs' })).not.toBeInTheDocument();
+  });
+
+  test("JWT: token's username is shown on navbar", () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt');
+    render(<AppNavbar />);
+
+    expect(screen.getByText('user123')).toBeInTheDocument();
+  });
+
+  // --- Auth/Rol ADMIN ---
+
+  test('JWT and rol ADMIN: shows admin links  oculta los de PLAYER', () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt-admin');
+    jwtDecodeMock.mockReturnValue({ authorities: ["ADMIN"], sub: "admin123" });
+    render(<AppNavbar />);
+
+    expect(screen.getByRole('link', { name: 'Users' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Developers' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Achievements' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Docs' })).toBeInTheDocument();
+
+    // ownerLinks are exclusive to PLAYER, must NOT appear for ADMIN
+    // Achievements appears for ADMIN but because of adminLinks, no ownerLinks — 
+    // Therefore, there must NOT be duplicates
+    expect(screen.getAllByRole('link', { name: 'Achievements' })).toHaveLength(1);
+    expect(screen.getAllByRole('link', { name: 'Developers' })).toHaveLength(1);
+  });
+
+  // --- unlockAchievement ---
+
+  test('click in Rules calls post with correct username and jwt', async () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt');
+    render(<AppNavbar />);
+
+    fireEvent.click(screen.getByRole('link', { name: 'Rules' }));
+
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith(
+        '/api/v1/usersachievements/unlockrules/user123',
+        'fake-jwt'
+      );
+    });
+  });
+
+  test('unlockAchievement logs error if answer is NOT ok', async () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt');
+    postMock.mockResolvedValue({ ok: false, status: 403 } as Response);
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(<AppNavbar />);
+    fireEvent.click(screen.getByRole('link', { name: 'Rules' }));
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to unlock achievement:',
+        expect.any(Error)
+      );
     });
 
-    // Test para verificar que se renderizan correctamente los enlaces para un jugador autenticado
-    test('renders player links when authenticated', () => {
-        getLocalAccessTokenMock.mockReturnValue('fake-jwt'); // Hay un JWT simulado
+    consoleSpy.mockRestore();
+  });
 
-        render(<AppNavbar />);
+  // --- Invalid JWT ---
 
-        // Verificar que los enlaces del jugador (como "Achievements" y "Developers") se renderizan correctamente
-        const linkAchievementsElement = screen.getByRole('link', { name: 'Achievements' });
-        expect(linkAchievementsElement).toBeInTheDocument();
+  test('Malformed JWT does NOT break render and does NOT show username', () => {
+    getLocalAccessTokenMock.mockReturnValue('bad-jwt');
+    jwtDecodeMock.mockImplementation(() => { throw new Error('invalid token'); });
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-        const linkDevelopersElement = screen.getByRole('link', { name: 'Developers' });
-        expect(linkDevelopersElement).toBeInTheDocument();
-    });
+    render(<AppNavbar />);
 
-    // Test para verificar que se renderizan los enlaces de un admin cuando tiene el rol adecuado
-    test('renders admin links when admin role is present', () => {
-        getLocalAccessTokenMock.mockReturnValue('fake-jwt-admin');
-        jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["ADMIN"], sub: "admin123" }));
+    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    expect(consoleSpy).toHaveBeenCalledWith('Failed to decode JWT', expect.any(Error));
 
-        render(<AppNavbar />);
+    consoleSpy.mockRestore();
+  });
 
-        // Verificar que los enlaces del admin (como "Users", "Developers", "Achievements" y "Docs") se renderizan
-        const linkUsersElement = screen.getByRole('link', { name: 'Users' });
-        expect(linkUsersElement).toBeInTheDocument();
+  // --- toggleNavbar ---
 
-        const linkDevelopersElement = screen.getByRole('link', { name: 'Developers' });
-        expect(linkDevelopersElement).toBeInTheDocument();
+  test('Toggler colapses and expands the menu', () => {
+    getLocalAccessTokenMock.mockReturnValue('fake-jwt');
+    render(<AppNavbar />);
 
-        const linkAchievementsElement = screen.getByRole('link', { name: 'Achievements' });
-        expect(linkAchievementsElement).toBeInTheDocument();
+    const toggler = screen.getByRole('button');
 
-        const linkDocsElement = screen.getByRole('link', { name: 'Docs' });
-        expect(linkDocsElement).toBeInTheDocument();
-    });
+    // Estado inicial: collapsed = true → el Collapse no está abierto
+    // Hacemos click para abrir
+    fireEvent.click(toggler);
+    expect(toggler).toBeInTheDocument(); // El toggler sigue ahí
 
-    // Test para verificar que el enlace de "Logout" aparece cuando el usuario está autenticado
-    test('renders logout link when authenticated', () => {
-        getLocalAccessTokenMock.mockReturnValue('fake-jwt');
-
-        render(<AppNavbar />);
-
-        const linkLogoutElement = screen.getByRole('link', { name: 'Logout' });
-        expect(linkLogoutElement).toBeInTheDocument();
-    });
-
-    // Test para verificar que el método unlockAchievement es llamado correctamente
-    test('calls unlockAchievement on click', async () => {
-        getLocalAccessTokenMock.mockReturnValue('fake-jwt');
-        jest.mock("jwt-decode", () => jest.fn().mockReturnValue({ authorities: ["PLAYER"], sub: "user123" }));
-
-        const mockUnlockAchievement = jest.fn();
-        render(<AppNavbar />);
-
-        const unlockLink = screen.getByRole('link', { name: 'Rules' });
-        fireEvent.click(unlockLink);
-
-        // Asegurarse de que la función de desbloqueo haya sido llamada
-        expect(mockUnlockAchievement).toHaveBeenCalled();
-    });
+    // Segundo click para cerrar de nuevo
+    fireEvent.click(toggler);
+    expect(toggler).toBeInTheDocument();
+  });
 
 });
