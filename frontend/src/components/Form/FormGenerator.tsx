@@ -60,7 +60,7 @@ export function FormGenerator<T extends FieldValues> ({fields, defaultValues, on
 
   let navigatePath = navigateOnCancel;
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<T>({...defaultValues});
-  if (!(navigateOnCancel === '' && cancelButtonActivated))
+  if (navigateOnCancel === '' && cancelButtonActivated)
     navigatePath = location.pathname.split('/').slice(0, -1).join('/') || '/';
 
   return (
