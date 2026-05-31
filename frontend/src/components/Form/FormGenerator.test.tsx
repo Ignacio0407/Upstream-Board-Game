@@ -1,3 +1,33 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Autor / Author: Ignacio Gutiérrez Serrera
+ * 
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * It may be used, modified, and distributed for personal or commercial 
+ * purposes, provided that explicit credit is given to the original author.
+ * 
+ * If this code is used as-is or with minor to moderate modifications 
+ * as part of another software, proper attribution must be given to 
+ * Ignacio Gutiérrez Serrera.
+ * (e.g., credits, documentation, or user interface).
+ * 
+ * This license notice must not be removed in any redistribution 
+ * of the source code or binaries.
+ * 
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * 
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * 
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
+ * -----------------------------------------------------------------------------
+ */
+
 import { render, screen, fireEvent, waitFor } from "../../test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FormGenerator } from "./FormGenerator";
@@ -27,6 +57,7 @@ const mockFields = [
     { tag: "Age", name: "age", type: "number", isRequired: false },
     { tag: "Role", name: "role", type: "select", values: ["Admin", "Player"] }
 ];
+const mockDefaultValues = { tag: "", name: "", type: 0, isRequired: false, role: "Player" };
 
 describe("FormGenerator Component", () => {
 
@@ -40,7 +71,7 @@ describe("FormGenerator Component", () => {
         const { container } = render(
             <FormGenerator 
                 fields={mockFields} 
-                defaultValues={{ username: "", age: 0, role: "Player" }} 
+                defaultValues={mockDefaultValues} 
                 onSubmit={vi.fn()} 
             />
         );
@@ -59,7 +90,7 @@ describe("FormGenerator Component", () => {
         const { container } = render(
             <FormGenerator 
                 fields={mockFields} 
-                defaultValues={{ username: "", age: 25, role: "Admin" }} 
+                defaultValues={mockDefaultValues} 
                 onSubmit={mockOnSubmit} 
             />
         );
@@ -83,12 +114,11 @@ describe("FormGenerator Component", () => {
     it("manages security policies and redirects unauthorized users", () => {
         render(
             <FormGenerator 
-                fields={mockFields} 
-                onSubmit={vi.fn()} 
+                fields={mockFields}
+                onSubmit={vi.fn()}
                 deactivateSecurity={false}
                 requiredAuth="ADMIN"
-                actualUser={{ id: 1, authority: "PLAYER" } as any}
-            />
+                actualUser={{ id: 1, authority: "PLAYER" } as any} defaultValues={mockDefaultValues}            />
         );
 
         expect(navigateToUnauthorized).toHaveBeenCalled();
@@ -101,6 +131,7 @@ describe("FormGenerator Component", () => {
                 onSubmit={vi.fn()} 
                 deactivateSecurity={true}
                 requiredAuth="ADMIN"
+                defaultValues={mockDefaultValues}
             />
         );
 
@@ -110,11 +141,10 @@ describe("FormGenerator Component", () => {
     it("handles the cancel button and navigates to the specified path", () => {
         render(
             <FormGenerator 
-                fields={mockFields} 
-                onSubmit={vi.fn()} 
+                fields={mockFields}
+                onSubmit={vi.fn()}
                 cancelButtonActivated={true}
-                navigateOnCancel="/home"
-            />
+                navigateOnCancel="/home" defaultValues={mockDefaultValues}            />
         );
 
         const cancelButton = screen.getByRole("button", { name: /Cancel/i });
@@ -128,10 +158,9 @@ describe("FormGenerator Component", () => {
         const mockOnSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 50)));
         render(
             <FormGenerator 
-                fields={mockFields} 
-                onSubmit={mockOnSubmit} 
-                loadingText="Creating..."
-            />
+                fields={mockFields}
+                onSubmit={mockOnSubmit}
+                loadingText="Creating..." defaultValues={mockDefaultValues}            />
         );
 
         fireEvent.click(screen.getByRole("button", { name: /Submit/i }));
@@ -143,10 +172,9 @@ describe("FormGenerator Component", () => {
     it("applies form styling based on className prop", () => {
         const { container } = render(
             <FormGenerator 
-                fields={mockFields} 
-                onSubmit={vi.fn()} 
-                className="super-form"
-            />
+                fields={mockFields}
+                onSubmit={vi.fn()}
+                className="super-form" defaultValues={mockDefaultValues}            />
         );
 
         expect(container.querySelector("form")).toHaveClass("super-form");
