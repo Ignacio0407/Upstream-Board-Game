@@ -212,7 +212,7 @@ export default function Game() {
             {!currentUserIsSpectator && myPlayer && myPlayer.id === match.actualPlayerId && match.phase === Phase.MOVING && 
             <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
             {renderPlayerList(playerList)}
-            {myPlayer && passTurn(match, jwt, myPlayer)}
+            {myPlayer && !currentUserIsSpectator && passTurn(match, jwt, myPlayer)}
             
         {matchTilesNoCoordinate.length > 0 && myPlayer &&
         <div key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
