@@ -14,7 +14,7 @@ export const GRID_HEIGHT = 6;
 export const coordToIndex = (x: number, y: number) => { return (GRID_HEIGHT - 1 - y) * GRID_WIDTH + x; };
 export type GridCell = {tile: MatchTile, salmons: SalmonMatch[]};
 
-function isFull (playersNumber:number, tile:MatchTile) {
+export function isFull (playersNumber:number, tile:MatchTile) {
     if (tile.capacity === 0) return false;
     if (playersNumber > 2 && (tile.tile.type === TileType.ROCK)) return tile.capacity === (tile.salmonsNumber - 1);
     else return tile.capacity === tile.salmonsNumber; 
@@ -288,7 +288,7 @@ export const updateGridWithSalmons = (prevGrid: GridCell[], updatedSalmons: Salm
       .map(s => updatedMap.get(s.id) ?? s)
       .filter(s => updatedMap.has(s.id) || (s as any).salmonsNumber > 0); // ⚠️ revisa esta condición
 
-    if (newSalmons === cell.salmons) {
+    if (newSalmons.length === cell.salmons.length && newSalmons.every((s, i) => s === cell.salmons[i])) {
       return cell;
     }
 
