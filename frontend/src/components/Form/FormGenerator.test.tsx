@@ -1,0 +1,154 @@
+import { render, screen, fireEvent, waitFor } from "../../test-utils";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { FormGenerator } from "./FormGenerator";
+import * as reactRouterDom from "react-router-dom";
+import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
+
+// --- Mocks ---
+
+vi.mock("react-router-dom", async () => {
+    const actual = await vi.importActual("react-router-dom");
+    return {
+        ...actual,
+        useLocation: vi.fn(),
+        useNavigate: vi.fn(),
+    };
+});
+
+vi.mock("../DoNotHackMyApp/DoNotHackMyAppHelper.ts", () => ({
+    navigateToUnauthorized: vi.fn()
+}));
+
+const mockNavigate = vi.fn();
+const mockLocation = { pathname: "/test-path" };
+
+const mockFields = [
+    { tag: "Username", name: "username", type: "text", isRequired: true },
+    { tag: "Age", name: "age", type: "number", isRequired: false },
+    { tag: "Role", name: "role", type: "select", values: ["Admin", "Player"] }
+];
+
+describe("FormGenerator Component", () => {
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(reactRouterDom.useNavigate).mockReturnValue(mockNavigate);
+        vi.mocked(reactRouterDom.useLocation).mockReturnValue(mockLocation as any);
+    });
+
+    it("renders all defined fields and the submit button", () => {
+        const { container } = render(
+            <FormGenerator 
+                fields={mockFields} 
+                defaultValues={{ username: "", age: 0, role: "Player" }} 
+                onSubmit={vi.fn()} 
+            />
+        );
+
+        expect(container.querySelector('input[name="username"]')).toBeInTheDocument();
+        expect(container.querySelector('input[name="age"]')).toBeInTheDocument();
+        expect(container.querySelector('select[name="role"]')).toBeInTheDocument();
+        
+        expect(screen.getByText(/Username \*/i)).toBeInTheDocument();
+        expect(screen.getByText(/Age/i)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Submit/i })).toBeInTheDocument();
+    });
+
+    it("processes form data and calls onSubmit correctly", async () => {
+        const mockOnSubmit = vi.fn();
+        const { container } = render(
+            <FormGenerator 
+                fields={mockFields} 
+                defaultValues={{ username: "", age: 25, role: "Admin" }} 
+                onSubmit={mockOnSubmit} 
+            />
+        );
+
+        const usernameInput = container.querySelector('input[name="username"]') as HTMLInputElement;
+        fireEvent.change(usernameInput, { target: { value: "brilliant_user" } });
+        
+        const ageInput = container.querySelector('input[name="age"]') as HTMLInputElement;
+        fireEvent.change(ageInput, { target: { value: "25" } });
+
+        fireEvent.click(screen.getByRole("button", { name: /Submit/i }));
+
+        await waitFor(() => {
+            expect(mockOnSubmit).toHaveBeenCalledWith(
+                expect.objectContaining({ username: "brilliant_user", age: "25", role: "Admin" }),
+                expect.anything()
+            );
+        });
+    });
+
+    it("manages security policies and redirects unauthorized users", () => {
+        render(
+            <FormGenerator 
+                fields={mockFields} 
+                onSubmit={vi.fn()} 
+                deactivateSecurity={false}
+                requiredAuth="ADMIN"
+                actualUser={{ id: 1, authority: "PLAYER" } as any}
+            />
+        );
+
+        expect(navigateToUnauthorized).toHaveBeenCalled();
+    });
+
+    it("allows access when security is deactivated or user has correct role", () => {
+        render(
+            <FormGenerator 
+                fields={mockFields} 
+                onSubmit={vi.fn()} 
+                deactivateSecurity={true}
+                requiredAuth="ADMIN"
+            />
+        );
+
+        expect(navigateToUnauthorized).not.toHaveBeenCalled();
+    });
+
+    it("handles the cancel button and navigates to the specified path", () => {
+        render(
+            <FormGenerator 
+                fields={mockFields} 
+                onSubmit={vi.fn()} 
+                cancelButtonActivated={true}
+                navigateOnCancel="/home"
+            />
+        );
+
+        const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+        fireEvent.click(cancelButton);
+
+        expect(mockNavigate).toHaveBeenCalledWith("/home");
+    });
+
+    it("displays the loading text when form is submitting", async () => {
+        // Mock onSubmit to be a long-running task
+        const mockOnSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 50)));
+        render(
+            <FormGenerator 
+                fields={mockFields} 
+                onSubmit={mockOnSubmit} 
+                loadingText="Creating..."
+            />
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: /Submit/i }));
+
+        expect(screen.getByText(/Creating.../i)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Creating.../i })).toBeDisabled();
+    });
+
+    it("applies form styling based on className prop", () => {
+        const { container } = render(
+            <FormGenerator 
+                fields={mockFields} 
+                onSubmit={vi.fn()} 
+                className="super-form"
+            />
+        );
+
+        expect(container.querySelector("form")).toHaveClass("super-form");
+    });
+});

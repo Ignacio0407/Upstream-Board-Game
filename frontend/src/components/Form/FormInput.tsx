@@ -46,7 +46,7 @@ export const FormInput: React.FC<FormInputProps> = ({tag, name, type, register, 
          style={numberOfColumns > 1 ? { width: `${100/numberOfColumns-3}%` } : {}}>
       
       {type === 'select' ? (
-        <select className="class-form-input" disabled={disabled} defaultValue={defaultValue}
+        <select id={name} className="class-form-input" disabled={disabled} defaultValue={defaultValue}
           {...register(name, { 
             required: isRequired ? `The ${tag} is required` : false,
             ...validators 
@@ -59,21 +59,21 @@ export const FormInput: React.FC<FormInputProps> = ({tag, name, type, register, 
           ))}
         </select>
       ) : type === 'textarea' ? (
-        <textarea className="class-form-input" disabled={disabled} defaultValue={defaultValue}
+        <textarea id={name} className="class-form-input" disabled={disabled} defaultValue={defaultValue}
           {...register(name, { 
             required: isRequired ? `The ${tag} is required` : false,
             ...validators 
           })}
         />
       ) : type === 'date' ? (
-        <input className="class-form-input" type="date" disabled={disabled} defaultValue={defaultValue}
+        <input id={name} className="class-form-input" type="date" disabled={disabled} defaultValue={defaultValue}
           {...register(name, { 
             required: isRequired ? `The ${tag} is required` : false,
             ...validators 
           })}
         />
       ) : (
-        <input className="class-form-input" type={type} disabled={disabled} defaultValue={defaultValue}
+        <input id={name} className="class-form-input" type={type} disabled={disabled} defaultValue={defaultValue}
           {...register(name, { 
             required: isRequired ? `The ${tag} is required` : false,
             ...validators 
