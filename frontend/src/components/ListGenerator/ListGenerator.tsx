@@ -87,6 +87,7 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
   }, [filtered, sortedData, searchBarPlaceholder]);
 
   const paginatedData = useMemo(() => {
+    if (!Array.isArray(filteredData)) return [];
     const start = (page - 1) * pageSize;
     return filteredData.slice(start, start + pageSize);
   }, [filteredData, page, pageSize]);
