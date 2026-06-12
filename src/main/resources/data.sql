@@ -24,23 +24,23 @@ INSERT INTO appusers_achievements(user_id, achievement_id) VALUES
 (4, 1), (4, 2), (4, 3);
 
 INSERT INTO tile (id, image, type) VALUES 
-(1, '/images/tiles/water.png', 'WATER'),
-(2, '/images/tiles/rock.png', 'ROCK'),
-(3, '/images/tiles/heron.png', 'HERON'),
-(4, '/images/tiles/bear.png', 'BEAR'),
-(5, '/images/tiles/eagle.png', 'EAGLE'),
-(6, '/images/tiles/jump.png', 'JUMP'),
-(7, '/images/tiles/sea.png', 'SEA'),
-(8, '/images/tiles/spawning.png', 'SPAWNING');
+(1, '/images/tiles/water.webp', 'WATER'),
+(2, '/images/tiles/rock.webp', 'ROCK'),
+(3, '/images/tiles/heron.webp', 'HERON'),
+(4, '/images/tiles/bear.webp', 'BEAR'),
+(5, '/images/tiles/eagle.webp', 'EAGLE'),
+(6, '/images/tiles/jump.webp', 'JUMP'),
+(7, '/images/tiles/sea.webp', 'SEA'),
+(8, '/images/tiles/spawning.webp', 'SPAWNING');
 
 INSERT INTO salmon (id, color, image) VALUES
-(1, 'YELLOW', '/images/salmons/Yellow_2.png'),
-(2, 'WHITE', '/images/salmons/White_2.png'),
-(3, 'RED', '/images/salmons/Red_2.png'),
-(4, 'PURPLE', '/images/salmons/Purple_2.png'),
-(5, 'GREEN', '/images/salmons/Green_2.png'),
-(6, 'YELLOW', '/images/salmons/Yellow_1.png'),
-(7, 'WHITE', '/images/salmons/White_1.png'),
-(8, 'RED', '/images/salmons/Red_1.png'),
-(9, 'PURPLE', '/images/salmons/Purple_1.png'),
-(10, 'GREEN', '/images/salmons/Green_1.png');
+(1, 'YELLOW', '/images/salmons/Yellow_2.webp'),
+(2, 'WHITE', '/images/salmons/White_2.webp'),
+(3, 'RED', '/images/salmons/Red_2.webp'),
+(4, 'PURPLE', '/images/salmons/Purple_2.webp'),
+(5, 'GREEN', '/images/salmons/Green_2.webp'),
+(6, 'YELLOW', '/images/salmons/Yellow_1.webp'),
+(7, 'WHITE', '/images/salmons/White_1.webp'),
+(8, 'RED', '/images/salmons/Red_1.webp'),
+(9, 'PURPLE', '/images/salmons/Purple_1.webp'),
+(10, 'GREEN', '/images/salmons/Green_1.webp');
