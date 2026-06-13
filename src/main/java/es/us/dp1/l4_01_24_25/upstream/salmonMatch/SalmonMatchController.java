@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,13 +27,11 @@ import jakarta.validation.Valid;
 public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch, SalmonMatchDTO, Integer>{
 
     SalmonMatchService salmonMatchService;
-    SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public SalmonMatchController(SalmonMatchService salmonMatchService, SimpMessagingTemplate messagingTemplate) {
+    public SalmonMatchController(SalmonMatchService salmonMatchService) {
         super(salmonMatchService);
         this.salmonMatchService = salmonMatchService;
-        this.messagingTemplate = messagingTemplate;
     }
 
     @GetMapping("/match/{matchId}")

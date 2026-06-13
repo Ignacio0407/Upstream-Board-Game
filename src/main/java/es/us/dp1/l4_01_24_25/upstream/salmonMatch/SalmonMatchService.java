@@ -131,11 +131,6 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         this.messagingTemplate.convertAndSend("/topic/herons/" + salmonMatches.get(0).getMatch().getId(), this.salmonMatchMapper.toDTOList(salmonMatches));
     }
 
-    public void findSalmonsByMatchIdAndNotifyUpdate (Integer matchId) {
-        List<SalmonMatchDTO> salmonMatches = this.findAllFromMatchDTO(matchId);
-        this.messagingTemplate.convertAndSend("/topic/salmons/" + matchId, salmonMatches);
-    }
-
     public void notifySalmonMatchSpawnUpdate (List<SalmonMatch> salmonMatches) {
         this.messagingTemplate.convertAndSend("/topic/salmons/spawn/" + salmonMatches.get(0).getMatch().getId(), "Update salmons in spawn");
     }
