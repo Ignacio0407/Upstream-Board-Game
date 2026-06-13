@@ -29,17 +29,20 @@ import org.springframework.web.bind.annotation.RestController;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @RestController
 @RequestMapping("/api/v1/users")
 class UserRestController extends BaseRestController<User,Integer>{
 
 	UserService userService;
+	UserAchievementService userAchievementService;
 
 	@Autowired
-	public UserRestController(UserService userService) {
+	public UserRestController(UserService userService, UserAchievementService userAchievementService) {
 		super(userService);
 		this.userService = userService;
+		this.userAchievementService = userAchievementService;
 	}
 
 	@GetMapping("authorities")
@@ -49,8 +52,7 @@ class UserRestController extends BaseRestController<User,Integer>{
 
 	@GetMapping("/{userId}/achievements")
 	public ResponseEntity<List<Achievement>> findUserAchievements(@PathVariable("userId") int userId) {
-		List<Achievement> l = this.userService.findUserAchievements(userId);
-		return new ResponseEntity<>(l, HttpStatus.OK);
+		return new ResponseEntity<>(this.userAchievementService.findUserAchievements(userId), HttpStatus.OK);
 	}
 
 	@PatchMapping(value = "/listing/{userId}")
