@@ -18,6 +18,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.AuthEntryPointJwt;
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.AuthTokenFilter;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +26,7 @@ public class SecurityConfiguration {
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
-    private String ADMIN = "ADMIN";
+    private String ADMIN = Authority.ADMIN.name();
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -52,13 +53,14 @@ public class SecurityConfiguration {
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/dashboard")).permitAll()
             .requestMatchers("/ws-upstream/**").permitAll()
             
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements/**")).authenticated()
+            .requestMatchers(HttpMethod.GET, "/api/v1/achievements/**").authenticated()
             .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}/**").authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/usersachievements/unlockrules/**")).authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/salmons")).authenticated()
 
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/users/**")).hasAuthority(ADMIN)
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements/**")).hasAuthority(ADMIN)
 
             .anyRequest().authenticated()
         )

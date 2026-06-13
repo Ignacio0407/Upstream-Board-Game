@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
@@ -140,7 +141,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         Boolean positionOccupied = matchTiles.stream()
         .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x() == updates.get("x") && mT.getCoordinate().y() == updates.get("y"));
         if (positionOccupied)
-            throw new IllegalStateException("Ya existe una MatchTile en las coordenadas especificadas.");
+            throw new ConflictException("Ya existe una MatchTile en las coordenadas especificadas.");
     
         if((matchTile.getMatch().getRound() == 0 && updates.get("y") > 3) || (matchTile.getMatch().getRound() == 1 && updates.get("y") > 4)
         || (matchTile.getMatch().getRound() == 6 && updates.get("x") == 1 && updates.get("y") == 5))
@@ -182,13 +183,13 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     }
 
     public void createMultipleMatchTiles(Integer id) throws DataAccessException {
+        Match match = this.matchService.findById(id);
         Tile water = this.tileService.findById(1);
         Tile rock = this.tileService.findById(2);
         Tile heron = this.tileService.findById(3);
         Tile bear = this.tileService.findById(4);
         Tile eagle = this.tileService.findById(5);
         Tile jump = this.tileService.findById(6);
-        Match match = this.matchService.findById(id);
         List<MatchTile> createdTiles = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             MatchTile matchTile = new MatchTile();

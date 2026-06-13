@@ -37,5 +37,7 @@ public class PlayerDTO {
         this.userId = userId;
         this.matchId = matchId;
     }
+
+    public PlayerDTO() {}
     
 }
