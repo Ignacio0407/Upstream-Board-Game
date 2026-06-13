@@ -66,7 +66,7 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
       const playerName = currentPlayer.name;
       const matchId = match.id
       const content = newMessage;
-      await post('/api/v1/messages', jwt, {playerId, playerName, matchId, content});
+      await post('/api/v1/messages/send', jwt, {playerId, playerName, matchId, content});
         setNewMessage('');
     } catch (error) {
         console.error('Error sending message:', error);
