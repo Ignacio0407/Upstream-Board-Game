@@ -1,53 +1,37 @@
 package es.us.dp1.l4_01_24_25.upstream.user;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-@ExtendWith(MockitoExtension.class)
+import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+
+@DataJpaTest
 public class UserRepositoryTest {
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
     @Test
-    public void testFindAllByAuthority() {
-        Authority auth = Authority.ADMIN;
+    void shouldFindAllByAuthority() {
+        List<User> admins = userRepository.findAllByAuthority(Authority.ADMIN);
+        assertThat(admins).hasSize(1);
+        assertThat(admins.get(0).getName()).isEqualTo("admin1");
 
-        User user1 = new User();
-        user1.setName("admin_user");
-        user1.setAuthority(Authority.ADMIN);
+        List<User> players = userRepository.findAllByAuthority(Authority.PLAYER);
+        assertThat(players).hasSize(10);
+    }
 
-        User user2 = new User();
-        user2.setAuthority(Authority.ADMIN);
-
-        List<User> users = new ArrayList<>();
-        users.add(user1);
-        users.add(user2);
-
-        when(userRepository.findAllByAuthority(auth)).thenReturn(users);
-
-        List<User> result = userRepository.findAllByAuthority(auth);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-
-        Authority playerAuth = Authority.PLAYER;
-
-        when(userRepository.findAllByAuthority(playerAuth)).thenReturn(Collections.emptyList());
-
-        result = userRepository.findAllByAuthority(playerAuth);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldFindAllListAdmin() {
+        List<UserListAdmin> listing = userRepository.findAllListAdmin();
+        assertThat(listing).hasSize(11);
+        // Verify DTO projection fields
+        assertThat(listing.get(0).getName()).isNotNull();
+        assertThat(listing.get(0).getAuthority()).isNotNull();
     }
 }
