@@ -2,8 +2,9 @@ package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.match.State;
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
 @DataJpaTest
@@ -43,8 +45,8 @@ class MessageRepositoryTest {
 
         User user = new User();
         user.setName("test");
-        user.setName("test");
         user.setPassword("123");
+        user.setAuthority(Authority.PLAYER);
         entityManager.persist(user);
 
         player = new Player();
@@ -71,9 +73,9 @@ class MessageRepositoryTest {
 
         List<MessageDTO> messages = messageRepository.findMessagesByMatchIdDTO(match.getId());
 
-        assertEquals(2, messages.size());
-        assertEquals("Hola", messages.get(0).getContent());
-        assertEquals("Mundo", messages.get(1).getContent());
+        assertThat(messages).hasSize(2);
+        assertThat(messages.get(0).getContent()).isEqualTo("Hola");
+        assertThat(messages.get(1).getContent()).isEqualTo("Mundo");
     }
 
     @Test
@@ -84,8 +86,8 @@ class MessageRepositoryTest {
 
         List<MessageDTO> messages = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
 
-        assertEquals(1, messages.size());
-        assertEquals("Hola", messages.get(0).getContent());
+        assertThat(messages).hasSize(1);
+        assertThat(messages.get(0).getContent()).isEqualTo("Hola");
     }
 
     @Test
@@ -96,8 +98,34 @@ class MessageRepositoryTest {
 
         List<Match> result = messageRepository.findAllChatsFromUser(player.getUserPlayer().getId());
 
-        assertEquals(1, result.size());
-        assertEquals(match.getId(), result.get(0).getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(match.getId());
     }
 
+    @Test
+    void testFindByIdAsDTO() {
+        Message m = new Message(player, match, "dto test");
+        entityManager.persist(m);
+
+        Optional<MessageDTO> result = messageRepository.findByIdAsDTO(m.getId());
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getContent()).isEqualTo("dto test");
+        assertThat(result.get().getPlayerName()).isEqualTo(player.getName());
+    }
+
+    @Test
+    void testFindAllAsDTO() {
+        Message m1 = new Message(player, match, "dto test 1");
+        entityManager.persist(m1);
+        Message m2 = new Message(player, match, "dto test 2");
+        entityManager.persist(m2);
+
+        List<MessageDTO> result = messageRepository.findAllAsDTO();
+
+        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(result).extracting(MessageDTO::getContent)
+                .contains("dto test 1", "dto test 2");
+    }
 }
+
