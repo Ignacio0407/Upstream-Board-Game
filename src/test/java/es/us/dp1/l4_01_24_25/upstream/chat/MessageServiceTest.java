@@ -1,12 +1,17 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,72 +36,64 @@ class MessageServiceTest {
     @Mock
     private MatchService matchService;
 
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
+
     @InjectMocks
     private MessageService messageService;
 
-    /*@Test
-    void testFindMatchMessagesAsDTO() {
-        Message m1 = new Message();
-        Message m2 = new Message();
-        MessageDTO dto1 = new MessageDTO();
-        MessageDTO dto2 = new MessageDTO();
-
-        when(messageRepository.findMessagesByMatchIdDTO(1)).thenReturn(List.of(m1, m2));
-        when(messageMapper.toDTO(m1)).thenReturn(dto1);
-        when(messageMapper.toDTO(m2)).thenReturn(dto2);
-
-        List<MessageDTO> result = messageService.findMatchMessagesAsDTO(1);
-
-        assertEquals(2, result.size());
-        verify(messageRepository).findMessagesByMatchIdDTO(1);
-        verify(messageMapper).toDTO(m1);
-        verify(messageMapper).toDTO(m2);
-    } */
-
     @Test
+    @DisplayName("findUserMessages - Should return list of MessageDTO")
     void testFindUserMessages() {
-        Message m = new Message();
         MessageDTO dto = new MessageDTO();
 
-        when(messageRepository.findMessagesByMatchIdDTO(1)).thenReturn(List.of(dto));
-        when(messageMapper.toDTO(m)).thenReturn(dto);
+        when(messageRepository.findMessagesByUserIdDTO(1)).thenReturn(List.of(dto));
 
         List<MessageDTO> result = messageService.findUserMessages(1);
 
-        assertEquals(1, result.size());
-        assertEquals(dto, result.get(0));
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(dto);
     }
 
     @Test
+    @DisplayName("findUserChats - Should return list of Match")
     void testFindUserChats() {
         Match m1 = new Match();
         when(messageRepository.findAllChatsFromUser(1)).thenReturn(List.of(m1));
 
         List<Match> chats = messageService.findUserChats(1);
 
-        assertEquals(1, chats.size());
+        assertThat(chats).hasSize(1);
         verify(messageRepository).findAllChatsFromUser(1);
     }
 
     @Test
-    void testSaveAsDTO() {
+    @DisplayName("sanitizeContent - Should remove HTML tags")
+    void testSanitizeContent() {
+        String dirty = "<script>alert('xss')</script><p>Hello</p>";
+        String clean = MessageService.sanitizeContent(dirty);
+        assertThat(clean).isEqualTo("Hello");
+    }
+
+    @Test
+    @DisplayName("saveAndSend - Should sanitize, save and broadcast message")
+    void testSaveAndSend() {
         MessageDTO dto = new MessageDTO();
-        dto.setPlayerId(5);
-        dto.setMatchId(10);
-        dto.setContent("Hello");
+        dto.setPlayerId(1);
+        dto.setMatchId(1);
+        dto.setContent("<p>Hello</p>");
 
-        Player p = new Player();
-        Match m = new Match();
-        //Message msg = new Message(p, m, "Hello");
-        MessageDTO dtoResult = new MessageDTO();
+        Player player = new Player();
+        player.setId(1);
+        Match match = new Match();
+        match.setId(1);
 
-        when(playerService.findById(5)).thenReturn(p);
-        when(matchService.findById(10)).thenReturn(m);
-        when(messageMapper.toDTO(any(Message.class))).thenReturn(dtoResult);
+        when(playerService.findById(1)).thenReturn(player);
+        when(matchService.findById(1)).thenReturn(match);
 
-        MessageDTO result = messageService.saveAsDTO(dto);
+        messageService.saveAndSend(dto);
 
-        assertEquals(dtoResult, result);
         verify(messageRepository).save(any(Message.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/chat/1"), any(Message.class));
     }
 }
