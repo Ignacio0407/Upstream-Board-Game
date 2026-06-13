@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.util.List;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,44 +19,47 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
     MessageMapper messageMapper;
     PlayerService playerService;
     MatchService matchService;
+    SimpMessagingTemplate messagingTemplate;
 
-    public MessageService(MessageRepository messageRepository, MessageMapper messageMapper, PlayerService playerService, MatchService matchService) {
+    public MessageService(MessageRepository messageRepository, MessageMapper messageMapper, PlayerService playerService, MatchService matchService, SimpMessagingTemplate messagingTemplate) {
         super(messageRepository, messageMapper);
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
         this.playerService = playerService;
         this.matchService = matchService;
+        this.messagingTemplate = messagingTemplate;
     }
     
     public List<MessageDTO> findMatchMessages(Integer matchId) {
-        return messageRepository.findMessagesByMatchIdDTO(matchId);
+        return this.messageRepository.findMessagesByMatchIdDTO(matchId);
     } 
     
     public List<MessageDTO> findUserMessages(Integer userId) {
-        return messageRepository.findMessagesByUserIdDTO(userId);
+        return this.messageRepository.findMessagesByUserIdDTO(userId);
     }
     
     public List<Match> findUserChats(Integer userId) {
-        return messageRepository.findAllChatsFromUser(userId);
+        return this.messageRepository.findAllChatsFromUser(userId);
     }
 
-    @Override
+    // XSS Protection: Clean the content before saving and broadcasting
+    public static String sanitizeContent(String content) {
+        return org.jsoup.Jsoup.clean(content, org.jsoup.safety.Safelist.none());
+    }
+
     @Transactional
-    public MessageDTO saveAsDTO(MessageDTO messageDTO) {
-        Player p = playerService.findById(messageDTO.getPlayerId());
-        Match m = matchService.findById(messageDTO.getMatchId());
-        Message message = new Message(p, m, messageDTO.getContent());
+    public void saveAndSend(MessageDTO messageDTO) {
+        Player p = this.playerService.findById(messageDTO.getPlayerId());
+        Match m = this.matchService.findById(messageDTO.getMatchId());
+        Message message = new Message(p, m, sanitizeContent(messageDTO.getContent()));
         this.messageRepository.save(message);
-        return messageMapper.toDTO(message);
+        this.messagingTemplate.convertAndSend("/topic/chat/" + m.getId(), message);
     }
 
     @Override
     @Transactional
     protected Message updateEntityFields (Message newMessage, Message messageToUpdate) {
-        messageToUpdate.setPlayer(newMessage.getPlayer());
         messageToUpdate.setContent(newMessage.getContent());
-        messageToUpdate.setCreatedAt(newMessage.getCreatedAt());
-        messageToUpdate.setMatch(newMessage.getMatch());
         return messageToUpdate; 
     }
 
