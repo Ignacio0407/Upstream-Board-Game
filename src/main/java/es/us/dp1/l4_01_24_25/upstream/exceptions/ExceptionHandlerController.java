@@ -42,17 +42,7 @@ public class ExceptionHandlerController {
 				request.getDescription(false));
 
 		return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
-	}
-
-//	@ExceptionHandler(value = TokenRefreshException.class)
-//	@ResponseStatus(HttpStatus.FORBIDDEN)
-//	public ResponseEntity<ErrorMessage> handleTokenRefreshException(TokenRefreshException ex, WebRequest request) {
-//		ErrorMessage message = new ErrorMessage(HttpStatus.FORBIDDEN.value(), new Date(), ex.getMessage(),
-//				request.getDescription(false));
-//
-//		return new ResponseEntity<ErrorMessage>(message, HttpStatus.FORBIDDEN);
-//	}	
-	
+	}	
 
 	@ExceptionHandler(value = MethodArgumentNotValidException.class)
 	public final ResponseEntity<ErrorMessage> handleMethodArgumentException(MethodArgumentNotValidException ex,
