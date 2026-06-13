@@ -1,68 +1,65 @@
 package es.us.dp1.l4_01_24_25.upstream.auth;
 
-import java.util.Collection;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.us.dp1.l4_01_24_25.upstream.auth.payload.request.SignupRequest;
 import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class AuthServiceTests {
 
-	@Autowired
-	protected AuthService authService;
-	@Autowired
-	protected UserService userService;
+	@Mock
+	private PasswordEncoder encoder;
+
+	@Mock
+	private UserService userService;
+
+	private AuthService authService;
+
+	@BeforeEach
+	void setUp() {
+		authService = new AuthService(encoder, userService);
+	}
 
 	@Test
-	@Transactional
 	public void shouldCreateAdminUser() {
-		SignupRequest request = createRequest("ADMIN", "admin2");
-		int userFirstCount = ((Collection<User>) this.userService.findAll()).size();
-		this.authService.createUser(request);
-		int userLastCount = ((Collection<User>) this.userService.findAll()).size();
-		assertEquals(userFirstCount + 1, userLastCount);
+		SignupRequest request = new SignupRequest();
+		request.setUsername("admin2");
+		request.setPassword("password");
+		request.setAuthority("ADMIN");
+
+		when(encoder.encode("password")).thenReturn("encodedPassword");
+
+		authService.createUser(request);
+
+		verify(userService).save(any(User.class));
+		verify(encoder).encode("password");
 	}
-	
-	
 	
 	@Test
-	@Transactional
 	public void shouldCreatePlayerUser() {
-		SignupRequest request = createRequest("PLAYER", "playertest");
-		int userFirstCount = ((Collection<User>) this.userService.findAll()).size();
-		this.authService.createUser(request);
-		int userLastCount = ((Collection<User>) this.userService.findAll()).size();
-		assertEquals(userFirstCount + 1, userLastCount);
-	}
-
-	private SignupRequest createRequest(String auth, String username) {
 		SignupRequest request = new SignupRequest();
-		request.setAddress("prueba");
-		request.setAuthority(auth);
-		request.setCity("prueba");
-		request.setFirstName("prueba");
-		request.setLastName("prueba");
-		request.setPassword("prueba");
-		request.setTelephone("123123123");
-		request.setUsername(username);
+		request.setUsername("playertest");
+		request.setPassword("password");
+		request.setAuthority("PLAYER");
 
-		if(auth == "PLAYER") {
-			User playerUser = new User();
-			playerUser.setName("clinicOwnerTest");
-			playerUser.setPassword("clinicOwnerTest");
-			playerUser.setAuthority(Authority.PLAYER);
-			userService.save(playerUser);			
-		}
+		when(encoder.encode("password")).thenReturn("encodedPassword");
 
-		return request;
+		authService.createUser(request);
+
+		verify(userService).save(any(User.class));
+		verify(encoder).encode("password");
 	}
 
 }
