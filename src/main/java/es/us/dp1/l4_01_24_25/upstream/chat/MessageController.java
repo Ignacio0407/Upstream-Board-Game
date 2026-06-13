@@ -26,7 +26,7 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
         this.messageService = messageService;
     }
 
-    @PostMapping
+    @PostMapping("/send")
     public void saveAndSend(@Valid MessageDTO messageDto) {
         this.messageService.saveAsDTO(messageDto);
     }
