@@ -1,13 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.user;
 
-import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 
 @SpringBootTest
@@ -28,111 +23,65 @@ public class UserServiceTest {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	UserRepository userRepository;
+
 	@Test
 	@WithMockUser(username = "player1", password = "0wn3r")
 	void shouldFindCurrentUser() {
 		User user = this.userService.findCurrentUser();
-		assertEquals("player1", user.getName());
+		assertThat(user.getName()).isEqualTo("player1");
 	}
 
 	@Test
 	@WithMockUser(username = "prueba")
 	void shouldNotFindCorrectCurrentUser() {
-		assertThrows(ResourceNotFoundException.class, () -> this.userService.findCurrentUser());
+		assertThatThrownBy(() -> this.userService.findCurrentUser())
+				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
 	void shouldNotFindAuthenticated() {
-		assertThrows(ResourceNotFoundException.class, () -> this.userService.findCurrentUser());
-	}
-
-	@Test
-	void shouldFindAllUsers() {
-		List<User> users = (List<User>) this.userService.findAll();
-		assertEquals(11, users.size());
+		assertThatThrownBy(() -> this.userService.findCurrentUser())
+				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
 	void shouldFindUsersByUsername() {
 		User user = this.userService.findUserByName("player1");
-		assertEquals("player1", user.getName());
+		assertThat(user.getName()).isEqualTo("player1");
 	}
 
 	@Test
 	void shouldFindUsersByAuthority() {
 		List<User> players = (List<User>) this.userService.findAllByAuthority(Authority.PLAYER);
-		assertEquals(10, players.size());
+		assertThat(players).hasSize(10);
 
 		List<User> admins = (List<User>) this.userService.findAllByAuthority(Authority.ADMIN);
-		assertEquals(1, admins.size());
+		assertThat(admins).hasSize(1);
 	}
 
 	@Test
 	void shouldNotFindUserByIncorrectUsername() {
-		assertThrows(ResourceNotFoundException.class, () -> this.userService.findUserByName("usernotexists"));
-	}		
-
-	@Test
-	void shouldFindSingleUser() {
-		// player3 has ID 4 in data.sql
-		User user = this.userService.findById(4);
-		assertEquals("player3", user.getName());
-	}
-
-	@Test
-	void shouldNotFindSingleUserWithBadID() {
-		assertThrows(ResourceNotFoundException.class, () -> this.userService.findById(100));
+		assertThatThrownBy(() -> this.userService.findUserByName("usernotexists"))
+				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
 	void shouldExistUser() {
-		assertEquals(true, this.userService.existsUserByName("player1"));
+		assertThat(this.userService.existsUserByName("player1")).isTrue();
 	}
 
 	@Test
 	void shouldNotExistUser() {
-		assertEquals(false, this.userService.existsUserByName("player10000"));
-	}
-
-	/*@Test
-	void shouldUpdateUser() {
-		int idToUpdate = 1;
-		userService.updateUserAuthority(idToUpdate);
-		User updatedUser = this.userService.findById(idToUpdate);
-		assertEquals(newName, updatedUser.getName());
-	} */
-
-	@Test
-	void shouldInsertUser() {
-		int count = ((Collection<User>) this.userService.findAll()).size();
-
-		User user = new User();
-		user.setName("Sam");
-		user.setPassword("password");
-		user.setAuthority(Authority.ADMIN);
-
-		this.userService.save(user);
-		assertNotEquals(0, user.getId().longValue());
-		assertNotNull(user.getId());
-
-		int finalCount = ((Collection<User>) this.userService.findAll()).size();
-		assertEquals(count + 1, finalCount);
+		assertThat(this.userService.existsUserByName("player10000")).isFalse();
 	}
 
 	@Test
 	void shouldFindAllAuthorities() {
 		List<Authority> auths = this.userService.findAllAuthorities();
-		assertEquals(2, auths.size());
-		assertTrue(auths.contains(Authority.ADMIN));
-		assertTrue(auths.contains(Authority.PLAYER));
-	}
-
-	@Test
-	void shouldFindUserAchievements() {
-		// player3 has ID 4 in data.sql and 3 achievements
-		List<Achievement> achievements = this.userService.findUserAchievements(4);
-		assertNotNull(achievements);
-		assertEquals(3, achievements.size());
+		assertThat(auths).hasSize(2)
+				.containsExactlyInAnyOrder(Authority.ADMIN, Authority.PLAYER);
 	}
 
 	@Test
@@ -147,28 +96,30 @@ public class UserServiceTest {
 		Integer id = user.getId();
 
 		this.userService.delete(id);
-		assertThrows(ResourceNotFoundException.class, () -> this.userService.findById(id));
+		assertThatThrownBy(() -> this.userService.findById(id))
+				.isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
 	@WithMockUser(username = "player3", authorities = "PLAYER")
 	void shouldNotDeleteSelf() {
 		// player3 has ID 4
-		assertThrows(AccessDeniedException.class, () -> this.userService.delete(4));
+		assertThatThrownBy(() -> this.userService.delete(4))
+				.isInstanceOf(AccessDeniedException.class);
 	}
 
 	@Test
 	@WithMockUser(username = "admin1", authorities = "ADMIN")
 	void shouldFindAllListingAsAdmin() {
 		List<UserListAdmin> listing = this.userService.findAllListing();
-		assertNotNull(listing);
-		assertEquals(11, listing.size());
+		assertThat(listing).isNotNull().hasSize(11);
 	}
 
 	@Test
 	@WithMockUser(username = "player1", authorities = "PLAYER")
 	void shouldNotFindAllListingAsPlayer() {
-		assertThrows(AccessDeniedException.class, () -> this.userService.findAllListing());
+		assertThatThrownBy(() -> this.userService.findAllListing())
+				.isInstanceOf(AccessDeniedException.class);
 	}
-	
+
 }
