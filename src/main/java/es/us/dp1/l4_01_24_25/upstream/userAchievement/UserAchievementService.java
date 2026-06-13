@@ -13,9 +13,9 @@ import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
-import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @Service
 public class UserAchievementService extends BaseService<UserAchievement,Integer>{
@@ -23,14 +23,15 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     UserAchievementRepository userAchievementRepository;
     UserService userService;
     AchievementService achievementService;
-    AchievementUnlocker achievementUnlocker = new AchievementUnlocker();
+    private final AchievementUnlocker achievementUnlocker;
 
     @Autowired
-    public UserAchievementService( UserAchievementRepository userAchievementRepository, @Lazy UserService userService, AchievementService achievementService) {
+    public UserAchievementService( UserAchievementRepository userAchievementRepository, @Lazy UserService userService, @Lazy AchievementService achievementService, AchievementUnlocker achievementUnlocker) {
         super(userAchievementRepository);
         this.userAchievementRepository = userAchievementRepository;
         this.userService = userService;
         this.achievementService = achievementService;
+        this.achievementUnlocker = achievementUnlocker;
     }
 
     @Transactional
@@ -76,4 +77,10 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         if(repeated != null) throw new Exception(); 
         return this.save(ua);
     }
+
+    @Transactional
+	public List<Achievement> findUserAchievements(Integer userId) {
+		this.checkAndUnlockAchievements(userId);
+		return this.findByUserId(userId).stream().map(ua -> ua.getAchievement()).toList();
+	}
 }

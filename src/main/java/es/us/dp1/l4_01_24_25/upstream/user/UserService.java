@@ -18,7 +18,6 @@ package es.us.dp1.l4_01_24_25.upstream.user;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,21 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
-import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @Service
 public class UserService extends BaseService<User,Integer> {
 
 	UserRepository userRepository;
-	UserAchievementService userAchievementService;
 
 	@Autowired
-	public UserService(UserRepository userRepository, @Lazy UserAchievementService userAchievementService) {
+	public UserService(UserRepository userRepository) {
 		super(userRepository);
 		this.userRepository = userRepository;
-		this.userAchievementService = userAchievementService;
 	}
 
 	@Override
@@ -85,12 +80,6 @@ public class UserService extends BaseService<User,Integer> {
 		else toUpdate.setAuthority(Authority.PLAYER);
 		this.save(toUpdate);
 		return new UserListAdmin(idToUpdate, toUpdate.getName(), toUpdate.getAuthority());
-	}
-	
-	@Transactional
-	public List<Achievement> findUserAchievements(Integer userId) {
-		this.userAchievementService.checkAndUnlockAchievements(userId);
-		return this.userAchievementService.findByUserId(userId).stream().map(ua -> ua.getAchievement()).toList();
 	}
 
 	@Transactional
