@@ -1,36 +1,37 @@
 /**
  * -----------------------------------------------------------------------------
- * Autor / Author: Ignacio Gutiérrez Serrera
+ * Autor / Author: Ignacio GutiÃ©rrez Serrera
  * 
- * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
+ * ðŸ‡¬ðŸ‡§ This software was developed by Ignacio GutiÃ©rrez Serrera.
  * It may be used, modified, and distributed for personal or commercial 
  * purposes, provided that explicit credit is given to the original author.
  * 
  * If this code is used as-is or with minor to moderate modifications 
  * as part of another software, proper attribution must be given to 
- * Ignacio Gutiérrez Serrera.
+ * Ignacio GutiÃ©rrez Serrera.
  * (e.g., credits, documentation, or user interface).
  * 
  * This license notice must not be removed in any redistribution 
  * of the source code or binaries.
  * 
- * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
- * Se permite su uso, modificación y distribución con fines personales o 
- * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
+ * ðŸ‡ªðŸ‡¸ Este software ha sido desarrollado por Ignacio GutiÃ©rrez Serrera.
+ * Se permite su uso, modificaciÃ³n y distribuciÃ³n con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explÃ­cito al autor.
  * 
- * Si este código se utiliza tal cual, o con modificaciones leves o medias 
- * como parte de otro software, se debe otorgar el crédito correspondiente 
- * a Ignacio Gutiérrez Serrera.
- * (por ejemplo, en los créditos, documentación o interfaz del producto).
+ * Si este cÃ³digo se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crÃ©dito correspondiente 
+ * a Ignacio GutiÃ©rrez Serrera.
+ * (por ejemplo, en los crÃ©ditos, documentaciÃ³n o interfaz del producto).
  * 
- * No se permite eliminar este aviso de licencia en ninguna redistribución 
- * del código fuente o binario.
+ * No se permite eliminar este aviso de licencia en ninguna redistribuciÃ³n 
+ * del cÃ³digo fuente o binario.
  * -----------------------------------------------------------------------------
  */
 
 package es.us.dp1.l4_01_24_25.upstream.web;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +88,7 @@ public class WebSocketSecurityTests {
     }
 
     // 1. CONNECT: JWT authentication
-    @ParameterizedTest(name = "[{index}] authHeader=''{0}'' valid={1} → success={2}")
+    @ParameterizedTest(name = "[{index}] authHeader=''{0}'' valid={1} â†’ success={2}")
     @CsvSource({
         // authHeader,          jwtValid, shouldSucceed
         "Bearer valid.jwt,      true,     true",   // Valid token
@@ -114,15 +115,18 @@ public class WebSocketSecurityTests {
 
         Message<byte[]> msg = MessageBuilder.createMessage(new byte[0], acc.getMessageHeaders());
 
-        if (shouldSucceed) assertDoesNotThrow(() -> interceptor.preSend(msg, null));
-        else              assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+        if (shouldSucceed) {
+            assertThatCode(() -> interceptor.preSend(msg, null)).doesNotThrowAnyException();
+        } else {
+            assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
+        }
     }
 
     // 2. SEND / SUBSCRIBE: Routes, authorization and payload validation
-    @ParameterizedTest(name = "[{index}] {0} {1} inMatch={2} bigPayload={3} → success={4}")
+    @ParameterizedTest(name = "[{index}] {0} {1} inMatch={2} bigPayload={3} â†’ success={4}")
     @CsvSource({
         // command,    destination,                      inMatch, bigPayload, shouldSucceed
-        // ── 1 segment routes ──────────────────────────────────────────────
+        // â”€â”€ 1 segment routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/chat/1,                     true,    false,      true",
         "SEND,       /topic/movingSalmon/99,            true,    false,      true",
         "SEND,       /topic/tilesAndSalmons/2,          true,    false,      true",
@@ -132,15 +136,15 @@ public class WebSocketSecurityTests {
         "SEND,       /topic/movingSalmonFromSea/99,     true,    false,      true",
         "SUBSCRIBE,  /topic/chat/1,                     true,    false,      true",
         "SUBSCRIBE,  /topic/movingSalmon/2,             true,    false,      true",
-        // ── 2 segments routes ─────────────────────────────────────────────
+        // â”€â”€ 2 segments routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/tiles/place/1,              true,    false,      true",
         "SEND,       /topic/tiles/rotation/1,           true,    false,      true",
         "SEND,       /topic/salmons/spawn/1,            true,    false,      true",
         "SUBSCRIBE,  /topic/tiles/place/1,              true,    false,      true",
-        // ── 3 segments routes ─────────────────────────────────────────────
+        // â”€â”€ 3 segments routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/salmon/spawn/enter/1,       true,    false,      true",
         "SUBSCRIBE,  /topic/salmon/spawn/enter/1,       true,    false,      true",
-        // ── (EXACT_PATHS) ────────────────────────────
+        // â”€â”€ (EXACT_PATHS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SUBSCRIBE,  /topic/matches/dashboard,          false,   false,      true",
         "SEND,       /topic/matches/dashboard,          false,   false,      true",
         "SUBSCRIBE,  /topic/match/update/5,             true,    false,      true",
@@ -149,15 +153,15 @@ public class WebSocketSecurityTests {
         "SEND,       /topic/match/newPlayer/1,          true,    false,      true",
         "SUBSCRIBE,  /topic/match/start/1,              true,    false,      true",
         "SEND,       /topic/match/start/1,              true,    false,      true",
-        // ── User not in match ──────────────────────────────────────────
+        // â”€â”€ User not in match â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/chat/1,                     false,   false,      false",
         "SUBSCRIBE,  /topic/chat/1,                     false,   false,      false",
-        // ── Invalid Routes ───────────────────────────────────────────────────
+        // â”€â”€ Invalid Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/invalid,                    true,    false,      false",
         "SUBSCRIBE,  /topic/invalid,                    true,    false,      false",
         "SEND,       /topic/chat/abc,                   true,    false,      false",  // Not numeric matchId
         "SEND,       /topic/chat/,                      true,    false,      false",  // Empty matchId
-        // ── Big Payload ────────────────────────────────────────────────────
+        // â”€â”€ Big Payload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         "SEND,       /topic/chat/1,                     true,    true,       false",
         "SUBSCRIBE,  /topic/chat/1,                     true,    true,       false",
     })
@@ -172,13 +176,16 @@ public class WebSocketSecurityTests {
         byte[] payload = bigPayload ? new byte[70 * 1024] : "ok".getBytes();
         Message<byte[]> msg = MessageBuilder.createMessage(payload, acc.getMessageHeaders());
 
-        if (shouldSucceed) assertDoesNotThrow(() -> interceptor.preSend(msg, null));
-        else               assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+        if (shouldSucceed) {
+            assertThatCode(() -> interceptor.preSend(msg, null)).doesNotThrowAnyException();
+        } else {
+            assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
+        }
     }
 
     // 3. SEND / SUBSCRIBE: unauthenticated user
     // Covers: auth == null in accessor (anonimous session SEND/SUBSCRIBE)
-    @ParameterizedTest(name = "[{index}] {0} sin usuario → debe fallar")
+    @ParameterizedTest(name = "[{index}] {0} sin usuario â†’ debe fallar")
     @CsvSource({
         "SEND,      /topic/chat/1",
         "SUBSCRIBE, /topic/chat/1",
@@ -187,7 +194,7 @@ public class WebSocketSecurityTests {
         StompHeaderAccessor acc = unauthenticatedAccessor(command, destination.trim());
         Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
 
-        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+        assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
     }
 
     // 4. Rate limit
@@ -204,7 +211,7 @@ public class WebSocketSecurityTests {
 
         for (int i = 0; i < 60; i++) interceptor.preSend(msg, null);
 
-        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+        assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
     }
 
     // 5. Cache cross-match
@@ -216,6 +223,6 @@ public class WebSocketSecurityTests {
         when(playerService.isUserInMatch("user", 1)).thenReturn(false);
         Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
 
-        assertThrows(MessageDeliveryException.class, () -> interceptor.preSend(msg, null));
+        assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
     }
 }
