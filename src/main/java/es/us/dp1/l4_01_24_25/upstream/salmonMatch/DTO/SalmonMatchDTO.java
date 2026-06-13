@@ -28,6 +28,7 @@ public class SalmonMatchDTO {
 
     Integer matchId;
 
+    public SalmonMatchDTO() {}
     public SalmonMatchDTO(Integer id, Integer playerId, Integer salmonsNumber, Integer spawningNumber, Coordinate coordinate, Salmon salmon, Integer matchId) {
         this.id = id;
         this.playerId = playerId;

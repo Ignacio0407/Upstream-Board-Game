@@ -3,8 +3,11 @@ package es.us.dp1.l4_01_24_25.upstream.statistic;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
+@Component
 public class AchievementUnlocker {
 
     private Map<Metric, AchievementStrategy> strategies = new HashMap<>();
