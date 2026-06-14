@@ -22,7 +22,6 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.GlobalExceptionHandler;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestControllerWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestDTO;
-import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class BaseRestControllerWithDTOTest {

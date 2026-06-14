@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.model.dummy;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
+import es.us.dp1.l4_01_24_25.upstream.model.TestEntity;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

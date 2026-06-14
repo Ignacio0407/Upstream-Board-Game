@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestDTO;
-import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestEntity;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestRepository;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestServiceWithDTO;
 
