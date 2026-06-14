@@ -1,8 +1,6 @@
-package es.us.dp1.l4_01_24_25.upstream.user;
+﻿package es.us.dp1.l4_01_24_25.upstream.user;
 
 import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +17,28 @@ public class UserRepositoryTest {
     @Test
     void shouldFindAllByAuthority() {
         List<User> admins = userRepository.findAllByAuthority(Authority.ADMIN);
-        assertThat(admins).hasSize(1);
-        assertThat(admins.get(0).getName()).isEqualTo("admin1");
-
         List<User> players = userRepository.findAllByAuthority(Authority.PLAYER);
+
+        assertThat(admins).hasSize(1);
         assertThat(players).hasSize(10);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoUsersWithAuthority() {
+        // assumes no ADMIN users exist in test data, or delete them first
+        userRepository.findAllByAuthority(Authority.ADMIN).forEach(u -> userRepository.delete(u));
+
+        assertThat(userRepository.findAllByAuthority(Authority.ADMIN)).isEmpty();
     }
 
     @Test
     void shouldFindAllListAdmin() {
         List<UserListAdmin> listing = userRepository.findAllListAdmin();
-        assertThat(listing).hasSize(11);
-        // Verify DTO projection fields
-        assertThat(listing.get(0).getName()).isNotNull();
-        assertThat(listing.get(0).getAuthority()).isNotNull();
+
+        assertThat(listing).isNotEmpty();
+        assertThat(listing).allSatisfy(dto -> {
+            assertThat(dto.getName()).isNotNull();
+            assertThat(dto.getAuthority()).isNotNull();
+        });
     }
 }

@@ -1,109 +1,183 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.Phase;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
 public class PlayerRepositoryTest {
 
-    @Mock
+    @Autowired
+    private TestEntityManager em;
+
+    @Autowired
     private PlayerRepository playerRepository;
 
+    private Match match;
+    private Match otherMatch;
+    private Player player1;
+    private Player player2;
+    private Player deadPlayer;
+    private User user1;
+    private User user2;
+
+    @BeforeEach
+    void setUp() {
+        match = new Match();
+        match.setState(State.ON_GOING);
+        match.setPhase(Phase.TILES);
+        match.setPlayersNumber(2);
+        match.setRound(1);
+        match.setFinalScoreCalculated(false);
+        em.persist(match);
+
+        otherMatch = new Match();
+        otherMatch.setState(State.WAITING);
+        otherMatch.setPhase(Phase.TILES);
+        otherMatch.setPlayersNumber(2);
+        otherMatch.setRound(0);
+        otherMatch.setFinalScoreCalculated(false);
+        em.persist(otherMatch);
+
+        user1 = new User();
+        user1.setName("userOne");
+        user1.setPassword("pass");
+        user1.setAuthority(Authority.PLAYER);
+        em.persist(user1);
+
+        user2 = new User();
+        user2.setName("userTwo");
+        user2.setPassword("pass");
+        user2.setAuthority(Authority.PLAYER);
+        em.persist(user2);
+
+        player1 = new Player();
+        player1.setName("Alpha");
+        player1.setColor(Color.RED);
+        player1.setPlayerOrder(1);
+        player1.setAlive(true);
+        player1.setPoints(5);
+        player1.setEnergy(3);
+        player1.setMatch(match);
+        player1.setUserPlayer(user1);
+        em.persist(player1);
+
+        player2 = new Player();
+        player2.setName("Beta");
+        player2.setColor(Color.YELLOW);
+        player2.setPlayerOrder(2);
+        player2.setAlive(true);
+        player2.setPoints(10);
+        player2.setEnergy(2);
+        player2.setMatch(match);
+        player2.setUserPlayer(user2);
+        em.persist(player2);
+
+        deadPlayer = new Player();
+        deadPlayer.setName("Dead");
+        deadPlayer.setColor(Color.GREEN);
+        deadPlayer.setPlayerOrder(3);
+        deadPlayer.setAlive(false);
+        deadPlayer.setPoints(0);
+        deadPlayer.setEnergy(0);
+        deadPlayer.setMatch(match);
+        deadPlayer.setUserPlayer(user2);
+        em.persist(deadPlayer);
+
+        em.flush();
+    }
+
+    // ── findPlayersByMatchAsDTO ───────────────────────────────────────────────
+
     @Test
-    public void testFindPlayersByMatch() {
-        Integer matchId = 1;
-
-        Player player1 = new Player();
-        player1.setName("Player 1");
-        player1.setMatch(new Match());
-        player1.getMatch().setId(matchId);
-
-        List<Player> players = new ArrayList<>();
-        players.add(player1);
-
-        when(playerRepository.findByMatchId(matchId)).thenReturn(players);
-
-        List<Player> result = playerRepository.findByMatchId(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Player 1", result.get(0).getName());
-
-        Integer invalidMatchId = 99;
-
-        when(playerRepository.findByMatchId(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = playerRepository.findByMatchId(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnPlayersDTOForMatch() {
+        List<PlayerDTO> result = playerRepository.findPlayersByMatchAsDTO(match.getId());
+        assertThat(result).hasSize(3);
+        assertThat(result).anyMatch(p -> p.getName().equals("Alpha"));
+        assertThat(result).anyMatch(p -> p.getName().equals("Beta"));
     }
 
     @Test
-    public void testFindAlivePlayersByMatch() {
-        Integer matchId = 1;
-
-        Player alivePlayer = new Player();
-        alivePlayer.setName("Alive Player");
-        alivePlayer.setAlive(true);
-        alivePlayer.setMatch(new Match());
-        alivePlayer.getMatch().setId(matchId);
-
-        List<Player> alivePlayers = new ArrayList<>();
-        alivePlayers.add(alivePlayer);
-
-        when(playerRepository.findByMatchIdAndAliveTrue(matchId)).thenReturn(alivePlayers);
-
-        List<Player> result = playerRepository.findByMatchIdAndAliveTrue(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).getAlive());
-
-        Integer invalidMatchId = 99;
-
-        when(playerRepository.findByMatchIdAndAliveTrue(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = playerRepository.findByMatchIdAndAliveTrue(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnEmptyDTOWhenMatchHasNoPlayers() {
+        List<PlayerDTO> result = playerRepository.findPlayersByMatchAsDTO(otherMatch.getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testFindByName() {
-        String name = "Player 1";
+    void shouldNotReturnPlayersFromOtherMatchAsDTO() {
+        List<PlayerDTO> result = playerRepository.findPlayersByMatchAsDTO(otherMatch.getId());
+        assertThat(result).noneMatch(p -> p.getName().equals("Alpha"));
+    }
 
-        Player player = new Player();
-        player.setName(name);
+    // ── findByMatchIdOrderByPlayerOrderAscAsDTO ───────────────────────────────
 
-        when(playerRepository.findByName(name)).thenReturn(Optional.of(player));
+    @Test
+    void shouldReturnPlayersDTOOrderedByPlayerOrder() {
+        List<PlayerDTO> result = playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(match.getId());
+        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(result.get(0).getPlayerOrder()).isLessThanOrEqualTo(result.get(1).getPlayerOrder());
+    }
 
-        Optional<Player> result = playerRepository.findByName(name);
+    @Test
+    void shouldReturnEmptyOrderedDTOWhenMatchHasNoPlayers() {
+        List<PlayerDTO> result = playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(otherMatch.getId());
+        assertThat(result).isEmpty();
+    }
 
-        assertNotNull(result);
-        assertEquals(name, result.get().getName());
+    // ── findByMatchIdAndAliveTrue ─────────────────────────────────────────────
 
-        String invalidName = "Non Existent Player";
+    @Test
+    void shouldReturnOnlyAlivePlayersForMatch() {
+        List<Player> result = playerRepository.findByMatchIdAndAliveTrue(match.getId());
+        assertThat(result).hasSize(2);
+        assertThat(result).allMatch(Player::getAlive);
+        assertThat(result).noneMatch(p -> p.getName().equals("Dead"));
+    }
 
-        when(playerRepository.findByName(invalidName)).thenReturn(null);
+    @Test
+    void shouldReturnEmptyWhenNoAlivePlayers() {
+        List<Player> result = playerRepository.findByMatchIdAndAliveTrue(otherMatch.getId());
+        assertThat(result).isEmpty();
+    }
 
-        result = playerRepository.findByName(invalidName);
+    // ── findByMatchIdAndAliveTrueOrderByPlayerOrderAsc ────────────────────────
 
-        assertNull(result);
+    @Test
+    void shouldReturnAlivePlayersOrderedByPlayerOrder() {
+        List<Player> result = playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(match.getId());
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getPlayerOrder()).isLessThan(result.get(1).getPlayerOrder());
+    }
+
+    // ── existsByUsernameAndMatchId ────────────────────────────────────────────
+
+    @Test
+    void shouldReturnTrueWhenUserIsInMatch() {
+        Boolean result = playerRepository.existsByUsernameAndMatchId("userOne", match.getId());
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenUserIsNotInMatch() {
+        Boolean result = playerRepository.existsByUsernameAndMatchId("userOne", otherMatch.getId());
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void shouldReturnFalseWhenUsernameDoesNotExist() {
+        Boolean result = playerRepository.existsByUsernameAndMatchId("noexiste", match.getId());
+        assertThat(result).isFalse();
     }
 }
