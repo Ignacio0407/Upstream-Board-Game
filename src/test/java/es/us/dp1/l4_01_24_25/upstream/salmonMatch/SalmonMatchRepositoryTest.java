@@ -1,255 +1,266 @@
 package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.match.Phase;
+import es.us.dp1.l4_01_24_25.upstream.match.State;
+import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
+import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.user.Authority;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
 public class SalmonMatchRepositoryTest {
 
-    @Mock
+    @Autowired
+    private TestEntityManager em;
+
+    @Autowired
     private SalmonMatchRepository salmonMatchRepository;
 
+    private Match match;
+    private Match otherMatch;
+    private Player player;
+    private Player otherPlayer;
+
+    private SalmonMatch smRiver;  // coordinate.y < 20
+    private SalmonMatch smSpawn;  // coordinate.y > 20
+    private Salmon salmon;
+
+    @BeforeEach
+    void setUp() {
+        match = new Match();
+        match.setState(State.ON_GOING);
+        match.setPhase(Phase.TILES);
+        match.setPlayersNumber(2);
+        match.setRound(1);
+        match.setFinalScoreCalculated(false);
+        em.persist(match);
+
+        otherMatch = new Match();
+        otherMatch.setState(State.WAITING);
+        otherMatch.setPhase(Phase.TILES);
+        otherMatch.setPlayersNumber(2);
+        otherMatch.setRound(0);
+        otherMatch.setFinalScoreCalculated(false);
+        em.persist(otherMatch);
+
+        User user = new User();
+        user.setName("userOne");
+        user.setPassword("pass");
+        user.setAuthority(Authority.PLAYER);
+        em.persist(user);
+
+        User otherUser = new User();
+        otherUser.setName("userTwo");
+        otherUser.setPassword("pass");
+        otherUser.setAuthority(Authority.PLAYER);
+        em.persist(otherUser);
+
+        player = new Player();
+        player.setName("Alpha");
+        player.setColor(Color.RED);
+        player.setPlayerOrder(1);
+        player.setAlive(true);
+        player.setPoints(0);
+        player.setEnergy(3);
+        player.setMatch(match);
+        player.setUserPlayer(user);
+        em.persist(player);
+
+        otherPlayer = new Player();
+        otherPlayer.setName("Beta");
+        otherPlayer.setColor(Color.YELLOW);
+        otherPlayer.setPlayerOrder(2);
+        otherPlayer.setAlive(true);
+        otherPlayer.setPoints(0);
+        otherPlayer.setEnergy(3);
+        otherPlayer.setMatch(otherMatch);
+        otherPlayer.setUserPlayer(otherUser);
+        em.persist(otherPlayer);
+
+        salmon = em.find(Salmon.class, 1);
+        
+        smRiver = new SalmonMatch();
+        smRiver.setMatch(match);
+        smRiver.setPlayer(player);
+        smRiver.setCoordinate(new Coordinate(1, 10)); // y < 20 → river
+        smRiver.setSalmonsNumber(2);
+        smRiver.setSpawningNumber(0);
+        smRiver.setSalmon(salmon);
+        em.persist(smRiver);
+
+        smSpawn = new SalmonMatch();
+        smSpawn.setMatch(match);
+        smSpawn.setPlayer(player);
+        smSpawn.setCoordinate(new Coordinate(1, 22)); // y > 20 → spawn
+        smSpawn.setSalmonsNumber(1);
+        smSpawn.setSpawningNumber(1);
+        smSpawn.setSalmon(salmon);
+        em.persist(smSpawn);
+
+        em.flush();
+    }
+
+    // ── findByMatchIdAsDTO ────────────────────────────────────────────────────
+
     @Test
-    public void testFindAllFromMatch() {
-        Integer matchId = 1;
-
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setMatch(new Match());
-        sm1.getMatch().setId(matchId);
-
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findByMatchId(matchId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findByMatchId(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidMatchId = 99;
-
-        when(salmonMatchRepository.findByMatchId(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findByMatchId(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnAllSalmonMatchesForMatchAsDTO() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByMatchIdAsDTO(match.getId());
+        assertThat(result).hasSize(2);
     }
 
     @Test
-    public void testFindAllFromMatchInRiver() {
-        Integer matchId = 1;
-
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setMatch(new Match());
-        sm1.getMatch().setId(matchId);
-        sm1.setCoordinate(new Coordinate(10, 15));
-
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findAllFromMatchInRiver(matchId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromMatchInRiver(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidMatchId = 99;
-
-        when(salmonMatchRepository.findAllFromMatchInRiver(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findAllFromMatchInRiver(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnEmptyDTOWhenMatchHasNoSalmonMatches() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByMatchIdAsDTO(otherMatch.getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testFindAllFromPlayer() {
-        Integer playerId = 1;
+    void shouldNotReturnSalmonMatchesFromOtherMatchAsDTO() {
+        SalmonMatch foreign = new SalmonMatch();
+        foreign.setMatch(otherMatch);
+        foreign.setPlayer(otherPlayer);
+        foreign.setCoordinate(new Coordinate(0, 5));
+        foreign.setSalmonsNumber(1);
+        foreign.setSpawningNumber(0);
+        foreign.setSalmon(salmon);
+        em.persistAndFlush(foreign);
 
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setPlayer(new Player());
-        sm1.getPlayer().setId(playerId);
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByMatchIdAsDTO(match.getId());
+        assertThat(result).hasSize(2);
+        assertThat(result).noneMatch(dto -> dto.getMatchId().equals(otherMatch.getId()));
+    }
 
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
+    // ── findByPlayerIdAsDTO ───────────────────────────────────────────────────
 
-        when(salmonMatchRepository.findByPlayerId(playerId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findByPlayerId(playerId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidPlayerId = 99;
-
-        when(salmonMatchRepository.findByPlayerId(invalidPlayerId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findByPlayerId(invalidPlayerId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldReturnAllSalmonMatchesForPlayerAsDTO() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByPlayerIdAsDTO(player.getId());
+        assertThat(result).hasSize(2);
     }
 
     @Test
-    public void testFindAllFromPlayerInSea() {
-        Integer playerId = 1;
-
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setPlayer(new Player());
-        sm1.getPlayer().setId(playerId);
-        sm1.setCoordinate(null);
-
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(playerId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(playerId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidPlayerId = 99;
-
-        when(salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(invalidPlayerId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(invalidPlayerId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnEmptyDTOWhenPlayerHasNoSalmonMatches() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByPlayerIdAsDTO(otherPlayer.getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testFindFromGameInSpawn() {
-        Integer matchId = 1;
+    void shouldNotReturnSalmonMatchesFromOtherPlayerAsDTO() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findByPlayerIdAsDTO(otherPlayer.getId());
+        assertThat(result).noneMatch(dto -> dto.getPlayerId().equals(player.getId()));
+    }
 
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setMatch(new Match());
-        sm1.getMatch().setId(matchId);
-        sm1.setCoordinate(new Coordinate(10, 30));
+    // ── findFromGameInSpawn / findFromGameInSpawnAsDTO ────────────────────────
 
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findFromGameInSpawn(matchId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findFromGameInSpawn(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidMatchId = 99;
-
-        when(salmonMatchRepository.findFromGameInSpawn(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findFromGameInSpawn(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldReturnOnlySalmonMatchesInSpawnForMatch() {
+        List<SalmonMatch> result = salmonMatchRepository.findFromGameInSpawn(match.getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCoordinate().y()).isGreaterThan(20);
     }
 
     @Test
-    public void testFindAllFromPlayerInRiver() {
-        Integer playerId = 1;
-
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setPlayer(new Player());
-        sm1.getPlayer().setId(playerId);
-        sm1.setCoordinate(new Coordinate(10, 15));
-
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findAllFromPlayerInRiver(playerId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInRiver(playerId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidPlayerId = 99;
-
-        when(salmonMatchRepository.findAllFromPlayerInRiver(invalidPlayerId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findAllFromPlayerInRiver(invalidPlayerId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    void shouldReturnEmptyWhenNoSalmonMatchesInSpawnForMatch() {
+        List<SalmonMatch> result = salmonMatchRepository.findFromGameInSpawn(otherMatch.getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    public void testFindWithNoCoord() {
-        Integer matchId = 1;
+    void shouldReturnSpawnSalmonMatchesAsDTO() {
+        List<SalmonMatchDTO> result = salmonMatchRepository.findFromGameInSpawnAsDTO(match.getId());
+        assertThat(result).hasSize(1);
+    }
 
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setMatch(new Match());
-        sm1.getMatch().setId(matchId);
-        sm1.setCoordinate(null);
+    // ── findAllFromMatchInRiver ───────────────────────────────────────────────
 
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
-
-        when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId)).thenReturn(salmonMatches);
-
-        List<SalmonMatch> result = salmonMatchRepository.findByMatchIdAndCoordinateIsNull(matchId);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-
-        Integer invalidMatchId = 99;
-
-        when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(invalidMatchId)).thenReturn(Collections.emptyList());
-
-        result = salmonMatchRepository.findByMatchIdAndCoordinateIsNull(invalidMatchId);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldReturnOnlySalmonMatchesInRiverForMatch() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromMatchInRiver(match.getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCoordinate().y()).isLessThan(20);
     }
 
     @Test
-    public void testFindAllFromPlayerInSpawn() {
-        Integer playerId = 1;
+    void shouldReturnEmptyWhenNoSalmonMatchesInRiverForMatch() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromMatchInRiver(otherMatch.getId());
+        assertThat(result).isEmpty();
+    }
 
-        SalmonMatch sm1 = new SalmonMatch();
-        sm1.setPlayer(new Player());
-        sm1.getPlayer().setId(playerId);
-        sm1.setCoordinate(new Coordinate(10, 30));
+    @Test
+    void shouldNotReturnSpawnSalmonMatchesFromRiverQuery() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromMatchInRiver(match.getId());
+        assertThat(result).noneMatch(sm -> sm.getCoordinate().y() > 20);
+    }
 
-        List<SalmonMatch> salmonMatches = new ArrayList<>();
-        salmonMatches.add(sm1);
+    // ── findAllFromPlayerInRiver ──────────────────────────────────────────────
 
-        when(salmonMatchRepository.findAllFromPlayerInSpawn(playerId)).thenReturn(salmonMatches);
+    @Test
+    void shouldReturnSalmonMatchesInRiverForPlayer() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInRiver(player.getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCoordinate().y()).isLessThan(20);
+    }
 
-        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInSpawn(playerId);
+    @Test
+    void shouldReturnEmptyRiverResultForPlayerWithNoRiverSalmons() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInRiver(otherPlayer.getId());
+        assertThat(result).isEmpty();
+    }
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
+    // ── findAllFromPlayerInSpawn ──────────────────────────────────────────────
 
-        Integer invalidPlayerId = 99;
+    @Test
+    void shouldReturnSalmonMatchesInSpawnForPlayer() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInSpawn(player.getId());
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCoordinate().y()).isGreaterThan(20);
+    }
 
-        when(salmonMatchRepository.findAllFromPlayerInSpawn(invalidPlayerId)).thenReturn(Collections.emptyList());
+    @Test
+    void shouldReturnEmptySpawnResultForPlayerWithNoSpawnSalmons() {
+        List<SalmonMatch> result = salmonMatchRepository.findAllFromPlayerInSpawn(otherPlayer.getId());
+        assertThat(result).isEmpty();
+    }
 
-        result = salmonMatchRepository.findAllFromPlayerInSpawn(invalidPlayerId);
+    // ── findByPlayerIdAsCoordinateDTO ─────────────────────────────────────────
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+    @Test
+    void shouldReturnAllCoordinatesForPlayer() {
+        List<SMCoordinateDTO> result = salmonMatchRepository.findByPlayerIdAsCoordinateDTO(player.getId());
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void shouldReturnEmptyCoordinatesForPlayerWithNoSalmons() {
+        List<SMCoordinateDTO> result = salmonMatchRepository.findByPlayerIdAsCoordinateDTO(otherPlayer.getId());
+        assertThat(result).isEmpty();
+    }
+
+    // ── findByPlayerIdInRiverAsCoordinateDTO ──────────────────────────────────
+
+    @Test
+    void shouldReturnOnlyRiverCoordinatesForPlayer() {
+        List<SMCoordinateDTO> result = salmonMatchRepository.findByPlayerIdInRiverAsCoordinateDTO(player.getId());
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void shouldReturnEmptyRiverCoordinatesForPlayerWithNoRiverSalmons() {
+        List<SMCoordinateDTO> result = salmonMatchRepository.findByPlayerIdInRiverAsCoordinateDTO(otherPlayer.getId());
+        assertThat(result).isEmpty();
     }
 }

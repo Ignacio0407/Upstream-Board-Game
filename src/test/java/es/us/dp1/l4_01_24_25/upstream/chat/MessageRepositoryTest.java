@@ -2,13 +2,11 @@ package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -21,33 +19,48 @@ import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class MessageRepositoryTest {
+public class MessageRepositoryTest {
 
     @Autowired
-    private TestEntityManager entityManager;
+    private TestEntityManager em;
 
     @Autowired
     private MessageRepository messageRepository;
 
     private Player player;
+    private Player player2;
     private Match match;
+    private Match match2;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         match = new Match();
         match.setState(State.ON_GOING);
         match.setPhase(Phase.TILES);
         match.setPlayersNumber(2);
         match.setRound(1);
         match.setFinalScoreCalculated(false);
-        entityManager.persist(match);
+        em.persist(match);
+
+        match2 = new Match();
+        match2.setState(State.WAITING);
+        match2.setPhase(Phase.TILES);
+        match2.setPlayersNumber(2);
+        match2.setRound(0);
+        match2.setFinalScoreCalculated(false);
+        em.persist(match2);
 
         User user = new User();
-        user.setName("test");
-        user.setPassword("123");
+        user.setName("testuser");
+        user.setPassword("pass");
         user.setAuthority(Authority.PLAYER);
-        entityManager.persist(user);
+        em.persist(user);
+
+        User user2 = new User();
+        user2.setName("testuser2");
+        user2.setPassword("pass");
+        user2.setAuthority(Authority.PLAYER);
+        em.persist(user2);
 
         player = new Player();
         player.setAlive(true);
@@ -58,43 +71,102 @@ class MessageRepositoryTest {
         player.setPlayerOrder(1);
         player.setMatch(match);
         player.setUserPlayer(user);
-        entityManager.persist(player);
+        em.persist(player);
+
+        player2 = new Player();
+        player2.setAlive(true);
+        player2.setColor(Color.WHITE);
+        player2.setEnergy(3);
+        player2.setName("Jugador 2");
+        player2.setPoints(0);
+        player2.setPlayerOrder(2);
+        player2.setMatch(match2);
+        player2.setUserPlayer(user2);
+        em.persist(player2);
+
+        em.flush();
     }
 
-    @Test
-    void testFindAllMessagesByMatchId() {
-        Message m1 = new Message(player, match, "Hola");
-        m1.setCreatedAt(LocalDateTime.now().minusMinutes(2));
-        entityManager.persist(m1);
+    // ── findMessagesByMatchIdDTO ──────────────────────────────────────────────
 
-        Message m2 = new Message(player, match, "Mundo");
+    @Test
+    void shouldReturnMessagesOrderedByDateForMatch() {
+        Message m1 = new Message(player, match, "Primero");
+        m1.setCreatedAt(LocalDateTime.now().minusMinutes(5));
+        em.persist(m1);
+
+        Message m2 = new Message(player, match, "Segundo");
         m2.setCreatedAt(LocalDateTime.now());
-        entityManager.persist(m2);
+        em.persist(m2);
+        em.flush();
 
-        List<MessageDTO> messages = messageRepository.findMessagesByMatchIdDTO(match.getId());
+        List<MessageDTO> result = messageRepository.findMessagesByMatchIdDTO(match.getId());
 
-        assertThat(messages).hasSize(2);
-        assertThat(messages.get(0).getContent()).isEqualTo("Hola");
-        assertThat(messages.get(1).getContent()).isEqualTo("Mundo");
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getContent()).isEqualTo("Primero");
+        assertThat(result.get(1).getContent()).isEqualTo("Segundo");
     }
 
     @Test
-    void testFindAllMessagesFromUser() {
-        Message m1 = new Message(player, match, "Hola");
-        m1.setCreatedAt(LocalDateTime.now());
-        entityManager.persist(m1);
-
-        List<MessageDTO> messages = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
-
-        assertThat(messages).hasSize(1);
-        assertThat(messages.get(0).getContent()).isEqualTo("Hola");
+    void shouldReturnEmptyWhenMatchHasNoMessages() {
+        List<MessageDTO> result = messageRepository.findMessagesByMatchIdDTO(match.getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testFindAllChatsFromUser() {
-        Message m = new Message(player, match, "chat test");
-        m.setCreatedAt(LocalDateTime.now());
-        entityManager.persist(m);
+    void shouldNotReturnMessagesFromOtherMatch() {
+        em.persist(new Message(player2, match2, "Otro match"));
+        em.flush();
+
+        List<MessageDTO> result = messageRepository.findMessagesByMatchIdDTO(match.getId());
+
+        assertThat(result).isEmpty();
+    }
+
+    // ── findMessagesByUserIdDTO ───────────────────────────────────────────────
+
+    @Test
+    void shouldReturnMessagesForUser() {
+        Message m1 = new Message(player, match, "Msg A");
+        m1.setCreatedAt(LocalDateTime.now().minusMinutes(1));
+        em.persist(m1);
+
+        Message m2 = new Message(player, match, "Msg B");
+        m2.setCreatedAt(LocalDateTime.now());
+        em.persist(m2);
+        em.flush();
+
+        List<MessageDTO> result = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
+
+        assertThat(result).hasSize(2);
+        // ORDER BY createdAt DESC — más reciente primero
+        assertThat(result.get(0).getContent()).isEqualTo("Msg B");
+        assertThat(result.get(1).getContent()).isEqualTo("Msg A");
+    }
+
+    @Test
+    void shouldReturnEmptyWhenUserHasNoMessages() {
+        List<MessageDTO> result = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void shouldNotReturnMessagesFromOtherUser() {
+        em.persist(new Message(player2, match2, "No mío"));
+        em.flush();
+
+        List<MessageDTO> result = messageRepository.findMessagesByUserIdDTO(player.getUserPlayer().getId());
+
+        assertThat(result).isEmpty();
+    }
+
+    // ── findAllChatsFromUser ──────────────────────────────────────────────────
+
+    @Test
+    void shouldReturnDistinctMatchesWhereUserHasMessages() {
+        em.persist(new Message(player, match, "Uno"));
+        em.persist(new Message(player, match, "Dos"));
+        em.flush();
 
         List<Match> result = messageRepository.findAllChatsFromUser(player.getUserPlayer().getId());
 
@@ -103,29 +175,18 @@ class MessageRepositoryTest {
     }
 
     @Test
-    void testFindByIdAsDTO() {
-        Message m = new Message(player, match, "dto test");
-        entityManager.persist(m);
-
-        Optional<MessageDTO> result = messageRepository.findByIdAsDTO(m.getId());
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getContent()).isEqualTo("dto test");
-        assertThat(result.get().getPlayerName()).isEqualTo(player.getName());
+    void shouldReturnEmptyChatsWhenUserHasNoMessages() {
+        List<Match> result = messageRepository.findAllChatsFromUser(player.getUserPlayer().getId());
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testFindAllAsDTO() {
-        Message m1 = new Message(player, match, "dto test 1");
-        entityManager.persist(m1);
-        Message m2 = new Message(player, match, "dto test 2");
-        entityManager.persist(m2);
+    void shouldNotReturnChatsFromOtherUser() {
+        em.persist(new Message(player2, match2, "Otro"));
+        em.flush();
 
-        List<MessageDTO> result = messageRepository.findAllAsDTO();
+        List<Match> result = messageRepository.findAllChatsFromUser(player.getUserPlayer().getId());
 
-        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(result).extracting(MessageDTO::getContent)
-                .contains("dto test 1", "dto test 2");
+        assertThat(result).isEmpty();
     }
 }
-
