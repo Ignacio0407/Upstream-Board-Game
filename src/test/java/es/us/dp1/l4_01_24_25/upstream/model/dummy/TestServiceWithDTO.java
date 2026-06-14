@@ -2,6 +2,7 @@ package es.us.dp1.l4_01_24_25.upstream.model.dummy;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
+import es.us.dp1.l4_01_24_25.upstream.model.TestEntity;
 
 public class TestServiceWithDTO extends BaseServiceWithDTO<TestEntity, TestDTO, Integer> {
     public TestServiceWithDTO(TestRepository repository, EntityMapper<TestEntity, TestDTO> mapper) {

@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.GlobalExceptionHandler;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestController;
-import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class BaseRestControllerTest {

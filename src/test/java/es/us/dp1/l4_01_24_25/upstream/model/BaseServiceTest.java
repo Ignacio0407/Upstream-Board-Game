@@ -18,7 +18,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.NoOverrideTestService;
-import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestEntity;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestRepository;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestService;
 
