@@ -84,16 +84,38 @@ _site/
 .metadata/.plugins/org.eclipse.ui.workbench/dialog_settings.xml
 .metadata/.plugins/org.eclipse.ui.workbench/workingsets.xml
 
+# Node / JavaScript
+node_modules/
+frontend/node_modules/
+package-lock.json
+yarn.lock
+.eslintcache
+.prettierrc.cache
+.cache/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VS Code
 .vscode/
-/.apt_generated/
-coverage/jacoco.xml
-.gitignore
-.package-lock.json
-logs/
-node_modules
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+*.code-workspace
 
-src/main/resources/static
-src/main/resources/keystore.p12
+# Tool cache files
+.eslintcache
+.parcel-cache/
+.next/
+.nuxt/
+dist/
+build/
 
+# Extra
 *.txt
+logs/
 *.pem
+keystore.p12
