@@ -6,10 +6,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,46 +18,57 @@ public class AchievementServiceTest {
     @Mock
     private AchievementRepository achievementRepository;
 
+    @InjectMocks
     private AchievementService achievementService;
 
-    @BeforeEach
-    void setUp() {
-        achievementService = new AchievementService(achievementRepository);
-    }
-
     @Test
-    @DisplayName("update - Should correctly update all Achievement fields")
-    void update_AchievementFields_CorrectlyMapped() {
-        // Arrange
-        Integer achievementId = 1;
+    void shouldUpdateAllAchievementFields() {
         Achievement existing = new Achievement();
-        existing.setId(achievementId);
+        existing.setId(1);
         existing.setName("Old Name");
         existing.setDescription("Old Description");
         existing.setThreshold(10.0);
         existing.setMetric(Metric.VICTORIES);
         existing.setBadgeImage("old_badge.png");
 
-        Achievement updatedInfo = new Achievement();
-        updatedInfo.setName("New Name");
-        updatedInfo.setDescription("New Description");
-        updatedInfo.setThreshold(20.0);
-        updatedInfo.setMetric(Metric.TOTAL_POINTS);
-        updatedInfo.setBadgeImage("new_badge.png");
+        Achievement updated = new Achievement();
+        updated.setName("New Name");
+        updated.setDescription("New Description");
+        updated.setThreshold(20.0);
+        updated.setMetric(Metric.TOTAL_POINTS);
+        updated.setBadgeImage("new_badge.png");
 
-        when(achievementRepository.findById(achievementId)).thenReturn(Optional.of(existing));
+        when(achievementRepository.findById(1)).thenReturn(Optional.of(existing));
         when(achievementRepository.save(existing)).thenReturn(existing);
 
-        // Act
-        Achievement result = achievementService.update(achievementId, updatedInfo);
+        Achievement result = achievementService.update(1, updated);
 
-        // Assert
         assertThat(result.getName()).isEqualTo("New Name");
         assertThat(result.getDescription()).isEqualTo("New Description");
         assertThat(result.getThreshold()).isEqualTo(20.0);
         assertThat(result.getMetric()).isEqualTo(Metric.TOTAL_POINTS);
         assertThat(result.getBadgeImage()).isEqualTo("new_badge.png");
-        
         verify(achievementRepository).save(existing);
+    }
+
+    @Test
+    void shouldUpdateAchievementWithNullBadgeImage() {
+        Achievement existing = new Achievement();
+        existing.setId(1);
+        existing.setBadgeImage("old_badge.png");
+
+        Achievement updated = new Achievement();
+        updated.setName("Name");
+        updated.setDescription("Desc");
+        updated.setThreshold(5.0);
+        updated.setMetric(Metric.VICTORIES);
+        updated.setBadgeImage(null);
+
+        when(achievementRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(achievementRepository.save(existing)).thenReturn(existing);
+
+        Achievement result = achievementService.update(1, updated);
+
+        assertThat(result.getBadgeImage()).isNull();
     }
 }
