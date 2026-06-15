@@ -1,12 +1,24 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,19 +28,13 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.us.dp1.l4_01_24_25.upstream.match.Match;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @WebMvcTest(controllers = PlayerRestController.class,
@@ -39,6 +45,9 @@ class PlayerRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockBean
     private PlayerService playerService;
 
@@ -48,161 +57,94 @@ class PlayerRestControllerTest {
     @MockBean
     private MatchService matchService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Test
-    void shouldReturnAllPlayers() throws Exception {
-        List<Player> players = List.of(new Player());
-        when(playerService.findAll()).thenReturn(players);
+    @DisplayName("DELETE /api/v1/players/{id} - Happy Path")
+    void shouldDeletePlayer() throws Exception {
+        doNothing().when(playerService).deleteById(1);
 
-        mockMvc.perform(get("/api/v1/players"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0]").exists());
+        mockMvc.perform(delete("/api/v1/players/{id}", 1))
+               .andExpect(status().isNoContent());
+
+        verify(playerService).deleteById(1);
     }
 
     @Test
-    void shouldReturnPlayersByName() throws Exception {
-        //List<Player> players = List.of(new Player());
-        //List<String> names = List.of("John", "Jane");
-        //when(playerService.getSomeByName(names)).thenReturn(players);
-
-        mockMvc.perform(get("/api/v1/players/names/{names}", "John,Jane"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0]").exists());
-    }
-
-    @Test
-    void shouldReturnPlayerByIdWhenExists() throws Exception {
-        Player player = new Player();
-        player.setId(1);
-        when(playerService.findById(1)).thenReturn(player);
-
-        mockMvc.perform(get("/api/v1/players/{id}", 1))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(1));
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenPlayerIdDoesNotExist() throws Exception {
-        when(playerService.findById(99)).thenReturn(null);
-
-        mockMvc.perform(get("/api/v1/players/{id}", 99))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
+    @DisplayName("GET /api/v1/players/match/{id} - Happy Path")
     void shouldReturnPlayersByMatchId() throws Exception {
-        List<Player> players = List.of(new Player());
-        when(playerService.findPlayersByMatch(1)).thenReturn(players);
+        PlayerDTO dto = new PlayerDTO();
+        dto.setId(1);
+        when(playerService.findPlayersByMatchAsDTO(1)).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/v1/players/match/{id}", 1))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0]").exists());
+               .andExpect(jsonPath("$[0].id").value(1));
     }
 
     @Test
-    void shouldReturnPlayerByNameWhenExists() throws Exception {
-        Player player = new Player();
-        player.setName("John");
-        //when(playerService.getByName("John")).thenReturn(player);
+    @DisplayName("GET /api/v1/players/match/sorted/{id} - Happy Path")
+    void shouldReturnPlayersByMatchIdSorted() throws Exception {
+        PlayerDTO dto = new PlayerDTO();
+        dto.setId(2);
+        when(playerService.findPlayersByMatchSortedPlayerOrderAsDTO(1)).thenReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/v1/players/name/{name}", "John"))
+        mockMvc.perform(get("/api/v1/players/match/sorted/{id}", 1))
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.name").value("John"));
+               .andExpect(jsonPath("$[0].id").value(2));
     }
 
     @Test
-    void shouldReturnNotFoundWhenPlayerByNameDoesNotExist() throws Exception {
-        //when(playerService.getByName("NonExistentName")).thenReturn(null);
-
-        mockMvc.perform(get("/api/v1/players/name/{name}", "NonExistentName"))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenPlayerByIdDoesNotExistForDeletion() throws Exception {
-        when(playerService.findById(99)).thenReturn(null);
-
-        mockMvc.perform(delete("/api/v1/players/{id}", 99))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldUpdatePlayerById() throws Exception {
-        Player player = new Player();
-        player.setId(1);
-        when(playerService.findById(1)).thenReturn(player);
-        when(playerService.update(any(), any())).thenReturn(player);
-
-        mockMvc.perform(put("/api/v1/players/{id}", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(player)))
-               .andExpect(status().isOk());
-    }
-
-    @Test
-    void shouldCreatePlayer() throws Exception {
-        Player player = new Player();
-        when(playerService.save(any(Player.class))).thenReturn(player);
-
-        mockMvc.perform(post("/api/v1/players")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(player)))
-               .andExpect(status().isCreated());
-    }
-
-    @Test
+    @DisplayName("POST /api/v1/players/match/{id} - Happy Path")
     void shouldCreatePlayerInMatch() throws Exception {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("user", "1");
         requestBody.put("color", "RED");
 
-        Player player = new Player();
-        when(matchService.findById(1)).thenReturn(new Match());
-        when(userService.findById(1)).thenReturn(new User());
-        when(playerService.save(any(Player.class))).thenReturn(player);
+        LobbyPlayerDTO lobbyDto = new LobbyPlayerDTO();
+        lobbyDto.setMatchId(1);
+        
+        when(playerService.createPlayerInMatch(eq(1), any())).thenReturn(lobbyDto);
 
         mockMvc.perform(post("/api/v1/players/match/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)))
-               .andExpect(status().isCreated());
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.matchId").value(1));
     }
 
     @Test
+    @DisplayName("PATCH /api/v1/players/{id}/energy - Happy Path")
     void shouldUpdatePlayerEnergyWhenSufficient() throws Exception {
-        Player player = new Player();
-        player.setEnergy(10);
-        when(playerService.findById(1)).thenReturn(player);
-        when(playerService.save(any(Player.class))).thenReturn(player);
+        PlayerDTO dto = new PlayerDTO();
+        dto.setEnergy(5);
+        when(playerService.updateEnergy(eq(1), eq(3))).thenReturn(dto);
 
         mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(5)))
-               .andExpect(status().isOk());
+                .content("3")) // We pass a valid number
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.energy").value(5));
     }
 
     @Test
-    void shouldReturnBadRequestWhenInsufficientEnergy() throws Exception {
-        Player player = new Player();
-        player.setEnergy(2);
-        when(playerService.findById(1)).thenReturn(player);
+    @DisplayName("PATCH /api/v1/players/{id}/energy - Negative Path (Insufficient Energy -> 400)")
+    void shouldReturnBadRequestWhenEnergyInsufficient() throws Exception {
+        when(playerService.updateEnergy(eq(1), eq(10)))
+            .thenThrow(new InsufficientEnergyException("Not enough energy"));
 
         mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(5)))
+                .content("10"))
                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void shouldRegenerateEnergy() throws Exception {
-        Player player = new Player();
-        player.setEnergy(2);
-        when(playerService.findById(1)).thenReturn(player);
-        when(playerService.save(any(Player.class))).thenReturn(player);
+    @DisplayName("PATCH /api/v1/players/{id}/energy - Edge Case (Type Mismatch/Bad JSON -> 400)")
+    void shouldReturnBadRequestOnEnergyTypeMismatch() throws Exception {
+        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("\"five\"")) //  String instead of Integer
+               .andExpect(status().isBadRequest());
 
-        mockMvc.perform(patch("/api/v1/players/{id}/regenerateEnergy", 1))
-               .andExpect(status().isOk());
+        verify(playerService, never()).updateEnergy(any(), any());
     }
 }
-

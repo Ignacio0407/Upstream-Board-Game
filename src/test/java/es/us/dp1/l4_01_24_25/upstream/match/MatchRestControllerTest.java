@@ -1,141 +1,243 @@
 package es.us.dp1.l4_01_24_25.upstream.match;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(MatchRestController.class)
-@AutoConfigureMockMvc
+@WebMvcTest(controllers = MatchRestController.class,
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
+@AutoConfigureMockMvc(addFilters = false)
 class MatchRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockBean
     private MatchService matchService;
 
-    /*@Test
-    void createMatchWMatchCreator_shouldReturn201() throws Exception {
+    // ==========================================
+    // GET /api/v1/matches/dashboard
+    // ==========================================
+
+    @Test
+    @DisplayName("GET /dashboard - Happy Path")
+    void shouldFindAllDashboard() throws Exception {
+        DashboardMatchDTO dto = new DashboardMatchDTO(1, "Match 1", "pass", State.WAITING, 0);
+        when(matchService.findAllAsDashboardDTO()).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/v1/matches/dashboard"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$[0].name").value("Match 1"));
+
+        verify(matchService).findAllAsDashboardDTO();
+    }
+
+    @Test
+    @DisplayName("GET /dashboard - Edge Case (Empty List)")
+    void shouldReturnEmptyListIfNoMatches() throws Exception {
+        when(matchService.findAllAsDashboardDTO()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/v1/matches/dashboard"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$").isEmpty());
+    }
+
+    // ==========================================
+    // POST /api/v1/matches/matchCreator/{userId}
+    // ==========================================
+
+    @Test
+    @DisplayName("POST /matchCreator/{userId} - Happy Path")
+    void shouldCreateMatchWMatchCreator() throws Exception {
         MatchDTO dto = new MatchDTO();
-        dto.setName("Test Match");
+        dto.setId(1);
+        dto.setName("New Match");
+
+        Map<String, String> body = Map.of("name", "New Match", "password", "pass");
 
         when(matchService.createMatchWMatchCreator(eq(1), any())).thenReturn(dto);
 
         mockMvc.perform(post("/api/v1/matches/matchCreator/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Test Match\", \"password\": \"123\"}"))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.name").value("Test Match"));
-    } */
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(body)))
+               .andExpect(status().isCreated())
+               .andExpect(jsonPath("$.name").value("New Match"));
 
-    @Test
-    void startGame_shouldReturn200() throws Exception {
-        MatchDTO dto = new MatchDTO();
-        dto.setId(1);
-        dto.setState(State.WAITING);
-        matchService.startGame(1);
-        when(matchService.findByIdAsDTO(1)).thenReturn(dto);
-
-        mockMvc.perform(patch("/api/v1/matches/1/startGame"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.state").value("WAITING"));
+        verify(matchService).createMatchWMatchCreator(eq(1), any());
     }
 
     @Test
-    void finalScore_shouldReturn200() throws Exception {
+    @DisplayName("POST /matchCreator/{userId} - Negative Path (User Not Found -> 404)")
+    void shouldFailCreateMatchWhenUserNotFound() throws Exception {
+        Map<String, String> body = Map.of("name", "New Match");
+
+        when(matchService.createMatchWMatchCreator(eq(99), any()))
+            .thenThrow(new ResourceNotFoundException("User not found"));
+
+        mockMvc.perform(post("/api/v1/matches/matchCreator/99")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content(objectMapper.writeValueAsString(body)))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("POST /matchCreator/{userId} - Edge Case (Malformed JSON -> 400)")
+    void shouldFailCreateMatchOnMalformedJson() throws Exception {
+        mockMvc.perform(post("/api/v1/matches/matchCreator/1")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content("{ \"name\": \"Broken JSON ")) // JSON Roto
+               .andExpect(status().isBadRequest());
+
+        verify(matchService, never()).createMatchWMatchCreator(any(), any());
+    }
+
+    @Test
+    @DisplayName("POST /matchCreator/{userId} - Edge Case (Type Mismatch on URL -> 400)")
+    void shouldFailCreateMatchOnTypeMismatch() throws Exception {
+        mockMvc.perform(post("/api/v1/matches/matchCreator/abc")
+               .contentType(MediaType.APPLICATION_JSON)
+               .content("{}"))
+               .andExpect(status().isBadRequest());
+
+        verify(matchService, never()).createMatchWMatchCreator(any(), any());
+    }
+
+    // ==========================================
+    // PATCH /api/v1/matches/{matchId}/startGame
+    // ==========================================
+
+    @Test
+    @DisplayName("PATCH /{matchId}/startGame - Happy Path")
+    void shouldStartGame() throws Exception {
+        doNothing().when(matchService).startGame(1);
+
+        mockMvc.perform(patch("/api/v1/matches/1/startGame"))
+               .andExpect(status().isOk());
+
+        verify(matchService).startGame(1);
+    }
+
+    @Test
+    @DisplayName("PATCH /{matchId}/startGame - Negative Path (Match Not Found -> 404)")
+    void shouldFailStartGameWhenNotFound() throws Exception {
+        doThrow(new ResourceNotFoundException("Match", "id", 999)).when(matchService).startGame(999);
+
+        mockMvc.perform(patch("/api/v1/matches/999/startGame"))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PATCH /{matchId}/startGame - Edge Case (Type Mismatch -> 400)")
+    void shouldFailStartGameOnTypeMismatch() throws Exception {
+        mockMvc.perform(patch("/api/v1/matches/abc/startGame"))
+               .andExpect(status().isBadRequest());
+
+        verify(matchService, never()).startGame(any());
+    }
+
+    // ==========================================
+    // PATCH /api/v1/matches/{matchId}/changephase/{playerId}
+    // ==========================================
+
+    @Test
+    @DisplayName("PATCH /{matchId}/changephase/{playerId} - Happy Path")
+    void shouldChangePhase() throws Exception {
+        doNothing().when(matchService).changePhase(1, 2);
+
+        mockMvc.perform(patch("/api/v1/matches/1/changephase/2"))
+               .andExpect(status().isOk());
+
+        verify(matchService).changePhase(1, 2);
+    }
+
+    @Test
+    @DisplayName("PATCH /{matchId}/changephase/{playerId} - Negative Path (Not Turn -> 400)")
+    void shouldFailChangePhaseWhenNotPlayersTurn() throws Exception {
+        doThrow(new NotValidMoveException("It is not your turn!")).when(matchService).changePhase(1, 2);
+
+        mockMvc.perform(patch("/api/v1/matches/1/changephase/2"))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("PATCH /{matchId}/changephase/{playerId} - Edge Case (Type Mismatch -> 400)")
+    void shouldFailChangePhaseOnTypeMismatch() throws Exception {
+        mockMvc.perform(patch("/api/v1/matches/1/changephase/abc"))
+               .andExpect(status().isBadRequest());
+
+        verify(matchService, never()).changePhase(any(), any());
+    }
+
+    // ==========================================
+    // PATCH /api/v1/matches/finalscore/{id}
+    // ==========================================
+
+    @Test
+    @DisplayName("PATCH /finalscore/{id} - Happy Path")
+    void shouldCalculateFinalScore() throws Exception {
         MatchDTO dto = new MatchDTO();
+        dto.setId(1);
         dto.setFinalScoreCalculated(true);
 
         when(matchService.finalScore(1)).thenReturn(dto);
 
         mockMvc.perform(patch("/api/v1/matches/finalscore/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.finalScoreCalculated").value(true));
-    }
-
-    @ParameterizedTest
-    @CsvSource({"0", "1", "2"})
-    void baseController_findById_shouldReturnDTO(Integer id) throws Exception {
-        MatchDTO dto = new MatchDTO();
-        dto.setId(id);
-        when(matchService.findByIdAsDTO(id)).thenReturn(dto);
-
-        mockMvc.perform(get("/api/v1/matches/" + id))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(id));
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finalScoreCalculated").value(true));
     }
 
     @Test
-    void baseController_findAll_shouldReturnList() throws Exception {
-        MatchDTO dto = new MatchDTO();
-        dto.setId(1);
-        when(matchService.findAllAsDTO()).thenReturn(List.of(dto));
+    @DisplayName("PATCH /finalscore/{id} - Negative Path (Already Calculated -> 409)")
+    void shouldFailFinalScoreWhenConflict() throws Exception {
+        when(matchService.finalScore(1))
+            .thenThrow(new ConflictException("Final score for this match has already been calculated"));
 
-        mockMvc.perform(get("/api/v1/matches"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").value(1));
+        mockMvc.perform(patch("/api/v1/matches/finalscore/1"))
+               .andExpect(status().isConflict());
     }
 
     @Test
-    void baseController_save_shouldReturnSavedDTO() throws Exception {
-        MatchDTO input = new MatchDTO();
-        input.setName("Match X");
+    @DisplayName("PATCH /finalscore/{id} - Edge Case (Type Mismatch -> 400)")
+    void shouldFailFinalScoreOnTypeMismatch() throws Exception {
+        mockMvc.perform(patch("/api/v1/matches/finalscore/invalidId"))
+               .andExpect(status().isBadRequest());
 
-        MatchDTO saved = new MatchDTO();
-        saved.setName("Match X");
-
-        when(matchService.saveAsDTO(any())).thenReturn(saved);
-
-        mockMvc.perform(post("/api/v1/matches")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Match X\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Match X"));
-    }
-
-    @Test
-    void baseController_update_shouldReturnUpdatedDTO() throws Exception {
-        MatchDTO updated = new MatchDTO();
-        updated.setId(1);
-        updated.setName("Updated Match");
-
-        when(matchService.updateAsDTO(any(), any())).thenReturn(updated);
-
-        mockMvc.perform(put("/api/v1/matches")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\":1,\"name\":\"Updated Match\"}"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Updated Match"));
-    }
-
-    @Test
-    void baseController_delete_shouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/v1/matches/1"))
-            .andExpect(status().isNoContent());
-
-        verify(matchService).deleteById(1);
+        verify(matchService, never()).finalScore(any());
     }
 }
