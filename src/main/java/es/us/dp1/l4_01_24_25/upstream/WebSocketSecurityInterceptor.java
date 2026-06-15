@@ -44,6 +44,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.lang.Nullable;
 
 import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.JwtUtils;
 import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsServiceImpl;
@@ -199,6 +200,7 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
     }
 
     @Override
+    @Nullable
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor =
             MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);

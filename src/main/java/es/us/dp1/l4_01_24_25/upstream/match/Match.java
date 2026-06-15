@@ -51,6 +51,8 @@ public class Match extends NamedEntity {
 	@JoinColumn(name="match_creator")
 	User matchCreator;
 
-	public Match() {}
+	public Match() {
+		// Empty constructor for tests
+	}
 
 }

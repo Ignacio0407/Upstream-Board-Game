@@ -1,6 +1,5 @@
 package es.us.dp1.l4_01_24_25.upstream.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,12 +23,10 @@ import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
     private String ADMIN = Authority.ADMIN.name();
 
     @Bean
-    protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain configure(HttpSecurity http, AuthEntryPointJwt unauthorizedHandler) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)

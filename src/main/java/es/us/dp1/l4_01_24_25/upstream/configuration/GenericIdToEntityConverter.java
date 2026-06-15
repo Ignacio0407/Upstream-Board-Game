@@ -10,6 +10,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
@@ -26,7 +27,7 @@ public final class GenericIdToEntityConverter implements ConditionalGenericConve
     private EntityManager entityManager;
 
         
-
+    @Nullable
     public Set<ConvertiblePair> getConvertibleTypes() {
     	Set<ConvertiblePair> result=new HashSet<>();
         result.add(new ConvertiblePair(Number.class, BaseEntity.class));
