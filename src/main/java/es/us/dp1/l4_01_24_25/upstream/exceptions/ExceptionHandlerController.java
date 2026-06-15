@@ -19,6 +19,8 @@ import org.springframework.web.context.request.WebRequest;
 @RestControllerAdvice
 public class ExceptionHandlerController {
 
+    private static final String BASE_ERROR_MESSAGE = "error";
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex, WebRequest request) {
@@ -101,27 +103,27 @@ public class ExceptionHandlerController {
     }
 
     @ExceptionHandler(InsufficientEnergyException.class)
-    public ResponseEntity<?> handleInsufficientEnergyException(InsufficientEnergyException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleInsufficientEnergyException(InsufficientEnergyException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(OnlyMovingForwardException.class)
-    public ResponseEntity<?> handleOnlyMovingForwardException(OnlyMovingForwardException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleOnlyMovingForwardException(OnlyMovingForwardException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(NotValidMoveException.class)
-    public ResponseEntity<?> handleNotValidMoveException(NotValidMoveException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleNotValidMoveException(NotValidMoveException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(NoCapacityException.class)
-    public ResponseEntity<?> handleNoCapacityException(NoCapacityException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleNoCapacityException(NoCapacityException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 
     @ExceptionHandler(NonSkipableTurnException.class)
-    public ResponseEntity<?> handleNonSkipableTurnException(NonSkipableTurnException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleNonSkipableTurnException(NonSkipableTurnException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 }

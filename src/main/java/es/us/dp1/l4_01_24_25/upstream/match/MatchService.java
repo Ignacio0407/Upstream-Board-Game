@@ -59,6 +59,9 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.messagingTemplate = messagingTemplate;
     }
 
+    private static final String SALMON_MATCHES = "salmonMatches";
+    private static final String MATCH_TILES = "matchTiles";
+
     @Override
     @Transactional
     protected Match updateEntityFields(Match newMatch, Match matchToUpdate) {
@@ -101,22 +104,22 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     public void notifyTilesAndSalmonsByMatchId (Integer matchId) {
         List<SalmonMatchDTO> salmonMatches = this.salmonMatchService.findAllFromMatchDTO(matchId);
         List<MatchTileDTO> matchTiles = this.matchTileService.findByMatchIdAsDTO(matchId);
-        this.messagingTemplate.convertAndSend("/topic/tilesAndSalmons/" + matchId, Map.of("matchTiles", matchTiles, "salmonMatches", salmonMatches));
+        this.messagingTemplate.convertAndSend("/topic/tilesAndSalmons/" + matchId, Map.of(MATCH_TILES, matchTiles, SALMON_MATCHES, salmonMatches));
     }
 
     public void notifyTilesAndSalmons (List<SalmonMatch> salmonMatches, List<MatchTile> matchTiles) {
         this.messagingTemplate.convertAndSend("/topic/tilesAndSalmons/" + salmonMatches.get(0).getMatch().getId(), 
-        Map.of("matchTiles", this.matchTileService.toDTOList(matchTiles), "salmonMatches", this.salmonMatchService.toDTOList(salmonMatches)));
+        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches)));
     }
 
     public void notifyHeronsUpdated (List<SalmonMatch> salmonMatches, List<MatchTile> matchTiles, List<Integer> deletedSalmonsIds, Integer matchId) {
         this.messagingTemplate.convertAndSend("/topic/heronsUpdated/" + matchId, 
-        Map.of("matchTiles", this.matchTileService.toDTOList(matchTiles), "salmonMatches", this.salmonMatchService.toDTOList(salmonMatches), "deletedSalmonIds", deletedSalmonsIds));
+        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches), SALMON_MATCHES, deletedSalmonsIds));
     }
 
     public void notifyHeronsDeleted (List<MatchTile> matchTiles, Set<Integer> deletedSalmonsIds) {
         this.messagingTemplate.convertAndSend("/topic/heronsDeleted/" + matchTiles.get(0).getMatch().getId(), 
-        Map.of("matchTiles", this.matchTileService.toDTOList(matchTiles), "deletedSalmonIds", deletedSalmonsIds));
+        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, deletedSalmonsIds));
     }
 
     public void notifyPlayerAndMatchUpdate (Player player, Match match) {

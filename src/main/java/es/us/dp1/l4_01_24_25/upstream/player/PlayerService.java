@@ -85,7 +85,6 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         this.messagingTemplate.convertAndSend("/topic/match/newPlayer/" + lobbyPlayer.getMatchId(), lobbyPlayer);
     }
 
-    @Transactional(readOnly = true)
     public void notifyPlayersUpdate(Integer matchId) { 
         List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
         this.messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
