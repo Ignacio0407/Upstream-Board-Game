@@ -135,8 +135,8 @@ class SalmonMatchServiceTest {
     void shouldThrowWhenPhaseIsNotMoving() {
         match.setPhase(Phase.TILES);
         when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonMatch));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 0)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 0);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class)
                 .hasMessageContaining("tiles have to be placed");
     }
@@ -146,8 +146,8 @@ class SalmonMatchServiceTest {
         salmonMatch.setCoordinate(new Coordinate(1, 1));
         MatchTile dest = water(1, 1);
         stubBasicMove(salmonMatch, List.of(dest));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 1)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 1);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class);
     }
 
@@ -157,8 +157,8 @@ class SalmonMatchServiceTest {
         salmonMatch.setCoordinate(null);
         MatchTile dest = water(1, 0);
         stubBasicMove(salmonMatch, List.of(dest));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 0)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 0);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(InsufficientEnergyException.class);
     }
 
@@ -167,8 +167,8 @@ class SalmonMatchServiceTest {
         salmonMatch.setCoordinate(null);
         MatchTile dest = water(1, 1); // y=1, not y=0
         stubBasicMove(salmonMatch, List.of(dest));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 1)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 1);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class)
                 .hasMessageContaining("advance from 1 to 1");
     }
@@ -178,8 +178,8 @@ class SalmonMatchServiceTest {
         salmonMatch.setCoordinate(new Coordinate(1, 1));
         MatchTile dest = water(1, 3);
         stubBasicMove(salmonMatch, List.of(water(1, 1), dest));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 3)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 3);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class);
     }
 
@@ -189,8 +189,8 @@ class SalmonMatchServiceTest {
         MatchTile src = water(1, 2);
         MatchTile dest = water(1, 1); // y < current y
         stubBasicMove(salmonMatch, List.of(src, dest));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 1)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 1);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class);
     }
 
@@ -229,8 +229,8 @@ class SalmonMatchServiceTest {
         MatchTile fullTile = tile(1, 0, TileType.WATER, 0, 2, 2);
         MatchTile alsoFull = tile(1, 1, TileType.WATER, 0, 2, 2);
         stubBasicMove(salmonMatch, List.of(fullTile, alsoFull));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 0)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 0);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class)
                 .hasMessageContaining("next tile is also full");
     }
@@ -345,8 +345,8 @@ class SalmonMatchServiceTest {
         MatchTile full = tile(1, 2, TileType.WATER, 0, 2, 2);
         MatchTile next = water(1, 3);
         stubBasicMove(salmonMatch, List.of(src, full, next));
-
-        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, Map.of("x", 1, "y", 2)))
+        Map<String, Integer> coordinates = Map.of("x", 1, "y", 2);
+        assertThatThrownBy(() -> salmonMatchService.updateCoordinate(1, coordinates))
                 .isInstanceOf(NotValidMoveException.class)
                 .hasMessageContaining("The tile is full and you don't have enough energy to jump!");
     }

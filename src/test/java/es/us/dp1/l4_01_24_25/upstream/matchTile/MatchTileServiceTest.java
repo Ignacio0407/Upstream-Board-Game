@@ -95,7 +95,9 @@ class MatchTileServiceTest {
 
     @Test
     void shouldThrowWhenNotPlayersTurn() {
-        assertThatThrownBy(() -> matchTileService.updateCoordinate(1, updates(1, 2, 0, 0)))
+        Map<String, Integer> updatesMap = updates(1, 2, 0, 0);
+        
+        assertThatThrownBy(() -> matchTileService.updateCoordinate(1, updatesMap))
                 .isInstanceOf(NotValidMoveException.class)
                 .hasMessageContaining("not your turn");
     }
