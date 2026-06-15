@@ -35,12 +35,6 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
         return ResponseEntity.ok(this.matchService.findAllAsDashboardDTO());
     }
 
-    // TODO
-    @GetMapping("/user/{id}")
-    public ResponseEntity<List<Match>> findMatchesFromUser() {
-        return null;
-    }
-
     @PostMapping("/matchCreator/{userId}")
     public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) {
         MatchDTO created = this.matchService.createMatchWMatchCreator(userId, requestBody);
