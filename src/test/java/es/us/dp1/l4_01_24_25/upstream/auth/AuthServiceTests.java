@@ -1,12 +1,13 @@
 package es.us.dp1.l4_01_24_25.upstream.auth;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,7 +34,7 @@ public class AuthServiceTests {
 	}
 
 	@Test
-	public void shouldCreateAdminUser() {
+	void shouldCreateAdminUser() {
 		SignupRequest request = new SignupRequest();
 		request.setUsername("admin2");
 		request.setPassword("password");
@@ -43,12 +44,16 @@ public class AuthServiceTests {
 
 		authService.createUser(request);
 
-		verify(userService).save(any(User.class));
+		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+		verify(userService).save(captor.capture());
 		verify(encoder).encode("password");
+
+		assertThat(captor.getValue().getAuthority()).isEqualTo(Authority.ADMIN);
+		assertThat(captor.getValue().getPassword()).isEqualTo("encodedPassword");
 	}
-	
+
 	@Test
-	public void shouldCreatePlayerUser() {
+	void shouldCreatePlayerUserForUnknownAuthority() {
 		SignupRequest request = new SignupRequest();
 		request.setUsername("playertest");
 		request.setPassword("password");
@@ -58,8 +63,11 @@ public class AuthServiceTests {
 
 		authService.createUser(request);
 
-		verify(userService).save(any(User.class));
-		verify(encoder).encode("password");
+		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+		verify(userService).save(captor.capture());
+
+		assertThat(captor.getValue().getAuthority()).isEqualTo(Authority.PLAYER);
+		assertThat(captor.getValue().getPassword()).isEqualTo("encodedPassword");
 	}
 
 }

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.statistic.Achievement;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
@@ -32,124 +32,159 @@ import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 @ExtendWith(MockitoExtension.class)
 public class UserAchievementServiceTest {
 
-    @Mock
-    private UserAchievementRepository userAchievementRepository;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private AchievementService achievementService;
-
-    @Mock
-    private AchievementUnlocker achievementUnlocker;
+    @Mock private UserAchievementRepository userAchievementRepository;
+    @Mock private UserService userService;
+    @Mock private AchievementService achievementService;
+    @Mock private AchievementUnlocker achievementUnlocker;
 
     @InjectMocks
     private UserAchievementService userAchievementService;
 
     @Captor
-    private ArgumentCaptor<List<UserAchievement>> userAchievementListCaptor;
+    private ArgumentCaptor<List<UserAchievement>> listCaptor;
+
+    // ── findByUserId ──────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("checkAndUnlockAchievements - Should unlock multiple achievements when criteria met and not already possessed")
-    void checkAndUnlockAchievements_UnlockNew_SavesAchievements() {
-        // Arrange
-        Integer userId = 1;
+    void shouldReturnUserAchievementsWhenUserExists() {
+        User user = new User(); user.setId(1);
+        Achievement a = new Achievement(); a.setId(101);
+        UserAchievement ua = new UserAchievement(user, a);
+
+        when(userAchievementRepository.findByUserId(1)).thenReturn(List.of(ua));
+
+        List<UserAchievement> result = userAchievementService.findByUserId(1);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getAchievement().getId()).isEqualTo(101);
+    }
+
+    @Test
+    void shouldThrowWhenFindByUserIdWithNull() {
+        assertThatThrownBy(() -> userAchievementService.findByUserId(null))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // ── findByUserAndAchievement ──────────────────────────────────────────────
+
+    @Test
+    void shouldThrowWhenUserIsNull() {
+        Achievement a = new Achievement();
+        assertThatThrownBy(() -> userAchievementService.findByUserandAchievement(null, a))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowWhenAchievementIsNull() {
         User user = new User();
-        user.setId(userId);
+        assertThatThrownBy(() -> userAchievementService.findByUserandAchievement(user, null))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
 
-        Achievement a1 = new Achievement(); a1.setId(101); // Already has
-        Achievement a2 = new Achievement(); a2.setId(102); // Will unlock
-        Achievement a3 = new Achievement(); a3.setId(103); // Won't unlock (criteria not met)
+    // ── checkAndUnlockAchievements ────────────────────────────────────────────
 
-        when(userService.findById(userId)).thenReturn(user);
+    @Test
+    void shouldUnlockOnlyNewAchievementsWhenCriteriaMet() {
+        User user = new User(); user.setId(1);
+        Achievement a1 = new Achievement(); a1.setId(101);
+        Achievement a2 = new Achievement(); a2.setId(102);
+        Achievement a3 = new Achievement(); a3.setId(103);
+
+        when(userService.findById(1)).thenReturn(user);
         when(achievementService.findAll()).thenReturn(List.of(a1, a2, a3));
-
-        UserAchievement ua1 = new UserAchievement(user, a1);
-        when(userAchievementRepository.findByUserId(userId)).thenReturn(new ArrayList<>(List.of(ua1)));
-
+        when(userAchievementRepository.findByUserId(1))
+                .thenReturn(new ArrayList<>(List.of(new UserAchievement(user, a1))));
         when(achievementUnlocker.checkUnlock(user, a2)).thenReturn(true);
         when(achievementUnlocker.checkUnlock(user, a3)).thenReturn(false);
 
-        // Act
-        userAchievementService.checkAndUnlockAchievements(userId);
+        userAchievementService.checkAndUnlockAchievements(1);
 
-        // Assert
-        verify(userAchievementRepository).saveAll(userAchievementListCaptor.capture());
-        List<UserAchievement> saved = userAchievementListCaptor.getValue();
+        verify(userAchievementRepository).saveAll(listCaptor.capture());
+        List<UserAchievement> saved = listCaptor.getValue();
         assertThat(saved).hasSize(1);
         assertThat(saved.get(0).getAchievement().getId()).isEqualTo(102);
     }
 
     @Test
-    @DisplayName("checkAndUnlockAchievements - Should not save anything if no new achievements meet criteria")  
-    void checkAndUnlockAchievements_NothingToUnlock_SavesEmptyList() {
-        // Arrange
-        Integer userId = 1;
-        User user = new User();
-        user.setId(userId);
-
+    void shouldSaveEmptyListWhenNoCriteriaMet() {
+        User user = new User(); user.setId(1);
         Achievement a1 = new Achievement(); a1.setId(101);
 
-        when(userService.findById(userId)).thenReturn(user);
+        when(userService.findById(1)).thenReturn(user);
         when(achievementService.findAll()).thenReturn(List.of(a1));
-        when(userAchievementRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(userAchievementRepository.findByUserId(1)).thenReturn(Collections.emptyList());
         when(achievementUnlocker.checkUnlock(user, a1)).thenReturn(false);
 
-        // Act
-        userAchievementService.checkAndUnlockAchievements(userId);
+        userAchievementService.checkAndUnlockAchievements(1);
 
-        // Assert
-        verify(userAchievementRepository).saveAll(Collections.emptyList());
+        verify(userAchievementRepository).saveAll(listCaptor.capture());
+        assertThat(listCaptor.getValue()).isEmpty();
     }
 
     @Test
-    @DisplayName("unlockRules - Should unlock hardcoded achievement 4 for valid user")
-    void unlockRules_ValidUser_SavesNewAchievement() throws Exception {
-        // Arrange
-        String username = "testUser";
-        User user = new User();
-        user.setId(1);
-        user.setName(username);
+    void shouldNotCheckAlreadyOwnedAchievements() {
+        User user = new User(); user.setId(1);
+        Achievement a1 = new Achievement(); a1.setId(101);
 
-        Achievement achievement4 = new Achievement();
-        achievement4.setId(4);
+        when(userService.findById(1)).thenReturn(user);
+        when(achievementService.findAll()).thenReturn(List.of(a1));
+        when(userAchievementRepository.findByUserId(1))
+                .thenReturn(List.of(new UserAchievement(user, a1)));
 
-        when(userService.findUserByName(username)).thenReturn(user);
-        when(achievementService.findById(4)).thenReturn(achievement4);
+        userAchievementService.checkAndUnlockAchievements(1);
+
+        verify(achievementUnlocker, never()).checkUnlock(any(), any());
+    }
+
+    // ── unlockRules ───────────────────────────────────────────────────────────
+
+    @Test
+    void shouldUnlockRulesAchievementWhenNotYetUnlocked() throws Exception {
+        User user = new User(); user.setId(1); user.setName("testUser");
+        Achievement a4 = new Achievement(); a4.setId(4);
+
+        when(userService.findUserByName("testUser")).thenReturn(user);
+        when(achievementService.findById(4)).thenReturn(a4);
         when(userAchievementRepository.findByUserIdAndAchievementId(1, 4)).thenReturn(null);
-        when(userAchievementRepository.save(any(UserAchievement.class))).thenAnswer(i -> i.getArguments()[0]);  
+        when(userAchievementRepository.save(any(UserAchievement.class))).thenAnswer(i -> i.getArguments()[0]);
 
-        // Act
-        UserAchievement result = userAchievementService.unlockRules(username);
+        UserAchievement result = userAchievementService.unlockRules("testUser");
 
-        // Assert
-        assertThat(result).isNotNull();
         assertThat(result.getUser()).isEqualTo(user);
-        assertThat(result.getAchievement()).isEqualTo(achievement4);
+        assertThat(result.getAchievement()).isEqualTo(a4);
         verify(userAchievementRepository).save(any(UserAchievement.class));
     }
 
     @Test
-    @DisplayName("unlockRules - Should throw generic Exception if achievement already unlocked")
-    void unlockRules_AlreadyUnlocked_ThrowsException() {
-        // Arrange
-        String username = "testUser";
-        User user = new User();
-        user.setId(1);
-        user.setName(username);
+    void shouldThrowWhenRulesAchievementAlreadyUnlocked() {
+        User user = new User(); user.setId(1); user.setName("testUser");
+        Achievement a4 = new Achievement(); a4.setId(4);
 
-        Achievement achievement4 = new Achievement();
-        achievement4.setId(4);
+        when(userService.findUserByName("testUser")).thenReturn(user);
+        when(achievementService.findById(4)).thenReturn(a4);
+        when(userAchievementRepository.findByUserIdAndAchievementId(1, 4))
+                .thenReturn(new UserAchievement());
 
-        when(userService.findUserByName(username)).thenReturn(user);
-        when(achievementService.findById(4)).thenReturn(achievement4);
-        when(userAchievementRepository.findByUserIdAndAchievementId(1, 4)).thenReturn(new UserAchievement());   
-
-        // Act & Assert
-        assertThatThrownBy(() -> userAchievementService.unlockRules(username))
+        assertThatThrownBy(() -> userAchievementService.unlockRules("testUser"))
                 .isExactlyInstanceOf(Exception.class);
-
         verify(userAchievementRepository, never()).save(any());
+    }
+
+    // ── findUserAchievements ──────────────────────────────────────────────────
+
+    @Test
+    void shouldReturnAchievementsAfterCheckingUnlocks() {
+        User user = new User(); user.setId(1);
+        Achievement a = new Achievement(); a.setId(101);
+        UserAchievement ua = new UserAchievement(user, a);
+
+        when(userService.findById(1)).thenReturn(user);
+        when(achievementService.findAll()).thenReturn(List.of(a));
+        when(userAchievementRepository.findByUserId(1)).thenReturn(List.of(ua));
+
+        List<Achievement> result = userAchievementService.findUserAchievements(1);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(101);
     }
 }
