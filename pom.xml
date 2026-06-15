@@ -35,7 +35,9 @@
 
         <!-- ngrok configuration -->
         <ngrok.enabled>false</ngrok.enabled>
-        <ngrok.authToken>2rfuENLr97X34rWWnTQCyo5suVf_337kdYPYmLmhrxYPZCVyN</ngrok.authToken>
+        <ngrok.authToken>${env.NGROK_AUTH_TOKEN}</ngrok.authToken>
+
+        <sonar.organization>tfg-upstream</sonar.organization>
 
     </properties>
 
@@ -226,13 +228,6 @@
             <groupId>io.github.kilmajster</groupId>
             <artifactId>ngrok-spring-boot-starter</artifactId>
             <version>0.9.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.jqwik</groupId>
-            <artifactId>jqwik</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
         </dependency>
 		
     </dependencies>
