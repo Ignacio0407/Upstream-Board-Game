@@ -117,5 +117,6 @@ build/
 # Extra
 *.txt
 logs/
+jacoco.xml
 *.pem
 keystore.p12
