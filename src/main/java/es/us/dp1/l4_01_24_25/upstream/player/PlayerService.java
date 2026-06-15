@@ -39,27 +39,22 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         this.messagingTemplate = messagingTemplate;
     }
 
-    @Transactional(readOnly = true)
     public List<Player> findPlayersByMatch(Integer id) {
         return this.playerRepository.findByMatchId(id);
     }
 
-    @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
         return this.playerRepository.findPlayersByMatchAsDTO(id);
     }
 
-    @Transactional(readOnly = true)
     public List<PlayerDTO> findPlayersByMatchSortedPlayerOrderAsDTO(Integer id) {
         return this.playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(id);
     }
 
-    @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatch(Integer id) {
         return this.playerRepository.findByMatchIdAndAliveTrue(id);
     }
 
-    @Transactional(readOnly = true)
     public List<Player> findAlivePlayersByMatchSortedPlayerOrder(Integer id) {
         return this.playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(id);
     }

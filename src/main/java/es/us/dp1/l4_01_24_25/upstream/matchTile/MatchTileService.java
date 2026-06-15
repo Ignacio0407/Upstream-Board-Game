@@ -46,32 +46,26 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         this.messagingTemplate = messagingTemplate;
     }
 
-    @Transactional(readOnly = true)
     public List<MatchTile> findByMatchId(Integer matchId) {
         return this.matchTileRepository.findByMatchId(matchId);
     }
 
-    @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdAsDTO(Integer matchId) {
         return this.matchTileRepository.findByMatchIdAsDTO(matchId);
     }
 
-    @Transactional(readOnly = true)
     public List<MatchTile> findByMatchIdNoCoord(Integer matchId) {
         return this.matchTileRepository.findByMatchIdAndCoordinateIsNull(matchId);
     }
 
-    @Transactional(readOnly = true)
     public List<MatchTileDTO> findByMatchIdNoCoordAsDTO(Integer matchId) {
         return this.matchTileRepository.findByMatchIdAndCoordinateIsNullAsDTO(matchId);
     }
 
-    @Transactional(readOnly = true)
     public MatchTile findByCoordinate(Integer x, Integer y) {
         return this.matchTileRepository.findByCoordinate(x,y).orElseThrow(() -> new ResourceNotFoundException("Coordinate (" + x + y + ") not found"));
     }
 
-    @Transactional(readOnly = true)
     public List<MatchTile> findHeronWithCoordsFromGame(Integer matchId){
         return this.matchTileRepository.findHeronWithCoordFromGame(matchId);
     }
