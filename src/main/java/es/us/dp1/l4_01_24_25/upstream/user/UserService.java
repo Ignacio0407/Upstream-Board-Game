@@ -84,7 +84,7 @@ public class UserService extends BaseService<User,Integer> {
 
 	@Transactional
 	public void delete(Integer id) {
-		if (this.findCurrentUser().getId() != id) {
+		if (!this.findCurrentUser().getId().equals(id)) {
 			this.deleteById(id);
 		} else
 			throw new AccessDeniedException("You can't delete yourself!");

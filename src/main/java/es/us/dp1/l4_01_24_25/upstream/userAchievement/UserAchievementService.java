@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
@@ -69,7 +68,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     }
 
     @Transactional
-    public UserAchievement unlockRules(@PathVariable("username") String username) throws Exception {
+    public UserAchievement unlockRules(String username) throws Exception {
         User u = this.userService.findUserByName(username);
         Achievement a = this.achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);

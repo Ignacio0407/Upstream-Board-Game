@@ -195,7 +195,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         }
     }
 
-    @Transactional
     private void changePlayerTurn(Player player) {
         Match match = player.getMatch();
         List<Player> players = this.playerService.findAlivePlayersByMatchSortedPlayerOrder(match.getId());
@@ -212,7 +211,6 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.save(match);
     }
 
-    @Transactional
     private void checkGameHasFinished (Match match) {
         List<MatchTile> tiles = this.matchTileService.findByMatchId(match.getId());
         List<SalmonMatch> salmons = this.salmonMatchService.findAllFromMatch(match.getId());
