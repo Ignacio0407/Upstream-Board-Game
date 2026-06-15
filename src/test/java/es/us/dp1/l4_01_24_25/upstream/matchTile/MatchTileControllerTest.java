@@ -48,10 +48,6 @@ class MatchTileControllerTest {
     @MockBean
     private MatchTileService matchTileService;
 
-    // ==========================================
-    // GET /api/v1/matchTiles/match/{id}
-    // ==========================================
-
     @Test
     @DisplayName("GET /match/{id} - Happy Path")
     void shouldGetMatchTilesByMatchId() throws Exception {
@@ -85,9 +81,6 @@ class MatchTileControllerTest {
         verify(matchTileService, never()).findByMatchIdAsDTO(any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/matchTiles/{id}
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /{id} - Happy Path (Update coordinates)")
@@ -144,9 +137,6 @@ class MatchTileControllerTest {
         verify(matchTileService, never()).updateCoordinate(any(), any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/matchTiles/{id}/rotation
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /{id}/rotation - Happy Path")
@@ -187,9 +177,6 @@ class MatchTileControllerTest {
         verify(matchTileService, never()).updateMatchTileRotation(any(), any());
     }
 
-    // ==========================================
-    // POST /api/v1/matchTiles/createMatchTiles/{matchId}
-    // ==========================================
 
     @Test
     @DisplayName("POST /createMatchTiles/{matchId} - Happy Path")
