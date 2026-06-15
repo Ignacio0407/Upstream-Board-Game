@@ -131,20 +131,20 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         MatchTile matchTile = this.findById(id);
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
         if(updates.get("y") != 0) {
-            MatchTile matchTile2 = matchTiles.stream().filter(mT -> mT.getCoordinate().y() == updates.get("y")-1 
-            && mT.getCoordinate().x() == updates.get("x")).findFirst().orElse(null);
+            MatchTile matchTile2 = matchTiles.stream().filter(mT -> mT.getCoordinate().y().equals(updates.get("y")-1) 
+            && mT.getCoordinate().x().equals(updates.get("x"))).findFirst().orElse(null);
             if(matchTile2 == null){
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
             }
         }
     
         Boolean positionOccupied = matchTiles.stream()
-        .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x() == updates.get("x") && mT.getCoordinate().y() == updates.get("y"));
+        .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x().equals(updates.get("x")) && mT.getCoordinate().y().equals(updates.get("y")));
         if (positionOccupied)
             throw new ConflictException("Ya existe una MatchTile en las coordenadas especificadas.");
     
-        if((matchTile.getMatch().getRound() == 0 && updates.get("y") > 3) || (matchTile.getMatch().getRound() == 1 && updates.get("y") > 4)
-        || (matchTile.getMatch().getRound() == 6 && updates.get("x") == 1 && updates.get("y") == 5))
+        if((matchTile.getMatch().getRound() == 0 && updates.get("y").equals(3)) || (matchTile.getMatch().getRound() == 1 && updates.get("y").equals(4))
+        || (matchTile.getMatch().getRound() == 6 && updates.get("x").equals(1) && updates.get("y").equals(5)))
             throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
              
         if (updates.containsKey("x") && updates.containsKey("y")) {
