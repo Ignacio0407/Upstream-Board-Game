@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
@@ -32,11 +33,11 @@ public class Message extends BaseEntity {
         this.player = player;
         this.match = match;
         this.content = content;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     public Message() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
 }
