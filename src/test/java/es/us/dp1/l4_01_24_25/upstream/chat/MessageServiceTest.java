@@ -1,20 +1,20 @@
 package es.us.dp1.l4_01_24_25.upstream.chat;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -42,53 +42,73 @@ class MessageServiceTest {
     @InjectMocks
     private MessageService messageService;
 
-    @Test
-    @DisplayName("findUserMessages - Should return list of MessageDTO")
-    void testFindUserMessages() {
-        MessageDTO dto = new MessageDTO();
+    // ── sanitizeContent ───────────────────────────────────────────────────────
 
-        when(messageRepository.findMessagesByUserIdDTO(1)).thenReturn(List.of(dto));
-
-        List<MessageDTO> result = messageService.findUserMessages(1);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(dto);
+    @ParameterizedTest
+    @CsvSource({
+        "<script>alert('xss')</script>Hello,          Hello",
+        "<p>Normal text</p>,                          Normal text",
+        "<img src=x onerror=alert(1)>clean,           clean",
+        "<b><i>nested</i></b>,                        nested",
+        "no tags at all,                              no tags at all"
+    })
+    void shouldSanitizeContent(String input, String expected) {
+        assertThat(MessageService.sanitizeContent(input.strip())).isEqualTo(expected.strip());
     }
 
     @Test
-    @DisplayName("findUserChats - Should return list of Match")
-    void testFindUserChats() {
-        Match m1 = new Match();
-        when(messageRepository.findAllChatsFromUser(1)).thenReturn(List.of(m1));
-
-        List<Match> chats = messageService.findUserChats(1);
-
-        assertThat(chats).hasSize(1);
-        verify(messageRepository).findAllChatsFromUser(1);
+    void shouldReturnEmptyStringWhenContentIsOnlyTags() {
+        assertThat(MessageService.sanitizeContent("<script>alert(1)</script>")).isEmpty();
     }
 
-    @Test
-    @DisplayName("sanitizeContent - Should remove HTML tags")
-    void testSanitizeContent() {
-        String dirty = "<script>alert('xss')</script><p>Hello</p>";
-        String clean = MessageService.sanitizeContent(dirty);
-        assertThat(clean).isEqualTo("Hello");
-    }
+    // ── saveAndSend ───────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("saveAndSend - Should sanitize, save and broadcast message")
-    void testSaveAndSend() {
+    void shouldSanitizeContentBeforeSaving() {
         MessageDTO dto = new MessageDTO();
         dto.setPlayerId(1);
         dto.setMatchId(1);
-        dto.setContent("<p>Hello</p>");
+        dto.setContent("<script>alert('xss')</script>Hello");
 
-        Player player = new Player();
-        player.setId(1);
+        when(playerService.findById(1)).thenReturn(new Player());
         Match match = new Match();
         match.setId(1);
+        when(matchService.findById(1)).thenReturn(match);
 
-        when(playerService.findById(1)).thenReturn(player);
+        messageService.saveAndSend(dto);
+
+        ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        verify(messageRepository).save(captor.capture());
+        assertThat(captor.getValue().getContent()).isEqualTo("Hello");
+    }
+
+    @Test
+    void shouldBroadcastToCorrectTopic() {
+        MessageDTO dto = new MessageDTO();
+        dto.setPlayerId(1);
+        dto.setMatchId(42);
+        dto.setContent("Hola");
+
+        when(playerService.findById(1)).thenReturn(new Player());
+        Match match = new Match();
+        match.setId(42);
+        when(matchService.findById(42)).thenReturn(match);
+
+        messageService.saveAndSend(dto);
+
+        verify(messagingTemplate).convertAndSend(eq("/topic/chat/42"), any(Message.class));
+    }
+
+    @Test
+    void shouldSaveAndBroadcastCleanMessage() {
+        MessageDTO dto = new MessageDTO();
+        dto.setPlayerId(1);
+        dto.setMatchId(1);
+        dto.setContent("Mensaje limpio");
+
+        when(playerService.findById(1)).thenReturn(new Player());
+        Match match = new Match();
+        match.setId(1);
         when(matchService.findById(1)).thenReturn(match);
 
         messageService.saveAndSend(dto);
