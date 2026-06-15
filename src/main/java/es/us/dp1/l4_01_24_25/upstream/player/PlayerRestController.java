@@ -31,6 +31,7 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
         this.playerService = playerService;
     }
 
+    @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         this.playerService.deleteById(id);
