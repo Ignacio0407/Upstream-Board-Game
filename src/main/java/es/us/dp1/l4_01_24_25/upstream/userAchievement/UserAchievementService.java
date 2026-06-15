@@ -33,7 +33,6 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         this.achievementUnlocker = achievementUnlocker;
     }
 
-    @Transactional
     public List<UserAchievement> findByUserId(Integer userId) throws ResourceNotFoundException {
         if (userId == null) {
             throw new ResourceNotFoundException("User ID cannot be null.");
@@ -41,7 +40,6 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         return this.userAchievementRepository.findByUserId(userId);
     }
 
-    @Transactional
     public UserAchievement findByUserandAchievement(User user, Achievement achievement) throws ResourceNotFoundException {
         if (user == null || achievement == null) {
             throw new ResourceNotFoundException("Neither user nor achievement can be null.");
