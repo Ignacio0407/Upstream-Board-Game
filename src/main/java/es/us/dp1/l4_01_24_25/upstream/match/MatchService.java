@@ -122,7 +122,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, deletedSalmonsIds));
     }
 
-    public void notifyPlayerAndMatchUpdate (Player player, Match match) {
+    public void notifyPlayerAndMatchUpdate (Match match) {
         this.save(match);
         this.playerService.notifyPlayersUpdate(match.getId());
         this.notifyMatchUpdate(match);
@@ -290,7 +290,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.notifyMatchUpdate(match);
     }
 
-    private void roundEquals2 (Integer round, List<SalmonMatch> salmonMatches, List<Player> players) {
+    private void roundEquals2 (List<SalmonMatch> salmonMatches, List<Player> players) {
         List<SalmonMatch> salmonMatchesInOcean = salmonMatches.stream().filter(m -> m.getCoordinate()==null).toList();
         this.salmonMatchService.deleteAllInBatch(salmonMatchesInOcean);
         this.playerService.checkPlayersDeadOrFinished(players);
@@ -306,7 +306,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         this.playerService.checkPlayersDeadOrFinished(players);
         this.notifyTilesAndSalmonsByMatchId(players.getFirst().getMatch().getId());
     }
-    private void midGame (Integer round, List<SalmonMatch> salmonMatches, List<Player> players, List<MatchTile> mt) {
+    private void midGame (List<SalmonMatch> salmonMatches, List<Player> players, List<MatchTile> mt) {
         for(SalmonMatch sm:salmonMatches) {
             if (sm.getCoordinate().y()==0) this.salmonMatchService.delete(sm);
             else {
@@ -331,13 +331,13 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         List<Integer> tilesPerRound = List.of(17, 14, 11, 8, 5, 2);
         Integer round = match.getRound();
         if (round == 2) {
-            this.roundEquals2(round, salmonMatches, players);
+            this.roundEquals2(salmonMatches, players);
         }
         else if (round > 7 && mtNoc.size() == 0) {
             this.noMoreTilesToPlace(round, salmonMatches, players, mt);
         }
         else if (round>2 && tilesPerRound.contains(mtNoc.size()) && match.getPhase() == Phase.TILES) {
-            this.midGame(round, salmonMatches, players, mt);
+            this.midGame(salmonMatches, players, mt);
         }
         this.save(match);
     }

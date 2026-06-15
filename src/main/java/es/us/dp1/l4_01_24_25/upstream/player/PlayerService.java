@@ -188,7 +188,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     public NextPlayerResult findNextPlayer (Player player, List<Player> players) {
         Integer myOrder = player.getPlayerOrder();
         Integer nPlayers = players.size();
-        Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().get());
+        Integer currentIndex = players.indexOf(players.stream().filter(p -> p.getPlayerOrder().equals(myOrder)).findFirst().orElse(null));
         Integer nextIndex = (currentIndex + 1) % nPlayers;
         Player nextPlayer = players.get(nextIndex);
         return new NextPlayerResult(nextPlayer, nextIndex);

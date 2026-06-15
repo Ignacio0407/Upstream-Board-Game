@@ -157,8 +157,8 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if(distance.y() < 0) throw new NotValidMoveException("You can only move forward"); 
         if(myCoordinate.y().equals(newCoordinate.y()) && myCoordinate.x().equals(1)) throw new NotValidMoveException("You can only move forward");
         if(List.of(0, 2).contains(myCoordinate.x()) && Math.abs(distance.x()) == 1 && Math.abs(distance.y()) == 1) throw new NotValidMoveException("Not allowed movement");
-        if (player.getEnergy() < 3) {
-            if (toTravel.isFull()) throw new NotValidMoveException("The tile is full and you don't have enough energy to jump!");
+        if (player.getEnergy() < 3 && toTravel.isFull()) {
+            throw new NotValidMoveException("The tile is full and you don't have enough energy to jump!");
         }
     }
 
@@ -243,7 +243,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             this.messagingTemplate.convertAndSend("/topic/movingSalmon/" + match.getId(), Map.of("salmon", salmon, "myTile", myTileDTO, "toTravel", tileToTravel));
         }
         else this.messagingTemplate.convertAndSend("/topic/movingSalmonFromSea/" + match.getId(), Map.of("salmon", salmon, "toTravel", tileToTravel));
-        this.matchService.notifyPlayerAndMatchUpdate(player, match);
+        this.matchService.notifyPlayerAndMatchUpdate(match);
         return salmon;
     }
 
@@ -609,7 +609,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         SalmonMatchDTO updated = this.salmonMatchMapper.toDTO(salmonMatch);
         this.messagingTemplate.convertAndSend("/topic/salmon/spawn/enter/" + match.getId(), Map.of("salmonMatch", updated, "matchTile", this.matchTileService.toDTO(myTile)));
         this.playerService.save(player);
-        this.matchService.notifyPlayerAndMatchUpdate(player, match);
+        this.matchService.notifyPlayerAndMatchUpdate(match);
     }
 
 }
