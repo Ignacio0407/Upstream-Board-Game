@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -127,8 +126,7 @@ class MatchServiceTest {
 
     private List<MTCoordinateDTO> createDummyTilesList(int size) {
         return IntStream.range(0, size)
-                .mapToObj(i -> new MTCoordinateDTO(i, new Coordinate(null, null)))
-                .collect(Collectors.toList());
+                .mapToObj(i -> new MTCoordinateDTO(i, new Coordinate(null, null))).toList();
     }
 
     // ── createMatchWMatchCreator ──────────────────────────────────────────────

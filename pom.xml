@@ -269,43 +269,6 @@
                 </configuration>
 
                 <executions>
-                    <!--execution>
-                            <id>install-frontend-tools</id>
-                            <goals>
-                                    <goal>install-node-and-npm</goal>
-                            </goals>
-                    </execution>
-
-                    <execution>
-                            <id>npm-install</id>
-                            <goals>
-                                    <goal>npm</goal>
-                            </goals>
-                            <configuration>
-                                    <arguments>install</arguments>
-                            </configuration>
-                    </execution>
-
-                    <execution>
-                            <id>build-frontend</id>
-                            <goals>
-                                    <goal>npm</goal>
-                            </goals>
-                            <phase>prepare-package</phase>
-                            <configuration>
-                                    <arguments>run build</arguments>
-                            </configuration>
-                    </execution-->
-                    <!-- <execution>
-                            <id>coverage-frontend</id>
-                            <goals>
-                                    <goal>npm</goal>
-                            </goals>
-                            <phase>prepare-package</phase>
-                            <configuration>
-                                    <arguments>run build</arguments>
-                            </configuration>
-                    </execution>-->
                 </executions>
             </plugin>
             <plugin>

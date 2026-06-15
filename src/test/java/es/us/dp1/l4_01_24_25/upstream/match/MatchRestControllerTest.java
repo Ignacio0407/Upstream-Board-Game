@@ -51,10 +51,6 @@ class MatchRestControllerTest {
     @MockBean
     private MatchService matchService;
 
-    // ==========================================
-    // GET /api/v1/matches/dashboard
-    // ==========================================
-
     @Test
     @DisplayName("GET /dashboard - Happy Path")
     void shouldFindAllDashboard() throws Exception {
@@ -78,9 +74,7 @@ class MatchRestControllerTest {
                .andExpect(jsonPath("$").isEmpty());
     }
 
-    // ==========================================
-    // POST /api/v1/matches/matchCreator/{userId}
-    // ==========================================
+
 
     @Test
     @DisplayName("POST /matchCreator/{userId} - Happy Path")
@@ -138,9 +132,6 @@ class MatchRestControllerTest {
         verify(matchService, never()).createMatchWMatchCreator(any(), any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/matches/{matchId}/startGame
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /{matchId}/startGame - Happy Path")
@@ -171,9 +162,6 @@ class MatchRestControllerTest {
         verify(matchService, never()).startGame(any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/matches/{matchId}/changephase/{playerId}
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /{matchId}/changephase/{playerId} - Happy Path")
@@ -204,9 +192,6 @@ class MatchRestControllerTest {
         verify(matchService, never()).changePhase(any(), any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/matches/finalscore/{id}
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /finalscore/{id} - Happy Path")

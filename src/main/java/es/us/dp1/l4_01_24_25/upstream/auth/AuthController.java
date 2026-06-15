@@ -1,7 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.auth;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
 
@@ -60,8 +59,7 @@ public class AuthController {
 			String jwt = jwtUtils.generateJwtToken(authentication);
 
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
-				.collect(Collectors.toList());
+			List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).toList();
 
 			return ResponseEntity.ok().body(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
 		}catch(BadCredentialsException exception){

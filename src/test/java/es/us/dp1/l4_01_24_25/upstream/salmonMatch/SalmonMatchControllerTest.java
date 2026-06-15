@@ -50,10 +50,6 @@ class SalmonMatchControllerTest {
     @MockBean
     private SalmonMatchService salmonMatchService;
 
-    // ==========================================
-    // GET /api/v1/salmonMatches/match/{matchId}
-    // ==========================================
-
     @Test
     @DisplayName("GET /match/{matchId} - Happy Path")
     void shouldFindAllFromMatch() throws Exception {
@@ -77,9 +73,6 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService, never()).findAllFromMatchDTO(any());
     }
 
-    // ==========================================
-    // GET /api/v1/salmonMatches/match/{matchId}/spawn
-    // ==========================================
 
     @Test
     @DisplayName("GET /match/{matchId}/spawn - Happy Path")
@@ -95,9 +88,6 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService).findFromGameInSpawnDTO(1);
     }
 
-    // ==========================================
-    // GET /api/v1/salmonMatches/player/{playerId}
-    // ==========================================
 
     @Test
     @DisplayName("GET /player/{playerId} - Happy Path")
@@ -122,9 +112,6 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService, never()).findAllFromPlayerDTO(any());
     }
 
-    // ==========================================
-    // PATCH /api/v1/salmonMatches/coordinate/{id}
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /coordinate/{id} - Happy Path")
@@ -164,9 +151,6 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService, never()).updateCoordinate(any(), any());
     }
 
-    // ==========================================
-    // POST /api/v1/salmonMatches/player/{playerId}
-    // ==========================================
 
     @Test
     @DisplayName("POST /player/{playerId} - Happy Path")
@@ -192,9 +176,6 @@ class SalmonMatchControllerTest {
                .andExpect(status().isNotFound());
     }
 
-    // ==========================================
-    // PATCH /api/v1/salmonMatches/enterSpawn/{id}
-    // ==========================================
 
     @Test
     @DisplayName("PATCH /enterSpawn/{id} - Happy Path")
