@@ -242,8 +242,8 @@ public class BaseServiceTest {
     @DisplayName("1.22 update - Negative path (not found)")
     void update_Negative() {
         when(repository.findById(99)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.update(99, new TestEntity()))
+        TestEntity entityToUpdate = new TestEntity();
+        assertThatThrownBy(() -> service.update(99, entityToUpdate))
             .isInstanceOf(ResourceNotFoundException.class);
         verify(repository, never()).save(any());
     }
@@ -253,7 +253,8 @@ public class BaseServiceTest {
     void update_Edge_NoOverride() {
         TestEntity existing = new TestEntity();
         when(repository.findById(1)).thenReturn(Optional.of(existing));
-        assertThatThrownBy(() -> noOverrideService.update(1, new TestEntity()))
+        TestEntity entityToUpdate = new TestEntity();
+        assertThatThrownBy(() -> noOverrideService.update(1, entityToUpdate))
             .isInstanceOf(UnsupportedOperationException.class)
             .hasMessageContaining("updateEntityFields no implementado");
     }
@@ -279,7 +280,9 @@ public class BaseServiceTest {
     @Test
     @DisplayName("1.25 updateSome - Negative path (size mismatch)")
     void updateSome_Negative_Mismatch() {
-        assertThatThrownBy(() -> service.updateSome(List.of(1), List.of(new TestEntity(), new TestEntity())))
+        List<Integer> ids = List.of(1);
+        List<TestEntity> entities = List.of(new TestEntity(), new TestEntity());
+        assertThatThrownBy(() -> service.updateSome(ids, entities))
             .isInstanceOf(IllegalArgumentException.class);
 
         verifyNoInteractions(repository);
@@ -293,7 +296,10 @@ public class BaseServiceTest {
         when(repository.findById(1)).thenReturn(Optional.of(e1));
         when(repository.findById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateSome(List.of(1, 99), List.of(new TestEntity(), new TestEntity())))
+        List<Integer> ids = List.of(1, 99);
+        List<TestEntity> entities = List.of(new TestEntity(), new TestEntity());
+
+        assertThatThrownBy(() -> service.updateSome(ids, entities))
             .isInstanceOf(ResourceNotFoundException.class);
 
         verify(repository, never()).saveAll(any());
