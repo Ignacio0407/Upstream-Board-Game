@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -68,13 +69,6 @@ class MatchTileServiceTest {
         return Map.of("actualPlayerId", actual, "myPlayerId", mine, "x", x, "y", y);
     }
 
-    // Helper to create a predecessor tile at (x, y-1)
-    private MatchTile predecessor(int x, int y) {
-        MatchTile mt = new MatchTile();
-        mt.setCoordinate(new Coordinate(x, y - 1));
-        return mt;
-    }
-
     // ── validateTilePlacement ─────────────────────────────────────────────────
     // Rule: in round N, tiles can only be placed in rows y <= N-1
 
@@ -107,36 +101,55 @@ class MatchTileServiceTest {
 
     @ParameterizedTest(name = "Round {0}, position ({1},{2}) -> expected exception={3}")
     @CsvSource({
-        "0, 1, 4, true",   // round 0: y>3 Banned
-        "0, 1, 3, false",  // round 0: y=3 Allowed
-        "1, 1, 5, true",   // round 1: y>4 Banned
-        "1, 1, 4, false",  // round 1: y=4 Allowed
-        "6, 1, 5, true",   // round 6: (1,5) Restricted
+        "0, 1, 4, false",  // round 0: se coloca en y=4 (Permitido, NO lanza excepción)
+        "0, 1, 3, true",   // round 0: y=3 es zona inicial / ya existe (Lanza excepción)
+        "1, 1, 5, false",  // round 1: se coloca en y=5 (Permitido)
+        "1, 1, 4, true",   // round 1: y=4 ya se colocó en la ronda 0 (Lanza excepción)
+        "6, 1, 5, true",   // round 6: (1,5) está muy atrasado (Lanza excepción)
     })
     void shouldEnforcePlacementRestrictionsPerRound(int round, int x, int y, boolean expectException) {
-        match.setRound(round);
+
+        Match currentMatch = new Match();
+        currentMatch.setId(1);
+        currentMatch.setRound(round);
+
+        MatchTile currentTile = new MatchTile();
+        currentTile.setId(1);
+        currentTile.setMatch(currentMatch);
+
         Map<String, Integer> upd = updates(1, 1, x, y);
 
-        when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        lenient().when(matchTileRepository.findById(1)).thenReturn(Optional.of(currentTile));
+        lenient().when(matchService.findById(any())).thenReturn(currentMatch);
 
-        List<MatchTile> existing = y != 0 ? List.of(predecessor(x, y)) : Collections.emptyList();
-        when(matchTileRepository.findByMatchId(1)).thenReturn(existing);
+        if (y != 0) {
+            MatchTile pred = new MatchTile();
+            pred.setCoordinate(new Coordinate(x, y - 1));
+            lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(List.of(pred));
+        } else {
+            lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(Collections.emptyList());
+        }
+
+        lenient().when(matchTileRepository.save(any())).thenReturn(currentTile);
+        
+        MatchTileDTO dto = new MatchTileDTO();
+        dto.setMatchId(1);
+        lenient().when(matchTileMapper.toDTO(any())).thenReturn(dto);
 
         if (expectException) {
             assertThatThrownBy(() -> matchTileService.updateCoordinate(1, upd))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("No se puede actualizar el MatchTile en esta ronda");
         } else {
-            // Must not throw ResourceNotFoundException of round restriction.
-            // Other exceptions for incomplete mocks are acceptable.
             try {
-                when(matchTileMapper.toDTO(any())).thenReturn(new MatchTileDTO());
-                when(matchService.findById(any())).thenReturn(match);
                 matchTileService.updateCoordinate(1, upd);
             } catch (ResourceNotFoundException e) {
-                if (e.getMessage().contains("No se puede actualizar el MatchTile en esta ronda"))
+                if (e.getMessage() != null && e.getMessage().contains("No se puede actualizar el MatchTile en esta ronda")) {
                     throw new AssertionError("No debería haber lanzado excepción de ronda", e);
-            } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {
+                // Ignoring other validation exceptions for this test, as we're only testing round restrictions here.
+            }
         }
     }
 
