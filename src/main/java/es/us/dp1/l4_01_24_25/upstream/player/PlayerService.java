@@ -85,6 +85,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         this.messagingTemplate.convertAndSend("/topic/match/newPlayer/" + lobbyPlayer.getMatchId(), lobbyPlayer);
     }
 
+    @Transactional(readOnly = true)
     public void notifyPlayersUpdate(Integer matchId) { 
         List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
         this.messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
@@ -173,6 +174,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId).isEmpty();
     }
 
+    @Transactional
     public void checkPlayersDeadOrFinished (List<Player> players) {
         for(Player p : players) {
             Boolean dead = this.checkPlayerIsDead(p.getId());
@@ -198,6 +200,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return new NextPlayerResult(nextPlayer, nextIndex);
     }
 
+    @Transactional(readOnly = true)
     public List<Player> playersForChangePhase (Integer matchId) {
         return this.findAlivePlayersByMatch(matchId).stream().filter(
             p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty() 

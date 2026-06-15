@@ -122,6 +122,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
 
+    @Transactional(readOnly = true)
     public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
         Integer actual = Integer.valueOf(updates.get("actualPlayerId").toString());
         Integer mine = Integer.valueOf(updates.get("myPlayerId").toString());

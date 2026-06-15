@@ -1,6 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -78,13 +79,17 @@ class PlayerServiceTest {
     @Test
     void shouldNotThrowWhenEnergyIsSufficient() {
         player.setEnergy(5);
-        playerService.throwExceptionNotEnoughEnergy(player, 5);
+        assertThatNoException().isThrownBy(() -> 
+            playerService.throwExceptionNotEnoughEnergy(player, 5)
+        );
     }
 
     @Test
     void shouldNotThrowWhenEnergyIsExact() {
         player.setEnergy(3);
-        playerService.throwExceptionNotEnoughEnergy(player, 3);
+        assertThatNoException().isThrownBy(() -> 
+            playerService.throwExceptionNotEnoughEnergy(player, 3)
+        );
     }
 
     @Test

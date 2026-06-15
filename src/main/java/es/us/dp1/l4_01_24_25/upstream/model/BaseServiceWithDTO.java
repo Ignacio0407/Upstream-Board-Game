@@ -41,17 +41,17 @@ import jakarta.validation.Valid;
 public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends BaseService<T, ID> {
 
     protected final EntityMapper<T, D> mapper;
-    protected final BaseRepository<T, D, ID> repository;
+    protected final BaseRepository<T, D, ID> dtoRepository;
 
     protected BaseServiceWithDTO(BaseRepository<T, D, ID> repository, EntityMapper<T, D> mapper) {
         super(repository);
-        this.repository = repository;
+        this.dtoRepository = repository;
         this.mapper = mapper;
     }
 
     @Transactional(readOnly = true)
     public List<D> findAllAsDTO() {
-        return this.repository.findAllAsDTO();
+        return this.dtoRepository.findAllAsDTO();
     }
 
     public D findDTOOrResourceNotFoundException (Optional<D> entity, ID id) {
@@ -61,7 +61,7 @@ public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends Ba
 
     @Transactional(readOnly = true)
     public D findByIdAsDTO(ID id) {
-        return this.findDTOOrResourceNotFoundException(this.repository.findByIdAsDTO(id), id);
+        return this.findDTOOrResourceNotFoundException(this.dtoRepository.findByIdAsDTO(id), id);
     }
 
     @Transactional
