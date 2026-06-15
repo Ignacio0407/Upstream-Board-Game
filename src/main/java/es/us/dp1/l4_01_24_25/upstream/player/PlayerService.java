@@ -92,7 +92,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     public void throwExceptionNotEnoughEnergy(Player player, Integer energyUsed) {
         if (player.getEnergy() - energyUsed < 0) {
-            throw new InsufficientEnergyException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
+            throw new InsufficientEnergyException(String.format("Insufficient energy for that move. Actual: %d, Tried using: %d", 
                 player.getEnergy(), energyUsed));
         }
     }
@@ -133,7 +133,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
         Player player = this.findById(id);
         if (player.getEnergy() - energyUsed < 0) {
-            throw new BadRequestException(String.format("Insuficient energy for that move. Actual: %d, Tried using: %d", 
+            throw new BadRequestException(String.format("Insufficient energy for that move. Actual: %d, Tried using: %d", 
                 player.getEnergy(), energyUsed));
         }
         player.setEnergy(player.getEnergy() - energyUsed);
