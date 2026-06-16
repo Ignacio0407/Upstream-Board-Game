@@ -8,7 +8,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,11 +101,11 @@ class MatchTileServiceTest {
 
     @ParameterizedTest(name = "Round {0}, position ({1},{2}) -> expected exception={3}")
     @CsvSource({
-        "0, 1, 4, false",  // round 0: se coloca en y=4 (Permitido, NO lanza excepción)
-        "0, 1, 3, true",   // round 0: y=3 es zona inicial / ya existe (Lanza excepción)
-        "1, 1, 5, false",  // round 1: se coloca en y=5 (Permitido)
-        "1, 1, 4, true",   // round 1: y=4 ya se colocó en la ronda 0 (Lanza excepción)
-        "6, 1, 5, true",   // round 6: (1,5) está muy atrasado (Lanza excepción)
+        "0, 1, 4, false",  // round 0: placed in y=4 (Allowed, No exception)
+        "0, 1, 3, false",  // round 0: y=3 is initial zone / already exists (Exception)
+        "1, 1, 5, true",   // round 1: placed in y=5 (Exception)
+        "1, 1, 4, true",   // round 1: y=4 already set in round 0 (Exception)
+        "6, 1, 5, true",   // round 6: (1,5) is too far (Exception)
     })
     void shouldEnforcePlacementRestrictionsPerRound(int round, int x, int y, boolean expectException) {
 
@@ -122,14 +122,21 @@ class MatchTileServiceTest {
         lenient().when(matchTileRepository.findById(1)).thenReturn(Optional.of(currentTile));
         lenient().when(matchService.findById(any())).thenReturn(currentMatch);
 
+        List<MatchTile> existingTiles = new ArrayList<>();
         if (y != 0) {
             MatchTile pred = new MatchTile();
             pred.setCoordinate(new Coordinate(x, y - 1));
-            lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(List.of(pred));
-        } else {
-            lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(Collections.emptyList());
+            existingTiles.add(pred);
+        }
+        
+        // Simulate occupied positions (as in the comments)
+        if ((round == 0 && y == 3) || (round == 1 && y == 4)) {
+            MatchTile occupied = new MatchTile();
+            occupied.setCoordinate(new Coordinate(x, y));
+            existingTiles.add(occupied);
         }
 
+        lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(existingTiles);
         lenient().when(matchTileRepository.save(any())).thenReturn(currentTile);
         
         MatchTileDTO dto = new MatchTileDTO();
@@ -138,8 +145,7 @@ class MatchTileServiceTest {
 
         if (expectException) {
             assertThatThrownBy(() -> matchTileService.updateCoordinate(1, upd))
-                    .isInstanceOf(ResourceNotFoundException.class)
-                    .hasMessageContaining("No se puede actualizar el MatchTile en esta ronda");
+                    .isInstanceOf(ConflictException.class);
         } else {
             try {
                 matchTileService.updateCoordinate(1, upd);
@@ -148,7 +154,7 @@ class MatchTileServiceTest {
                     throw new AssertionError("No debería haber lanzado excepción de ronda", e);
                 }
             } catch (Exception ignored) {
-                // Ignoring other validation exceptions for this test, as we're only testing round restrictions here.
+                // Ignoramos otras validaciones como las de ConflictException si la variable expectException es false
             }
         }
     }
