@@ -79,13 +79,13 @@ export default function Lobby () {
                 <h4 className='passwordContainer'> Players number: {match.playersNumber} </h4>
             </div>
             <div className='lobbyMainContainer'>
-                <div className='lobbyUtilContainer' tabIndex={0}>
+                <div className='lobbyUtilContainer'>
                     <h2>Players</h2>
                     {playerList}
                 </div>
-            <h1/>
+            <br />
 
-                <div className='lobbyUtilContainer' tabIndex={0} 
+                <div role="button" className='lobbyUtilContainer' tabIndex={0} 
                 onKeyDown={(e) => {
                     if (e.key === "Enter" && match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) 
                         === undefined && match.playersNumber >= 1) {

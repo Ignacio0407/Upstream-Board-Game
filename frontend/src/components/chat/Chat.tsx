@@ -86,7 +86,8 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
 
   return (
     <div className="chat-wrapper">
-      <div className="chat-tab" onClick={() => setIsChatVisible((prev) => !prev)}>
+      <div role="button" tabIndex={0} className="chat-tab" onClick={() => setIsChatVisible((prev) => !prev)}
+        onKeyDown={(e) => e.key === 'Enter' && setIsChatVisible((prev) => !prev)}>
         Chat
       </div>
 

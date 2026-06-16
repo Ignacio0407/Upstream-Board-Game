@@ -215,10 +215,10 @@ export default function Game() {
             {myPlayer && !currentUserIsSpectator && passTurn(match, jwt, myPlayer)}
             
         {matchTilesNoCoordinate.length > 0 && myPlayer &&
-        <div key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
-            onClick={() =>
-            handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)
-            }>
+        <div role="button" tabIndex={0} key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
+            onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+            onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+            >
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
                 {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
                 <h2>Next tile:</h2>
