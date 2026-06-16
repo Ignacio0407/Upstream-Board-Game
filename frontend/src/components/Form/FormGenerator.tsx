@@ -65,8 +65,8 @@ export function FormGenerator<T extends FieldValues> ({fields, defaultValues, on
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={className}>
-      {fields.map((field, idx) => (
-        <FormInput key={idx} {...field} register={register} errors={errors} />
+      {fields.map((field) => (
+        <FormInput key={field.name} {...field} register={register} errors={errors} />
       ))}
 
       {extraBeforeSubmit}

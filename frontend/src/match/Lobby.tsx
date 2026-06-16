@@ -20,7 +20,9 @@ export default function Lobby () {
     const { matchId } = useParams<{ matchId: string }>();
     const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${encodeURIComponent(String(matchId))}` : null, jwt);
     const user = tokenService.getUser()
-    const [finalUser,setUser] = useFetchState<User>(emptyUser, `/api/v1/users/${encodeURIComponent(String(user.id))}`, jwt)
+    // Remove everything that is not a letter or number from ID to prevent resource manipulation
+    const safeUserId = encodeURIComponent(String(user.id).replace(/[^a-zA-Z0-9-]/g, ''));
+    const [finalUser,setUser] = useFetchState<User>(emptyUser, `/api/v1/users/${safeUserId}`, jwt);
     const [players,setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${encodeURIComponent(String(match.id))}`,jwt)
     const [userPlayer,setUserPlayer] = useState(emptyPlayer);
     const [showColorPicker, setShowColorPicker] = useState(true);

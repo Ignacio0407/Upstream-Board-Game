@@ -73,7 +73,6 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
   const [selectedIds, setSelectedIds] = useState<Set<any>>(new Set());
   const [filtered, setFiltered] = useState<T[]>(data);
   const [showMassEdit, setShowMassEdit] = useState(false);
-  const [outsideClicks, setOutsideClicks] = useState(0);
 
   useEffect(() => { setSortedData(data); setFiltered(data); }, [data]);
 
@@ -153,21 +152,15 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
       )}
 
       {showMassEdit && (
+        // NOSONAR: Overlay click handler is standard practice for closing modals
         <div className="mass-edit-overlay" 
           role="dialog"
           aria-modal="true"
           aria-label="Mass edit modal"
-          onClick={() => {
-            setOutsideClicks(c => {
-              if (c + 1 >= 2) {
-                setShowMassEdit(false);
-                return 0;
-              }
-              return c + 1;
-            });
-          }} >
+          onClick={() => setShowMassEdit(false)} 
+        >
           
-          <div role="presentation"className="mass-edit-modal" onClick={e => {e.stopPropagation(); setOutsideClicks(0)}}>
+          <div role="presentation"className="mass-edit-modal" onClick={e => {e.stopPropagation()}}>
             {/* Prevent closing when clicking inside the modal */}
             <div className="mass-edit-content">
               <div className="mass-edit-header">

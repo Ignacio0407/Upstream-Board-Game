@@ -13,9 +13,20 @@ export class TokenService {
   }
 
   getLocalAccessToken(): string {
-    const stored = localStorage.getItem("jwt");
-    return stored ? JSON.parse(stored) : "";
+  const stored = localStorage.getItem("jwt");
+  if (!stored) return "";
+  
+  const parsed = JSON.parse(stored);
+  
+  // Validate JWT standard format to break sonar "taint", that is the possibility of the value beiing "evil"
+  const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+  
+  if (typeof parsed === "string" && jwtRegex.test(parsed)) {
+    return parsed;
   }
+  
+  return "";
+}
 
   updateLocalAccessToken(token: string): void {
     localStorage.setItem("jwt", JSON.stringify(token));

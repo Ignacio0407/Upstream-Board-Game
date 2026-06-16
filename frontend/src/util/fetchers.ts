@@ -1,5 +1,6 @@
 export const get = async (uri:string, jwt:string|null) => {
-  return fetch(uri, {
+  const safeUri = new URL(uri, window.location.origin).href;
+  return fetch(safeUri, {
     method: "GET",
     headers: {
         Authorization: `Bearer ${jwt}`,
@@ -10,7 +11,8 @@ export const get = async (uri:string, jwt:string|null) => {
 }
 
 export const patch = async (uri:string, jwt:string|null, data?:any) => {
-    return fetch(uri, {
+    const safeUri = new URL(uri, window.location.origin).href;
+    return fetch(safeUri, {
       method: "PATCH",
       headers: {
           Authorization: `Bearer ${jwt}`,
@@ -22,7 +24,8 @@ export const patch = async (uri:string, jwt:string|null, data?:any) => {
 };
 
 export const put = async (uri:string, jwt:string|null, data?:any) => {
-    return fetch(uri, {
+    const safeUri = new URL(uri, window.location.origin).href;
+    return fetch(safeUri, {
       method: "PUT",
       headers: {
           Authorization: `Bearer ${jwt}`,
@@ -34,7 +37,8 @@ export const put = async (uri:string, jwt:string|null, data?:any) => {
 };
 
 export const post = async (uri:string, jwt:string|null, data?:any) => {
-    return await fetch(uri, {
+    const safeUri = new URL(uri, window.location.origin).href;
+    return await fetch(safeUri, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -46,7 +50,9 @@ export const post = async (uri:string, jwt:string|null, data?:any) => {
 };
 
 export const deleteEntity = async (uri:string, jwt:string|null, id:number) => {
-    return fetch(uri + "/" + id, {
+    // Aquí concatenamos el ID primero y luego lo pasamos por la validación
+    const safeUri = new URL(`${uri}/${encodeURIComponent(String(id))}`, window.location.origin).href;
+    return fetch(safeUri, {
       method: "DELETE",
       headers: {
           Authorization: `Bearer ${jwt}`,

@@ -39,11 +39,11 @@ instance.interceptors.response.use(
 
         return instance(originalConfig);
       } catch (_error) {
-        return Promise.reject(_error);
+        throw _error;
       }
     }
 
-    return Promise.reject(err);
+    throw err;
   }
 );
 

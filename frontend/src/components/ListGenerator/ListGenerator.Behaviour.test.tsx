@@ -154,26 +154,6 @@ describe("ListGenerator — sorting integration", () => {
 
 });
 
-/* describe("ListGenerator — search integration", () => {
-
-  test("search filters rows", async () => {
-    const userEventInstance = userEvent.setup();
-    renderComponent();
-
-    const searchInput = screen.getByPlaceholderText(/search/i);
-    await userEventInstance.type(searchInput, "Bravo");
-
-    // Wait for the result to appear and the filtered item to disappear
-    await waitFor(() => {
-      const rows = screen.getAllByRole("row");
-      const rowTexts = rows.map(r => r.textContent);
-      expect(rowTexts.some(t => t?.includes("Bravo"))).toBe(true);
-      expect(rowTexts.some(t => t?.includes("Charlie"))).toBe(false);
-    }, { timeout: 2000 });
-  });
-
-}); */
-
 describe("ListGenerator — selection", () => {
 
   test("master checkbox selects visible rows", async () => {

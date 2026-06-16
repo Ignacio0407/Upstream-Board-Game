@@ -13,7 +13,8 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
             if (response.ok) {
                 const createdPlayer = await response.json();
 
-                const req = post(`/api/v1/salmonMatches/player/${encodeURIComponent(String(createdPlayer.id))}`, jwt);
+                const safePlayerId = encodeURIComponent(String(createdPlayer.id).replace(/[^a-zA-Z0-9-]/g, ''));
+                const req = post(`/api/v1/salmonMatches/player/${safePlayerId}`, jwt);
 
                 await Promise.all([req]);
                 console.log("All SalmonMatches have been created.");

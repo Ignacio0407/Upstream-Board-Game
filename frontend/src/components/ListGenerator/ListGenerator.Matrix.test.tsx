@@ -96,25 +96,6 @@ describe("ListGenerator — Interaction Matrix", () => {
     expect(screen.getByText("Delta")).toBeInTheDocument();
   });
 
-  /*test("Search + Pagination interaction", async () => {
-    const userEventInstance = userEvent.setup();
-    renderList();
-
-    // Type to filter
-    await userEventInstance.type(
-      screen.getByPlaceholderText(/search/i),
-      "Foxtrot"
-    );
-
-    // Wait for the results to update and the page to potentially reset
-    await waitFor(() => {
-      const rows = screen.getAllByRole("row");
-      const rowTexts = rows.map(r => r.textContent);
-      expect(rowTexts.some(t => t?.includes("Foxtrot"))).toBe(true);
-      expect(rowTexts.some(t => t?.includes("Charlie"))).toBe(false);
-    }, { timeout: 2000 });
-  }); */
-
   test("Search + Sort interaction", async () => {
     const userEventInstance = userEvent.setup();
     renderList();

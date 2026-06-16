@@ -222,7 +222,8 @@ export default function Game() {
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
                 {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
                 <h2>Next tile:</h2>
-                {<img onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+                {<img role="button" tabIndex={0} onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
                 src={matchTilesNoCoordinate[0].tile.image} alt='' style={{width: '150px', ...getRotationStyle(matchTilesNoCoordinate[0])} }></img>}
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
                 (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
@@ -255,7 +256,7 @@ export default function Game() {
             
             <div className={`grid1 ${match.round < 6 ? 'grid1-80' : 'grid1-100'}`}>
             {myPlayer && grid.map((cell, index) => (
-            <div key={index} className="grid-item" style={{ position: 'relative' }} onClick={() =>
+            <div role="button" tabIndex={0} key={index} className="grid-item" style={{ position: 'relative' }} onClick={() =>
                 handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid)}>
                 
                 {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
@@ -263,10 +264,16 @@ export default function Game() {
                 {cell.salmons && cell.salmons.map((salmon, sIndex) => {
                     const position = calculateSalmonPosition(sIndex, cell.salmons.length);
                     return (
-                        <img key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img"
+                        <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon)}}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.stopPropagation();
+                                    handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon);
+                                }
+                            }}
                             style={{...position,
                                 filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)})`,
                                 border: `3px solid ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)}`}}
@@ -282,7 +289,9 @@ export default function Game() {
             {gridSea.map((salmon:SalmonMatch[], index) => (
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
-                        (s.coordinate === null && <img key = {i} src = {s.salmon.image} alt="" onClick={() => handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
+                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt="" 
+                            onClick={() => handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
                         style={{                          
                             filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
                             border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`, // Cambia el color y grosor del borde según necesites
