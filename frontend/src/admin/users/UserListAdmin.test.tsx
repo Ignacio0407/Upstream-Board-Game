@@ -45,14 +45,19 @@ describe("UserListAdmin", () => {
     vi.clearAllMocks();
   });
 
-  it("Renders the page title", () => {
+  it("Renders the page title", async () => {
     vi.mocked(fetchers.get).mockResolvedValue({
         ok: true,
         json: async () => []
     } as any);
 
     renderWithRouter(<UserListAdmin />);
+    
     expect(screen.getByRole("heading", { name: /users/i })).toBeInTheDocument();
+    
+    await waitFor(() => {
+        expect(fetchers.get).toHaveBeenCalled();
+    });
   });
 
   it("Renders user list when users are fetched", async () => {
