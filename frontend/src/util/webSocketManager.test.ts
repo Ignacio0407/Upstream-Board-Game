@@ -95,19 +95,33 @@ describe('WebSocketManager', () => {
     });
 
     it('builds socket URL correctly for localhost', () => {
-        // Save original values
-        const originalHostname = window.location.hostname;
-        const originalPort = window.location.port;
+    // 1. Save the original location to restore it later
+    const originalLocation = window.location;
 
-        // Override only the properties needed for the test
-        Object.defineProperty(window.location, 'hostname', {value: 'localhost', configurable: true});
-        Object.defineProperty(window.location, 'port', {value: '3000', configurable: true});
+    // 2. Delete the actual location  (ts-ignore for TypeScript not to complain)
+    // @ts-ignore
+    delete window.location;
 
-        const url = (wsManager as any).buildSocketUrl();
-        expect(url).toBe('wss://localhost:8080/ws-upstream');
+    // 3. Create a fake location with what is needed
+    Object.defineProperty(window, 'location', {
+        configurable: true,
+        writable: true,
+        value: {
+            ...originalLocation,
+            hostname: 'localhost',
+            port: '3000'
+        }
+    });
 
-        // Restore original values
-        Object.defineProperty(window.location, 'hostname', {value: originalHostname, configurable: true});
-        Object.defineProperty(window.location, 'port', {value: originalPort, configurable: true});
+    // 4. Execute logic
+    const url = (wsManager as any).buildSocketUrl();
+    expect(url).toBe('wss://localhost:8080/ws-upstream');
+
+    // 5. Restore original location
+    Object.defineProperty(window, 'location', {
+        configurable: true,
+        writable: true,
+        value: originalLocation
+    });
     });
 });

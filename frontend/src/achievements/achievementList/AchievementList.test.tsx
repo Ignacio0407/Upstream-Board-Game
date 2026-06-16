@@ -27,6 +27,43 @@ vi.mock("../../components/ListGenerator/ListGenerator", () => ({
   ),
 }));
 
+// Mock para el fetch directo 'get'
+vi.mock("../../util/fetchers", () => ({
+  get: vi.fn().mockResolvedValue({
+    json: () => Promise.resolve([
+      { id: 1, name: "First Win", description: "Win once", badgeImage: "/img/badge1.png", threshold: 1, metric: "wins" },
+      { id: 2, name: "No Badge", description: "No image", badgeImage: null, threshold: 5, metric: "games" }
+    ])
+  })
+}));
+
+// Mock para 'useFetchState'
+vi.mock("../../util/useFetchState", () => ({
+  default: vi.fn((initialData, url) => {
+    // Si pide las estadísticas del usuario
+    if (url.includes("/users/1")) {
+      return [{ username: "testuser", victories: 3, playedgames: 10, totalpoints: 50 }, vi.fn()];
+    }
+    // Si pide los logros DEL USUARIO (Aquí está la clave para que la clase "achieved" funcione)
+    if (url.includes("/achievements/user/1")) {
+      return [[
+        { id: 1, name: "First Win", description: "Win once", badgeImage: "/img/badge1.png", threshold: 1, metric: "wins" }
+      ], vi.fn()];
+    }
+    
+    return [initialData, vi.fn()];
+  })
+}));
+
+// Mocks que te faltaban para jwt_decode y tokenService
+vi.mock("jwt-decode", () => ({ default: vi.fn(() => ({ authorities: ["PLAYER"] })) }));
+vi.mock("../../services/token.service", () => ({
+  default: {
+    getLocalAccessToken: vi.fn(),
+    getUser: vi.fn(),
+  }
+}));
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function renderComponent() {
@@ -96,12 +133,12 @@ describe("AchievementList", () => {
 
   it("applies 'achieved' class to achievements the user has completed", async () => {
     renderComponent();
-    // id=1 is in userAchievements → must have class "achieved"
+    
     await waitFor(() => {
         const achievedCell = screen.getByText("First Win").closest("td");
         expect(achievedCell).toHaveClass("achieved");
     });
-  });
+});
 
   // ── 7. renderAchievement — achievement locked → class "text-center table-cell"
 
