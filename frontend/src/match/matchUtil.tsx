@@ -213,7 +213,7 @@ export const fetchPlayers = async (match:Match, jwt:string, setPlayers:Function)
 }
 
 export function buildGridFromSnapshot(tiles: MatchTile[], salmons: SalmonMatch[]): GridCell[] {
-    const grid: GridCell[] = Array(18).fill(null).map(() => ({
+    const grid: GridCell[] = new Array(18).fill(null).map(() => ({
         tile: emptyTile,
         salmons: [],
     }));
