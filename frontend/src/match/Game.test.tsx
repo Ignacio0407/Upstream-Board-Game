@@ -24,7 +24,7 @@ vi.mock("./matchUtil.tsx", async () => {
         handleRotateTile: vi.fn(), // API call
         handleGridClick: vi.fn(), // API call
         // Explicitly mock these if type issues arise with vi.mocked(...).mockReturnValue
-        buildGridFromSnapshot: vi.fn(() => Array(18).fill(null).map(() => ({ tile: null, salmons: [] }))),
+        buildGridFromSnapshot: vi.fn(() => new Array(18).fill(null).map(() => ({ tile: null, salmons: [] }))),
         passTurn: vi.fn(() => <button data-testid="pass-turn">Pass Turn</button>),
     };
 });
@@ -43,7 +43,7 @@ const mockMatch = {
     round: 1,
     phase: Phase.TILES,
     actualPlayerId: 1,
-    state: State.PLAYING
+    state: State.ON_GOING
 };
 const mockPlayers = [
     { id: 1, userId: 10, name: "player1", color: "RED" },
@@ -86,7 +86,7 @@ describe("Game Component", () => {
         };
         vi.mocked(WebSocketManager).mockImplementation(function() { return mockWsManager; } as any);
         
-        vi.mocked(matchUtil.buildGridFromSnapshot).mockReturnValue(Array(18).fill(null).map(() => ({ tile: null, salmons: [] })));
+        vi.mocked(matchUtil.buildGridFromSnapshot).mockReturnValue(new Array(18).fill(null).map(() => ({ tile: {} as any, salmons: [] as any[] })));
     });
 
     it("renders loading state initially if data is not loaded", () => {
@@ -377,7 +377,7 @@ describe("Game Component", () => {
                 tile: mockMatchTiles[1],
                 salmons: [mockSalmons[0]]
             },
-            ...Array(17).fill(null).map(() => ({ tile: null, salmons: [] }))
+            ...new Array(17).fill(null).map(() => ({ tile: {} as any, salmons: [] as any[] }))
         ]);
 
         const { container } = render(<Game />);

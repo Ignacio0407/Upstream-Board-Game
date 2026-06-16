@@ -55,11 +55,14 @@ export default function DoNotHackMyApp({density = 40, spawnIntervalMs = 120, min
 
   const createFlag = (): Flag => {
     const id = idCounter.current++;
+    // NOSONAR: Math.random is safe here, used only for UI positioning
     const x = Math.random() * 100; // Horizontal percentage
     const durationMs = randomBetween(minSpeedMs, maxSpeedMs);
+    // NOSONAR: Math.random is safe here, used only for UI positioning
     const delayMs = Math.random() * 1000; // Little gap
     const sizeRem = randomBetween(3.2, 5.4);
     const rotateDeg = randomBetween(-20, 20);
+    // NOSONAR: Math.random is safe here, used only for UI positioning
     const color = colors.length ? colors[Math.floor(Math.random() * colors.length)] : null;
     return { id, x, sizeRem, durationMs, delayMs, rotateDeg, color };
   };
@@ -117,5 +120,6 @@ export default function DoNotHackMyApp({density = 40, spawnIntervalMs = 120, min
 }
 
 function randomBetween(min: number, max: number) {
+  // NOSONAR: Math.random is safe here, used only for UI positioning
   return Math.random() * (max - min) + min;
 }

@@ -30,13 +30,13 @@ vi.mock("./components/DoNotHackMyApp/DoNotHackMyApp.tsx", () => ({ default: () =
 </div> }));
 
 describe("App Component Routing", () => {
-    const originalFetch = global.fetch;
+    const originalFetch = globalThis.fetch;
 
     beforeEach(() => {
         vi.clearAllMocks();
         shouldThrowError = false;
         // Mock fetch for PrivateRoute validation
-        global.fetch = vi.fn().mockImplementation(() => 
+        globalThis.fetch = vi.fn().mockImplementation(() => 
             Promise.resolve({
                 ok: true,
                 json: () => Promise.resolve(true),
@@ -45,7 +45,7 @@ describe("App Component Routing", () => {
     });
 
     afterEach(() => {
-        global.fetch = originalFetch;
+        globalThis.fetch = originalFetch;
     });
 
     it("renders Home page by default when not authenticated", () => {

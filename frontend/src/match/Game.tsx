@@ -28,9 +28,9 @@ export default function Game() {
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [selectedTile, setSelectedTile] = useState<MatchTile | null>(null);
     const [selectedSalmon, setSelectedSalmon] = useState<SalmonMatch | null>(null);
-    const [grid, setGrid] = useState<GridCell[]>(Array(18).fill(null).reverse().map(() => ({ tile: emptyTile, salmons: [] })));
-    const [gridSea, setGridSea] = useState<SalmonMatch[][]>(Array(4).fill(null).map(() => []));
-    const [gridSpawn, setGridSpawn] = useState<SalmonMatch[][]>(Array(5).fill(null).map(() => []));
+    const [grid, setGrid] = useState<GridCell[]>(new Array(18).fill(null).reverse().map(() => ({ tile: emptyTile, salmons: [] })));
+    const [gridSea, setGridSea] = useState<SalmonMatch[][]>(new Array(4).fill(null).map(() => []));
+    const [gridSpawn, setGridSpawn] = useState<SalmonMatch[][]>(new Array(5).fill(null).map(() => []));
     const [myPlayer, setMyPlayer] = useState<Player | null>(null);
     let playerList: JSX.Element[] = [];
     if (match.actualPlayerId) playerList = generatePlayerList(players, match.actualPlayerId);
@@ -49,7 +49,7 @@ export default function Game() {
         setMatchTilesNoCoordinate(matchTiles.filter(t => !t.coordinate));
         setGrid(buildGridFromSnapshot(matchTiles.filter(t => t.coordinate !== null), salmons));
         if (match.round >= 6) {
-            const newGridDesove: SalmonMatch[][] = Array(5).fill(null).map(() => []);
+            const newGridDesove: SalmonMatch[][] = new Array(5).fill(null).map(() => []);
             let spawnIndex: number | null = null;
             salmons.forEach(s => {
             if (s.coordinate) spawnIndex = s.coordinate.y - 21;
@@ -189,7 +189,7 @@ export default function Game() {
     useEffect(() => {
         if (match.round < 2) {
             const salmonsPerPlayer = 4;
-            const newGridSea:SalmonMatch[][] = Array(salmonsPerPlayer).fill(null).map(() => []);
+            const newGridSea:SalmonMatch[][] = new Array(salmonsPerPlayer).fill(null).map(() => []);
             players.forEach((p) => {
                 const pSalmons = salmons.filter(s => s.playerId === p.id);
                 if(pSalmons.length > 0) {

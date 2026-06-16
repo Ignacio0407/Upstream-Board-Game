@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as matchUtil from './matchUtil';
 import { Phase } from '../interfaces/Phase';
-import { TileType } from '../interfaces/Tile';
+import { emptySimpleTile, TileType } from '../interfaces/Tile';
 import { emptyTile } from '../interfaces/MatchTile';
 import * as fetchers from '../util/fetchers';
 
@@ -216,7 +216,7 @@ describe('matchUtil', () => {
         const setSelectedTile = vi.fn();
         const setSelectedSalmon = vi.fn();
         const mockMatch = { id: 1, phase: Phase.TILES, playersNumber: 2, round: 1 };
-        const grid = Array(18).fill(null).map(() => ({ tile: emptyTile, salmons: [] }));
+        const grid = new Array(18).fill(null).map(() => ({ tile: emptyTile, salmons: [] }));
 
         it('handles tile placement', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: true } as any);
@@ -255,7 +255,7 @@ describe('matchUtil', () => {
             const selectedSalmon = { id: 1 };
             const movingMatch = { ...mockMatch, phase: Phase.MOVING };
             const fullGrid = [...grid];
-            fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { type: TileType.WATER } }, salmons: [] };
+            fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { ...emptySimpleTile, type: TileType.WATER } }, salmons: [] };
             
             await matchUtil.handleGridClick('jwt', 0, selectedSalmon as any, setSelectedTile, null, setSelectedSalmon, movingMatch as any, 1, 1, fullGrid);
             expect(global.confirm).toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe('matchUtil', () => {
             const selectedSalmon = { id: 1 };
             const movingMatch = { ...mockMatch, phase: Phase.MOVING };
             const fullGrid = [...grid];
-            fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { type: TileType.WATER } }, salmons: [] };
+            fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { ...emptySimpleTile, type: TileType.WATER } }, salmons: [] };
             
             await matchUtil.handleGridClick('jwt', 0, selectedSalmon as any, setSelectedTile, null, setSelectedSalmon, movingMatch as any, 1, 1, fullGrid);
             expect(global.confirm).toHaveBeenCalled();
@@ -395,7 +395,7 @@ describe('matchUtil', () => {
     });
 
     describe('Grid Update Functions', () => {
-        const baseGrid = Array(18).fill(null).map(() => ({ tile: emptyTile, salmons: [] }));
+        const baseGrid = new Array(18).fill(null).map(() => ({ tile: emptyTile, salmons: [] }));
 
         it('updateGridWithMovement', () => {
             const salmon = { id: 1, salmonsNumber: 1 };
@@ -415,8 +415,8 @@ describe('matchUtil', () => {
 
         it('updateGridWithSalmons', () => {
             const cellIndex = matchUtil.coordToIndex(0,0);
-            const grid = [...baseGrid];
-            grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 } as any] };
+            const grid = [...baseGrid] as any[]
+            grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 } ] };
             
             const updatedSalmons = [{ id: 1, salmonsNumber: 2 }];
             const newGrid = matchUtil.updateGridWithSalmons(grid, updatedSalmons as any);
@@ -426,8 +426,8 @@ describe('matchUtil', () => {
         it('updateGridWithSalmons returns original cell if no changes', () => {
             const cellIndex = matchUtil.coordToIndex(0,0);
             const salmon = { id: 1, salmonsNumber: 1 };
-            const grid = [...baseGrid];
-            grid[cellIndex] = { ...grid[cellIndex], salmons: [salmon as any] };
+            const grid = [...baseGrid] as any[]
+            grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 }] };
             
             const newGrid = matchUtil.updateGridWithSalmons(grid, [salmon as any]);
             expect(newGrid[cellIndex]).toBe(grid[cellIndex]);
@@ -449,8 +449,8 @@ describe('matchUtil', () => {
 
         it('updateGridWithHerons', () => {
             const cellIndex = matchUtil.coordToIndex(0,0);
-            const grid = [...baseGrid];
-            grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 } as any] };
+            const grid = [...baseGrid] as any[]
+            grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 } ] };
             
             const updatedTiles = [{ ...emptyTile, coordinate: { x: 0, y: 0 } }];
             const updatedSalmons = [{ id: 1, salmonsNumber: 0 }];
