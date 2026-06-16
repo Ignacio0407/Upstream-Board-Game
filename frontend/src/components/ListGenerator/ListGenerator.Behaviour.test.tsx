@@ -105,7 +105,7 @@ describe("ListGenerator — pagination integration", () => {
     renderComponent();
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "2" })
+      screen.getAllByRole("button", { name: "2" })[0]
     );
 
     expect(screen.getByText("Foxtrot")).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("ListGenerator — pagination integration", () => {
     ).toBeInTheDocument();
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "2" })
+      screen.getAllByRole("button", { name: "2" })[0]
     );
 
     expect(
@@ -146,7 +146,7 @@ describe("ListGenerator — sorting integration", () => {
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "↑" })
+      screen.getAllByRole("button", { name: "↑" })[0]
     );
 
     expect(screen.getByText("Alpha")).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe("ListGenerator — mass actions", () => {
     await userEventInstance.click(rowCheckbox);
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: /delete/i })
+      screen.getAllByRole("button", { name: /delete/i })[0]
     );
 
     expect(massDelete).toHaveBeenCalledTimes(1);
@@ -240,7 +240,7 @@ describe("ListGenerator — mass edit modal", () => {
     await userEventInstance.click(rowCheckbox);
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: /edit/i })
+      screen.getAllByRole("button", { name: /edit/i })[0]
     );
 
     expect(
@@ -253,7 +253,7 @@ describe("ListGenerator — mass edit modal", () => {
     renderComponent({ massEditButton: <button>Edit</button>, massEditUri: "/edit" });
 
     await userEventInstance.click(screen.getAllByRole("checkbox")[1]);
-    await userEventInstance.click(screen.getByRole("button", { name: /edit/i }));
+    await userEventInstance.click(screen.getAllByRole("button", { name: /edit/i })[0]);
 
     const overlay = screen.getByLabelText("Mass edit modal");
 
@@ -284,7 +284,7 @@ describe("ListGenerator — sync after edit", () => {
     });
 
     await userEventInstance.click(screen.getAllByRole("checkbox")[1]); // Charlie
-    await userEventInstance.click(screen.getByRole("button", { name: /edit/i }));
+    await userEventInstance.click(screen.getAllByRole("button", { name: /edit/i })[0]);
 
     // Here we would ideally interact with MassEditWizard to finish and call onClose
     // For brevity in this example, let's assume MassEditWizard is mocked to return new data
