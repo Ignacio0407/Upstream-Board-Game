@@ -18,10 +18,10 @@ import { State } from '../interfaces/State.ts';
 export default function Lobby () {
     const jwt = tokenService.getLocalAccessToken();
     const { matchId } = useParams<{ matchId: string }>();
-    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${matchId}` : null, jwt);
+    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${encodeURIComponent(String(matchId))}` : null, jwt);
     const user = tokenService.getUser()
-    const [finalUser,setUser] = useFetchState<User>(emptyUser,`/api/v1/users/${user.id}`,jwt)
-    const [players,setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${match.id}`,jwt)
+    const [finalUser,setUser] = useFetchState<User>(emptyUser, `/api/v1/users/${encodeURIComponent(String(user.id))}`, jwt)
+    const [players,setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${encodeURIComponent(String(match.id))}`,jwt)
     const [userPlayer,setUserPlayer] = useState(emptyPlayer);
     const [showColorPicker, setShowColorPicker] = useState(true);
     const navigate = useNavigate();

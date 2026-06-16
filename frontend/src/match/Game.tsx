@@ -19,12 +19,12 @@ export default function Game() {
     const navigate = useNavigate();
     const jwt = tokenService.getLocalAccessToken();
     const { matchId } = useParams<{ matchId: string }>();
-    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${matchId}` : null, jwt);
+    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${encodeURIComponent(String(matchId))}` : null, jwt);
     const user = tokenService.getUser();
-    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${matchId}`,jwt);
-    const [matchTiles, setMatchTiles] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${matchId}`, jwt);
+    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${encodeURIComponent(String(matchId))}`,jwt);
+    const [matchTiles, setMatchTiles] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${encodeURIComponent(String(matchId))}`, jwt);
     const [matchTilesNoCoordinate, setMatchTilesNoCoordinate] = useState<MatchTile[]>([]);
-    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${matchId}`, jwt);
+    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${encodeURIComponent(String(matchId))}`, jwt);
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [selectedTile, setSelectedTile] = useState<MatchTile | null>(null);
     const [selectedSalmon, setSelectedSalmon] = useState<SalmonMatch | null>(null);

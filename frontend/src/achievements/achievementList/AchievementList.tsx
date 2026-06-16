@@ -23,8 +23,8 @@ export default function AchievementList() {
   const [achievements, setAchievements] = useState<Achievement[]>([])
   useEffect(() => {get(`/api/v1/achievements`, jwt).then(res => res.json()).then(data => setAchievements(data))}, [jwt]);
   const user = tokenService.getUser();
-  const [finalUser] = useFetchState<User>({} as User, `/api/v1/users/${user.id}`, jwt);
-  const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements/user/${user.id}`, jwt);
+  const [finalUser] = useFetchState<User>({} as User, `/api/v1/users/${encodeURIComponent(String(user.id))}`, jwt);
+  const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements/user/${encodeURIComponent(String(user.id))}`, jwt);
   const navigate = useNavigate();
 
   let roles: string[] = [];
