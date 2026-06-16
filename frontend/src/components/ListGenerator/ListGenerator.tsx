@@ -152,12 +152,15 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
       )}
 
       {showMassEdit && (
-        // NOSONAR: Overlay click handler is standard practice for closing modals
         <div className="mass-edit-overlay" 
           role="dialog"
           aria-modal="true"
           aria-label="Mass edit modal"
-          onClick={() => setShowMassEdit(false)} 
+          tabIndex={0}
+          onClick={() => setShowMassEdit(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowMassEdit(false);
+          }}
         >
           
           <div role="presentation"className="mass-edit-modal" onClick={e => {e.stopPropagation()}}>

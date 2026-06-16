@@ -19,12 +19,12 @@ export default function Game() {
     const navigate = useNavigate();
     const jwt = tokenService.getLocalAccessToken();
     const { matchId } = useParams<{ matchId: string }>();
-    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${encodeURIComponent(String(matchId))}` : null, jwt);
+    const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${matchId}` : null, jwt);
     const user = tokenService.getUser();
-    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${encodeURIComponent(String(matchId))}`,jwt);
-    const [matchTiles, setMatchTiles] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${encodeURIComponent(String(matchId))}`, jwt);
+    const [players, setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${matchId}`,jwt);
+    const [matchTiles, setMatchTiles] = useFetchState<MatchTile[]>([], `/api/v1/matchTiles/match/${matchId}`, jwt);
     const [matchTilesNoCoordinate, setMatchTilesNoCoordinate] = useState<MatchTile[]>([]);
-    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${encodeURIComponent(String(matchId))}`, jwt);
+    const [salmons, setSalmons] = useFetchState<SalmonMatch[]>([], `/api/v1/salmonMatches/match/${matchId}`, jwt);
     const [allDataLoaded, setAllDataLoaded] = useState(false);
     const [selectedTile, setSelectedTile] = useState<MatchTile | null>(null);
     const [selectedSalmon, setSelectedSalmon] = useState<SalmonMatch | null>(null);
@@ -82,7 +82,6 @@ export default function Game() {
         });
 
         wsManager.addSubscription<SalmonMovement>(`movingSalmon/${matchId}`, ({ salmon, myTile, toTravel }) => {
-            console.log("salmon", salmon)
             setMatchTiles(prev => prev.map(tile => {
                 if (tile.id === myTile.id) return myTile;
                 if (tile.id === toTravel.id) return toTravel;
@@ -94,7 +93,6 @@ export default function Game() {
         });
 
         wsManager.addSubscription<SalmonMovement>(`movingSalmonFromSea/${matchId}`, ({ salmon, toTravel }) => {
-            console.log("salmon from sea", salmon)
             setSalmons(prev => prev.map(s => s.id === salmon.id ? salmon : s).filter(s => s.salmonsNumber > 0));
             setMatchTiles(prev => prev.map(tile => {
                 if (tile.id === toTravel.id) return toTravel;
@@ -161,7 +159,6 @@ export default function Game() {
         });
 
         wsManager.addSubscription<TilesAndSalmons & { deletedSalmonIds?: number[] }>(`heronsUpdated/${matchId}`, ({ matchTiles, salmonMatches, deletedSalmonIds }) => {
-            console.log("deletedIds", deletedSalmonIds)
             setSalmons(prev => { const updatedMap = new Map(salmonMatches.map(s => [s.id, s]));
             return prev.filter(s => !deletedSalmonIds?.includes(s.id)).map(s => updatedMap.get(s.id) ?? s);
             });
@@ -222,7 +219,7 @@ export default function Game() {
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
                 {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
                 <h2>Next tile:</h2>
-                {<img role="button" tabIndex={0} onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+                {<img role="button" tabIndex={0} onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)} // NOSONAR
                     onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
                 src={matchTilesNoCoordinate[0].tile.image} alt='' style={{width: '150px', ...getRotationStyle(matchTilesNoCoordinate[0])} }></img>}
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
@@ -255,16 +252,21 @@ export default function Game() {
             </div>}
             
             <div className={`grid1 ${match.round < 6 ? 'grid1-80' : 'grid1-100'}`}>
-            {myPlayer && grid.map((cell, index) => (
-            <div role="button" tabIndex={0} key={index} className="grid-item" style={{ position: 'relative' }} onClick={() =>
-                handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid)}>
+            {myPlayer && grid.map((cell, index) => (<div role="button" tabIndex={0} key={index} className="grid-item" style={{ position: 'relative' }} onClick={() => 
+                handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid)}
+                    onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid);
+                    }
+                    }}
+                >
                 
                 {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
 
                 {cell.salmons && cell.salmons.map((salmon, sIndex) => {
                     const position = calculateSalmonPosition(sIndex, cell.salmons.length);
                     return (
-                        <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img"
+                        <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img" // NOSONAR
                             onClick={(e) => {
                                 e.stopPropagation();
                                 handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon)}}
@@ -289,7 +291,7 @@ export default function Game() {
             {gridSea.map((salmon:SalmonMatch[], index) => (
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
-                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt="" 
+                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt="" // NOSONAR
                             onClick={() => handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
                         style={{                          

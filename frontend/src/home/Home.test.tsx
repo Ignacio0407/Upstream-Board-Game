@@ -1,6 +1,6 @@
 import { render, screen } from "../test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import Home from "./home";
+import Home from "./Home.tsx";
 import tokenService from "../services/token.service.ts";
 
 // --- Mocks ---

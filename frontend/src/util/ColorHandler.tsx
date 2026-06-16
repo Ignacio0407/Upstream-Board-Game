@@ -1,5 +1,5 @@
 import ColorPickerModal from './ColorPickerModal.tsx';
-import {post} from './fetchers.ts'
+import {buildSafeUrl, post} from './fetchers.ts'
 import { JSX } from 'react';
 
 interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, takenColors:string[], onColorChanged:Function, 
@@ -13,9 +13,8 @@ export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, o
             if (response.ok) {
                 const createdPlayer = await response.json();
 
-                const safePlayerId = encodeURIComponent(String(createdPlayer.id).replace(/[^a-zA-Z0-9-]/g, ''));
-                const req = post(`/api/v1/salmonMatches/player/${safePlayerId}`, jwt);
-
+                const req = post(buildSafeUrl('/api/v1/salmonMatches/player/', createdPlayer.id), jwt);
+                
                 await Promise.all([req]);
                 console.log("All SalmonMatches have been created.");
                 onColorChanged();

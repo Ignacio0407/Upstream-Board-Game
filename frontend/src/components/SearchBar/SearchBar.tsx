@@ -284,6 +284,7 @@ const SearchBar = <T extends object>({
                 <div
                   key={attr}
                   role="option"
+                  aria-selected="false"
                   tabIndex={0}
                   className="search-dropdown-item"
                   onClick={() => handleAttributeClick(attr)}

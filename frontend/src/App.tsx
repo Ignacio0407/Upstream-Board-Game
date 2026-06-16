@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
 import { ErrorBoundary } from 'react-error-boundary';
 import AppNavbar from './AppNavbar.tsx';
-import Home from './home/home.tsx';
+import Home from './home/Home.tsx';
 import PrivateRoute from './privateRoute/PrivateRoute.tsx';
 import Register from './auth/register/Register.tsx';
 import Login from './auth/login/Login.tsx';

@@ -56,6 +56,7 @@ export default function Lobby () {
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         if(match.state === State.FINALIZED) navigate("/dashboard");
+        if(match.state === State.ON_GOING) navigate(`/matches/${matchId}/game`);
     }, [players, user.id, match.state]);
 
     const startingGame = async () => {
