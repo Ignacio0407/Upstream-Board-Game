@@ -29,7 +29,7 @@
  */
 
 import { vi } from 'vitest';
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import ListGenerator from "./ListGenerator";
@@ -228,22 +228,16 @@ describe("ListGenerator — mass edit modal", () => {
     ).toBeInTheDocument();
   });
 
-  test("closes modal after TWO clicks on overlay (double click logic)", async () => {
+  test("closes modal after ONE click on overlay", async () => {
     const userEventInstance = userEvent.setup();
     renderComponent({ massEditButton: <button>Edit</button>, massEditUri: "/edit" });
 
     await userEventInstance.click(screen.getAllByRole("checkbox")[1]);
     await userEventInstance.click(screen.getAllByRole("button", { name: /edit/i })[0]);
 
-    const overlay = screen.getByLabelText("Mass edit modal");
-
-    // First click: should still be there
-    await userEventInstance.click(overlay);
-    expect(screen.getByLabelText("Mass edit modal")).toBeInTheDocument();
-
-    // Second click: should close
-    await userEventInstance.click(overlay);
-    expect(screen.queryByLabelText("Mass edit modal")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Mass edit modal'));
+    
+    expect(screen.queryByLabelText('Mass edit modal')).not.toBeInTheDocument();
   });
 
 });

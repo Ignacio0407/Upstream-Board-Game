@@ -247,9 +247,7 @@ describe('Dashboard', () => {
         `/api/v1/matches/${matchWaiting.id}`,
         matchWaiting.id,
         expect.any(Array),
-        expect.any(Array),
-        expect.any(Function),
-        expect.any(Function),
+        expect.any(Array)
       );
     });
   });

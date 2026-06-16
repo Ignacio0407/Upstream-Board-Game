@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { get, patch, put, post, deleteEntity } from './fetchers';
 
 describe('API Fetchers', () => {
-  const uri = '/api/test';
+  const uri = 'http://localhost:3000/api/test';
   const jwt = 'fake-jwt';
   const data = { id: 1, name: 'Paco' };
   

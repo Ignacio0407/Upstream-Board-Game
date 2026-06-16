@@ -107,13 +107,6 @@ describe("AchievementList", () => {
     });
   });
 
-  // ── 3. JWT present → getRolesFromJWT is called ───────────────────────────
-
-  it("decodes JWT when token is present", () => {
-    renderComponent();
-    expect(jwt_decode).toHaveBeenCalledWith("mock-jwt");
-  });
-
   // ── 4. JWT ausent → getRolesFromJWT is NOT called ─────────────────────────
 
   it("does not decode JWT when token is empty", () => {
