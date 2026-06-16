@@ -12,8 +12,8 @@ describe('TokenService', () => {
     });
 
     it('gets local access token', () => {
-        localStorage.setItem('jwt', JSON.stringify('mock-token'));
-        expect(tokenService.getLocalAccessToken()).toBe('mock-token');
+        localStorage.setItem('jwt', JSON.stringify('aaaa.bbbb.cccc'));
+        expect(tokenService.getLocalAccessToken()).toBe('aaaa.bbbb.cccc');
     });
 
     it('returns empty string if no access token', () => {
