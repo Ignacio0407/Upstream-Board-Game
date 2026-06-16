@@ -38,6 +38,19 @@
         <ngrok.authToken>${env.NGROK_AUTH_TOKEN}</ngrok.authToken>
 
         <sonar.organization>tfg-upstream</sonar.organization>
+        <sonar.coverage.exclusions>
+            **/DTO/**,
+            /*DTO.java,
+            **/configuration/**,
+            **/exceptions/**,
+            **/model/**,
+            **/enums/**,
+            **/*Upstream.java,
+            **/SecurityConfiguration.java,
+            **/generated/**,
+            **/swagger/**,
+            **/openapi/**
+        </sonar.coverage.exclusions>
 
     </properties>
 
