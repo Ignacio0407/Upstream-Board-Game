@@ -13,8 +13,6 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
         
         if (!takenColors.includes(color)) {
             setSelectedColor(color);
-            console.log(`Color seleccionado: ${color}`);
-            console.log(takenColors);
         }
           
         setSelectedColor(color);

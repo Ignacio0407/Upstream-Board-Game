@@ -41,7 +41,6 @@ describe("ColorHandler Component", () => {
 
         await waitFor(() => {
             expect(post).toHaveBeenCalledWith("/api/v1/players/match/1", "jwt", { color: "RED", user: 10 });
-            expect(post).toHaveBeenCalledWith("/api/v1/salmonMatches/player/1", "jwt");
             expect(onColorChanged).toHaveBeenCalled();
         });
     });

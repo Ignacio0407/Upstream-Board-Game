@@ -17,7 +17,8 @@ vi.mock("../../services/token.service.ts", () => ({
 vi.mock("../../util/fetchers", () => ({
     get: vi.fn(),
     patch: vi.fn(),
-    deleteEntity: vi.fn()
+    deleteEntity: vi.fn(),
+    buildSafeUrl: vi.fn((base, id) => id ? `${base}${id}` : base),
 }));
 
 // Mock reactstrap components to render content simply for tests

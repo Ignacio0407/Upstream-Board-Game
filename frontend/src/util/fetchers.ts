@@ -50,7 +50,6 @@ export const post = async (uri:string, jwt:string|null, data?:any) => {
 };
 
 export const deleteEntity = async (uri:string, jwt:string|null, id:number) => {
-    // Aquí concatenamos el ID primero y luego lo pasamos por la validación
     const safeUri = new URL(`${uri}/${encodeURIComponent(String(id))}`, window.location.origin).href;
     return fetch(safeUri, {
       method: "DELETE",
@@ -61,3 +60,8 @@ export const deleteEntity = async (uri:string, jwt:string|null, id:number) => {
       }
     });
 };
+
+export function buildSafeUrl(base: string, id?: string | number): string {
+    const path = id !== undefined ? `${base}${encodeURIComponent(String(id))}` : base;
+    return new URL(path, window.location.origin).href;
+}
