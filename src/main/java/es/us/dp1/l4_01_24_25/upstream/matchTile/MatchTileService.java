@@ -116,7 +116,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
         Integer actual = Integer.valueOf(updates.get("actualPlayerId").toString());
         Integer mine = Integer.valueOf(updates.get("myPlayerId").toString());
@@ -125,11 +125,12 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         }
         MatchTile matchTile = this.findById(id);
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
-        if(updates.get("y") != 0) {
-            MatchTile matchTile2 = matchTiles.stream().filter(mT -> mT.getCoordinate().y().equals(updates.get("y")-1) 
-            && mT.getCoordinate().x().equals(updates.get("x"))).findFirst().orElse(null);
-            if(matchTile2 == null){
-                throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
+        if (!Integer.valueOf(0).equals(updates.get("y"))) {
+            boolean hasSupport = matchTiles.stream().filter(mT -> mT.getCoordinate() != null)
+                .anyMatch(mT -> mT.getCoordinate().y().equals(updates.get("y") - 1) && mT.getCoordinate().x().equals(updates.get("x")));
+
+            if (!hasSupport && !updates.get("y").equals(1)) {
+                throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID", id);
             }
         }
     
@@ -138,9 +139,9 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         if (positionOccupied)
             throw new ConflictException("Ya existe una MatchTile en las coordenadas especificadas.");
     
-        if((matchTile.getMatch().getRound() == 0 && updates.get("y").equals(3)) || (matchTile.getMatch().getRound() == 1 && updates.get("y").equals(4))
+        if((matchTile.getMatch().getRound() == 0 && updates.get("y") > 3) || (matchTile.getMatch().getRound() == 1 && updates.get("y") > 4)
         || (matchTile.getMatch().getRound() == 6 && updates.get("x").equals(1) && updates.get("y").equals(5)))
-            throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID",id);
+            throw new ConflictException("No se puede actualizar el MatchTile en esta ronda");
              
         if (updates.containsKey("x") && updates.containsKey("y")) {
             matchTile.setCoordinate(new Coordinate(updates.get("x"), updates.get("y")));
