@@ -143,7 +143,9 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
         <div className="mass-actions-bar">
           <span className="selected-counter">{selectedItems.length} selected</span>
 
-          {editCondition && massEditButton && (<div onClick={() => {setShowMassEdit(true)}}> {massEditButton} </div>)}
+          {editCondition && massEditButton && (
+            <div role="button" tabIndex={0} onClick={() => setShowMassEdit(true)} onKeyDown={(e) => e.key === 'Enter' && 
+            setShowMassEdit(true)}> {massEditButton} </div>)}
 
             {deleteCondition && massDeleteButton &&
               <Button color="danger" onClick={() => massDeleteButton(selectedItems)}>Delete</Button>}
@@ -165,7 +167,7 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
             });
           }} >
           
-          <div className="mass-edit-modal" onClick={e => {e.stopPropagation(); setOutsideClicks(0)}}>
+          <div role="presentation"className="mass-edit-modal" onClick={e => {e.stopPropagation(); setOutsideClicks(0)}}>
             {/* Prevent closing when clicking inside the modal */}
             <div className="mass-edit-content">
               <div className="mass-edit-header">

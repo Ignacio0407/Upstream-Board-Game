@@ -75,7 +75,7 @@ export default function Register() {
           deactivateSecurity={true}
           extraBeforeSubmit={
             <div className="class-form-group" style={{ marginTop: '20px', marginLeft: '200px' }}>
-              <label style={{ display: 'block', marginBottom: '10px' }}>Select Role:</label>
+              <span style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>Select Role:</span>
               <div style={{ display: 'flex', gap: '20px', marginTop: '10px', marginLeft: '-55px' }}>
                 <button type="button" onClick={() => setSelectedRole('PLAYER')}
                   style={{padding: '10px 20px', backgroundColor: selectedRole === 'PLAYER' ? '#4CAF50' : '#ddd',
