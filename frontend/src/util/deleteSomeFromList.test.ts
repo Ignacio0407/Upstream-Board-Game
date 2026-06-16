@@ -16,8 +16,8 @@ describe('deleteSomeFromList', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        global.confirm = vi.fn();
-        global.alert = vi.fn();
+        globalThis.confirm = vi.fn();
+        globalThis.alert = vi.fn();
         vi.mocked(tokenService.getUser).mockReturnValue({ id: 1 } as any);
         vi.mocked(tokenService.getLocalAccessToken).mockReturnValue('jwt');
     });
@@ -28,13 +28,13 @@ describe('deleteSomeFromList', () => {
     });
 
     it('does nothing if user cancels confirmation', () => {
-        vi.mocked(global.confirm).mockReturnValue(false);
+        vi.mocked(globalThis.confirm).mockReturnValue(false);
         deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
         expect(fetchers.deleteEntity).not.toHaveBeenCalled();
     });
 
     it('calls deleteEntity for each item and updates state', async () => {
-        vi.mocked(global.confirm).mockReturnValue(true);
+        vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockResolvedValue({ status: 200 } as any);
 
         deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
@@ -46,13 +46,13 @@ describe('deleteSomeFromList', () => {
     });
 
     it('alerts on failure', async () => {
-        vi.mocked(global.confirm).mockReturnValue(true);
+        vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockRejectedValue(new Error('Fail'));
 
         deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
 
         await vi.waitFor(() => {
-            expect(global.alert).toHaveBeenCalledWith('Error deleting selected items');
+            expect(globalThis.alert).toHaveBeenCalledWith('Error deleting selected items');
         });
     });
 });

@@ -22,8 +22,8 @@ describe('matchUtil', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        global.alert = vi.fn();
-        global.confirm = vi.fn();
+        globalThis.alert = vi.fn();
+        globalThis.confirm = vi.fn();
     });
 
     describe('coordToIndex', () => {
@@ -117,23 +117,23 @@ describe('matchUtil', () => {
         it('alerts if not moving phase or not player turn', async () => {
             const otherMatch = { phase: Phase.TILES };
             await matchUtil.updateSalmonPosition(mockSalmon as any, 1, 1, jwt, otherMatch as any, 1, 1);
-            expect(global.alert).toHaveBeenCalledWith("Now it's tiles placing phase!");
+            expect(globalThis.alert).toHaveBeenCalledWith("Now it's tiles placing phase!");
             
             vi.clearAllMocks();
             await matchUtil.updateSalmonPosition(mockSalmon as any, 1, 1, jwt, mockMatch as any, 1, 2);
-            expect(global.alert).toHaveBeenCalledWith("Now it's tiles placing phase!");
+            expect(globalThis.alert).toHaveBeenCalledWith("Now it's tiles placing phase!");
         });
 
         it('alerts error message if response is not ok and no specific error provided', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: false, json: async () => ({ message: 'General Error' }) } as any);
             await matchUtil.updateSalmonPosition(mockSalmon as any, 1, 1, jwt, mockMatch as any, 1, 1);
-            expect(global.alert).toHaveBeenCalledWith('General Error');
+            expect(globalThis.alert).toHaveBeenCalledWith('General Error');
         });
 
         it('alerts error if response has specific error field', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: false, json: async () => ({ error: 'Detailed Error' }) } as any);
             await matchUtil.updateSalmonPosition(mockSalmon as any, 1, 1, jwt, mockMatch as any, 1, 1);
-            expect(global.alert).toHaveBeenCalledWith('Detailed Error');
+            expect(globalThis.alert).toHaveBeenCalledWith('Detailed Error');
         });
 
         it('throws error on catch block', async () => {
@@ -152,7 +152,7 @@ describe('matchUtil', () => {
         it('alerts error on failure', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: false, json: async () => ({ error: 'Phase Error' }) } as any);
             await matchUtil.changephase({ id: 1 } as any, 'jwt', 1);
-            expect(global.alert).toHaveBeenCalledWith('Phase Error');
+            expect(globalThis.alert).toHaveBeenCalledWith('Phase Error');
         });
 
         it('throws on catch', async () => {
@@ -171,7 +171,7 @@ describe('matchUtil', () => {
         it('alerts error on failure', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: false, json: async () => ({ error: 'Spawn Error' }) } as any);
             await matchUtil.enterSpawn({ id: 5 } as any, 'jwt');
-            expect(global.alert).toHaveBeenCalledWith('Spawn Error');
+            expect(globalThis.alert).toHaveBeenCalledWith('Spawn Error');
         });
 
         it('throws on catch', async () => {
@@ -193,13 +193,13 @@ describe('matchUtil', () => {
         it('alerts if not tiles phase', async () => {
             const otherMatch = { phase: Phase.MOVING };
             await matchUtil.updateTilePosition(mockTile as any, 1, 1, 'jwt', 1, 1, otherMatch as any);
-            expect(global.alert).toHaveBeenCalledWith("Now it's salmon moving phase!");
+            expect(globalThis.alert).toHaveBeenCalledWith("Now it's salmon moving phase!");
         });
 
         it('alerts and throws on failure', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: false, json: async () => ({ message: 'Tile Error' }) } as any);
             await matchUtil.updateTilePosition(mockTile as any, 1, 1, 'jwt', 1, 1, mockMatch as any);
-            expect(global.alert).toHaveBeenCalledWith('Tile Error');
+            expect(globalThis.alert).toHaveBeenCalledWith('Tile Error');
         });
 
         it('logs and rethrows on catch', async () => {
@@ -251,14 +251,14 @@ describe('matchUtil', () => {
 
         it('handles jumping when tile is full', async () => {
             vi.mocked(fetchers.patch).mockResolvedValue({ ok: true } as any);
-            vi.mocked(global.confirm).mockReturnValue(true);
+            vi.mocked(globalThis.confirm).mockReturnValue(true);
             const selectedSalmon = { id: 1 };
             const movingMatch = { ...mockMatch, phase: Phase.MOVING };
             const fullGrid = [...grid];
             fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { ...emptySimpleTile, type: TileType.WATER } }, salmons: [] };
             
             await matchUtil.handleGridClick('jwt', 0, selectedSalmon as any, setSelectedTile, null, setSelectedSalmon, movingMatch as any, 1, 1, fullGrid);
-            expect(global.confirm).toHaveBeenCalled();
+            expect(globalThis.confirm).toHaveBeenCalled();
             expect(fetchers.patch).toHaveBeenCalled();
         });
 
@@ -268,14 +268,14 @@ describe('matchUtil', () => {
         });
 
         it('does nothing when jumping is cancelled by user', async () => {
-            vi.mocked(global.confirm).mockReturnValue(false);
+            vi.mocked(globalThis.confirm).mockReturnValue(false);
             const selectedSalmon = { id: 1 };
             const movingMatch = { ...mockMatch, phase: Phase.MOVING };
             const fullGrid = [...grid];
             fullGrid[0] = { tile: { ...emptyTile, capacity: 1, salmonsNumber: 1, tile: { ...emptySimpleTile, type: TileType.WATER } }, salmons: [] };
             
             await matchUtil.handleGridClick('jwt', 0, selectedSalmon as any, setSelectedTile, null, setSelectedSalmon, movingMatch as any, 1, 1, fullGrid);
-            expect(global.confirm).toHaveBeenCalled();
+            expect(globalThis.confirm).toHaveBeenCalled();
             expect(fetchers.patch).not.toHaveBeenCalled();
         });
 
@@ -305,7 +305,7 @@ describe('matchUtil', () => {
             const movingMatch = { ...mockMatch, phase: Phase.MOVING };
             await matchUtil.handleGridClick('jwt', 0, null, setSelectedTile, selectedTile as any, setSelectedSalmon, movingMatch as any, 1, 1, grid);
             expect(fetchers.patch).not.toHaveBeenCalled();
-            expect(global.alert).toHaveBeenCalledWith("Now it's salmon moving phase!");
+            expect(globalThis.alert).toHaveBeenCalledWith("Now it's salmon moving phase!");
         });
     });
 
@@ -430,7 +430,7 @@ describe('matchUtil', () => {
             grid[cellIndex] = { ...grid[cellIndex], salmons: [{ id: 1, salmonsNumber: 1 }] };
             
             const newGrid = matchUtil.updateGridWithSalmons(grid, [salmon as any]);
-            expect(newGrid[cellIndex]).toBe(grid[cellIndex]);
+            expect(newGrid[cellIndex]).toStrictEqual(grid[cellIndex]);
         });
 
         it('updateGridWithMovementFromSea', () => {

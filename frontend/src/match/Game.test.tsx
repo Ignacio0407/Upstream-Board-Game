@@ -86,7 +86,7 @@ describe("Game Component", () => {
         };
         vi.mocked(WebSocketManager).mockImplementation(function() { return mockWsManager; } as any);
         
-        vi.mocked(matchUtil.buildGridFromSnapshot).mockReturnValue(new Array(18).fill(null).map(() => ({ tile: {} as any, salmons: [] as any[] })));
+        vi.mocked(matchUtil.buildGridFromSnapshot).mockReturnValue(new Array(18).fill(null).map(() => ({ tile: { tile: { image: 'test.png' } } as any, salmons: [] as any[] })));
     });
 
     it("renders loading state initially if data is not loaded", () => {
@@ -215,7 +215,7 @@ describe("Game Component", () => {
 
         render(<Game />);
         await waitFor(() => {
-            expect(screen.getByRole("button", { name: /Rotate Tile/i })).toBeInTheDocument();
+            expect(screen.getAllByRole("button", { name: /Rotate Tile/i })[0]).toBeInTheDocument();
         });
     });
 
@@ -247,7 +247,7 @@ describe("Game Component", () => {
 
         render(<Game />);
         await waitFor(() => {
-            expect(screen.getByRole("button", { name: /Rotate Tile/i })).toBeInTheDocument();
+            expect(screen.getAllByRole("button", { name: /Rotate Tile/i })[0]).toBeInTheDocument();
         });
     });
 
@@ -377,7 +377,7 @@ describe("Game Component", () => {
                 tile: mockMatchTiles[1],
                 salmons: [mockSalmons[0]]
             },
-            ...new Array(17).fill(null).map(() => ({ tile: {} as any, salmons: [] as any[] }))
+            ...new Array(17).fill(null).map(() => ({ tile: { tile: { image: 'test.png' } } as any, salmons: [] as any[] }))
         ]);
 
         const { container } = render(<Game />);

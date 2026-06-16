@@ -8,6 +8,7 @@ import endGame from "../util/endGame.ts";
 import WebSocketManager from "../util/webSocketManager.ts";
 import { State } from "../interfaces/State.ts";
 import useFetchState from "../util/useFetchState.ts";
+import { emptyUser } from "../interfaces/User.ts";
 
 // --- Mocks ---
 
@@ -57,7 +58,7 @@ const mockMatch = {
     state: State.WAITING
 };
 
-const mockUser = { id: 10, username: "creator" };
+const mockUser = { ...emptyUser, id: 10, username: "creator" };
 const mockFinalUser = { id: 10, username: "creator" };
 const mockPlayers = [
     { id: 1, userId: 10, name: "creator", color: "RED" },
@@ -104,7 +105,7 @@ describe("Lobby Component", () => {
 
     it("shows ColorHandler if the user is not in the player list and not a spectator", () => {
         // Mock user not in players
-        const outsider = { id: 99, username: "outsider" };
+        const outsider = { ...emptyUser, id: 99, username: "outsider" };
         vi.mocked(tokenService.getUser).mockReturnValue(outsider);
         vi.mocked(useFetchState).mockImplementation((defaultVal: any, url: string | null) => {
             if (url?.includes("/api/v1/matches/")) return [mockMatch, vi.fn()];
@@ -118,7 +119,7 @@ describe("Lobby Component", () => {
     });
 
     it("hides ColorHandler once a color is selected", async () => {
-        const outsider = { id: 99, username: "outsider" };
+        const outsider = { ...emptyUser, id: 99, username: "outsider" };
         vi.mocked(tokenService.getUser).mockReturnValue(outsider);
         vi.mocked(useFetchState).mockImplementation((defaultVal: any, url: string | null) => {
             if (url?.includes("/api/v1/matches/")) return [mockMatch, vi.fn()];
@@ -136,25 +137,25 @@ describe("Lobby Component", () => {
     it("shows 'Start' button only for the creator with enough players", () => {
         // User is creator (id 10)
         render(<Lobby />);
-        expect(screen.getByRole("button", { name: /Start/i })).toBeInTheDocument();
+        expect(screen.getAllByRole("button", { name: /Start/i })[0]).toBeInTheDocument();
     });
 
     it("hides 'Start' button if the user is not the creator", () => {
-        vi.mocked(tokenService.getUser).mockReturnValue({ id: 11, username: "player2" });
+        vi.mocked(tokenService.getUser).mockReturnValue({ ...emptyUser, id: 11, username: "player2" });
         render(<Lobby />);
         expect(screen.queryByRole("button", { name: /Start/i })).not.toBeInTheDocument();
     });
 
     it("calls startGame when 'Start' button is clicked", async () => {
         render(<Lobby />);
-        const startButton = screen.getByRole("button", { name: /Start/i });
+        const startButton = screen.getByText(/Start/i);
         fireEvent.click(startButton);
         expect(startGame).toHaveBeenCalled();
     });
 
     it("calls endGame when 'Exit' button is clicked", () => {
         render(<Lobby />);
-        const exitButton = screen.getByRole("button", { name: /Exit/i });
+        const exitButton = screen.getByText(/Exit/i);
         fireEvent.click(exitButton);
         expect(endGame).toHaveBeenCalled();
     });

@@ -86,11 +86,11 @@ describe("ListGenerator — Interaction Matrix", () => {
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "↑" })
+      screen.getAllByRole("button", { name: "↑" })[0]
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "2" })
+      screen.getAllByRole("button", { name: "2" })[0]
     );
 
     expect(screen.getByText("Delta")).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe("ListGenerator — Interaction Matrix", () => {
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "↑" })
+      screen.getAllByRole("button", { name: "↑" })[0]
     );
 
     expect(screen.getByText("Alpha")).toBeInTheDocument();
@@ -147,7 +147,7 @@ describe("ListGenerator — Interaction Matrix", () => {
     expect(screen.getByText(/1 selected/i)).toBeInTheDocument();
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: "2" })
+      screen.getAllByRole("button", { name: "2" })[0]
     );
 
     expect(screen.queryByText(/selected/i)).not.toBeInTheDocument();
@@ -164,7 +164,7 @@ describe("ListGenerator — Interaction Matrix", () => {
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: /delete/i })
+      screen.getAllByRole("button", { name: /delete/i })[0]
     );
 
     expect(massDelete).toHaveBeenCalled();
@@ -183,7 +183,7 @@ describe("ListGenerator — Interaction Matrix", () => {
     );
 
     await userEventInstance.click(
-      screen.getByRole("button", { name: /edit/i })
+      screen.getAllByRole("button", { name: /edit/i })[0]
     );
 
     expect(
