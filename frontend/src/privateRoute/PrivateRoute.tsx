@@ -6,7 +6,6 @@ const PrivateRoute = ({ children }: {children: React.ReactNode}) => {
   const jwt = tokenService.getLocalAccessToken();
   const [isLoading, setIsLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (jwt) {
@@ -19,22 +18,15 @@ const PrivateRoute = ({ children }: {children: React.ReactNode}) => {
       })
         .then((response) => response.json())
         .then((data) => {
-        //.then((data: boolean | { message?: string }) => {
           if (typeof data === 'object' && 'message' in data) {
-            setMessage(data.message || 'Your token has expired. Please, sign in again.');
             setIsValid(false);
           } else {
-            //setIsValid(data as boolean);
             setIsValid(data);
-            if (!data) {
-              setMessage('Your token has expired. Please, sign in again.');
-            }
           }
           setIsLoading(false);
         })
         .catch((err) => {
           console.error('Error validating token:', err);
-          setMessage('Authentication failed. Please log in again.');
           setIsValid(false);
           setIsLoading(false);
         });

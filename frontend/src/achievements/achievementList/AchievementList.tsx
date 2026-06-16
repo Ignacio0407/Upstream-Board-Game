@@ -27,16 +27,6 @@ export default function AchievementList() {
   const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements/user/${encodeURIComponent(String(user.id))}`, jwt);
   const navigate = useNavigate();
 
-  let roles: string[] = [];
-  if (jwt) {
-    try { roles = getRolesFromJWT(jwt); }
-    catch (e) { console.error("Invalid JWT token"); }
-  }
-
-  function getRolesFromJWT(token: string): string[] {
-    return jwt_decode<JwtPayload>(token).authorities;
-  }
-
   function renderAchievement(a: Achievement) {
     const achievedClass = userAchievements.some(ua => ua.id === a.id) ? "achieved" : "text-center table-cell";
     return (

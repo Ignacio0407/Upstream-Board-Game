@@ -147,9 +147,9 @@ const AppNavbar: React.FC = () => {
     <div>
       <Navbar expand="md" dark color="success">
         <NavbarBrand href="/">
-          <img src="/images/salmonLogo.webp" alt="Logo" style={{ height: 40, width: 40, marginRight: 5 }} />
-          Upstream
-        </NavbarBrand>
+        <img src="/images/salmonLogo.webp" alt="Logo" style={{ height: 40, width: 40, marginRight: 5 }} />
+          <span>Upstream</span>
+      </NavbarBrand>
         <NavbarToggler onClick={toggleNavbar} className="ms-2" />
         <Collapse isOpen={!collapsed} navbar>
           <Nav className="me-auto mb-2 mb-lg-0" navbar>

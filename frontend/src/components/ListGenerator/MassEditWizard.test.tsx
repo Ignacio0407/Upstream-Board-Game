@@ -103,7 +103,7 @@ describe("MassEditWizard — History and Navigation", () => {
     );
 
     // Initial state
-    var undoBtn; var redoBtn;
+    let undoBtn; let redoBtn;
     undoBtn = screen.getByText("Undo");
     redoBtn = screen.getByText("Redo");
     expect(undoBtn).toBeDisabled();

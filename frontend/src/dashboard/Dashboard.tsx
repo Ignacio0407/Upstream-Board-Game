@@ -23,8 +23,6 @@ export default function Dashboard() {
     const [matches, setMatches] = useFetchState<DashboardMatch[]>([],'/api/v1/matches/dashboard',jwt);
     const [filtered, setFiltered] = useState<DashboardMatch[]>([]);
     const [alerts, setAlerts] = useState<Alert[]>([]);
-    const [message, setMessage] = useState("");
-    const [visible, setVisible] = useState(false);
     const [spectatorIds, setSpectatorIds] = useState<number[]>([]);
 
     useEffect(() => {
@@ -79,8 +77,7 @@ export default function Dashboard() {
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
                 {user.roles && user.roles[0] == "ADMIN" && <Button color="danger" onClick={() =>
-                    deleteFromList(`/api/v1/matches/${match.id}`, match.id, [matches, setMatches], [alerts, setAlerts],
-                    setMessage, setVisible)}>
+                    deleteFromList(`/api/v1/matches/${match.id}`, match.id, [matches, setMatches], [alerts, setAlerts])}>
                     {<i className="fa fa-trash"></i>}
                     Delete
                 </Button>}

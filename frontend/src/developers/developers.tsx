@@ -1,13 +1,11 @@
-import {useState} from 'react'
 import { Table } from "reactstrap";
 import useFetchState from "../util/useFetchState.ts";
 import tokenService from '../services/token.service.ts';
-import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import Developer from '../interfaces/Developer.ts'  
    
 export default function DeveloperList() {
     const jwt = tokenService.getLocalAccessToken();
-    const [developers, setDevelopers] = useFetchState<Developer[]>([], `/api/v1/developers`, jwt);
+    const [developers] = useFetchState<Developer[]>([], `/api/v1/developers`, jwt);
 
     const imgnotfound = "/images/achievements/NotFoundImage.png";  
     
