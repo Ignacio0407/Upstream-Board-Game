@@ -10,7 +10,7 @@ const PrivateRoute = ({ children }: {children: React.ReactNode}) => {
 
   useEffect(() => {
     if (jwt) {
-      fetch(`/api/v1/auth/validate?token=${jwt}`, {
+      fetch(`/api/v1/auth/validate?token=${encodeURIComponent(jwt)}`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',

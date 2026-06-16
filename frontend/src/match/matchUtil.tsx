@@ -42,7 +42,7 @@ export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number
             const errorData = await response.json();
             if (errorData.error) alert(errorData.error) 
             else alert(errorData.message);
-            console.log("Error updating salmon:", errorData);
+            console.log("Error updating salmon:", response.status);
         }
         return response;
     } catch (error:any) {
@@ -59,7 +59,7 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
         if (!responseChangePhase.ok) {
             const errorData = await responseChangePhase.json();
             alert(errorData.error);
-            console.log("Error changing phase.", errorData);
+            console.log("Error changing phase.", responseChangePhase.status);
         }            
     } catch (error:any) {
         console.log("Error changing phase from catch.", error)
@@ -81,7 +81,7 @@ export const enterSpawn = async(salmon:SalmonMatch, jwt:string) => {
         if (!response.ok) {
             const errorData = await response.json();
             alert(errorData.error);
-            console.log("Error updating salmon:", errorData);
+            console.log("Error updating salmon:", response.status);
         }
         return response;
     } catch (error:any) {
@@ -97,7 +97,7 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
         if (!response.ok) {
             const errorData = await response.json();
             alert(errorData.message);
-            console.log("Error positioning tile:", errorData);
+            console.log("Error positioning tile:", response.status);
         }
         return response;
     } catch (error) {

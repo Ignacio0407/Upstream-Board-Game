@@ -8,12 +8,12 @@ interface ColorHandlerProps {matchId:number, jwt:string, finalUserId:number, tak
 export default function ColorHandler({ matchId, jwt, finalUserId, takenColors, onColorChanged }:ColorHandlerProps): JSX.Element {
     async function handleColorChange(color:string) {
         try {
-            const response = await post(`/api/v1/players/match/${matchId}`, jwt, { color: color, user: finalUserId });
+            const response = await post(`/api/v1/players/match/${encodeURIComponent(String(matchId))}`, jwt, { color: color, user: finalUserId });
 
             if (response.ok) {
                 const createdPlayer = await response.json();
 
-                const req = post(`/api/v1/salmonMatches/player/${createdPlayer.id}`, jwt);
+                const req = post(`/api/v1/salmonMatches/player/${encodeURIComponent(String(createdPlayer.id))}`, jwt);
 
                 await Promise.all([req]);
                 console.log("All SalmonMatches have been created.");
