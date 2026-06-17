@@ -61,7 +61,7 @@ export default function Game() {
     }, [allDataLoaded]);
 
     useEffect(() => {
-        if (match && players.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
+        if (match.id !== 0 && players.length > 0 && matchTiles.length > 0 && salmons.length > 0) {
             setAllDataLoaded(true);
         }
     }, [match, players, matchTiles, salmons]);

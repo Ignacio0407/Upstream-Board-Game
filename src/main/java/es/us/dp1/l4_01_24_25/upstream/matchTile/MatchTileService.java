@@ -139,8 +139,8 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         if (positionOccupied)
             throw new ConflictException("Ya existe una MatchTile en las coordenadas especificadas.");
     
-        if((matchTile.getMatch().getRound() == 0 && updates.get("y") > 3) || (matchTile.getMatch().getRound() == 1 && updates.get("y") > 4)
-        || (matchTile.getMatch().getRound() == 6 && updates.get("x").equals(1) && updates.get("y").equals(5)))
+        if((matchTile.getMatch().getRound().equals(0) && updates.get("y") > 3) || (matchTile.getMatch().getRound().equals(1) && updates.get("y") > 4)
+        || (matchTile.getMatch().getRound().equals(6) && updates.get("x").equals(1) && updates.get("y").equals(5)))
             throw new ConflictException("No se puede actualizar el MatchTile en esta ronda");
              
         if (updates.containsKey("x") && updates.containsKey("y")) {
