@@ -58,7 +58,7 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
         const responseChangePhase = await patch(`/api/v1/matches/${match.id}/changephase/${myPlayerId}`, jwt)
         if (!responseChangePhase.ok) {
             const errorData = await responseChangePhase.json();
-            alert(errorData.error);
+            alert(errorData.error || errorData.message);
             console.log("Error changing phase.", responseChangePhase.status);
         }            
     } catch (error:any) {

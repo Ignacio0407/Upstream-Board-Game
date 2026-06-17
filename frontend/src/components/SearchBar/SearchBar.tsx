@@ -306,7 +306,14 @@ const SearchBar = <T extends object>({
           aria-label="Search input"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") runSearchNow(); }}
+          onKeyDown={e => {
+            if (e.ctrlKey && e.key.toLowerCase() === "a") {
+              e.stopPropagation(); // prevents it from reaching ListGenerator
+              return; 
+            }
+
+            if (e.key === "Enter") runSearchNow();
+          }}
         />
         <button
           type="button"

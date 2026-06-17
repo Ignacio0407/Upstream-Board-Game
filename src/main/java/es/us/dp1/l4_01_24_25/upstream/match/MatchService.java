@@ -114,12 +114,12 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
 
     public void notifyHeronsUpdated (List<SalmonMatch> salmonMatches, List<MatchTile> matchTiles, List<Integer> deletedSalmonsIds, Integer matchId) {
         this.messagingTemplate.convertAndSend("/topic/heronsUpdated/" + matchId, 
-        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches), SALMON_MATCHES, deletedSalmonsIds));
+        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches), "deletedSalmonIds", deletedSalmonsIds));
     }
 
     public void notifyHeronsDeleted (List<MatchTile> matchTiles, Set<Integer> deletedSalmonsIds) {
         this.messagingTemplate.convertAndSend("/topic/heronsDeleted/" + matchTiles.get(0).getMatch().getId(), 
-        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, deletedSalmonsIds));
+        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), "deletedSalmonIds", deletedSalmonsIds));
     }
 
     public void notifyPlayerAndMatchUpdate (Match match) {
@@ -304,7 +304,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             }
         }
         this.playerService.checkPlayersDeadOrFinished(players);
-        this.notifyTilesAndSalmonsByMatchId(players.getFirst().getMatch().getId());
+        this.notifyTilesAndSalmonsByMatchId(players.get(0).getMatch().getId());
     }
     private void midGame (List<SalmonMatch> salmonMatches, List<Player> players, List<MatchTile> mt) {
         for(SalmonMatch sm:salmonMatches) {
@@ -320,7 +320,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             }
         }
         this.playerService.checkPlayersDeadOrFinished(players);
-        this.notifyTilesAndSalmonsByMatchId(players.getFirst().getMatch().getId());
+        this.notifyTilesAndSalmonsByMatchId(players.get(0).getMatch().getId());
     }
 
     private void endRound (Match match) throws ResourceNotFoundException {
