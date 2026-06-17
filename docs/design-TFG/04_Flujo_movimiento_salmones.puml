@@ -1,0 +1,62 @@
+@startuml
+title Flujo de Decisión: Lógica de Movimiento y Peligros (SalmonMatchService)
+
+start
+:Recibir Coordenada Destino;
+:Validar Turno y Energía > 0;
+
+if (¿Desde el Mar?) then (Sí)
+    :Ejecutar fromSea();
+    if (¿Casilla Destino Llena?) then (Sí)
+        :Cálculo de Salto (+3 Energía);
+        :Avanzar a Casilla Destino + 1;
+        note right: Salta la casilla llena
+    else (No)
+        :Movimiento Simple (Costo 1);
+    endif
+else (No, desde el Río)
+    :Validar Dirección (Solo Adelante);
+    if (¿Casilla Destino Llena?) then (Sí)
+        :Ejecutar fromGridFull();
+        :Cálculo de Salto (+3 Energía);
+        :Avanzar a Casilla Destino + 1;
+    else (No)
+        :Ejecutar fromGrid();
+        :Determinar Coste de Energía (1 o 2);
+    endif
+endif
+
+partition "Cálculo Universal de Peligros (Reglas de Obstáculos)" {
+    if (¿Se ha realizado un SALTO (Energía > 1)?) then (Sí)
+        :Evaluar Peligros en el Trayecto;
+        if (¿Origen, Intermedia o Destino son Oso (BEAR)?) then (Sí)
+            :Restar salmones por cada amenaza contactada;
+            note right: Se pierde 1 salmón por cada oso\nen el origen, el salto "sobre" o el destino.
+        endif
+        
+        if (¿Involucra Casilla de Salto/Cascada (JUMP)?) then (Sí)
+            :El coste ya incluye la penalización de energía;
+        endif
+    else (No, se ha NADADO (Energía = 1))
+        :Movimiento Seguro frente a Osos;
+        note right: Nadar permite evitar la amenaza del Oso.
+    endif
+
+    if (¿Casilla Destino es Águila (EAGLE)?) then (Sí)
+        :Muerte de Salmón (n-1);
+        :matchTileService.eagleToWater();
+        note right: El águila ataca al llegar,\nindependientemente del tipo de movimiento.
+    endif
+}
+
+:Descontar Energía al Player;
+:Actualizar Estado en Base de Datos;
+
+if (¿Energía del Jugador == 0?) then (Sí)
+    :Ejecutar herons() (Lógica de Garzas);
+    :Eliminar salmones en casillas con garza;
+endif
+
+:Notificar vía WebSockets;
+stop
+@enduml

@@ -1,0 +1,59 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Integración del Chat: Comunicación en Tiempo Real y Persistencia
+
+actor "Jugador A" as UA
+participant "Frontend (React)" as FEA
+participant "MessageController" as MC
+participant "MessageService" as MS
+participant "SimpMessagingTemplate" as STOMP
+participant "Otros Jugadores" as OFE
+
+== Envío de Mensaje ==
+
+UA -> FEA: Escribe mensaje y pulsa 'Enviar'
+FEA -> STOMP: SEND /app/chat/message/{matchId}
+note right: Payload: { content: "¡Buen movimiento!" }
+
+== Procesamiento en Backend ==
+
+activate MC
+MC -> MS: saveMessage(matchId, messageDTO, principal)
+activate MS
+
+MS -> MS: Validar pertenencia del usuario a la partida
+MS -> MS: MessageMapper.toEntity(dto)
+MS -> MS: repository.save(message)
+note right: El mensaje se guarda en H2\npara permitir el histórico al recargar.
+
+MS --> MC: messageEntity
+deactivate MS
+
+MC -> STOMP: convertAndSend("/topic/chat/{matchId}", messageDTO)
+deactivate MC
+
+== Recepción Reactiva ==
+
+STOMP -> FEA: Broadcast (vía suscripción)
+STOMP -> OFE: Broadcast (vía suscripción)
+
+FEA -> FEA: Actualizar lista de mensajes (State update)
+OFE -> OFE: Actualizar lista de mensajes (State update)
+
+note bottom
+  **Arquitectura:** Se utiliza un flujo Híbrido. 
+  1. El envío es asíncrono vía WebSocket (@MessageMapping).
+  2. La persistencia es síncrona en el hilo del mensaje.
+  3. La difusión es reactiva, permitiendo que el chat se mantenga 
+     sincronizado incluso si un jugador se reconecta tarde.
+end note
+
+@enduml

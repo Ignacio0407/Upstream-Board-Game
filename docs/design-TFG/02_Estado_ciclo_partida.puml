@@ -1,0 +1,25 @@
+@startuml
+[*] --> WAITING : Crear Partida
+
+state WAITING {
+    [*] --> LOBBY
+    LOBBY --> LOBBY : Jugador entra/sale
+}
+
+WAITING --> ON_GOING : Iniciar Partida (MatchCreator)
+
+state ON_GOING {
+    [*] --> Phase_TILES
+    Phase_TILES --> Phase_MOVING : Colocación completada / Recarga Energía
+    Phase_MOVING --> Phase_TILES : Fin de ronda (avanzar río)
+    Phase_MOVING --> Phase_MOVING : Siguiente turno
+}
+
+ON_GOING --> FINALIZED : Condiciones de Fin (Sin fichas, todos terminan/mueren)
+FINALIZED --> [*]
+
+note right of ON_GOING
+  La transición de fases es gestionada
+  automáticamente por MatchService.
+end note
+@enduml

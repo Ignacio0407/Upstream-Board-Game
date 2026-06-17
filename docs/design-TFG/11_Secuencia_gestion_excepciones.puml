@@ -1,0 +1,40 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+}
+
+title Manejo Global de Excepciones (Robustez del Sistema)
+
+participant "Frontend (React)" as FE
+participant "Rest Controller" as RC
+participant "Service Layer" as SL
+participant "ExceptionHandlerController" as EHC
+
+FE -> RC: POST /api/v1/salmonMatches//coordinate/id
+activate RC
+
+RC -> SL: logic.moveSalmon(...)
+activate SL
+
+SL -> SL: checkEnergy()
+note right: Error de lógica detectado
+
+SL --[#red]> RC: throw new InsufficientEnergyException("Not enough energy")
+deactivate SL
+deactivate RC
+
+note over EHC: Intercepción por @RestControllerAdvice
+
+RC --[#red]> EHC: Captura Excepción
+activate EHC
+
+EHC -> EHC: buildErrorMessage(status, message)
+EHC --[#blue]> FE: 400 Bad Request { "error": "Not enough energy" }
+deactivate EHC
+
+FE -> FE: Mostrar Toast/Alert al usuario
+note right: El sistema no se rompe y el \nusuario recibe feedback claro.
+@enduml

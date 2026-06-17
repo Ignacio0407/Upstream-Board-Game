@@ -1,0 +1,59 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Sincronización Reactiva del Tablero (Flujo del frontend)
+
+actor "Jugador" as U
+participant "Game.tsx (React)" as Game
+participant "WebSocketManager" as WS
+participant "Backend (Spring)" as API
+participant "matchUtil (Logic)" as Util
+
+== Establecimiento de Conexión ==
+
+U -> Game: Carga pantalla /game/:matchId
+activate Game
+
+Game -> Game: useFetchState (Initial Snapshot)
+note right: Carga inicial vía REST de:\nMatch, Players, Tiles y Salmons
+
+Game -> WS: initConnection(jwt)
+WS -> API: Connect (STOMP over SockJS)
+API --> WS: Connected
+
+Game -> WS: addSubscription("/topic/match/update/...")
+Game -> WS: addSubscription("/topic/movingSalmon/...")
+Game -> WS: addSubscription("/topic/tiles/place/...")
+
+== Reacción a Eventos (Tiempo Real) ==
+
+API -> WS: Mensaje: { salmon, myTile, toTravel }
+WS -> Game: Callback: movingSalmon
+
+Game -> Util: updateGridWithMovement(oldGrid, ...)
+activate Util
+Util -> Util: coordToIndex(x, y)
+Util -> Util: Inmutabilidad: Spread Operator [...]
+Util --> Game: newGrid (Inmune a mutaciones)
+deactivate Util
+
+Game -> Game: setGrid(newGrid)
+note right: React detecta cambio de estado\ny dispara re-renderizado parcial
+
+Game -> U: Actualiza posición del Salmón (Animado)
+
+== Gestión de Desconexión ==
+
+U -> Game: Abandona Partida / Cierra Pestaña
+Game -> WS: deactivate()
+note right: Cleanup de suscripciones\npara evitar memory leaks.
+deactivate Game
+
+@enduml

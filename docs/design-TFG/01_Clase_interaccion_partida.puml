@@ -1,0 +1,125 @@
+@startuml
+skinparam shadowing false
+skinparam class {
+    BackgroundColor<<DTO>> #E1F5FE
+    BorderColor<<DTO>> #01579B
+    BackgroundColor<<Entity>> #F1F8E9
+    BorderColor<<Entity>> #33691E
+}
+
+title Modelo de Dominio y Capa de Transferencia (DTOs)
+
+package "Capa de Dominio (Entidades JPA)" {
+    class User <<Entity>> {
+        - String name
+        - Authority authority
+        - Integer victories
+        - Integer playedgames
+        - Integer totalpoints
+    }
+
+    class Match <<Entity>> {
+        - State state
+        - Integer playersNumber
+        - Integer round
+        - Phase phase
+    }
+
+    class Player <<Entity>> {
+        - String name
+        - Color color
+        - Integer playerOrder
+        - Integer points
+        - Integer energy
+    }
+
+    class SalmonMatch <<Entity>> {
+        - Integer salmonsNumber
+        - Integer spawningNumber
+        - Coordinate coordinate
+        - Salmon salmon
+    }
+
+    class MatchTile <<Entity>> {
+        - Integer capacity
+        - Integer orientation
+        - Coordinate coordinate
+        - Tile tile
+    }
+
+    class Salmon <<Entity>> {
+        - Color color
+        - String image
+    }
+
+    class Tile <<Entity>> {
+        - String image
+        - TileType type
+    }
+}
+
+package "Capa de Transferencia (DTOs)" {
+    class MatchDTO <<DTO>> {
+        + State state
+        + Integer round
+        + Phase phase
+        + Integer initialPlayerId
+        + Integer actualPlayerId
+        + Integer matchCreatorId
+    }
+
+    class PlayerDTO <<DTO>> {
+        + String name
+        + Color color
+        + Integer energy
+        + Integer points
+        + Integer userId
+        + Integer matchId
+    }
+
+    class SalmonMatchDTO <<DTO>> {
+        + Coordinate coordinate
+        + Integer salmonsNumber
+        + Salmon salmon
+    }
+
+    class MatchTileDTO <<DTO>> {
+        + Coordinate coordinate
+        + Integer capacity
+        + Tile tile
+    }
+}
+
+' Relaciones de Dominio
+Match "1" *-- "many" Player : players
+Match "1" *-- "many" MatchTile : game
+Match "1" *-- "many" SalmonMatch : game
+Match "1" -- "0..1" Player : initialPlayer
+Match "1" -- "0..1" Player : actualPlayer
+Match "many" -- "1" User : matchCreator
+
+Player "many" -- "1" User : userPlayer
+SalmonMatch "many" -- "1" Player : owner
+SalmonMatch "many" -- "1" Match : game
+SalmonMatch "many" -- "1" Salmon : salmonDefinition
+
+MatchTile "many" -- "1" Tile : tileDefinition
+MatchTile "many" -- "1" Match : game
+
+' Dependencias de Mapeo
+Match ..> MatchDTO : "Transformado en"
+Player ..> PlayerDTO : "Transformado en"
+SalmonMatch ..> SalmonMatchDTO : "Transformado en"
+
+note bottom of Match
+  La entidad Match centraliza el estado del juego,
+  manteniendo referencias circulares controladas
+  con Player para gestionar turnos (actualPlayer).
+end note
+
+note top of MatchDTO
+  Los DTOs aplanan las relaciones complejas
+  sustituyendo objetos por IDs, optimizando
+  el tráfico de red en WebSockets.
+end note
+@enduml
