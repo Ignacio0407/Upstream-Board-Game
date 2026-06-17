@@ -86,6 +86,7 @@ _site/
 
 # Node / JavaScript
 node_modules/
+frontend/node_modules/.package-lock.json
 package-lock.json
 yarn.lock
 .eslintcache

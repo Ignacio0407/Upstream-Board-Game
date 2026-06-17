@@ -1,0 +1,68 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Orquestación Genérica de Listas, Filtrado y Edición
+
+actor "Usuario (Admin)" as U
+participant "ListGenerator" as LG
+participant "SearchBar" as SB
+participant "MassEditWizard" as Wizard
+participant "EditFormGenerator" as Form
+participant "Backend API" as API
+
+== Orquestación y Filtrado ==
+
+U -> LG: Entra en vista (e.g. Usuarios)
+LG -> LG: Inicializar Estados (data, page, selectedIds)
+LG -> SB: Renderizar con datos originales
+
+U -> SB: Filtra datos (visto en diagrama anterior)
+SB -> LG: setFiltered(results)
+LG -> LG: resetPage(1)
+LG -> LG: useMemo (paginatedData, renderedData)
+LG -> U: Muestra lista filtrada y paginada
+
+== Ciclo de Vida de Edición Masiva (Wizard) ==
+
+U -> LG: Selecciona múltiples items
+U -> LG: Click en "Mass Edit"
+LG -> Wizard: Abrir con selectedItems
+
+activate Wizard
+Wizard -> Wizard: Inicializar editHistory (original, versions[], activeVersion)
+note right: Nivel 2: Sistema de versiones\npara soporte de Undo/Redo
+
+loop Para cada item seleccionado
+    Wizard -> Form: Renderizar Formulario para item[i]
+    U -> Form: Modifica campos y click "Update & Next"
+    Form -> Wizard: applyUpdate(updatedEntity)
+    Wizard -> Wizard: hasChanges() check
+    Wizard -> Wizard: push version & activeVersion++
+    Wizard -> Wizard: structuredClone(updated)
+    Wizard -> Wizard: setActiveIndex(i + 1)
+end
+
+U -> Wizard: Click "Review"
+Wizard -> U: Muestra ReviewModal (Diferencias Original vs Editado)
+
+U -> Wizard: Confirmar Cambios
+Wizard -> API: PUT /api/v1/resource/mass-edit (JSON con IDs y Entidades)
+activate API
+API --> Wizard: 200 OK [UpdatedEntities]
+deactivate API
+
+Wizard -> LG: onClose(updatedEntities)
+deactivate Wizard
+
+LG -> LG: setSortedData(Actualizar items locales)
+LG -> LG: setSelectedIds(new Set())
+LG -> U: Refresca vista con datos actualizados
+
+@enduml

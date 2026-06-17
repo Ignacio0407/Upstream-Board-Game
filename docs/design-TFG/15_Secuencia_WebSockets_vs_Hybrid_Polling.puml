@@ -1,0 +1,40 @@
+@startuml
+skinparam shadowing false
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+}
+
+title Evolución de la Sincronización: Polling Híbrido vs. WebSockets Puros
+
+box "Estado Inicial: Polling Híbrido (Señalización)" #FFF3E0
+participant "Cliente" as C1
+participant "Servidor" as S1
+end box
+
+box "Estado Final: WebSockets Puros (Payload Directo)" #E8F5E9
+participant "Cliente" as C2
+participant "Servidor" as S2
+end box
+
+== Evento: Movimiento de Ficha o Salmón ==
+
+S1 <- : Cambio en DB
+S1 -[#green]> C1: WS SIGNAL (Topic)
+note left C1: Cliente recibe notificación\nde que algo ha cambiado.
+C1 -[#blue]> S1: GET /api/match/status
+activate S1
+S1 --[#blue]> C1: 200 OK [Estado Completo]
+deactivate S1
+note right S1: Doble latencia (Ida/Vuelta WS\nmás Ida/Vuelta REST)\ny carga innecesaria de red.
+
+|||
+
+S2 <- : Cambio en DB
+S2 -[#green]> C2: WS PAYLOAD: { action: "MOVE", dto: [...] }
+note left C2: Cliente recibe el estado\nactualizado **directamente**\nen un único frame STOMP.
+
+note right S2: Eficiencia máxima:\nLatencia reducida a la mitad y\nmenor carga de procesamiento HTTP.
+
+footer Evolución Arquitectónica implementada en el TFG - Upstream Board Game
+@enduml

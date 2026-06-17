@@ -1,0 +1,46 @@
+@startuml
+autonumber
+skinparam shadowing false
+
+title Flujo de Seguridad: Autenticación JWT en WebSockets (STOMP)
+
+actor "Cliente (Frontend)" as Client
+participant "HTTP Upgrade" as Handshake
+participant "Channel Interceptor" as Interceptor
+participant "JwtUtils" as JWT
+participant "Message Broker" as Broker
+
+== Conexión Inicial y Handshake ==
+
+Client -> Handshake: GET /ws-upstream/info (Protocol Upgrade)
+note left: Incluye JWT en URL o Header
+Handshake -> Handshake: Validar origen (CORS)
+Handshake --> Client: 101 Switching Protocols
+
+== Establecimiento de Sesión STOMP ==
+
+Client -> Interceptor: SEND CONNECT (STOMP Frame)
+note left: Header: Authorization: Bearer <token>
+
+activate Interceptor
+Interceptor -> JWT: validateJwtToken(token)
+JWT --> Interceptor: claims (Username, Roles)
+Interceptor -> Interceptor: Set SecurityContext Holder
+Interceptor --> Broker: Permite Conexión
+deactivate Interceptor
+
+Broker --> Client: CONNECTED
+
+== Suscripción Segura a Canales ==
+
+Client -> Interceptor: SUBSCRIBE /topic/match/update/{id}
+activate Interceptor
+Interceptor -> Interceptor: ¿El usuario pertenece a esta partida?
+note right: Validación dinámica de acceso\na tópicos privados.
+Interceptor --> Broker: Autoriza Suscripción
+deactivate Interceptor
+
+Broker --> Client: SUBSCRIPTION CONFIRMED
+
+note over Client, Broker: A partir de aquí, los mensajes fluyen\nbajo una sesión ya autenticada.
+@enduml

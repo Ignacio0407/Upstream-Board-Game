@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+actor "Administrador" as Admin
+
+package "Subsistema de Administración (Refactorizado)" {
+    usecase "Gestión Masiva de Usuarios" as UC_MassUser
+    usecase "Filtrado Avanzado (ListGenerator)" as UC_Filter
+    usecase "Edición en Lote (MassEditWizard)" as UC_BatchEdit
+    usecase "Auditoría de Partidas" as UC_Audit
+    usecase "Configuración de Logros" as UC_Achievements
+}
+
+Admin --> UC_MassUser
+Admin --> UC_Filter
+Admin --> UC_BatchEdit
+Admin --> UC_Audit
+Admin --> UC_Achievements
+
+UC_MassUser <.. UC_Filter : <<extend>>
+UC_MassUser <.. UC_BatchEdit : <<include>>
+
+note right of UC_Filter
+  Componente genérico 'ListGenerator'
+  reutilizado para Usuarios, Partidas y Logros.
+end note
+
+note right of UC_BatchEdit
+  Patrón 'Wizard' para cambios
+  atómicos en múltiples registros.
+end note
+@enduml

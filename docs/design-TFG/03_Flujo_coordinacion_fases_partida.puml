@@ -1,0 +1,60 @@
+@startuml
+title Motor de Juego: Coordinación de Fases y Turnos (MatchService)
+
+start
+:changePhase(matchId, playerId) invocado;
+:Validar Turno (actualPlayer == player);
+
+if (¿Quedan Losetas por colocar en el mazo?) then (Sí)
+    if (¿Fase actual es TILES?) then (Sí)
+        if (¿Es Ronda 0 (Preparación Inicial)?) then (Sí)
+            if (¿Se han colocado las primeras 12 losetas?) then (Sí)
+                note right: Quedan 17 losetas en el mazo
+                :Recargar Energía (5);
+                :Cambiar Fase a MOVING;
+                :Reiniciar Turno al InitialPlayer;
+            else (No)
+                :changePlayerTurn();
+                note right: Los jugadores se turnan para\ncolocar las 12 losetas iniciales.
+            endif
+        else (Ronda > 0)
+            if (¿Se han colocado las 3 losetas de la ronda?) then (Sí)
+                :Recargar Energía (5);
+                :Cambiar Fase a MOVING;
+                :Reiniciar Turno al InitialPlayer;
+            else (No)
+                :changePlayerTurn();
+            endif
+        endif
+    else (Fase MOVING)
+        if (¿Jugador agotó energía?) then (Sí)
+            :changePlayerTurn();
+        endif
+    endif
+else (No quedan losetas en el mazo)
+    :Avanzar Ronda (round++);
+    :Eliminar fila inferior del río;
+    :Desplazar todo el río hacia abajo (-1 Y);
+    :Recargar Energía (5) a todos;
+    :Fijar Fase a MOVING;
+endif
+
+partition "Gestión de Supervivencia y Fin" {
+    if (¿Jugador no tiene más salmones?) then (Sí)
+        :setPlayerDead();
+        :changePlayerTurn();
+    endif
+    if (¿Ronda >= 6 y Jugador terminó?) then (Sí)
+        :setPlayerNoEnergy();
+        :changePlayerTurn();
+    endif
+}
+
+if (¿Condiciones de Fin de Partida?) then (Sí)
+    :setState(FINALIZED);
+    :Notificar vía WebSocket;
+endif
+
+:Notificar actualización de Match y Players;
+stop
+@enduml

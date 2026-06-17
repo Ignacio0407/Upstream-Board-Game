@@ -1,0 +1,32 @@
+@startuml
+package "es.us.dp1.l4_01_24_25.upstream.statistic" {
+    
+    interface AchievementStrategy <<Strategy>> {
+        + boolean isUnlockedByUser(User, Achievement)
+    }
+
+    class AchievementUnlocker <<Context>> {
+        - Map<Metric, AchievementStrategy> strategies
+        + boolean checkUnlock(User, Achievement)
+    }
+
+    class AUGamesPlayed implements AchievementStrategy {
+        + boolean isUnlockedByUser(User, Achievement)
+    }
+
+    class AUTotalPoints implements AchievementStrategy {
+        + boolean isUnlockedByUser(User, Achievement)
+    }
+
+    class AUVictories implements AchievementStrategy {
+        + boolean isUnlockedByUser(User, Achievement)
+    }
+
+    AchievementUnlocker "1" o-- "many" AchievementStrategy : utiliza
+}
+
+note top of AchievementUnlocker
+  Patrón Strategy: Permite añadir nuevas métricas
+  de logros sin modificar el motor de desbloqueo.
+end note
+@enduml
