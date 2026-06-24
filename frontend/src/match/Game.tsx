@@ -296,7 +296,7 @@ export default function Game() {
                             onKeyDown={(e) => e.key === 'Enter' && handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
                         style={{                          
                             filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
-                            border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`, // Cambia el color y grosor del borde según necesites
+                            border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
                             borderRadius: '40px',}}
                         />
                         )

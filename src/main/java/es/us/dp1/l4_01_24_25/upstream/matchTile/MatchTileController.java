@@ -29,7 +29,7 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
         this.matchTileService = matchTileService;
     }
 
-    @GetMapping("match/{id}")
+    @GetMapping("/match/{id}")
     public ResponseEntity<List<MatchTileDTO>> findByMatchId(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(this.matchTileService.findByMatchIdAsDTO(id));
     }
