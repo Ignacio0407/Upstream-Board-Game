@@ -56,8 +56,9 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
     }
 
     @PostMapping("/player/{playerId}")
-    public ResponseEntity<List<SalmonMatchDTO>> create(@PathVariable("playerId") Integer playerId) {
-        return ResponseEntity.ok(this.salmonMatchService.create(playerId));
+    public ResponseEntity<Void> create(@PathVariable("playerId") Integer playerId) {
+        this.salmonMatchService.create(playerId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping("/enterSpawn/{id}")
