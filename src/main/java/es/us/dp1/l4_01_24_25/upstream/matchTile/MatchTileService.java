@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
@@ -20,10 +22,13 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
+import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @Service
 public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO, Integer>{
@@ -33,16 +38,18 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     TileService tileService;
     MatchService matchService;
     PlayerService playerService;
+    UserService userService;
     SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService, PlayerService playerService, SimpMessagingTemplate messagingTemplate) {
+    public MatchTileService(MatchTileRepository matchTileRepository, MatchTileMapper matchTileMapper, @Lazy TileService tileService, @Lazy MatchService matchService, PlayerService playerService, UserService userService, SimpMessagingTemplate messagingTemplate) {
         super(matchTileRepository, matchTileMapper);
         this.matchTileRepository = matchTileRepository;
         this.matchTileMapper = matchTileMapper;
         this.tileService = tileService;
         this.matchService = matchService;
         this.playerService = playerService;
+        this.userService = userService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -118,12 +125,18 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     @Transactional
     public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
-        Integer actual = Integer.valueOf(updates.get("actualPlayerId").toString());
-        Integer mine = Integer.valueOf(updates.get("myPlayerId").toString());
-        if (!actual.equals(mine)) {
+        MatchTile matchTile = this.findById(id);
+        Match match = matchTile.getMatch();
+        // 1. Extract user from JWT token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        // 2. Search player
+        User authenticatedUser = this.userService.findUserByName(currentUsername);
+        Player myPlayer = this.playerService.findPlayerByUserAndMatch(authenticatedUser.getId(), match.getId());
+        // 3. Safe validation with DB
+        if (!match.getActualPlayer().getId().equals(myPlayer.getId())) {
             throw new NotValidMoveException("It is not your turn!");
         }
-        MatchTile matchTile = this.findById(id);
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
         if (!Integer.valueOf(0).equals(updates.get("y"))) {
             boolean hasSupport = matchTiles.stream().filter(mT -> mT.getCoordinate() != null)
@@ -133,7 +146,6 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID", id);
             }
         }
-    
         Boolean positionOccupied = matchTiles.stream()
         .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x().equals(updates.get("x")) && mT.getCoordinate().y().equals(updates.get("y")));
         if (positionOccupied)
@@ -150,7 +162,6 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
         this.messagingTemplate.convertAndSend("/topic/tiles/place/" + updatedTile.getMatchId(), updatedTile);
         this.playerService.notifyPlayersUpdate(updatedTile.getMatchId());
-        Match match = this.matchService.findById(updatedTile.getMatchId());
         this.matchService.notifyMatchUpdate(match);
         return updatedTile;
     }

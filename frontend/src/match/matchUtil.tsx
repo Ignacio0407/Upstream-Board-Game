@@ -93,7 +93,7 @@ export const enterSpawn = async(salmon:SalmonMatch, jwt:string) => {
 export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
     if (match.phase === Phase.TILES && actualPlayerId === myPlayerId) {
         try {
-        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {actualPlayerId, myPlayerId, x,y});
+        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
         if (!response.ok) {
             const errorData = await response.json();
             alert(errorData.message);
