@@ -147,7 +147,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     private void throwExceptionsInitial(Coordinate myCoordinate, Coordinate newCoordinate, Player player, MatchTile toTravel) {
         if(myCoordinate != null && myCoordinate.equals(newCoordinate)) throw new NotValidMoveException("You cannot go to where yo already are");
         if (player.getEnergy() <= 0) throw new InsufficientEnergyException("Not enough energy for that move");
-        if (myCoordinate == null && newCoordinate.y() != 0) throw new NotValidMoveException("You can only advance from 1 to 1");
+        if (myCoordinate == null && !newCoordinate.y().equals(0)) throw new NotValidMoveException("You can only advance from 1 to 1");
         if (player.getEnergy() < 3) {
             if (toTravel.isFull()) throw new NotValidMoveException("The tile is full and you don't have enough energy to jump!");
         }  
@@ -523,7 +523,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         else this.processSalmonMovement(salmonMatch, myTile, toTravel2, player, match, newCoordinate2, energyUsed, players, numPlayers);
     }
 
-    public List<SalmonMatchDTO> create(Integer playerId) {
+    public void create(Integer playerId) {
         List<SalmonMatch> salmonMatches = new ArrayList<>();
         Player player = this.playerService.findById(playerId);
         Match match = player.getMatch();
@@ -540,7 +540,6 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             salmonMatches.add(salmonMatch);
         }
         this.saveAll(salmonMatches);
-        return this.salmonMatchMapper.toDTOList(salmonMatches);
     }
 
     private void enterSpawnMovement (Coordinate myCoordinate, Coordinate newCoordinate, TileType tileType, MatchTile myTile, 

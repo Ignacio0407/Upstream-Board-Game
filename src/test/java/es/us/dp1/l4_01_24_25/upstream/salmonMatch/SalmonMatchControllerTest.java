@@ -155,13 +155,8 @@ class SalmonMatchControllerTest {
     @Test
     @DisplayName("POST /player/{playerId} - Happy Path")
     void shouldCreateSalmonMatchesForPlayer() throws Exception {
-        SalmonMatchDTO dto = new SalmonMatchDTO();
-        dto.setId(1);
-        when(salmonMatchService.create(1)).thenReturn(List.of(dto));
-
         mockMvc.perform(post("/api/v1/salmonMatches/player/1"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(1));
+            .andExpect(status().isOk());
 
         verify(salmonMatchService).create(1);
     }
@@ -169,11 +164,13 @@ class SalmonMatchControllerTest {
     @Test
     @DisplayName("POST /player/{playerId} - Negative Path (Player Not Found -> 404)")
     void shouldFailCreateSalmonMatchesWhenPlayerNotFound() throws Exception {
-        when(salmonMatchService.create(99))
-            .thenThrow(new ResourceNotFoundException("Player not found"));
+        
+        // Inverted sintaxis to throw exceptions in void methods
+        doThrow(new ResourceNotFoundException("Player not found"))
+            .when(salmonMatchService).create(99);
 
         mockMvc.perform(post("/api/v1/salmonMatches/player/99"))
-               .andExpect(status().isNotFound());
+            .andExpect(status().isNotFound());
     }
 
 
