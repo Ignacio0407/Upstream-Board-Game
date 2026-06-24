@@ -254,7 +254,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
 
     public void changePhase(Integer matchId, Integer playerId) {
         Match match = this.findById(matchId);
-        if (match.getActualPlayer().getId() != playerId)
+        if (!match.getActualPlayer().getId().equals(playerId))
             throw new NotValidMoveException("It is not your turn!");
         Player player = this.playerService.findById(playerId);
         Phase phase = match.getPhase();

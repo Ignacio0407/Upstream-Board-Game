@@ -25,6 +25,8 @@ public interface PlayerRepository extends BaseRepository<Player, PlayerDTO, Inte
 
     public List<Player> findByMatchId(Integer id);
 
+    Player findByUserPlayer_IdAndMatch_Id(Integer userId, Integer matchId);
+
     public List<Player> findByMatchIdOrderByPlayerOrderAsc(Integer id);
 
     @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p WHERE p.match.id = :id")

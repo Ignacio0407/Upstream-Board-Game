@@ -43,6 +43,10 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         return this.playerRepository.findByMatchId(id);
     }
 
+    public Player findPlayerByUserAndMatch(Integer userId, Integer matchId) {
+        return this.playerRepository.findByUserPlayer_IdAndMatch_Id(userId, matchId);
+    }
+
     public List<PlayerDTO> findPlayersByMatchAsDTO(Integer id) {
         return this.playerRepository.findPlayersByMatchAsDTO(id);
     }
