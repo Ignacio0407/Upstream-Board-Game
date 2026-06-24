@@ -94,7 +94,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }
 
     public void notifyMatchUpdateDashboard (Match match) {
-        this.messagingTemplate.convertAndSend("/topic/matches/dashboard" + match.getId(), this.toDashboardDTO(match));
+        this.messagingTemplate.convertAndSend("/topic/matches/dashboard", this.toDashboardDTO(match));
     }
 
     public void notifyMatchStarts (Integer matchId) {

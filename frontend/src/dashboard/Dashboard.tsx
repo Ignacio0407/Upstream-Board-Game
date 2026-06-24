@@ -14,6 +14,7 @@ import {DashboardMatch} from '../interfaces/Match.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
 import Match from '../interfaces/Match.ts';
 import { State } from '../interfaces/State.ts';
+import { Authority } from '../interfaces/User.ts';
    
 export default function Dashboard() {
     const jwt = tokenService.getLocalAccessToken();
@@ -28,7 +29,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (jwt) {
             const decoded = jwt_decode<JwtPayload>(jwt);
-            if (decoded && decoded.sub) setUsername(decoded.sub);
+            if (decoded?.sub) setUsername(decoded.sub);
         };
     }, [jwt])
     
@@ -76,8 +77,8 @@ export default function Dashboard() {
                 <td className='celda'>{(match.state === State.ON_GOING || match.state === State.WAITING) &&
                 <Button color={"warning"} onClick={() => espectate(match)} >Spectate game</Button>
                 }</td>
-                {user.roles && user.roles[0] == "ADMIN" && <Button color="danger" onClick={() =>
-                    deleteFromList(`/api/v1/matches/${match.id}`, match.id, [matches, setMatches], [alerts, setAlerts])}>
+                {user?.roles?.[0] === Authority.ADMIN && <Button color="danger" onClick={() =>
+                    deleteFromList(`/api/v1/matches`, match.id, [matches, setMatches], [alerts, setAlerts])}>
                     {<i className="fa fa-trash"></i>}
                     Delete
                 </Button>}
