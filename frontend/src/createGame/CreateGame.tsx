@@ -5,6 +5,7 @@ import { post } from '../util/fetchers.ts';
 import { FormGenerator, FieldDef } from '../components/Form/FormGenerator.tsx';
 import '../static/css/createGame/createGame.css';
 import '../static/css/admin/adminPage.css';
+import { Authority } from '../interfaces/User.ts';
 
 interface CreateGameFormData {name: string, password: string}
 
@@ -34,8 +35,8 @@ export default function CreateGame() {
         throw new Error(errText || 'Unknown error');
       }
       const createdMatch = await response.json();
-
       navigate(`/matches/${createdMatch.id}/waiting`);
+      
     } catch (error: any) {
       console.error('Error al crear la partida:', error);
       alert(`Error al crear la partida: ${error.message}`);
@@ -57,7 +58,7 @@ export default function CreateGame() {
           cancelButtonActivated={true}
           navigateOnCancel='/dashboard'
           actualUser={user}
-          requiredAuth='PLAYER'
+          requiredAuth={Authority.PLAYER}
         />
       </div>
     </div>

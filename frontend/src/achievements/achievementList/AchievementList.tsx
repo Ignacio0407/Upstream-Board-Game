@@ -6,7 +6,7 @@ import deleteFromList from "../../util/deleteFromList.ts";
 import "./achievement.css";
 import ListGenerator from "../../components/ListGenerator/ListGenerator.tsx";
 import Achievement from "../../interfaces/Achievement.ts";
-import User from "../../interfaces/User.ts";
+import User, { Authority } from "../../interfaces/User.ts";
 import { buildSafeUrl, get } from "../../util/fetchers.ts";
 import ButtonLink from "../../components/ButtonLink/ButtonLink.tsx";
 import { useNavigate } from "react-router-dom";
@@ -62,19 +62,19 @@ export default function AchievementList() {
           columns={["name","description","badgeImage","threshold","metric"]}
           idKey="id"
           customRender={renderAchievement}
-          requiredAuth="PLAYER"
-          createButton={user.roles && user.roles[0] === "ADMIN" ? "/achievements/new" : undefined}
+          requiredAuth={Authority.PLAYER}
+          createButton={user?.roles?.[0] === Authority.ADMIN ? "/achievements/new" : undefined}
           createButtonPosition="bottom"
-          editCondition={user.roles && user.roles[0] === "ADMIN"}
+          editCondition={user?.roles?.[0] === Authority.ADMIN}
           editButton={(a) => <ButtonLink outline={false} color="warning" direction={`/achievements/${a.id}`} state={{ achievement: a }} text="Edit" />}
-          deleteCondition={user.roles?.[0] === "ADMIN"}
+          deleteCondition={user.roles?.[0] === Authority.ADMIN}
           deleteButton={(a) => deleteFromList(`/api/v1/achievements`, a.id, [achievements, setAchievements], [alerts, setAlerts])}
           customLabels={{ badgeImage: "Badge Image" }}
           massEditButton={<Button outline={false} color="warning" style={{ color: "#fff" }}>Edit</Button>}
           massEditUri="/api/v1/achievements/some"
-          massDeleteButton={(items: Achievement[]) => deleteSomeFromList("/api/v1/achievements", items, "ADMIN", undefined, false, achievements, setAchievements, navigate, { confirmField: "name" })}
+          massDeleteButton={(items: Achievement[]) => deleteSomeFromList("/api/v1/achievements", items, Authority.ADMIN, undefined, false, achievements, setAchievements, navigate, { confirmField: "name" })}
           searchBarPlaceholder={"Search achievements"}
-          massRequiredAuth="ADMIN"
+          massRequiredAuth={Authority.ADMIN}
         />
       </div>
     </div>

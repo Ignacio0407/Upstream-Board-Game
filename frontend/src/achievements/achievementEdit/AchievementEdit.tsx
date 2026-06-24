@@ -4,6 +4,7 @@ import Achievement, { Metric } from '../../interfaces/Achievement.ts';
 import { EditFormGenerator } from '../../components/Form/EditFormGenerator.tsx';
 import { SubmitHandler } from 'react-hook-form';
 import tokenService from '../../services/token.service.ts';
+import { Authority } from '../../interfaces/User.ts';
 
 const jwt = tokenService.getLocalAccessToken();
 
@@ -29,7 +30,7 @@ export default function AchievementEdit() {
       <div className="auth-form-container">
         <EditFormGenerator<Achievement> entityToEdit={achievement} onSubmit={onSubmit} submitText="Save" loadingText="Saving..."
           selectOptions={{ metric: Object.values(Metric) }}
-          actualUser={user} requiredAuth="ADMIN"
+          actualUser={user} requiredAuth={Authority.ADMIN}
         />
       </div>
     </div>

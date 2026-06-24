@@ -33,6 +33,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FormGenerator } from "./FormGenerator";
 import * as reactRouterDom from "react-router-dom";
 import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.ts";
+import { Authority } from "../../interfaces/User.ts";
 
 // --- Mocks ---
 
@@ -118,7 +119,7 @@ describe("FormGenerator Component", () => {
                 onSubmit={vi.fn()}
                 deactivateSecurity={false}
                 requiredAuth="ADMIN"
-                actualUser={{ id: 1, authority: "PLAYER" } as any} defaultValues={mockDefaultValues}            />
+                actualUser={{ id: 1, authority: Authority.PLAYER } as any} defaultValues={mockDefaultValues}            />
         );
 
         expect(navigateToUnauthorized).toHaveBeenCalled();

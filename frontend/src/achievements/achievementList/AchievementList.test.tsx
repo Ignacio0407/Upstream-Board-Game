@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { get } from "../../util/fetchers";
 import tokenService from "../../services/token.service";
-import { emptyUser } from "../../interfaces/User";
+import { Authority, emptyUser } from "../../interfaces/User";
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -53,7 +53,7 @@ vi.mock("../../util/useFetchState", () => ({
   })
 }));
 
-vi.mock("jwt-decode", () => ({ default: vi.fn(() => ({ authorities: ["PLAYER"] })) }));
+vi.mock("jwt-decode", () => ({ default: vi.fn(() => ({ authorities: [Authority.PLAYER] })) }));
 vi.mock("../../services/token.service", () => ({
   default: {
     getLocalAccessToken: vi.fn(),
@@ -74,7 +74,7 @@ describe("AchievementList", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("mock-jwt");
-    vi.mocked(tokenService.getUser).mockReturnValue({...emptyUser, id: 1, username: "testuser", roles: ["PLAYER"] });
+    vi.mocked(tokenService.getUser).mockReturnValue({...emptyUser, id: 1, username: "testuser", roles: [Authority.PLAYER] });
   });
 
   // ── 1. Basic rendering ──────────────────────────────────────────────────
@@ -176,7 +176,7 @@ describe("AchievementList", () => {
   // ── 11. Roles PLAYER → admin buttons hidden ───────────────────────────
 
   it("hides admin controls when user role is PLAYER", async () => {
-    renderComponent(); // default: roles: ["PLAYER"]
+    renderComponent(); // default: roles: [Authority.PLAYER]
     await waitFor(() => {
         expect(screen.queryByTestId("create-button")).not.toBeInTheDocument();
         expect(screen.queryByTestId("edit-condition")).not.toBeInTheDocument();

@@ -4,6 +4,7 @@ import App from "./App";
 import tokenService from "./services/token.service.ts";
 import jwt_decode from "jwt-decode";
 import { MemoryRouter } from "react-router-dom";
+import { Authority } from "./interfaces/User.ts";
 
 // --- Mocks ---
 
@@ -74,7 +75,7 @@ describe("App Component Routing", () => {
 
     it("renders Dashboard when authenticated as PLAYER and navigating to /dashboard", async () => {
         vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("fake-jwt");
-        vi.mocked(jwt_decode).mockReturnValue({ authorities: ["PLAYER"] });
+        vi.mocked(jwt_decode).mockReturnValue({ authorities: [Authority.PLAYER] });
         
         render(
             <MemoryRouter initialEntries={["/dashboard"]}>

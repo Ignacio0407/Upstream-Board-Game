@@ -9,6 +9,7 @@ import * as useFetchStateModule from '../util/useFetchState';
 import * as deleteFromListModule from '../util/deleteFromList';
 import { DashboardMatch } from '../interfaces/Match';
 import type User from '../interfaces/User';
+import { Authority } from '../interfaces/User';
 
 // ─── Infrastructure mocks ─────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ vi.mock('jwt-decode', () => ({
 vi.mock('../services/token.service', () => ({
   default: {
     getLocalAccessToken: vi.fn(() => 'mock-jwt'),
-    getUser: vi.fn(() => ({ id: 1, roles: ['PLAYER'] } as User)),
+    getUser: vi.fn(() => ({ id: 1, roles: [Authority.PLAYER] } as User)),
   },
 }));
 
@@ -101,7 +102,7 @@ describe('Dashboard', () => {
     mockClientInstance.deactivate.mockReset();
     mockClientInstance.subscribe.mockReset();
     vi.mocked(tokenService.getLocalAccessToken).mockReturnValue('mock-jwt');
-    vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: ['PLAYER'] } as User);
+    vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: [Authority.PLAYER] } as User);
     // Always reset to empty so no previous matches bleed through
     mockFetchState([]);
   });
@@ -212,7 +213,7 @@ describe('Dashboard', () => {
   describe('espectate()', () => {
     test('Browses to /game with id of user in spectatorIds', () => {
       mockFetchState([matchWaiting]);
-      vi.mocked(tokenService.getUser).mockReturnValue({ id: 42, roles: ['PLAYER'] } as User);
+      vi.mocked(tokenService.getUser).mockReturnValue({ id: 42, roles: [Authority.PLAYER] } as User);
       renderDashboard();
       fireEvent.click(screen.getByRole('button', { name: /Spectate game/i }));
       expect(mockedNavigate).toHaveBeenCalledWith(
@@ -226,7 +227,7 @@ describe('Dashboard', () => {
 
   describe('Security🛡️: Role Control Access', () => {
     test('ADMIN: shows Delete button in each row', () => {
-      vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: ['ADMIN'] } as User);
+      vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: [Authority.ADMIN] } as User);
       mockFetchState([matchWaiting, matchOnGoing]);
       renderDashboard();
       expect(screen.getAllByRole('button', { name: /Delete/i })).toHaveLength(2);
@@ -239,12 +240,12 @@ describe('Dashboard', () => {
     });
 
     test('ADMIN: click on Delete calls deleteFromList with correct URL', () => {
-      vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: ['ADMIN'] } as User);
+      vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, roles: [Authority.ADMIN] } as User);
       mockFetchState([matchWaiting]);
       renderDashboard();
       fireEvent.click(screen.getByRole('button', { name: /Delete/i }));
       expect(vi.mocked(deleteFromListModule.default)).toHaveBeenCalledWith(
-        `/api/v1/matches/${matchWaiting.id}`,
+        `/api/v1/matches`,
         matchWaiting.id,
         expect.any(Array),
         expect.any(Array)

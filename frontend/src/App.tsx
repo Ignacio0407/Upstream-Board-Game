@@ -24,6 +24,7 @@ import EndGame from './match/EndGame.tsx';
 import {JwtPayload} from './interfaces/util'
 import DoNotHackMyApp from './components/DoNotHackMyApp/DoNotHackMyApp.tsx';
 import AchievementCreate from './achievements/achievementCreate/AchievementCreate.tsx';
+import { Authority } from './interfaces/User.ts';
 
 const ErrorFallback: React.FC<{error: Error; resetErrorBoundary: () => void;}> = ({ error, resetErrorBoundary }) => {
   return (
@@ -57,7 +58,7 @@ const App: React.FC = () => {
   let publicRoutes: React.ReactNode = null;
 
   roles.forEach((role: string) => {
-    if (role === 'ADMIN') {
+    if (role === Authority.ADMIN) {
       adminRoutes = (
         <>
           <Route path="/rules" element={<Rules />} />
@@ -75,7 +76,7 @@ const App: React.FC = () => {
         </>
       );
     }
-    if (role === 'PLAYER') {
+    if (role === Authority.PLAYER) {
       playerRoutes = (
         <>
           <Route path="/rules" element={<Rules />} />
