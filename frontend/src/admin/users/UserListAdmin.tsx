@@ -5,7 +5,7 @@ import useFetchState from "../../util/useFetchState.ts";
 import deleteFromList from "../../util/deleteFromList.ts";
 import ErrorModal from "../../util/ErrorModal.tsx";
 import ListGenerator from "../../components/ListGenerator/ListGenerator.tsx";
-import { UserList } from "../../interfaces/User.ts";
+import { Authority, UserList } from "../../interfaces/User.ts";
 import "../../static/css/admin/adminPage.css";
 import { patch } from "../../util/fetchers.ts";
 
@@ -63,7 +63,7 @@ export default function UserListAdmin() {
         customRender={renderUser}
 
         /* 🔐 Security */
-        requiredAuth="ADMIN"
+        requiredAuth={Authority.ADMIN}
 
         /* ✏️ Edit */
         editCondition={true}

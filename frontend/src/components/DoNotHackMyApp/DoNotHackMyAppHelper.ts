@@ -1,8 +1,8 @@
 import { NavigateFunction } from "react-router-dom";
-import { BaseUser } from "../../interfaces/User";
+import { Authority, BaseUser } from "../../interfaces/User";
 
 function checkAuthDefault (required: string, actualUser: BaseUser) {
-  if (actualUser.roles && actualUser.roles[0] !== "ADMIN") return required === actualUser.roles[0];
+  if (actualUser.roles && actualUser.roles[0] !== Authority.ADMIN) return required === actualUser.roles[0];
   else return true
   //else return required === actualUser.authority.authority;
 }

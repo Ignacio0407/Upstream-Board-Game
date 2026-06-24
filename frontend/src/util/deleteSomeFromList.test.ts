@@ -3,6 +3,7 @@ import deleteSomeFromList from './deleteSomeFromList';
 import tokenService from '../services/token.service';
 import * as fetchers from './fetchers';
 import { navigateToUnauthorized } from '../components/DoNotHackMyApp/DoNotHackMyAppHelper';
+import { Authority } from '../interfaces/User';
 
 vi.mock('../services/token.service');
 vi.mock('./fetchers');
@@ -23,13 +24,13 @@ describe('deleteSomeFromList', () => {
     });
 
     it('calls navigateToUnauthorized if security is active', () => {
-        deleteSomeFromList('/url', items, 'ADMIN', undefined, false, state, setState, navigate);
+        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, false, state, setState, navigate);
         expect(navigateToUnauthorized).toHaveBeenCalled();
     });
 
     it('does nothing if user cancels confirmation', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(false);
-        deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
+        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
         expect(fetchers.deleteEntity).not.toHaveBeenCalled();
     });
 
@@ -37,7 +38,7 @@ describe('deleteSomeFromList', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockResolvedValue({ status: 200 } as any);
 
-        deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
+        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
 
         await vi.waitFor(() => {
             expect(fetchers.deleteEntity).toHaveBeenCalledTimes(2);
@@ -49,7 +50,7 @@ describe('deleteSomeFromList', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockRejectedValue(new Error('Fail'));
 
-        deleteSomeFromList('/url', items, 'ADMIN', undefined, true, state, setState, navigate);
+        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
 
         await vi.waitFor(() => {
             expect(globalThis.alert).toHaveBeenCalledWith('Error deleting selected items');

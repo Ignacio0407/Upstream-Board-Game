@@ -30,6 +30,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { navigateToUnauthorized } from './DoNotHackMyAppHelper';
+import { Authority } from '../../interfaces/User';
 
 describe('DoNotHackMyAppHelper', () => {
     const navigate = vi.fn();
@@ -40,40 +41,40 @@ describe('DoNotHackMyAppHelper', () => {
 
     it('uses checkAuth function if provided', () => {
         const checkAuth = vi.fn().mockReturnValue(true);
-        navigateToUnauthorized(checkAuth, { id: 1, username: 'user' }, 'ADMIN', navigate);
-        expect(checkAuth).toHaveBeenCalledWith('ADMIN');
+        navigateToUnauthorized(checkAuth, { id: 1, username: 'user' }, Authority.ADMIN, navigate);
+        expect(checkAuth).toHaveBeenCalledWith(Authority.ADMIN);
         expect(navigate).not.toHaveBeenCalled();
     });
 
     it('redirects if checkAuth function returns false', () => {
         const checkAuth = vi.fn().mockReturnValue(false);
-        navigateToUnauthorized(checkAuth, { id: 1, username: 'user' }, 'ADMIN', navigate);
+        navigateToUnauthorized(checkAuth, { id: 1, username: 'user' }, Authority.ADMIN, navigate);
         expect(navigate).toHaveBeenCalledWith('/do-not-hack-my-app');
     });
 
     it('uses checkAuthDefault if checkAuth is undefined', () => {
-        // Alice has roles ['PLAYER']
-        const alice = { id: 1, username: 'Alice', roles: ['PLAYER'] };
+        // Alice has roles [Authority.PLAYER]
+        const alice = { id: 1, username: 'Alice', roles: [Authority.PLAYER] };
         
         // Attempting to access ADMIN area
-        navigateToUnauthorized(undefined, alice as any, 'ADMIN', navigate);
+        navigateToUnauthorized(undefined, alice as any, Authority.ADMIN, navigate);
         expect(navigate).toHaveBeenCalledWith('/do-not-hack-my-app');
     });
 
     it('allows access if checkAuthDefault returns true', () => {
-        const admin = { id: 1, username: 'Admin', roles: ['ADMIN'] };
-        navigateToUnauthorized(undefined, admin as any, 'ADMIN', navigate);
+        const admin = { id: 1, username: 'Admin', roles: [Authority.ADMIN] };
+        navigateToUnauthorized(undefined, admin as any, Authority.ADMIN, navigate);
         expect(navigate).not.toHaveBeenCalled();
     });
 
     it('allows access if checkAuth is true', () => {
-        navigateToUnauthorized(true, { id: 1 } as any, 'ADMIN', navigate);
+        navigateToUnauthorized(true, { id: 1 } as any, Authority.ADMIN, navigate);
         expect(navigate).not.toHaveBeenCalled();
     });
 
     it('redirects to custom URL', () => {
         const checkAuth = () => false;
-        navigateToUnauthorized(checkAuth, { id: 1 } as any, 'ADMIN', navigate, '/custom-redirect');
+        navigateToUnauthorized(checkAuth, { id: 1 } as any, Authority.ADMIN, navigate, '/custom-redirect');
         expect(navigate).toHaveBeenCalledWith('/custom-redirect');
     });
 });

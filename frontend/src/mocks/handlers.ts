@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { Authority } from '../interfaces/User';
 
 export const handlers = [
     // Auth
@@ -10,7 +11,7 @@ export const handlers = [
         return HttpResponse.json({
             token: 'mock-jwt',
             username: body.username || 'admin',
-            user: { id: 1, username: 'admin', authority: { authority: 'ADMIN' } }
+            user: { id: 1, username: 'admin', authority: { authority: Authority.ADMIN } }
         });
     }),
 

@@ -5,6 +5,7 @@ import tokenService from './services/token.service.ts';
 import jwt_decode from 'jwt-decode';
 import { post } from './util/fetchers.ts';
 import {JwtPayload} from './interfaces/util'
+import { Authority } from './interfaces/User.ts';
 
 const AppNavbar: React.FC = () => {
   const [roles, setRoles] = useState<string[]>([]);
@@ -46,7 +47,7 @@ const AppNavbar: React.FC = () => {
   let publicLinks: JSX.Element = <></>;
 
   roles.forEach((role: string) => {
-    if (role === 'ADMIN') {
+    if (role === Authority.ADMIN) {
       adminLinks = (
         <>
           <NavItem>
@@ -72,7 +73,7 @@ const AppNavbar: React.FC = () => {
         </>
       );
     }
-    if (role === 'PLAYER') {
+    if (role === Authority.PLAYER) {
       ownerLinks = (
         <>
           <NavItem>

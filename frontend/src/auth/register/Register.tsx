@@ -7,12 +7,13 @@ import tokenService from '../../services/token.service.ts';
 import ButtonLink from '../../components/ButtonLink/ButtonLink.tsx';
 import validators from '../validators.ts';
 import { FormGenerator } from '../../components/Form/FormGenerator.tsx';
+import { Authority } from '../../interfaces/User.ts';
 
-interface RegisterFormInputs {username:string, password:string, firstName:string, lastName:string, authority: 'PLAYER' | 'ADMIN'}
+interface RegisterFormInputs {username:string, password:string, firstName:string, lastName:string, authority: Authority.PLAYER | Authority.ADMIN}
 
 export default function Register() {
   const [message, setMessage] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<'PLAYER' | 'ADMIN' | ''>('');
+  const [selectedRole, setSelectedRole] = useState<Authority.PLAYER | Authority.ADMIN | ''>('');
 
   const registerFields = [
     { tag: "Username", name: "username", type: "text", isRequired: true, validators: validators.username },
@@ -68,7 +69,7 @@ export default function Register() {
       <div className="auth-form-container">
         <FormGenerator<RegisterFormInputs>
           fields={registerFields}
-          defaultValues={{username: '', password: '', firstName: '', lastName: '', authority: 'PLAYER'}}
+          defaultValues={{username: '', password: '', firstName: '', lastName: '', authority: Authority.PLAYER}}
           onSubmit={onSubmit}
           submitText="Register"
           loadingText="Registering..."
@@ -77,14 +78,14 @@ export default function Register() {
             <div className="class-form-group" style={{ marginTop: '20px', marginLeft: '200px' }}>
               <span style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>Select Role:</span>
               <div style={{ display: 'flex', gap: '20px', marginTop: '10px', marginLeft: '-55px' }}>
-                <button type="button" onClick={() => setSelectedRole('PLAYER')}
-                  style={{padding: '10px 20px', backgroundColor: selectedRole === 'PLAYER' ? '#4CAF50' : '#ddd',
-                    color: selectedRole === 'PLAYER' ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
+                <button type="button" onClick={() => setSelectedRole(Authority.PLAYER)}
+                  style={{padding: '10px 20px', backgroundColor: selectedRole === Authority.PLAYER ? '#4CAF50' : '#ddd',
+                    color: selectedRole === Authority.PLAYER ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
                   Player
                 </button>
-                <button type="button" onClick={() => setSelectedRole('ADMIN')}
-                  style={{padding: '10px 20px', backgroundColor: selectedRole === 'ADMIN' ? '#4CAF50' : '#ddd',
-                    color: selectedRole === 'ADMIN' ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
+                <button type="button" onClick={() => setSelectedRole(Authority.ADMIN)}
+                  style={{padding: '10px 20px', backgroundColor: selectedRole === Authority.ADMIN ? '#4CAF50' : '#ddd',
+                    color: selectedRole === Authority.ADMIN ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
                   Admin
                 </button>
               </div>
