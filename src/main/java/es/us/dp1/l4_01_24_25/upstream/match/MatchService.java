@@ -201,7 +201,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     private void changePlayerTurn(Player player) {
         Match match = player.getMatch();
         List<Player> players = this.playerService.findAlivePlayersByMatchSortedPlayerOrder(match.getId());
-        List<MTCoordinateDTO> tilesNoCoord = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(match.getId());
+        List<MTCoordinateDTO> tilesNoCoord = new ArrayList<>();
+        if (match.getRound() < 6) tilesNoCoord = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(match.getId());
         if (match.getRound() > 6) {
             List<Player> playersFinished = this.playerService.findAlivePlayersByMatch(match.getId()).stream().filter(
                 p -> this.salmonMatchService.findByPlayerIdAsCoordinateDTO(p.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)).toList();
@@ -258,7 +259,8 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             throw new NotValidMoveException("It is not your turn!");
         Player player = this.playerService.findById(playerId);
         Phase phase = match.getPhase();
-        List<MTCoordinateDTO> mtNoC = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
+        List<MTCoordinateDTO> mtNoC = new ArrayList<>();
+        if (match.getRound() < 6) mtNoC = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
         List<Player> players = this.playerService.playersForChangePhase(matchId);;
         if (mtNoC.size() == 0 && phase == Phase.TILES) {
             this.noMoreTilesToPlaceRechargeEnergy(players, match);
