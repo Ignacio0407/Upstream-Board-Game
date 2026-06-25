@@ -38,16 +38,6 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
     public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatch(@PathVariable Integer matchId) {  
         return new ResponseEntity<>(this.salmonMatchService.findAllFromMatchDTO(matchId), HttpStatus.OK);
     }
-    
-    @GetMapping("/match/{matchId}/spawn")
-    public ResponseEntity<List<SalmonMatchDTO>> findAllFromMatchInSpawn(@PathVariable Integer matchId) {  
-        return new ResponseEntity<>(this.salmonMatchService.findFromGameInSpawnDTO(matchId), HttpStatus.OK);
-    }
-
-    @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<SalmonMatchDTO>> findAllFromPlayer(@PathVariable Integer playerId) {  
-        return new ResponseEntity<>(this.salmonMatchService.findAllFromPlayerDTO(playerId), HttpStatus.OK);
-    }
 
     @PatchMapping("/coordinate/{id}")
     public ResponseEntity<SalmonMatchDTO> updateCoordinate(@PathVariable Integer id, @RequestBody @Valid Map<String,Integer> coordinate) throws NotValidMoveException,  InsufficientEnergyException, OnlyMovingForwardException, NoCapacityException {

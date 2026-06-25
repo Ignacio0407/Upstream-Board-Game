@@ -73,46 +73,6 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService, never()).findAllFromMatchDTO(any());
     }
 
-
-    @Test
-    @DisplayName("GET /match/{matchId}/spawn - Happy Path")
-    void shouldFindAllFromMatchInSpawn() throws Exception {
-        SalmonMatchDTO dto = new SalmonMatchDTO();
-        dto.setId(2);
-        when(salmonMatchService.findFromGameInSpawnDTO(1)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/v1/salmonMatches/match/1/spawn"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(2));
-
-        verify(salmonMatchService).findFromGameInSpawnDTO(1);
-    }
-
-
-    @Test
-    @DisplayName("GET /player/{playerId} - Happy Path")
-    void shouldFindAllFromPlayer() throws Exception {
-        SalmonMatchDTO dto = new SalmonMatchDTO();
-        dto.setId(3);
-        when(salmonMatchService.findAllFromPlayerDTO(1)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/v1/salmonMatches/player/1"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(3));
-
-        verify(salmonMatchService).findAllFromPlayerDTO(1);
-    }
-
-    @Test
-    @DisplayName("GET /player/{playerId} - Edge Case (Type Mismatch -> 400)")
-    void shouldFailFindAllFromPlayerOnTypeMismatch() throws Exception {
-        mockMvc.perform(get("/api/v1/salmonMatches/player/invalid"))
-               .andExpect(status().isBadRequest());
-
-        verify(salmonMatchService, never()).findAllFromPlayerDTO(any());
-    }
-
-
     @Test
     @DisplayName("PATCH /coordinate/{id} - Happy Path")
     void shouldUpdateCoordinate() throws Exception {

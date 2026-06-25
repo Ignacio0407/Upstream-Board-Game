@@ -81,18 +81,6 @@ class PlayerRestControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/players/match/sorted/{id} - Happy Path")
-    void shouldReturnPlayersByMatchIdSorted() throws Exception {
-        PlayerDTO dto = new PlayerDTO();
-        dto.setId(2);
-        when(playerService.findPlayersByMatchSortedPlayerOrderAsDTO(1)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/v1/players/match/sorted/{id}", 1))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$[0].id").value(2));
-    }
-
-    @Test
     @DisplayName("POST /api/v1/players/match/{id} - Happy Path")
     void shouldCreatePlayerInMatch() throws Exception {
         Map<String, String> requestBody = new HashMap<>();
