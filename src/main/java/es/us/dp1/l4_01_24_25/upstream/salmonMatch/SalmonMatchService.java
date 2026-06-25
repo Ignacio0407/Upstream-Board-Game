@@ -203,7 +203,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                 if(target.getSalmonsNumber()==0) {
                     salmonMatchesToDelete.add(target);
                     heron.setSalmonsNumber(heron.getSalmonsNumber()-1);
-                    heronsUpdated.add(this.matchTileService.save(heron));
+                    heronsUpdated.add(heron);
                     deletedSalmonsIds.add(target.getId());
                 }
                 else salmonMatchesUpdated.add(target);
@@ -212,6 +212,9 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if (!salmonMatchesToDelete.isEmpty()) {
             this.deleteAll(salmonMatchesToDelete);
             if (!heronsUpdated.isEmpty() && salmonMatchesUpdated.isEmpty()) this.matchService.notifyHeronsUpdated(salmonMatchesUpdated, heronsUpdated, deletedSalmonsIds, match.getId());
+        }
+        if (!heronsUpdated.isEmpty()) {
+            this.matchTileService.saveAll(heronsUpdated);
         }
         else if (!salmonMatchesUpdated.isEmpty()) {
             salmonMatchesUpdated = this.saveAll(salmonMatchesUpdated);
@@ -280,127 +283,76 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         return new CoordinateInteger(newCoordinate2, toTravel2, energyUsed); 
     }
 
-    private Integer above (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
-        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(0,1).contains(toTravel.getOrientation());
-        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,1,5).contains(toTravel.getOrientation());
-        if(myCoordinateType.equals(TileType.BEAR)) {
-            if(List.of(3,4).contains(myTile.getOrientation())) {
+    private Integer calculateMovementEnergy(
+        TileType toTravelType, MatchTile toTravel, 
+        TileType myCoordinateType, MatchTile myTile, 
+        Integer energyUsed, SalmonMatch salmonMatch, Player player,
+        List<Integer> toTravelBearOrientations,
+        List<Integer> toTravelJumpOrientations,
+        List<Integer> myBearOrientations,
+        List<Integer> myJumpOrientations) {
+
+        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && toTravelBearOrientations.contains(toTravel.getOrientation());
+        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && toTravelJumpOrientations.contains(toTravel.getOrientation());
+
+        if (myCoordinateType.equals(TileType.BEAR)) {
+            if (myBearOrientations.contains(myTile.getOrientation())) {
                 energyUsed = 2;
                 this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 2 : salmonMatch.getSalmonsNumber() - 1));
+            } else if (toTravelBearHasJump || toTravelHasJump) {
+                energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 2 : toTravelHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
             }
-            else {
-                if (toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 2 : toTravelHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-                }
-            }
-        }
-        else if(myCoordinateType.equals(TileType.JUMP)) {
-            if(List.of(2,3,4).contains(myTile.getOrientation())) {
+        } 
+        else if (myCoordinateType.equals(TileType.JUMP)) {
+            if (myJumpOrientations.contains(myTile.getOrientation())) {
                 energyUsed = 2;
                 this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
+            } else if (toTravelBearHasJump || toTravelHasJump) {
+                energyUsed = 2;
+                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
+                salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
             }
-            else {
-                if(toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-                }
-            }
-        }
+        } 
         else {
-            if(toTravelBearHasJump || toTravelHasJump) {
+            if (toTravelBearHasJump || toTravelHasJump) {
                 energyUsed = 2;
                 this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
                 salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
             }
         }
+        
         return energyUsed;
+    }
+
+    private Integer above (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
+        return calculateMovementEnergy(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player,
+                List.of(0, 1),       // toTravelBearHasJump
+                List.of(0, 1, 5),    // toTravelHasJump
+                List.of(3, 4),       // myCoordinateType == BEAR
+                List.of(2, 3, 4)     // myCoordinateType == JUMP
+        );
     }
 
     private Integer left (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
-        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(0,5).contains(toTravel.getOrientation());
-        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,4,5).contains(toTravel.getOrientation());
-        if(myCoordinateType.equals(TileType.BEAR)) {
-            if(List.of(2,3).contains(myTile.getOrientation())) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 2 : salmonMatch.getSalmonsNumber() - 1));
-            }
-            else {
-                if(toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 2 : toTravelHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber())); 
-                }
-            }
-        }
-        else if(myCoordinateType.equals(TileType.JUMP)) {
-            if(List.of(1,2,3).contains(myTile.getOrientation())) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-            }
-            else {
-                if(toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-                }
-            }
-        }
-        else {
-            if(toTravelBearHasJump || toTravelHasJump) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-            }
-        }
-        return energyUsed;
+        return calculateMovementEnergy(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player,
+                List.of(0, 5),       // toTravelBearHasJump
+                List.of(0, 4, 5),    // toTravelHasJump
+                List.of(2, 3),       // myCoordinateType == BEAR
+                List.of(1, 2, 3)     // myCoordinateType == JUMP
+        );
     }
 
     private Integer right (TileType toTravelType, MatchTile toTravel, TileType myCoordinateType, MatchTile myTile, Integer energyUsed, SalmonMatch salmonMatch, Player player) {
-        Boolean toTravelBearHasJump = toTravelType.equals(TileType.BEAR) && List.of(1,2).contains(toTravel.getOrientation());
-        Boolean toTravelHasJump = toTravelType.equals(TileType.JUMP) && List.of(0,1,2).contains(toTravel.getOrientation());
-        if(myCoordinateType.equals(TileType.BEAR)) {
-            if(List.of(4,5).contains(myTile.getOrientation())) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 2 : salmonMatch.getSalmonsNumber() - 1));
-            }
-            else {
-                if(toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 2 : toTravelHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber())); 
-                }
-            }
-        }
-        else if(myCoordinateType.equals(TileType.JUMP)) {
-            if(List.of(3,4,5).contains(myTile.getOrientation())) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, (toTravelType.equals(TileType.BEAR)) ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-            }
-            else {
-                if(toTravelBearHasJump || toTravelHasJump) {
-                    energyUsed = 2;
-                    this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                    salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-                }
-            }
-        }
-        else {
-            if(toTravelBearHasJump || toTravelHasJump) {
-                energyUsed = 2;
-                this.playerService.throwExceptionNotEnoughEnergy(player, energyUsed);
-                salmonMatch.setSalmonsNumber(Math.max(0, toTravelBearHasJump ? salmonMatch.getSalmonsNumber() - 1 : salmonMatch.getSalmonsNumber()));
-            }
-        }
-        return energyUsed;
+        return calculateMovementEnergy(toTravelType, toTravel, myCoordinateType, myTile, energyUsed, salmonMatch, player,
+                List.of(1, 2),       // toTravelBearHasJump
+                List.of(0, 1, 2),    // toTravelHasJump
+                List.of(4, 5),       // myCoordinateType == BEAR
+                List.of(3, 4, 5)     // myCoordinateType == JUMP
+        );
     }
 
     private CoordinateInteger fromGridFull (List<MatchTile> matchTiles, Coordinate myCoordinate, Coordinate newCoordinate, 
