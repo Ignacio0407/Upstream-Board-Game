@@ -7,7 +7,6 @@ const startGame = async ({ matchId, jwt, setLoading, navigate }:startGamePrompts
     setLoading(true);
     await patch(`/api/v1/matches/${matchId}/startGame`, jwt);
     await post(`/api/v1/matchTiles/createMatchTiles/${matchId}`, jwt);
-    navigate(`/matches/${matchId}/game`);
 };
 
 export default startGame;
