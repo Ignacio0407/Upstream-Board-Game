@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from 'reactstrap';
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts'
@@ -11,7 +11,6 @@ import endGame from '../util/endGame.ts';
 import ColorHandler from '../util/ColorHandler.tsx';
 import Match, {emptyMatch} from '../interfaces/Match.ts';
 import Player, {emptyPlayer} from '../interfaces/Player.ts';
-import User, { emptyUser } from '../interfaces/User.ts';
 import WebSocketManager from '../util/webSocketManager.ts';
 import { State } from '../interfaces/State.ts';
 
@@ -20,9 +19,6 @@ export default function Lobby () {
     const { matchId } = useParams<{ matchId: string }>();
     const [match, setMatch] = useFetchState<Match>(emptyMatch, matchId ? `/api/v1/matches/${encodeURIComponent(String(matchId))}` : null, jwt);
     const user = tokenService.getUser()
-    // Remove everything that is not a letter or number from ID to prevent resource manipulation
-    const safeUserId = encodeURIComponent(String(user.id).replace(/[^a-zA-Z0-9-]/g, ''));
-    const [finalUser,setUser] = useFetchState<User>(emptyUser, `/api/v1/users/${safeUserId}`, jwt);
     const [players,setPlayers] = useFetchState<Player[]>([],`/api/v1/players/match/${encodeURIComponent(String(match.id))}`,jwt)
     const [userPlayer,setUserPlayer] = useState(emptyPlayer);
     const [showColorPicker, setShowColorPicker] = useState(true);
@@ -30,6 +26,7 @@ export default function Lobby () {
     const [takenColors, setTakenColors] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const spectatorIds:number[] = useLocation().state?.spectatorIds||[];
+    const isInitialMount = useRef(true)
     
     useEffect(() => {
         const wsManager = new WebSocketManager(jwt);
@@ -56,7 +53,8 @@ export default function Lobby () {
         const colorsUsed = players.map(player => ColorToRgb(player.color));
         setTakenColors(colorsUsed);
         if(match.state === State.FINALIZED) navigate("/dashboard");
-        if(match.state === State.ON_GOING) navigate(`/matches/${matchId}/game`);
+        if(isInitialMount.current && match.state === State.ON_GOING) navigate(`/matches/${matchId}/game`);
+        if (match.id && match.id !== 0) isInitialMount.current = false;
     }, [players, user.id, match.state]);
 
     const startingGame = async () => {
@@ -71,9 +69,9 @@ export default function Lobby () {
     
     return (
         <div className='lobbyContainer'>
-            {players.find(p => p.userId === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined && (showColorPicker &&
+            {players.find(p => p.userId === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined && (showColorPicker&&
             (
-                <ColorHandler matchId={Number(matchId)} jwt={jwt} finalUserId={finalUser.id} takenColors={takenColors} 
+                <ColorHandler matchId={Number(matchId)} jwt={jwt} userId={user.id} takenColors={takenColors} 
                 onColorChanged={() => setShowColorPicker(false)} /> )
             )}
             <div className='lobbyTitleContainer'>
