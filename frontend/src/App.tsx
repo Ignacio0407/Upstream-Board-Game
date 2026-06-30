@@ -19,7 +19,7 @@ import Dashboard from './dashboard/Dashboard.tsx';
 import CreateGame from './createGame/CreateGame.tsx';
 import Rules from './rules/rules.tsx';
 import Game from './match/Game.tsx';
-import Lobby from './match/Lobby.tsx';
+import Lobby from './lobby/Lobby.tsx';
 import EndGame from './match/EndGame.tsx';
 import {JwtPayload} from './interfaces/util'
 import DoNotHackMyApp from './components/DoNotHackMyApp/DoNotHackMyApp.tsx';

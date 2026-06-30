@@ -31,12 +31,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { post } from '../../util/fetchers.ts';
 import tokenService from '../../services/token.service.ts';
-import { ColorToRgb } from '../../util/ColorParser.ts';
+import { ColorToRgb } from '../../lobby/ColorParser.ts';
 import './chat.css'
 import Match from '../../interfaces/Match.ts';
 import Player from '../../interfaces/Player.ts';
 import Message from '../../interfaces/Message.ts';
-import WebSocketManager from '../../util/webSocketManager.ts';
+import WebSocketManager from '../webSocketManager/webSocketManager.ts';
 
 interface ChatPrompts {match:Match, players:Player[], currentPlayer:Player};
 

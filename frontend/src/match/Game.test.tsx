@@ -4,7 +4,7 @@ import Game from "./Game";
 import tokenService from "../services/token.service.ts";
 import * as reactRouterDom from "react-router-dom";
 import useFetchState from "../util/useFetchState.ts";
-import WebSocketManager from "../util/webSocketManager.ts";
+import WebSocketManager from "../components/webSocketManager/webSocketManager.ts";
 import * as matchUtil from "./matchUtil.tsx";
 import { Phase } from "../interfaces/Phase.ts";
 import { State } from "../interfaces/State.ts";

@@ -1,11 +1,11 @@
-import { render, screen, fireEvent } from "../test-utils";
+import { render, screen, fireEvent } from "../test-utils.tsx";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import Lobby from "./Lobby";
+import Lobby from "./Lobby.tsx";
 import tokenService from "../services/token.service.ts";
 import * as reactRouterDom from "react-router-dom";
 import startGame from "../util/startGame.ts";
 import endGame from "../util/endGame.ts";
-import WebSocketManager from "../util/webSocketManager.ts";
+import WebSocketManager from "../components/webSocketManager/webSocketManager.ts";
 import { State } from "../interfaces/State.ts";
 import useFetchState from "../util/useFetchState.ts";
 import { emptyUser } from "../interfaces/User.ts";
