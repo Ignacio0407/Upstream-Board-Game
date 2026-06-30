@@ -4,13 +4,13 @@ import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
 import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick, renderPlayerList, passTurn, buildGridFromSnapshot, updateGridWithSalmons, updateGridWithTile, updateGridWithMovement, coordToIndex, updateGridWithMovementFromSea, updateGridWithHerons } from './matchUtil.tsx';
-import { ColorToRgb } from '../util/ColorParser.ts';
+import { ColorToRgb } from '../lobby/ColorParser.ts';
 import Chat from '../components/chat/Chat.tsx'
 import Match, { emptyMatch } from '../interfaces/Match.ts';
 import MatchTile, {emptyTile} from '../interfaces/MatchTile.ts';
 import SalmonMatch from '../interfaces/SalmonMatch.ts';
 import Player from '../interfaces/Player.ts';
-import WebSocketManager from '../util/webSocketManager.ts';
+import WebSocketManager from '../components/webSocketManager/webSocketManager.ts';
 import { TileType } from '../interfaces/Tile.ts';
 import { Phase } from '../interfaces/Phase.ts';
 import { State } from '../interfaces/State.ts';

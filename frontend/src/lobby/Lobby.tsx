@@ -5,13 +5,13 @@ import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/lobby.css'
 import PlayerCard from './PlayerCard.tsx';
-import { ColorToRgb } from '../util/ColorParser.ts';
+import { ColorToRgb } from './ColorParser.ts';
 import startGame from '../util/startGame.ts';
 import endGame from '../util/endGame.ts';
-import ColorHandler from '../util/ColorHandler.tsx';
+import ColorHandler from './ColorHandler.tsx';
 import Match, {emptyMatch} from '../interfaces/Match.ts';
 import Player, {emptyPlayer} from '../interfaces/Player.ts';
-import WebSocketManager from '../util/webSocketManager.ts';
+import WebSocketManager from '../components/webSocketManager/webSocketManager.ts';
 import { State } from '../interfaces/State.ts';
 
 export default function Lobby () {

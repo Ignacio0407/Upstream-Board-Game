@@ -1,4 +1,4 @@
-import { ColorToRgb } from "../util/ColorParser.ts";
+import { ColorToRgb } from "../lobby/ColorParser.ts";
 import { get, patch, put } from "../util/fetchers.ts";
 import '../static/css/game/game.css'
 import MatchTile, { emptyTile } from '../interfaces/MatchTile.ts'

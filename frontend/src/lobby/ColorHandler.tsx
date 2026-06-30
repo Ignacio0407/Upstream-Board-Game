@@ -1,5 +1,5 @@
 import ColorPickerModal from './ColorPickerModal.tsx';
-import {buildSafeUrl, post} from './fetchers.ts'
+import {buildSafeUrl, post} from '../util/fetchers.ts'
 import { JSX } from 'react';
 
 interface ColorHandlerProps {matchId:number, jwt:string, userId:number, takenColors:string[], onColorChanged:Function, 

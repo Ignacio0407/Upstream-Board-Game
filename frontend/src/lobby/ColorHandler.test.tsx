@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "../test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import ColorHandler from "./ColorHandler";
-import { post } from "./fetchers";
+import { post } from "../util/fetchers";
 
 // --- Mocks ---
 
@@ -31,7 +31,7 @@ describe("ColorHandler Component", () => {
             <ColorHandler 
                 matchId={1} 
                 jwt="jwt" 
-                finalUserId={10} 
+                userId={10} 
                 takenColors={[]} 
                 onColorChanged={onColorChanged} 
             />
@@ -58,7 +58,7 @@ describe("ColorHandler Component", () => {
             <ColorHandler 
                 matchId={1} 
                 jwt="jwt" 
-                finalUserId={10} 
+                userId={10} 
                 takenColors={[]} 
                 onColorChanged={onColorChanged} 
             />

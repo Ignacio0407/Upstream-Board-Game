@@ -1,6 +1,6 @@
 import "../static/css/game/playerCard.css"
 import { Table } from 'reactstrap';
-import { ColorToRgb } from '../util/ColorParser.ts';
+import { ColorToRgb } from './ColorParser.ts';
 
 interface PlayerCardProps {name?: string; color: string}
 

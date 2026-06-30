@@ -11,7 +11,7 @@ import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
 import WhiteSpace from '../util/WhiteSpace.tsx';
 import {DashboardMatch} from '../interfaces/Match.ts';
-import WebSocketManager from '../util/webSocketManager.ts';
+import WebSocketManager from '../components/webSocketManager/webSocketManager.ts';
 import Match from '../interfaces/Match.ts';
 import { State } from '../interfaces/State.ts';
 import { Authority } from '../interfaces/User.ts';
