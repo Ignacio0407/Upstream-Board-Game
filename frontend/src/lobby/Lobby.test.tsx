@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import Lobby from "./Lobby.tsx";
 import tokenService from "../services/token.service.ts";
 import * as reactRouterDom from "react-router-dom";
-import startGame from "../util/startGame.ts";
+import startGame from "./startGame.ts";
 import endGame from "../util/endGame.ts";
 import WebSocketManager from "../components/webSocketManager/webSocketManager.ts";
 import { State } from "../interfaces/State.ts";
@@ -14,7 +14,7 @@ import { emptyUser } from "../interfaces/User.ts";
 
 vi.mock("../services/token.service.ts");
 vi.mock("../util/useFetchState.ts");
-vi.mock("../util/startGame.ts");
+vi.mock("./startGame.ts");
 vi.mock("../util/endGame.ts");
 const mockWsManager = {
     initConnection: vi.fn(),
@@ -22,12 +22,12 @@ const mockWsManager = {
     deactivate: vi.fn()
 };
 
-vi.mock("../util/webSocketManager.ts", () => ({
+vi.mock("../components/webSocketManager/webSocketManager.ts", () => ({
     default: vi.fn().mockImplementation(function() {
         return mockWsManager;
     })
 }));
-vi.mock("../util/ColorHandler.tsx", () => ({
+vi.mock("./ColorHandler.tsx", () => ({
     default: ({ onColorChanged }: any) => (
         <div data-testid="color-handler">
             <button onClick={onColorChanged}>Select Color</button>
@@ -161,11 +161,12 @@ describe("Lobby Component", () => {
     });
 
     it("redirects to dashboard if match is finalized", () => {
-        const finalizedMatch = { ...mockMatch, state: State.FINALIZED };
-        vi.mocked(useFetchState)
-            .mockReturnValueOnce([finalizedMatch, vi.fn()])
-            .mockReturnValueOnce([mockFinalUser, vi.fn()])
-            .mockReturnValueOnce([mockPlayers, vi.fn()]);
+    const finalizedMatch = { ...mockMatch, state: State.FINALIZED };
+        vi.mocked(useFetchState).mockImplementation((defaultVal: any, url: string | null) => {
+            if (url?.includes("/api/v1/matches/")) return [finalizedMatch, vi.fn()];
+            if (url?.includes("/api/v1/players/")) return [mockPlayers, vi.fn()];
+            return [defaultVal, vi.fn()];
+        });
 
         render(<Lobby />);
         expect(mockNavigate).toHaveBeenCalledWith("/dashboard");

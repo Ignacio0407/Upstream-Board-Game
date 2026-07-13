@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import startGame from './startGame';
-import * as fetchers from './fetchers';
+import * as fetchers from '../util/fetchers.ts';
 
 vi.mock('./fetchers');
 

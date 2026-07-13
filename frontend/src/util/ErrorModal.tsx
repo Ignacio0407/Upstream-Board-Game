@@ -1,14 +1,7 @@
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
-interface ErrorModalProps {
-    visible: boolean;
-    setVisible: (visible: boolean) => void;
-    message: string;
-}
+interface ErrorModalProps { visible: boolean, setVisible: (visible: boolean) => void, message: string }
 
-/**
- * Proper React Component for displaying an error modal.
- */
 export default function ErrorModal({ visible, setVisible, message }: ErrorModalProps) {
     if (!message) return null;
 
