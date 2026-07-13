@@ -6,7 +6,7 @@ import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/lobby.css'
 import PlayerCard from './PlayerCard.tsx';
 import { ColorToRgb } from './ColorParser.ts';
-import startGame from '../util/startGame.ts';
+import startGame from './startGame.ts';
 import endGame from '../util/endGame.ts';
 import ColorHandler from './ColorHandler.tsx';
 import Match, {emptyMatch} from '../interfaces/Match.ts';

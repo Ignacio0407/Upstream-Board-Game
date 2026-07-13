@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Alert, Button } from 'reactstrap';
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import '../static/css/dashboard/dashb.css' 
+import './dashboard.css' 
 import tokenService from '../services/token.service.ts'
 import jwt_decode, { JwtPayload } from "jwt-decode";
 import ButtonLink from "../components/ButtonLink/ButtonLink.tsx";
