@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Commits - Upstream</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.5;
+            color: #1f2328;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 0 rgba(27,31,35,0.04);
+        }
+        .header {
+            padding: 16px;
+            background-color: #f6f8fa;
+            border-bottom: 1px solid #d0d7de;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 16px;
+            margin: 0;
+            font-weight: 600;
+        }
+        .commit-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .commit-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d0d7de;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .commit-item:last-child {
+            border-bottom: none;
+        }
+        .commit-item:hover {
+            background-color: #f6f8fa;
+        }
+        .commit-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 80%;
+        }
+        .commit-message {
+            font-size: 14px;
+            color: #1f2328;
+            text-decoration: none;
+            word-break: break-word;
+        }
+        .commit-prefix {
+            font-weight: 600;
+            color: #1f2328;
+        }
+        .commit-meta {
+            font-size: 12px;
+            color: #636c76;
+        }
+        .commit-hash-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .commit-hash {
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 12px;
+            color: #0969da;
+            background-color: #ddf4ff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: 1px solid rgba(9, 105, 218, 0.2);
+        }
+        .date-text {
+            color: #636c76;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Commits desde Junio 2025</h1>
+            <span style="font-size: 12px; color: #636c76;">Total commits: <span id="total-count">0</span></span>
+        </div>
+        <ul class="commit-list" id="commit-list">
+            <!-- Los commits se insertarán aquí -->
+        </ul>
+    </div>
+
+    <script>
+        const rawData = `c709635|2026-06-16 20:04:52|test: :white_check_mark: Improved shouldEnforcePlacementRestrictionsPerRound test
+cee725f|2026-06-16 19:44:36|build: :construction_worker: Updated pom.xml to tell sonar what to ignore when computing test coverage
+36649ca|2026-06-16 19:39:24|fix: :bug: Solved 6 reliability issues and raised test coverage 1%
+8aec1f7|2026-06-16 18:09:25|fix: :ambulance: Game did not work because I changed 2 ">" for equals
+745c15a|2026-06-16 15:40:01|test: :white_check_mark: Adapted tests to pass after new sonar fixes
+6059974|2026-06-16 15:33:34|fix: :bug: Solved 3 security issues related to DOM manipulation, fixed various maintenability and accesibility issues
+f263b5c|2026-06-16 14:11:06|ci: :wrench: Updated sonar properties to ignore files that are not typescript code to increase test coverage recorded
+865061f|2026-06-16 14:10:01|test: :white_check_mark: Added new tests and fixed some minor issues from other ones so that all of them pass
+57b897f|2026-06-16 13:28:57|fix: :bug: Fixed low reliability and maintenability sonar issues and 4 security hotspots in DoNotHackMyApp
+b863605|2026-06-16 13:02:50|fix: :bug: Removed 14 blocked and 12 medium severity reliability sonar issues       
+3c96c99|2026-06-16 12:44:59|fix: :bug: Removed 14 Blocked reliability sonar errors on the css and 7 security ones by encoding ids in URIs
+2f2fea3|2026-06-16 12:22:06|ci: :chart_with_upwards_trend: First sonar analysis of the frontend
+6da9e58|2026-06-16 00:27:54|fix: :bug: Solved 2 low severity Reliability sonar issues by using timezone in date.now()
+ec7fb16|2026-06-16 00:05:14|test: :white_check_mark: Fixed tests that, due to previous changed did not pass     
+d74ca54|2026-06-15 23:47:24|fix: :bug: Refactor the code of the lambda to have only one invocation possibly throwing a runtime exception.
+62a5f1e|2026-06-15 23:47:09|fix: :bug: Solved various medium severity sonar bugs, like empty catch, non-used parameters, nested if and not using Optional.get directly
+0334d47|2026-06-15 23:23:11|fix: :bug: Removed 1 blocking and 3 high severity sonar issues
+66fc779|2026-06-15 23:09:32|fix: :bug: Removed 1 blocking issues and possibly more issues by removing unnecessary @Transactional annotations
+053007a|2026-06-15 22:57:26|fix: :coffin: Changed some collect(Collectors.toList()) for toList() and removed commented out code
+c9068d4|2026-06-15 22:51:24|fix: :bug: Removed 8 maintenability high severity sonar vulnerabilities
+3bf5154|2026-06-15 22:31:11|fix: :bug: Removed 10 Sonar Blocking severity issues
+4b083fc|2026-06-15 22:09:56|chore: :see_no_evil: Ignoring jacoco.xml file
+c79a538|2026-06-15 22:09:14|fix: :bug: Removed 8 Reliability medium bugs from sonar analysis
+0755ae5|2026-06-15 21:33:27|fix: :lock: Changed plaintext ngrok token for an environment variable
+9107654|2026-06-15 20:51:38|chore: :pencil2: Changed UserRepositoryTest encoding to UTF-8
+03fa897|2026-06-15 20:40:30|test: :white_check_mark: Integration tests for MatchController
+d815c28|2026-06-15 20:31:26|style: :coffin: Removed a todo method that was not going to be implemented
+6710f85|2026-06-15 20:30:44|test: :white_check_mark: In-game controllers tests improved
+75058ed|2026-06-15 20:29:33|docs: :page_facing_up: Added license/copyright message to base project test files   
+bd147c2|2026-06-15 18:58:56|chore: :coffin: Removed old file from petclinic project
+d0be8ad|2026-06-15 18:57:48|chore: :see_no_evil: Improved gitignore organization
+eda8f6e|2026-06-15 18:57:02|refactor: :recycle: Moved all exception handling logic to ExceptionHandlerController
+2ebc201|2026-06-15 18:37:43|test: :white_check_mark: In-game services fully tested
+3fc9a96|2026-06-15 12:42:27|test: :white_check_mark: Improved and adapted Achievement and User controller tests, AchievementServiceTest and created tests for the exception handler controller
+48b40f9|2026-06-15 12:41:07|refactor: :art: Modified achievement listing uri, changed from User to Achievement controller
+4faeee6|2026-06-15 11:47:17|test: :white_check_mark: Improved tests for non in-game services
+af32121|2026-06-15 11:44:18|test: :white_check_mark: Added ValidNumber tests to verify the validation is correctly applied
+b5ca605|2026-06-14 23:21:16|test: :white_check_mark: Improved tests for the repositories that have personalized querys
+e841768|2026-06-14 22:04:25|fix: :ambulance: Added @Entity tag to TestEntity
+ce9112a|2026-06-14 22:03:58|fix: :ambulance: Added @Entity annotation to TestEntity and changed it to main folder
+02b7f20|2026-06-14 00:56:06|test: :white_check_mark: Improved chat tests
+32fb6d3|2026-06-14 00:31:13|test: :white_check_mark: Improved AuthService and Coordinate tests and created ExceptionTest. Modified keystore password to plain text to avoid configuration issues
+4759c3a|2026-06-14 00:20:10|test: :white_check_mark: Improved achievements testing
+d51b484|2026-06-13 22:43:03|test: :white_check_mark: Improved WebSocketSecurityTests
+6ae3ff4|2026-06-13 22:41:43|build: :construction_worker: Updated pom.xml to be more resilient against minor failures
+e0f17ac|2026-06-13 22:39:33|test: :white_check_mark: Improved User reposiroty, service and controller tests     
+43c5b51|2026-06-13 22:37:56|chore: :fire: Removed redundant tests probed in Base service and controller tests   
+5360f4e|2026-06-13 22:33:48|test: :white_check_mark: Base Project: Added generic tests for both base controllers and services
+13675a0|2026-06-13 19:49:30|test: :bricks: Prepared dummy test doubles to test Base services and controllers    
+64ec5ce|2026-06-13 19:19:01|fix: :ambulance: Forgot to change method uri
+333dd43|2026-06-13 17:11:51|refactor: :construction: Added empty constructors to some DTOs, made AchievementUnlocker and AuGamesPlayed Spring beans, and modified achievement Security configuration
+39873e4|2026-06-13 17:09:36|refactor: :coffin: Removed unused code from these 4 files
+a45ded9|2026-06-13 17:06:53|refactor: :recycle: Changed findUserAchievement from UserService to UserAchievementService
+d8146f9|2026-06-13 17:04:37|refactor: :recycle: Changed web sockets notification from controller to service     
+3c7e528|2026-06-12 17:12:54|chore: :see_no_evil: Now ignoring TLS .pem files
+ee621f0|2026-06-12 17:08:51|chore: :fire: Removed unnecessary image files stored in server side
+c67a9d9|2026-06-12 17:07:33|perf: :zap: Changed .png pictures to .webp format
+4bcfe25|2026-06-12 17:00:31|chore: :construction: Changed rules pdf
+582020e|2026-05-31 20:45:28|test: :white_check_mark: Frontend testing: SearchBar auxiliary files tests
+e79ac51|2026-05-31 20:33:19|test: :white_check_mark: Frontend testing: WebSocketManager tests
+01e4482|2026-05-31 20:29:02|test: :white_check_mark: Frontend testing: AppNavbar and token.service tests        
+a088f42|2026-05-31 20:28:04|test: :white_check_mark: Frontend testing: Game and related in-game functions/components tests
+d07f465|2026-05-31 20:26:56|test: :white_check_mark: Frontend testing: Util folder tests
+e394b85|2026-05-31 20:25:06|test: :white_check_mark: Frontend testing: SearchBar tests
+8c90bf6|2026-05-31 20:23:56|test: :white_check_mark: Frontend testing: DoNotHackMyApp tests
+0854e70|2026-05-31 20:23:29|test: :white_check_mark: Frontend testing: List Generator tests
+b680c26|2026-05-31 20:21:34|test: :white_check_mark: Frontend testing: (Edit)FormGenerator and FormInput tests  
+8e53049|2026-05-30 13:46:16|test: :white_check_mark: Frontend testing: UserListAdmin
+68af391|2026-05-30 13:44:52|test: :white_check_mark: Frontend testing: CreateGame (from .jsx to .tsx)
+29398d7|2026-05-30 13:43:28|test: :white_check_mark: Frontend testing: Achievement testing, create and list     
+0f71356|2026-05-30 13:39:58|test: :white_check_mark: Frontend testing: Simple tests
+ff27d6f|2026-05-30 13:28:17|chore: :construction: Changed name from dp1-game-template to upstream and removed Searchbar from developers.tsx
+6f2e761|2026-05-30 12:58:14|refactor: :art: Changed getErrorModal from a function to a React component
+468485f|2026-05-30 12:52:41|test: :art: Prepared infraestructure for frontend testing
+9bdf192|2026-04-14 19:15:38|test: :white_check_mark: Created ListGenerator and auxiliary components tests       
+58ddf93|2026-04-14 18:15:28|fix: :ambulance: Forgot to upload updated imports for achievement components        
+0767331|2026-04-09 21:05:56|test: :white_check_mark: Added AchievementEdit tests
+f0deddd|2026-04-09 20:51:04|chore: :truck: Improved achievement components folder structure
+a2b5b2f|2026-04-09 20:32:22|test: :fire: Forgot to remove the previous UserListAdminTest.jsx test before        
+491037c|2026-04-09 20:27:02|test: :white_check_mark: Improved UserListAdmin tests and made the file be TS       
+5327f22|2026-04-09 20:05:42|test: :white_check_mark: Improved Chat tests and converted it into TS
+2a078fb|2026-04-09 20:04:19|refactor: :recycle: Chat now uses WebSocketManager
+3c17bd9|2026-04-09 18:25:59|fix: :ambulance: Modified webSocketManager to make the game work and HTTP/2 setup   
+83ad1a7|2026-04-08 12:17:34|test: :white_check_mark: Added tests for Dashboard matching vite's structure        
+6c32e7d|2026-03-25 00:22:27|feat: :lock: Improved and tested Web Sockets Security against route tampering and DoS and webSocketManager to only have 1 at a time
+7fb4799|2026-03-25 00:12:15|build: :construction_worker: Updated dependencies and reportWebVitals
+037ee72|2026-03-22 19:27:26|fix: :ambulance: Added proxy in vite config, before it worked because browser kept the session up
+e1f0d88|2026-03-17 17:33:54|chore: :building_construction: Vitest setup
+9b69be6|2026-03-17 13:08:57|build: :building_construction: Migrate build and test tooling from CRA and Jest to Vite and Vitest
+0ba128d|2026-03-16 12:03:40|build: :green_heart: Modified gitignre to track package-lock.json files
+9b1e1ba|2026-03-11 17:45:02|style: :arrow_up: Added tsconfig.json for true TS incorporation and restores server and handlers in mocks folder
+704f283|2026-03-11 16:43:53|chore: :coffin: Removed inherited "less" code now dead from original Spring petclinic
+ca14de7|2026-03-11 15:18:31|perf: :zap: Implemented HTTP/2 and WSS (Secure Web Sockets over TLS) to increase performance and security
+f8119a8|2026-03-11 15:16:28|fix: :ambulance: Forgot to upload removing UserEdit import
+b0bd7fd|2026-03-11 15:09:02|fix: :ambulance: Forgot to add the .ts extension in imports, making project not loading
+4dfc1f4|2026-03-11 14:59:17|fix: :bug: Added modified UserControllerTests, forgot before
+3415a28|2026-03-11 14:58:45|refactor: :triangular_flag_on_post: Restricted admin's creation and edition of users, now they can only list and change their authority
+0269560|2026-03-08 17:04:33|refactor: :art: Replaced match state string by an enum in frontend
+ec9e134|2026-03-08 16:56:44|refactor: :art: Replaced Phase strings in frontend by an enum
+c413048|2026-03-08 16:50:39|style: :bulb: Removed commented out code from key files
+45b49ef|2026-03-08 16:43:57|feat: :sparkles: GAME WITH WEBSOCKETS WORKS PERFECTLY
+f46a940|2026-03-08 16:41:39|fix: :bug: Fixing minor/mayor case file naming issue through git config core.ignorecase false
+71cd591|2026-03-07 21:06:10|refactor: :safety_vest: Added Coordinate validation to SalmonMatch and MatchTile    
+dd431f1|2026-03-05 10:53:58|refactor: :construction: Added normal deleteAll method
+ef73d8a|2026-03-05 10:52:26|refactor: :lock: Added validation in coordinate fields
+744c087|2026-03-03 19:47:05|refactor: :art: Removed User serializer and deserializer
+a427428|2026-02-18 11:36:18|fix: :bug: Forgot to add DB initial modification to replace Authority entity by an enum
+5d2fc84|2026-02-18 11:32:18|feat: :art: Modified FormGenerator to have cancel button included and ease creation of forms with dropdown(s) and minor style changes
+a02a7ae|2026-02-18 11:28:23|feat: :sparkles: Added user listing and edition for admins
+43b03ff|2026-02-18 11:09:01|refactor: :art: Replaced Authority entity by an enum to reduce complexity
+009e348|2026-02-03 13:53:35|refactor: :bug: Added this to static calls in BaseControllers to remove Sonarqube bugs
+f3d664a|2026-01-18 18:47:42|feat: :sparkles: Added achievement creation, edition and deletion with base project components
+2ac6405|2026-01-18 18:42:31|feat: :sparkles: Added state to ButtonLink and enabled EditFormGenerator to load form directly from uri
+3f8c3f6|2026-01-18 18:41:40|feat: :sparkles: Added ListGenerator component with searchbar, pagination, sorting, multiple editions/deletions, authority check
+1bb6244|2026-01-18 18:37:44|feat: :sparkles: Added updateSome feature to BaseService/Controller through /some uri
+1909738|2026-01-15 16:23:09|style: :art: Minor style and comparison changesç
+855af56|2026-01-15 14:28:30|fix: :bug: Forgot to add rules.tsx and css in previous commit
+655fe64|2026-01-15 14:05:13|refactor: :fire: Moved rules to public folder and rules.css to rules folder
+1f0b95d|2026-01-15 14:03:55|feat: :sparkles: Enabled FormGenerators to navigate to DoNotHackMyApp screen        
+fe9edf0|2026-01-15 14:01:37|feat: :sparkles: Added DoNotHAckMyAppHelper to navigate to the screen
+c3dd407|2026-01-15 12:56:46|feat: :sparkles: Added Do not hack my app screen for more security
+6f979e4|2025-12-30 14:15:14|refactor: :art: Changed PrivateRoute to TS
+e2388d9|2025-12-30 14:14:25|docs: :memo: Updated license in FormGenerator files
+970115a|2025-12-24 20:24:59|feat: :sparkles: Added EditFormGenerator and fixed FormGenerator bug to make forms with much less code
+a0d9c13|2025-10-01 17:39:46|build: :wrench: Updated .gitignore to not upload compiled frontend
+31df43a|2025-10-01 17:38:48|build: :wrench: Compiled frontend removed
+cb2c0e3|2025-09-24 11:35:37|feat: :zap: Finally removed syncronization fetchs during the game through eficient WebSocket managing through WebSocketManager
+45b43fd|2025-09-24 11:34:14|refactor: :art: Minor fixes and more english translations
+990301a|2025-09-24 11:33:09|feat: :art: Created FormGenerator and improved FormInput error messages
+051d288|2025-09-24 11:22:15|build: :arrow_up: Switched Java 17 by 21
+b1abb53|2025-09-04 00:09:34|docs: :page_facing_up: Added copyright message to Base Project files
+7e6889a|2025-09-04 00:02:14|refactor: :zap: Improved SearchBar with higer performance, better code structure and more functionalities
+1a48c76|2025-08-22 19:40:28|fix: :bug: Fixed BaseRepository and minor frontend paths that made the project not booting
+e163c39|2025-08-18 18:29:15|perf: :zap: Added MatchTile an SalmonMatch internal DTOs and used batch operations to increase performance. Also kept applying "this." for sonarqube compliance
+a8a1bc3|2025-08-17 21:43:20|refactor: :art: Moved some files to other folders
+edf6e71|2025-08-17 18:16:44|refactor: :art: Used BaseService with AuthoritiesService and minor improvements in User and UserAchievement
+0256c99|2025-08-17 15:34:34|perf: :zap: Added DashboardMatchDTO to reduce data transmision
+d90071b|2025-08-17 15:31:53|refactor: :art: Added BaseRepository to improve performance of findAll/findById as DTO and applied 'this.' in Java files for SonarQube compliance
+ee277a0|2025-08-14 19:31:23|refactor: :art: Renamed repository methods to reduce querys written manually        
+1b3f207|2025-08-14 18:37:03|fix: :bug: Fixed in-game issues in tiles shuffling and salmons movement
+4cda6d3|2025-08-14 18:34:21|refactor: :art: Rewrote frontend in Typescript and improved Login and Register design and coding
+6fd4103|2025-07-16 17:52:36|refactor: :art: Extracted submethods from long methods and moving methods to other classes and minor fixes
+a4e90f4|2025-07-14 15:41:30|feat: :zap: True first functional version and increased performance
+c14d423|2025-07-10 21:09:54|feat: :sparkles: Finally first working version and minor improvements (webSocketManager for the future)
+2e4317c|2025-07-10 14:09:22|perf: :zap: First working version again, changed dto mappings for projections, improved Game.jsx data structures, english renaming, possibility to play multi-device
+bec6363|2025-07-05 20:29:25|refactor: :art: Almost functional game and phase renaming
+24b81a3|2025-06-24 17:32:13|refactor: :zap: Serializers removed and DTO completion. Minor frontend fixes. Still not working because of Game.jsx and revise SearchBars
+f06e1fb|2025-06-23 20:04:23|refactor: :art: Backend cleaning, working tests and controllers correction
+62e3ca0|2025-06-20 17:22:02|refactor: :zap: Added DTOs and optimized chat backend. Still review serializers and test
+232e6e3|2025-06-13 18:06:19|refactor: :art: Starting DTO for replacing serializers
+c5d3629|2025-06-11 23:39:02|refactor: :art: Moved game logic from controllers to services
+c020647|2025-06-09 17:38:02|docs: :memo: Removing logs
+f426ca3|2025-06-09 17:36:52|feat: :sparkles: Backend cleaning part 2
+bacca74|2025-06-02 23:32:13|Mayus error fixed
+4714815|2025-06-02 23:29:26|error mayúsculas
+b2db37b|2025-06-02 23:27:03|refactor: :art: Backend cleaning with BaseService and BaseRestController`;
+
+        const listContainer = document.getElementById('commit-list');
+        const countContainer = document.getElementById('total-count');
+
+        const lines = rawData.trim().split('\n');
+        countContainer.textContent = lines.length;
+
+        function formatMessage(message) {
+            // Regex corregida para Conventional Commits
+            const ccRegex = /^([a-zA-Z-]+)(?:\([\w-]+\))?!?:\s*(.*)/;
+            const match = message.match(ccRegex);
+            
+            if (match) {
+                const prefix = match[1] + ':';
+                const rest = match[2];
+                return `<span class="commit-prefix">${prefix}</span>${rest}`;
+            }
+            return message;
+        }
+
+        lines.forEach(line => {
+            const parts = line.split('|');
+            if (parts.length < 3) return;
+            
+            const hash = parts[0];
+            const date = parts[1];
+            const message = parts.slice(2).join('|');
+
+            const li = document.createElement('li');
+            li.className = 'commit-item';
+
+            li.innerHTML = `
+                <div class="commit-info">
+                    <span class="commit-message">${formatMessage(message)}</span>
+                    <div class="commit-meta">
+                        <span class="date-text">${date}</span>
+                    </div>
+                </div>
+                <div class="commit-hash-container">
+                    <span class="commit-hash">${hash}</span>
+                </div>
+            `;
+            listContainer.appendChild(li);
+        });
+    </script>
+</body>
+</html>

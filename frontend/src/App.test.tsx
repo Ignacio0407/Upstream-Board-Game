@@ -113,22 +113,4 @@ describe("App Component Routing", () => {
         expect(screen.getByText(/Don' t Hack My App/i)).toBeInTheDocument();
         expect(screen.getByText(/HACKER DETECTED/i)).toBeInTheDocument();
     });
-
-    it.skip("shows error fallback when an error occurs", async () => {
-        vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("");
-        shouldThrowError = true;
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-        render(
-            <MemoryRouter initialEntries={["/"]}>
-                <App />
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
-            expect(screen.getByText(/Sorry, an unexpected error has occurred./i)).toBeInTheDocument();
-        });
-
-        consoleSpy.mockRestore();
-    });
 });
