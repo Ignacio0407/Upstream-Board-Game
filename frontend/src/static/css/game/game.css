@@ -1,7 +1,7 @@
 .gamePage-container {
     position: relative;
     text-align: center;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('../../images/upStreamFondo.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('/images/upstreamBackground.jpg');
     background-size: cover;
   }
 
@@ -12,7 +12,8 @@
     margin-left: 550px;
     margin-top: 50px;
     width: 800px;
-    height: 2000px;;
+    /*height: 2000px;*/
+    height: fit-content;
     border-radius: 10px;
     /*background-color:  #1e95a2; */
     border: solid;
@@ -21,7 +22,7 @@
 .game-title {
   position: absolute;
   margin-bottom: 10px;
-  margin-top: 23px;
+  margin-top: 20px;
   font-size: 30px;
 }
 
@@ -53,26 +54,32 @@
 .grid1 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+  /* Recrea matemáticamente el espacio exacto que tenías antes: */
+  grid-template-rows: repeat(6, 260px); 
+  
   background-color: #3A6B76;
   padding-left: 10px;
   padding-right: 10px;
-  padding-bottom: 110px;
+  /* ARREGLO: 120px para contener el transform de los hexágonos + 20px de margen visual */
+  padding-bottom: 140px; 
 }
 
 .grid1-80 {
-  height: 80%;
+  /*height: 80%;*/
+  height: auto;
 }
 
 .grid1-100 {
-  height: 100%;
+  /*height: 100%;*/
+  height: auto;
 }
 
 .grid2 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    height: 20%;
+    /*height: 20%;*/
+    height: 400px;
     justify-self: flex-end;
     background-image: url('/images/tiles/sea.webp');
     background-position: center;
@@ -84,7 +91,8 @@
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-  height: 20%;
+  /*height: 20%;*/
+  height: 400px;
   background-color:  #193963;
 }
 
@@ -249,4 +257,87 @@
   left: 2vw;
   cursor: pointer;
   z-index: 1000;
+}
+
+/* AÑADE ESTO AL FINAL DE TU CSS ORIGINAL */
+
+/* ==========================================================================
+   Only for tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    
+    /* 1. Extra space at the bottom for scroll */
+    .gamePage-container {
+        padding-bottom: 300px !important; 
+    }
+
+    /* 2. The table at the top, with MAXIMUM HEIGHT and internal scroll for 5 players */
+    .users-table {
+        position: absolute !important;
+        top: 15px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90vw !important;
+        max-width: 600px !important;
+        max-height: 220px !important; 
+        overflow-y: auto !important;  
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* 3. The board starts below the titles (at 300px from the top) */
+    .game-container {
+        margin-left: calc((100vw - 800px) / 2) !important;
+        margin-top: 300px !important; 
+    }
+
+    /* 4. We place the titles right in the gap between the table and the board (at 260px) */
+    .game-title {
+        margin-top: 0 !important;
+        top: 260px !important;
+    }
+    
+    .game-name { 
+        margin-left: calc((100vw - 800px) / 2) !important; 
+    }
+    .game-round { 
+        margin-left: calc(((100vw - 800px) / 2) + 260px) !important; 
+    }
+    .game-phase { 
+        margin-left: calc(((100vw - 800px) / 2) + 480px) !important; 
+    }
+    
+    h1.game-turn { display: none; } 
+    div.game-turn { display: flex !important; }
+
+    /* 5. Confirm/Undo Buttons (Fixing stretching) */
+    .move-your-salmons {
+        top: auto !important; /* MAGIA: Esto anula el top:260px de .game-title para que no se estire */
+        left: 10px !important;
+        bottom: 10px !important;
+        margin-left: 0 !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        padding: 10px;
+        border-radius: 10px;
+        z-index: 1000;
+    }
+
+    /* 6. The tile block: Transparent and traversable */
+    .pick-the-tile-block {
+        left: auto !important;
+        right: 10px !important;
+        bottom: 10px !important;
+        padding: 15px;
+        border-radius: 10px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.3) !important; 
+        pointer-events: none !important; 
+    }
+
+    .pick-the-tile-block img,
+    .pick-the-tile-block button,
+    .pick-the-tile-block h2 {
+        pointer-events: auto !important; 
+    }
 }

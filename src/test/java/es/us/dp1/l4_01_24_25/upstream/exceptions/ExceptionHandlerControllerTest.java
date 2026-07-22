@@ -31,9 +31,6 @@ class ExceptionHandlerControllerTest {
         @GetMapping("/test/not-valid-move")
         void notValidMove() { throw new NotValidMoveException("Invalid move"); }
 
-        @GetMapping("/test/no-capacity")
-        void noCapacity() { throw new NoCapacityException("No capacity"); }
-
         @GetMapping("/test/not-owned")
         void notOwned() { throw new ResourceNotOwnedException("Not owned"); }
 
@@ -73,13 +70,6 @@ class ExceptionHandlerControllerTest {
         mockMvc.perform(get("/test/not-valid-move").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Invalid move"));
-    }
-
-    @Test
-    void shouldReturn400ForNoCapacityException() throws Exception {
-        mockMvc.perform(get("/test/no-capacity").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("No capacity"));
     }
 
     @Test

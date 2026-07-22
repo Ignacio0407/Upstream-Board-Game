@@ -1,30 +1,30 @@
 /**
  * -----------------------------------------------------------------------------
- * Autor / Author: Ignacio GutiÃ©rrez Serrera
+ * Autor / Author: Ignacio Gutiérrez Serrera
  * 
- * ðŸ‡¬ðŸ‡§ This software was developed by Ignacio GutiÃ©rrez Serrera.
+ * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
  * It may be used, modified, and distributed for personal or commercial 
  * purposes, provided that explicit credit is given to the original author.
  * 
  * If this code is used as-is or with minor to moderate modifications 
  * as part of another software, proper attribution must be given to 
- * Ignacio GutiÃ©rrez Serrera.
+ * Ignacio Gutiérrez Serrera.
  * (e.g., credits, documentation, or user interface).
  * 
  * This license notice must not be removed in any redistribution 
  * of the source code or binaries.
  * 
- * ðŸ‡ªðŸ‡¸ Este software ha sido desarrollado por Ignacio GutiÃ©rrez Serrera.
- * Se permite su uso, modificaciÃ³n y distribuciÃ³n con fines personales o 
- * comerciales, siempre que se mantenga el reconocimiento explÃ­cito al autor.
+ * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se permite su uso, modificación y distribución con fines personales o 
+ * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
  * 
- * Si este cÃ³digo se utiliza tal cual, o con modificaciones leves o medias 
- * como parte de otro software, se debe otorgar el crÃ©dito correspondiente 
- * a Ignacio GutiÃ©rrez Serrera.
- * (por ejemplo, en los crÃ©ditos, documentaciÃ³n o interfaz del producto).
+ * Si este código se utiliza tal cual, o con modificaciones leves o medias 
+ * como parte de otro software, se debe otorgar el crédito correspondiente 
+ * a Ignacio Gutiérrez Serrera.
+ * (por ejemplo, en los créditos, documentación o interfaz del producto).
  * 
- * No se permite eliminar este aviso de licencia en ninguna redistribuciÃ³n 
- * del cÃ³digo fuente o binario.
+ * No se permite eliminar este aviso de licencia en ninguna redistribución 
+ * del código fuente o binario.
  * -----------------------------------------------------------------------------
  */
 
@@ -126,25 +126,19 @@ public class WebSocketSecurityTests {
     @ParameterizedTest(name = "[{index}] {0} {1} inMatch={2} bigPayload={3} â†’ success={4}")
     @CsvSource({
         // command,    destination,                      inMatch, bigPayload, shouldSucceed
-        // â”€â”€ 1 segment routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // 1 segment routes
         "SEND,       /topic/chat/1,                     true,    false,      true",
-        "SEND,       /topic/movingSalmon/99,            true,    false,      true",
         "SEND,       /topic/tilesAndSalmons/2,          true,    false,      true",
-        "SEND,       /topic/herons/3,                   true,    false,      true",
-        "SEND,       /topic/heronsUpdated/3,            true,    false,      true",
         "SEND,       /topic/players/2,                  true,    false,      true",
-        "SEND,       /topic/movingSalmonFromSea/99,     true,    false,      true",
         "SUBSCRIBE,  /topic/chat/1,                     true,    false,      true",
-        "SUBSCRIBE,  /topic/movingSalmon/2,             true,    false,      true",
-        // â”€â”€ 2 segments routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // 2 segments routes
         "SEND,       /topic/tiles/place/1,              true,    false,      true",
         "SEND,       /topic/tiles/rotation/1,           true,    false,      true",
         "SEND,       /topic/salmons/spawn/1,            true,    false,      true",
         "SUBSCRIBE,  /topic/tiles/place/1,              true,    false,      true",
-        // â”€â”€ 3 segments routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        "SEND,       /topic/salmon/spawn/enter/1,       true,    false,      true",
-        "SUBSCRIBE,  /topic/salmon/spawn/enter/1,       true,    false,      true",
-        // â”€â”€ (EXACT_PATHS) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        "SEND,       /topic/tilesAndSalmonsByMatchId/1, true,    false,      true",
+        "SUBSCRIBE,  /topic/tilesAndSalmonsByMatchId/1, true,    false,      true",
+        // (EXACT_PATHS)
         "SUBSCRIBE,  /topic/matches/dashboard,          false,   false,      true",
         "SEND,       /topic/matches/dashboard,          false,   false,      true",
         "SUBSCRIBE,  /topic/match/update/5,             true,    false,      true",
@@ -153,15 +147,15 @@ public class WebSocketSecurityTests {
         "SEND,       /topic/match/newPlayer/1,          true,    false,      true",
         "SUBSCRIBE,  /topic/match/start/1,              true,    false,      true",
         "SEND,       /topic/match/start/1,              true,    false,      true",
-        // â”€â”€ User not in match â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // User not in match
         "SEND,       /topic/chat/1,                     false,   false,      false",
         "SUBSCRIBE,  /topic/chat/1,                     false,   false,      false",
-        // â”€â”€ Invalid Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Invalid Routes
         "SEND,       /topic/invalid,                    true,    false,      false",
         "SUBSCRIBE,  /topic/invalid,                    true,    false,      false",
         "SEND,       /topic/chat/abc,                   true,    false,      false",  // Not numeric matchId
         "SEND,       /topic/chat/,                      true,    false,      false",  // Empty matchId
-        // â”€â”€ Big Payload â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Big Payload
         "SEND,       /topic/chat/1,                     true,    true,       false",
         "SUBSCRIBE,  /topic/chat/1,                     true,    true,       false",
     })
