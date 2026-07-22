@@ -107,23 +107,8 @@ public class ExceptionHandlerController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 
-    @ExceptionHandler(OnlyMovingForwardException.class)
-    public ResponseEntity<Map<String, String>> handleOnlyMovingForwardException(OnlyMovingForwardException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
-    }
-
     @ExceptionHandler(NotValidMoveException.class)
     public ResponseEntity<Map<String, String>> handleNotValidMoveException(NotValidMoveException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
-    }
-
-    @ExceptionHandler(NoCapacityException.class)
-    public ResponseEntity<Map<String, String>> handleNoCapacityException(NoCapacityException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
-    }
-
-    @ExceptionHandler(NonSkipableTurnException.class)
-    public ResponseEntity<Map<String, String>> handleNonSkipableTurnException(NonSkipableTurnException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(BASE_ERROR_MESSAGE, ex.getMessage()));
     }
 }

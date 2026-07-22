@@ -23,7 +23,6 @@ export default function EndGame(): JSX.Element {
     useEffect(() => {
         if (!initialized) {
             const initialize = async () => {
-                await patch(`/api/v1/matches/finalscore/${matchId}`, jwt);
                 await fetchPlayers();
                 setInitialized(true);
             };

@@ -1,5 +1,5 @@
 import { ColorToRgb } from "../lobby/ColorParser.ts";
-import { get, patch, put } from "../util/fetchers.ts";
+import { patch } from "../util/fetchers.ts";
 import '../static/css/game/game.css'
 import MatchTile, { emptyTile } from '../interfaces/MatchTile.ts'
 import Player from '../interfaces/Player.ts'
@@ -8,6 +8,7 @@ import SalmonMatch from "../interfaces/SalmonMatch.ts";
 import { JSX } from "react";
 import { TileType } from "../interfaces/Tile.ts";
 import { Phase } from "../interfaces/Phase.ts";
+import ConfirmModal from "../util/ConfirmModal.tsx";
 
 export const GRID_WIDTH = 3;
 export const GRID_HEIGHT = 6;
@@ -27,31 +28,12 @@ export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, se
     }
 }
 
-export const handleSalmonClick = (salmon: SalmonMatch, myPlayer:Player|null, match:Match, setSelectedSalmon:Function) => {
-    if (myPlayer) {
-        if (myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === Phase.MOVING)
-            setSelectedSalmon(salmon);
-    }
+export const handleSalmonClick = (salmon: SalmonMatch, myPlayer: Player | null, match: Match, setSelectedSalmon: Function) => {
+    if (myPlayer?.id === match.actualPlayerId && myPlayer?.id === salmon.playerId && match.phase === Phase.MOVING)
+        setSelectedSalmon(salmon);
+    else
+        setSelectedSalmon(null);
 }
-
-export const updateSalmonPosition = async(salmon:SalmonMatch, x:number, y:number, jwt:string, match:Match, actualPlayerId:number|undefined, myPlayerId:number|undefined) => {
-    if (match.phase === Phase.MOVING && actualPlayerId === myPlayerId) {
-        try {
-        const response = await patch(`/api/v1/salmonMatches/coordinate/${salmon.id}`, jwt, {x,y});
-        if (!response.ok) {
-            const errorData = await response.json();
-            if (errorData.error) alert(errorData.error) 
-            else alert(errorData.message);
-            console.log("Error updating salmon:", response.status);
-        }
-        return response;
-    } catch (error:any) {
-        console.log("Error updating salmon from catch.", error)
-        throw error.message;
-    }
-    }
-    else alert("Now it's tiles placing phase!")
-};
 
 export const changephase = async(match:Match, jwt:string, myPlayerId:number) => {
     try {
@@ -68,32 +50,16 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
 };
 
 export const passTurn = (match:Match, jwt:string, myPlayer:Player) => {
-    return (<button onClick={() => {
-        myPlayer.energy = myPlayer.energy -1;
-        put(`/api/v1/players/${myPlayer.id}`, jwt, myPlayer)
+    async () => {
+        await patch(`/api/v1/players/${myPlayer.id}/energy`, jwt)
         changephase(match, jwt, myPlayer.id)
-     }}>Pass Turn</button>)
-};
-    
-export const enterSpawn = async(salmon:SalmonMatch, jwt:string) => {
-    try {
-        const response = await patch(`/api/v1/salmonMatches/enterSpawn/${salmon.id}`, jwt);
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert(errorData.error);
-            console.log("Error updating salmon:", response.status);
-        }
-        return response;
-    } catch (error:any) {
-        console.log("Error updating salmon from catch:", error)
-        throw error.message;
     }
 };
 
 export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
     if (match.phase === Phase.TILES && actualPlayerId === myPlayerId) {
         try {
-        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, {x,y});
+        const response = await patch(`/api/v1/matchTiles/${tile.id}`, jwt, { x, y, orientation: tile.orientation });
         if (!response.ok) {
             const errorData = await response.json();
             alert(errorData.message);
@@ -108,46 +74,27 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
     else alert("Now it's salmon moving phase!")
 };
 
-export const handleGridClick = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, setSelectedSalmon:Function, match:Match, actualPlayerId:number|undefined, myPlayerId:number, grid:GridCell[]) => {
+export const handleUpdateTilePosition = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, match:Match, actualPlayerId:number|undefined, myPlayerId:number, matchTilesNoCoordinate?: MatchTile[]) => {
     const x = index % GRID_WIDTH;
     const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
-    let updateTilePositionResponse = null;
-    let updateSalmonPositionResponse = null;
-    let updateSpawnReponse = null;
-    let confirmed;
+    let updateTilePositionResponse;
     if (selectedSalmon === null) {
-        if (selectedTile) updateTilePositionResponse = await updateTilePosition(selectedTile, x, y, jwt, actualPlayerId, myPlayerId, match);
+        const tileToPlace = selectedTile || (matchTilesNoCoordinate && matchTilesNoCoordinate.length > 0 ? matchTilesNoCoordinate[0] : null);
+        if (tileToPlace) {
+            updateTilePositionResponse = await updateTilePosition(tileToPlace, x, y, jwt, actualPlayerId, myPlayerId, match);
+        }
         setSelectedTile(null);
+        if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === Phase.TILES) await changephase(match, jwt, myPlayerId);
     }
-    else {
-        const foundTileAndSalmons = grid[index]?.tile;
-        if (isFull(match.playersNumber, foundTileAndSalmons)) {
-            confirmed = window.confirm("This tile is full of salmons, you must spend 3 energy points to jump to the next one (If the next one is also full, this move will not be valid). Do you want to jump?");
-            if (confirmed) {
-                updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
-                setSelectedSalmon(null);
-            }
-        }
-        else if(x === 1 && y === 5 && match.round >= 6) {
-            updateSpawnReponse = await enterSpawn(selectedSalmon, jwt);        
-            setSelectedSalmon(null);
-        }
-        else {
-            updateSalmonPositionResponse = await updateSalmonPosition(selectedSalmon, x, y, jwt, match, actualPlayerId, myPlayerId);
-            setSelectedSalmon(null);
-        }
-    }
-    if (updateTilePositionResponse != null && updateTilePositionResponse.ok && match.phase === Phase.TILES) await changephase(match, jwt, myPlayerId);
-    else if (updateSalmonPositionResponse != null && updateSalmonPositionResponse.ok && match.phase === Phase.MOVING) await changephase(match, jwt, myPlayerId);
-    else if (updateSpawnReponse != null && updateSpawnReponse.ok && match.phase === Phase.MOVING) await changephase(match, jwt, myPlayerId);
 };
 
-export const handleRotateTile = async (tile:MatchTile, jwt:string) => {
+export const handleRotateTile = async (tile: MatchTile, jwt: string) => {
+    const currentOrientation = tile.orientation ?? 0;
+    const newOrientation = (currentOrientation + 1) % 6;
     try {
-        const newOrientation = (tile.orientation + 1) % 7;
-        const response = await patch(`/api/v1/matchTiles/${tile.id}/rotation`, jwt, newOrientation)
-        if (!response.ok) {
-            throw new Error('Error updating tile rotation');
+        const response = await patch(`/api/v1/matchTiles/${tile.id}/rotate`, jwt, { rotation: newOrientation });
+        if (response && !response.ok) {
+            console.error('Error rotating tile:', new Error('Error rotating tile'));
         }
     } catch (error) {
         console.error('Error rotating tile:', error);
@@ -206,12 +153,6 @@ export const renderPlayerList = (playerList:JSX.Element[]) => {
             </table>
 }
 
-export const fetchPlayers = async (match:Match, jwt:string, setPlayers:Function) => {
-    const response = await get("/api/v1/players/match/"+match.id, jwt);
-    const data = await response.json();
-    setPlayers(data);
-}
-
 export function buildGridFromSnapshot(tiles: MatchTile[], salmons: SalmonMatch[]): GridCell[] {
     const grid: GridCell[] = new Array(18).fill(null).map(() => ({
         tile: emptyTile,
@@ -234,39 +175,6 @@ export function buildGridFromSnapshot(tiles: MatchTile[], salmons: SalmonMatch[]
     return grid;
 }
 
-export const updateGridWithMovement = (prevGrid: GridCell[], salmon: SalmonMatch, myTile: MatchTile, toTravel: MatchTile): GridCell[] => {
-  const newGrid = [...prevGrid];
-  const fromIndex = coordToIndex(myTile.coordinate.x, myTile.coordinate.y);
-  const toIndex = coordToIndex(toTravel.coordinate.x, toTravel.coordinate.y);
-  // Remove salmon from current tile
-  newGrid[fromIndex] = {...newGrid[fromIndex],
-    tile: myTile,
-    salmons: newGrid[fromIndex].salmons.filter(s => s.id !== salmon.id),
-  };
-  // Add salmon to new tile
-    newGrid[toIndex] = {...newGrid[toIndex],
-    tile: toTravel,
-    salmons: salmon.salmonsNumber > 0 ? [...newGrid[toIndex].salmons, salmon] : newGrid[toIndex].salmons
-    };
-    console.log("myTile", newGrid[fromIndex])
-    console.log("toTravel", newGrid[toIndex])
-  return newGrid;
-};
-
-export const updateGridWithMovementFromSea = (prevGrid: GridCell[], salmon: SalmonMatch, toTravel: MatchTile): GridCell[] => {
-  const newGrid = [...prevGrid];
-  const toIndex = coordToIndex(toTravel.coordinate.x, toTravel.coordinate.y);
-  // Add salmon to new tile
-  if (salmon.salmonsNumber > 0) {
-    newGrid[toIndex] = {
-    ...newGrid[toIndex],
-    tile: toTravel,
-    salmons: [...newGrid[toIndex].salmons, salmon],
-    };
-  }
-  return newGrid;
-};
-
 export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile): GridCell[] => {
   const { x, y } = updatedTile.coordinate;
   const index = coordToIndex(x, y);
@@ -278,40 +186,51 @@ export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile)
   return newGrid;
 };
 
-export const updateGridWithSalmons = (prevGrid: GridCell[], updatedSalmons: SalmonMatch[]): GridCell[] => {
-  const updatedMap = new Map(updatedSalmons.map(s => [s.id, s]));
-
-  return prevGrid.map(cell => {
-    if (cell.salmons.length === 0) return cell;
-
-    const newSalmons = cell.salmons
-      .map(s => updatedMap.get(s.id) ?? s)
-      .filter(s => updatedMap.has(s.id) || (s as any).salmonsNumber > 0); // ⚠️ revisa esta condición
-
-    if (newSalmons.length === cell.salmons.length && newSalmons.every((s, i) => s === cell.salmons[i])) {
-      return cell;
+export type PendingMove = { salmonId: number, x: number, y: number, enterSpawn?: boolean };
+// --- Send batch to backend and manage rollback ---
+export const confirmMovementBatch = async (pendingMoves: PendingMove[], jwt: string, match: Match, 
+    myPlayerId: number, initialState: any, setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void, restoreSnapshot: Function, clearPath: Function) => {
+    let moveBatchSuccess = false;
+    try {
+        const response = await patch(`/api/v1/salmonMatches/move-batch/${match.id}`, jwt, pendingMoves);
+        if (!response.ok) throw new Error(await response.text());
+        moveBatchSuccess = true;
+        // If all goes well, path is cleared. The WebSocket will handle confirmation for everyone.
+        clearPath();
+        setConfirmBatchIsSubmitting(false);
+        await changephase(match, jwt, myPlayerId);
+    } catch (error: any) {
+        console.error("Error in confirmation sequence:", error);
+        // CASE A: Failed the first thing we sent. The backend is clean, we can do a safe rollback.
+        if (!moveBatchSuccess) {
+            alert("Movement could not be processed. Restoring position...");
+            restoreSnapshot(initialState); 
+        } 
+        // CASE B: All was saved, but changePhase failed. We retry.
+        else {
+            let retries = 3;
+            while (retries > 0) {
+                try {
+                    await changephase(match, jwt, myPlayerId);
+                    break;
+                } catch (retryError) {
+                    retries--;
+                    if (retries === 0) alert("Persistent network failure. Movement was saved, reload to continue.");
+                    else await new Promise(res => setTimeout(res, 1000));
+                }
+            }
+        }
+        clearPath();
+        setConfirmBatchIsSubmitting(false);
     }
-
-    return { ...cell, salmons: newSalmons };
-  });
 };
 
-export const updateGridWithHerons=(prevGrid:GridCell[],updatedTiles:MatchTile[],updatedSalmons:SalmonMatch[],deletedIds?:number[]):GridCell[]=>{
- const newGrid=[...prevGrid];
- const salmonMap=new Map(updatedSalmons.map(s=>[s.id,s]));
- newGrid.forEach((cell,index)=>{
-  if(cell.salmons.length===0) return;
-  const newSalmons=cell.salmons.filter(s=>!deletedIds?.includes(s.id)).map(s=>salmonMap.get(s.id)??s);
-  if(newSalmons!==cell.salmons)
-   newGrid[index]={...cell,salmons:newSalmons};
- });
- updatedTiles.forEach(tile=>{
-  if(!tile.coordinate)return;
-  const {x,y}=tile.coordinate;
-  const index=coordToIndex(x,y);
-  newGrid[index]={...newGrid[index],tile};
- });
- return newGrid;
+export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, history: any[], 
+        visible: boolean, setVisible: (visible: boolean) => void, handleConfirmBatch: () => void) => {
+    if (history.length === 0)
+        passTurn(match, jwt, myPlayer);
+    else 
+        ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch});
 };
 
 export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
@@ -320,12 +239,12 @@ export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
   const salmonWidth = 80;
   const salmonHeight = 77;
 
-  // Centro del hexágono (ajustado para centrar el salmón)
+  // Center the hexagonous (adjusted to center the salmon)
   const centerX = tileWidth / 2 - salmonWidth / 2;
   const centerY = tileHeight / 2 - salmonHeight / 2;
 
-  // Radio desde el centro del hexágono a los salmones
-  const radius = 60; // Ajustable: radio de la "órbita" donde se ponen los salmones
+  // Radius from hexagonous center to salmons
+  const radius = 60;
 
   if (totalSalmons === 1) {
     return {
@@ -334,38 +253,38 @@ export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
     };
   }
 
-  // Para 2 o más, usamos diferentes figuras
+  // For 2 or more, use different figures
   let angle = 0;
   let x:number, y:number;
 
   switch (totalSalmons) {
     case 2: {
-      // Dos salmones: uno ligeramente a la izquierda, otro a la derecha, en el centro vertical
-      const offset = 40; // separación horizontal
+      // 2 salmons: one smoothly to the left, the other to the right, in the vertical center
+      const offset = 40; // horizontal separation
       x = tileWidth / 2 + (index === 0 ? -offset : +offset) - salmonWidth / 2;
       y = tileHeight / 2 - salmonHeight / 2;
       break;
     }
 
     case 3: {
-      // Triángulo: ángulos 0°, 120°, 240° (empezando desde arriba)
-      angle = (index * 2 * Math.PI) / 3 - Math.PI / 2; // -PI/2 para empezar desde arriba
+      // Triangle: angles 0°, 120°, 240° (starting from the top)
+      angle = (index * 2 * Math.PI) / 3 - Math.PI / 2; // -PI/2 to start from the top
       x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
       y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
       break;
     }
 
     case 4: {
-      // Cuadrado: ángulos 45°, 135°, 225°, 315° (rotado para que no esté en cruz)
-      angle = (index * 2 * Math.PI) / 4 + Math.PI / 4; // +PI/4 para empezar en esquina
+      // Square: angles 45°, 135°, 225°, 315° (rotated so it's not in a cross)
+      angle = (index * 2 * Math.PI) / 4 + Math.PI / 4; // +PI/4 to start from a corner
       x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
       y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
       break;
     }
 
     case 5: {
-      // Pentágono: 5 puntos, cada 72°, empezando desde arriba
-      angle = (index * 2 * Math.PI) / 5 - Math.PI / 2; // empezar desde arriba
+      // Pentagonous: 5 points, each 72°, starting from the top
+      angle = (index * 2 * Math.PI) / 5 - Math.PI / 2; // start from the top
       x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
       y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
       break;

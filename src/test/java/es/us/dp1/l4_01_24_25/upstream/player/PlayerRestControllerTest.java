@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.player;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
@@ -100,39 +102,24 @@ class PlayerRestControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/v1/players/{id}/energy - Happy Path")
-    void shouldUpdatePlayerEnergyWhenSufficient() throws Exception {
-        PlayerDTO dto = new PlayerDTO();
-        dto.setEnergy(5);
-        when(playerService.updateEnergy(eq(1), eq(3))).thenReturn(dto);
+    @DisplayName("PATCH /api/v1/players/{id}/energy - Happy Path (Set energy to zero)")
+    void shouldSetPlayerEnergyToZero() throws Exception {
+        doNothing().when(playerService).setEnergyToZero(1);
 
-        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("3")) // We pass a valid number
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.energy").value(5));
+        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)) // Ya no enviamos body
+               .andExpect(status().isOk());
+
+        verify(playerService).setEnergyToZero(1);
     }
 
     @Test
-    @DisplayName("PATCH /api/v1/players/{id}/energy - Negative Path (Insufficient Energy -> 400)")
-    void shouldReturnBadRequestWhenEnergyInsufficient() throws Exception {
-        when(playerService.updateEnergy(eq(1), eq(10)))
-            .thenThrow(new InsufficientEnergyException("Not enough energy"));
-
-        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("10"))
-               .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("PATCH /api/v1/players/{id}/energy - Edge Case (Type Mismatch/Bad JSON -> 400)")
+    @DisplayName("PATCH /api/v1/players/{id}/energy - Edge Case (Not player turn -> 403)")
     void shouldReturnBadRequestOnEnergyTypeMismatch() throws Exception {
-        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("\"five\"")) //  String instead of Integer
-               .andExpect(status().isBadRequest());
+        doThrow(new AccessDeniedException("It is not your turn!")).when(playerService).setEnergyToZero(1);
 
-        verify(playerService, never()).updateEnergy(any(), any());
+        mockMvc.perform(patch("/api/v1/players/{id}/energy", 1))
+               .andExpect(status().isForbidden());
+
+        verify(playerService).setEnergyToZero(1);
     }
 }

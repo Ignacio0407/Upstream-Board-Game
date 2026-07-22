@@ -18,7 +18,6 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/players")
@@ -49,8 +48,9 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
     }
 
     @PatchMapping("/{id}/energy")
-    public ResponseEntity<PlayerDTO> updateEnergy(@PathVariable("id") Integer id, @RequestBody @Valid Integer energyUsed) throws ResourceNotFoundException, Exception {
-        return new ResponseEntity<>(this.playerService.updateEnergy(id, energyUsed), HttpStatus.OK);
+    public ResponseEntity<PlayerDTO> setEnergyToZero(@PathVariable("id") Integer id) throws ResourceNotFoundException, Exception {
+        this.playerService.setEnergyToZero(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-       
+ 
 }

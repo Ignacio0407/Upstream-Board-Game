@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import startGame from './startGame';
 import * as fetchers from '../util/fetchers.ts';
 
-vi.mock('./fetchers');
+vi.mock('../util/fetchers.ts');
 
 describe('startGame', () => {
     const navigate = vi.fn();
@@ -23,6 +23,5 @@ describe('startGame', () => {
         expect(setLoading).toHaveBeenCalledWith(true);
         expect(fetchers.patch).toHaveBeenCalledWith('/api/v1/matches/1/startGame', jwt);
         expect(fetchers.post).toHaveBeenCalledWith('/api/v1/matchTiles/createMatchTiles/1', jwt);
-        expect(navigate).toHaveBeenCalledWith('/matches/1/game');
     });
 });

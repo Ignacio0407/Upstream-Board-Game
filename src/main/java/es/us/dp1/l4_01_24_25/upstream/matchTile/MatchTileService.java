@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
@@ -27,7 +25,6 @@ import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
-import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @Service
@@ -124,18 +121,15 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
     }
 
     @Transactional
-    public MatchTileDTO updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
+    public void updateCoordinate(Integer id, Map<String, Integer> updates) throws NotValidMoveException {
         MatchTile matchTile = this.findById(id);
         Match match = matchTile.getMatch();
-        // 1. Extract user from JWT token
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        // 2. Search player
-        User authenticatedUser = this.userService.findUserByName(currentUsername);
-        Player myPlayer = this.playerService.findPlayerByUserAndMatch(authenticatedUser.getId(), match.getId());
-        // 3. Safe validation with DB
+        Player myPlayer = this.playerService.findMyPlayer(match.getId());
         if (!match.getActualPlayer().getId().equals(myPlayer.getId())) {
             throw new NotValidMoveException("It is not your turn!");
+        }
+        if (updates.containsKey("orientation") && updates.get("orientation") != null) {
+            matchTile.setOrientation(updates.get("orientation"));
         }
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
         if (!Integer.valueOf(0).equals(updates.get("y"))) {
@@ -163,16 +157,18 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         this.messagingTemplate.convertAndSend("/topic/tiles/place/" + updatedTile.getMatchId(), updatedTile);
         this.playerService.notifyPlayersUpdate(updatedTile.getMatchId());
         this.matchService.notifyMatchUpdate(match);
-        return updatedTile;
     }
 
-    public MatchTileDTO updateMatchTileRotation(Integer id, Integer rotation) {
+    public void broadcastMatchTileRotation(Integer id, Integer rotation) {
         MatchTile matchTile = this.findById(id);
+        Match match = matchTile.getMatch();
+        Player myPlayer = this.playerService.findMyPlayer(match.getId());
+        if (!match.getActualPlayer().getId().equals(myPlayer.getId())) {
+            throw new NotValidMoveException("It is not your turn!");
+        }
         matchTile.setOrientation(rotation);
-        this.save(matchTile);
         MatchTileDTO updatedTile = this.matchTileMapper.toDTO(matchTile);
         this.messagingTemplate.convertAndSend("/topic/tiles/rotation/" + updatedTile.getMatchId(), updatedTile);
-        return updatedTile;
     }
 
     private void createMatchTile(MatchTile matchTile, Tile tile, Match match, List<MatchTile> createdTiles) {

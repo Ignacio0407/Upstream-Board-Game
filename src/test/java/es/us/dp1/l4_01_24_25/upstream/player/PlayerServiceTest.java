@@ -9,23 +9,31 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +65,51 @@ class PlayerServiceTest {
         player.setEnergy(5);
         player.setAlive(true);
         player.setPoints(0);
+    }
+
+    // findMyPlayer
+    @Test
+    @DisplayName("findMyPlayer - Happy Path: Devuelve el jugador del usuario autenticado")
+    void shouldFindMyPlayerSuccessfully() {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn("testUser");
+
+        User mockUser = new User();
+        mockUser.setId(1);
+        when(userService.findUserByName("testUser")).thenReturn(mockUser);
+
+        Player mockPlayer = new Player();
+        mockPlayer.setId(10);
+        when(playerRepository.findByUserPlayer_IdAndMatch_Id(1, 99)).thenReturn(mockPlayer); 
+
+        Player result = playerService.findMyPlayer(99);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(10);
+        verify(userService).findUserByName("testUser");
+        
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    @DisplayName("findMyPlayer - Negative Path: Lanza excepción si el usuario no existe")
+    void shouldThrowExceptionWhenUserNotFound() {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn("unknownUser");
+
+        when(userService.findUserByName("unknownUser")).thenThrow(new ResourceNotFoundException("User not found"));
+
+        assertThatThrownBy(() -> playerService.findMyPlayer(99))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User not found");
+
+        SecurityContextHolder.clearContext();
     }
 
     // ── findNextPlayer ────────────────────────────────────────────────────────

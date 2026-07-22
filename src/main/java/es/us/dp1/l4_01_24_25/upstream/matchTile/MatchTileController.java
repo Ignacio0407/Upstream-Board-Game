@@ -36,12 +36,14 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
     
     @PatchMapping("/{id}")
     public ResponseEntity<MatchTileDTO> updateMatchTile(@PathVariable("id") Integer id, @RequestBody Map<String, Integer> updates) {
-        return ResponseEntity.ok(this.matchTileService.updateCoordinate(id, updates));
+        this.matchTileService.updateCoordinate(id, updates);
+        return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/rotation")
-    public ResponseEntity<MatchTileDTO> updateMatchTileRotation(@PathVariable("id") Integer id, @RequestBody Integer rotation) {
-        return ResponseEntity.ok(this.matchTileService.updateMatchTileRotation(id, rotation));
+    @PatchMapping("/{id}/rotate")
+    public ResponseEntity<Void> broadcastMatchTileRotation(@PathVariable("id") Integer id, @RequestBody Map<String, Integer> rotation) {
+        this.matchTileService.broadcastMatchTileRotation(id, rotation.get("rotation"));
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/createMatchTiles/{matchId}")

@@ -3,8 +3,10 @@ package es.us.dp1.l4_01_24_25.upstream.matchTile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,10 +28,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileService;
@@ -50,13 +52,18 @@ class MatchTileServiceTest {
 
     private Match match;
     private MatchTile matchTile;
+    private Player player;
 
     @BeforeEach
     void setUp() {
+        player = new Player();
+        player.setId(1);
+
         match = new Match();
         match.setId(1);
         match.setRound(1);
         match.setPlayersNumber(3);
+        match.setActualPlayer(player);
 
         matchTile = new MatchTile();
         matchTile.setId(1);
@@ -64,14 +71,8 @@ class MatchTileServiceTest {
         matchTile.setCoordinate(new Coordinate(1, 0));
     }
 
-    // Helper to build the updates map for updateCoordinate tests, improving readability.
-    private Map<String, Integer> updates(int actual, int mine, int x, int y) {
-        return Map.of("actualPlayerId", actual, "myPlayerId", mine, "x", x, "y", y);
-    }
-
     // ── validateTilePlacement ─────────────────────────────────────────────────
-    // Rule: in round N, tiles can only be placed in rows y <= N-1
-
+    
     @ParameterizedTest(name = "Round {0}, y={1} -> valid={2}")
     @CsvSource({
         "1, 0, true",
@@ -85,59 +86,53 @@ class MatchTileServiceTest {
         assertThat(matchTileService.validateTilePlacement(round, y)).isEqualTo(expected);
     }
 
-    // ── updateCoordinate — turn ──────────────────────────────────────────────
+    // ── updateCoordinate — Turn Validation ────────────────────────────────────
 
     @Test
-    void shouldThrowWhenNotPlayersTurn() {
-        Map<String, Integer> updatesMap = updates(1, 2, 0, 0);
+    void shouldThrowWhenNotPlayersTurnOnUpdateCoordinate() {
+        Player otherPlayer = new Player();
+        otherPlayer.setId(2);
+        match.setActualPlayer(otherPlayer); // Es el turno de otro jugador
+
+        when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        when(playerService.findMyPlayer(match.getId())).thenReturn(player); // Mi jugador es el 1
         
-        assertThatThrownBy(() -> matchTileService.updateCoordinate(1, updatesMap))
+        Map<String, Integer> upd = Map.of("x", 1, "y", 2, "orientation", 0);
+        
+        assertThatThrownBy(() -> matchTileService.updateCoordinate(1, upd))
                 .isInstanceOf(NotValidMoveException.class)
-                .hasMessageContaining("not your turn");
+                .hasMessageContaining("It is not your turn!");
     }
 
-    // ── updateCoordinate — Round restrictions ─────────────────────────────
-    // Rule: during the initial preparation, tiles can only be placed in positions allowed for that round.
+    // ── updateCoordinate — Round restrictions ─────────────────────────────────
 
     @ParameterizedTest(name = "Round {0}, position ({1},{2}) -> expected exception={3}")
     @CsvSource({
-        "0, 1, 4, false",  // round 0: placed in y=4 (Allowed, No exception)
-        "0, 1, 3, false",  // round 0: y=3 is initial zone / already exists (Exception)
-        "1, 1, 5, true",   // round 1: placed in y=5 (Exception)
-        "1, 1, 4, true",   // round 1: y=4 already set in round 0 (Exception)
-        "6, 1, 5, true",   // round 6: (1,5) is too far (Exception)
+        "0, 1, 4, true",   // round 0: y=4 is > 3 (Exception)
+        "0, 1, 3, false",  // round 0: y=3 (Allowed)
+        "1, 1, 5, true",   // round 1: y=5 is > 4 (Exception)
+        "1, 1, 4, false",  // round 1: y=4 (Allowed)
+        "6, 1, 5, true",   // round 6: (1,5) is explicitly forbidden (Exception)
+        "6, 1, 4, false"   // round 6: (1,4) (Allowed)
     })
     void shouldEnforcePlacementRestrictionsPerRound(int round, int x, int y, boolean expectException) {
+        match.setRound(round);
+        
+        Map<String, Integer> upd = Map.of("x", x, "y", y, "orientation", 0);
 
-        Match currentMatch = new Match();
-        currentMatch.setId(1);
-        currentMatch.setRound(round);
-
-        MatchTile currentTile = new MatchTile();
-        currentTile.setId(1);
-        currentTile.setMatch(currentMatch);
-
-        Map<String, Integer> upd = updates(1, 1, x, y);
-
-        lenient().when(matchTileRepository.findById(1)).thenReturn(Optional.of(currentTile));
-        lenient().when(matchService.findById(any())).thenReturn(currentMatch);
+        lenient().when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        lenient().when(playerService.findMyPlayer(match.getId())).thenReturn(player); // Turn check passes
 
         List<MatchTile> existingTiles = new ArrayList<>();
+        // Inyectamos soporte para que no salte ResourceNotFoundException por falta de apoyo en Y-1
         if (y != 0) {
             MatchTile pred = new MatchTile();
             pred.setCoordinate(new Coordinate(x, y - 1));
             existingTiles.add(pred);
         }
-        
-        // Simulate occupied positions (as in the comments)
-        if ((round == 0 && y == 3) || (round == 1 && y == 4)) {
-            MatchTile occupied = new MatchTile();
-            occupied.setCoordinate(new Coordinate(x, y));
-            existingTiles.add(occupied);
-        }
 
         lenient().when(matchTileRepository.findByMatchId(1)).thenReturn(existingTiles);
-        lenient().when(matchTileRepository.save(any())).thenReturn(currentTile);
+        lenient().when(matchTileRepository.save(any())).thenReturn(matchTile);
         
         MatchTileDTO dto = new MatchTileDTO();
         dto.setMatchId(1);
@@ -145,69 +140,88 @@ class MatchTileServiceTest {
 
         if (expectException) {
             assertThatThrownBy(() -> matchTileService.updateCoordinate(1, upd))
-                    .isInstanceOf(ConflictException.class);
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("No se puede actualizar el MatchTile en esta ronda");
         } else {
-            try {
-                matchTileService.updateCoordinate(1, upd);
-            } catch (ResourceNotFoundException e) {
-                if (e.getMessage() != null && e.getMessage().contains("No se puede actualizar el MatchTile en esta ronda")) {
-                    throw new AssertionError("No debería haber lanzado excepción de ronda", e);
-                }
-            } catch (Exception ignored) {
-                // Ignoramos otras validaciones como las de ConflictException si la variable expectException es false
-            }
+            matchTileService.updateCoordinate(1, upd); // Debe pasar sin excepción
         }
     }
 
-    // ── updateCoordinate — occupied position ───────────────────────────────────
+    // ── updateCoordinate — Occupied position ──────────────────────────────────
 
     @Test
     void shouldThrowWhenPositionAlreadyOccupied() {
-        Map<String, Integer> upd = updates(1, 1, 1, 0);
+        Map<String, Integer> upd = Map.of("x", 1, "y", 1, "orientation", 0);
 
         MatchTile occupying = new MatchTile();
-        occupying.setCoordinate(new Coordinate(1, 0)); // misma posición
+        occupying.setCoordinate(new Coordinate(1, 1)); // Misma posición
 
         when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
-        when(matchTileRepository.findByMatchId(1)).thenReturn(List.of(occupying));
+        when(playerService.findMyPlayer(match.getId())).thenReturn(player);
+        when(matchTileRepository.findByMatchId(1)).thenReturn(List.of(occupying)); // Simula que ya hay una loseta
 
         assertThatThrownBy(() -> matchTileService.updateCoordinate(1, upd))
-                .isInstanceOf(ConflictException.class);
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("Ya existe una MatchTile");
     }
 
-    // ── updateCoordinate — happy path ─────────────────────────────────────────
+    // ── updateCoordinate — Happy path ─────────────────────────────────────────
 
     @Test
-    void shouldUpdateCoordinateSuccessfully() throws Exception {
-        Map<String, Integer> upd = updates(1, 1, 2, 0);
+    void shouldUpdateCoordinateAndOrientationSuccessfullyAndNotifyEveryone() {
+        Map<String, Integer> upd = Map.of("x", 2, "y", 0, "orientation", 3);
+        
         MatchTileDTO dto = new MatchTileDTO();
+        dto.setMatchId(match.getId());
 
         when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        when(playerService.findMyPlayer(match.getId())).thenReturn(player);
         when(matchTileRepository.findByMatchId(1)).thenReturn(List.of(matchTile));
         when(matchTileMapper.toDTO(matchTile)).thenReturn(dto);
-        when(matchService.findById(any())).thenReturn(match);
 
-        MatchTileDTO result = matchTileService.updateCoordinate(1, upd);
+        matchTileService.updateCoordinate(1, upd);
 
-        assertThat(result).isNotNull();
+        // Verifica que se actualizaron los estados
         assertThat(matchTile.getCoordinate()).isEqualTo(new Coordinate(2, 0));
-        verify(matchTileRepository).save(matchTile);
-    }
-
-    // ── updateMatchTileRotation ───────────────────────────────────────────────
-
-    @Test
-    void shouldUpdateRotationAndNotify() {
-        MatchTileDTO dto = new MatchTileDTO();
-        when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
-        when(matchTileMapper.toDTO(matchTile)).thenReturn(dto);
-
-        MatchTileDTO result = matchTileService.updateMatchTileRotation(1, 3);
-
-        assertThat(result).isNotNull();
         assertThat(matchTile.getOrientation()).isEqualTo(3);
         verify(matchTileRepository).save(matchTile);
-        verify(messagingTemplate).convertAndSend(any(String.class), any(MatchTileDTO.class));
+        
+        // Verifica que se lanzaron los 3 eventos correspondientes
+        verify(messagingTemplate).convertAndSend(eq("/topic/tiles/place/1"), eq(dto));
+        verify(playerService).notifyPlayersUpdate(1);
+        verify(matchService).notifyMatchUpdate(match);
+    }
+
+    // ── broadcastMatchTileRotation ────────────────────────────────────────────
+
+    @Test
+    void shouldBroadcastRotationWithoutSavingToDatabase() {
+        MatchTileDTO dto = new MatchTileDTO();
+        dto.setMatchId(match.getId());
+        
+        when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        when(playerService.findMyPlayer(match.getId())).thenReturn(player);
+        when(matchTileMapper.toDTO(matchTile)).thenReturn(dto);
+
+        matchTileService.broadcastMatchTileRotation(1, 4);
+
+        assertThat(matchTile.getOrientation()).isEqualTo(4);
+        verify(messagingTemplate).convertAndSend("/topic/tiles/rotation/1", dto);
+        verify(matchTileRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowWhenNotPlayersTurnOnBroadcastRotation() {
+        Player otherPlayer = new Player();
+        otherPlayer.setId(2);
+        match.setActualPlayer(otherPlayer); // Turno de otro
+        
+        when(matchTileRepository.findById(1)).thenReturn(Optional.of(matchTile));
+        when(playerService.findMyPlayer(match.getId())).thenReturn(player);
+        
+        assertThatThrownBy(() -> matchTileService.broadcastMatchTileRotation(1, 3))
+                .isInstanceOf(NotValidMoveException.class)
+                .hasMessageContaining("It is not your turn!");
     }
 
     // ── findMyTile ────────────────────────────────────────────────────────────
@@ -232,7 +246,6 @@ class MatchTileServiceTest {
     }
 
     // ── eagleToWater ──────────────────────────────────────────────────────────
-    // Rule: When an eagle eats a salmon, its tile becomes water.
 
     @Test
     void shouldConvertEagleTileToWater() {
@@ -249,7 +262,6 @@ class MatchTileServiceTest {
     }
 
     // ── createMultipleMatchTiles ──────────────────────────────────────────────
-    // Rule: at match initiation, 7 water, 5 rock, 5 heron, 3 bear, 5 eagle, and 4 salmon tiles are created (29 in total).
 
     @Test
     void shouldCreate29MatchTilesOnGameStart() {
@@ -261,6 +273,7 @@ class MatchTileServiceTest {
         matchTileService.createMultipleMatchTiles(1);
 
         verify(matchTileRepository, atLeastOnce()).saveAll(any());
+        verify(matchService).notifyMatchStarts(1);
     }
 
     @Test
@@ -269,11 +282,6 @@ class MatchTileServiceTest {
         Tile rockTile = new Tile();
         rockTile.setType(TileType.ROCK);
 
-        // Rock capacity logic is verified directly with >2 players.
-        // We use the private method indirectly through createMultipleMatchTiles
-        // and verify that saveAll receives tiles — the internal logic is covered by the previous test.
-        // This test verifies the explicit rule from the regulations:
-        // "In these tiles, one salmon token can be placed less than normal"
         when(tileService.findById(any())).thenReturn(rockTile);
         when(matchService.findById(1)).thenReturn(match);
 
