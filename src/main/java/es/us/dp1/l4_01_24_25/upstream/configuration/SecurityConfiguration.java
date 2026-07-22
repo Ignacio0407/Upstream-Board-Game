@@ -69,7 +69,8 @@ public class SecurityConfiguration {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOrigins(java.util.Arrays.asList("http://localhost:3000", "https://localhost:8080"));
+        configuration.setAllowedOriginPatterns(java.util.Arrays.asList("http://localhost:3000", "https://localhost:3000", "https://localhost:8080",
+        "http://192.168.*.*:3000", "https://192.168.*.*:3000", "https://192.168.*.*:8080"));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
         configuration.setExposedHeaders(java.util.Arrays.asList("Authorization"));

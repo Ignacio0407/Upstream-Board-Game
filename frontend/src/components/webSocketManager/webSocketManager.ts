@@ -73,7 +73,7 @@ class WebSocketManager {
     const wsProtocol = "wss:";
     
     let socketPort = "";
-    if (host === "localhost" || host === "127.0.0.1") {
+    if (host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.")) {
         socketPort = ":8080";
     } else if (port) {
         socketPort = `:${port}`;
