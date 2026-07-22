@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -104,22 +103,12 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     public void notifyTilesAndSalmonsByMatchId (Integer matchId) {
         List<SalmonMatchDTO> salmonMatches = this.salmonMatchService.findAllFromMatchDTO(matchId);
         List<MatchTileDTO> matchTiles = this.matchTileService.findByMatchIdAsDTO(matchId);
-        this.messagingTemplate.convertAndSend("/topic/tilesAndSalmons/" + matchId, Map.of(MATCH_TILES, matchTiles, SALMON_MATCHES, salmonMatches));
+        this.messagingTemplate.convertAndSend("/topic/tilesAndSalmonsByMatchId/" + matchId, Map.of(MATCH_TILES, matchTiles, SALMON_MATCHES, salmonMatches));
     }
 
     public void notifyTilesAndSalmons (List<SalmonMatch> salmonMatches, List<MatchTile> matchTiles) {
         this.messagingTemplate.convertAndSend("/topic/tilesAndSalmons/" + salmonMatches.get(0).getMatch().getId(), 
         Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches)));
-    }
-
-    public void notifyHeronsUpdated (List<SalmonMatch> salmonMatches, List<MatchTile> matchTiles, List<Integer> deletedSalmonsIds, Integer matchId) {
-        this.messagingTemplate.convertAndSend("/topic/heronsUpdated/" + matchId, 
-        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), SALMON_MATCHES, this.salmonMatchService.toDTOList(salmonMatches), "deletedSalmonIds", deletedSalmonsIds));
-    }
-
-    public void notifyHeronsDeleted (List<MatchTile> matchTiles, Set<Integer> deletedSalmonsIds) {
-        this.messagingTemplate.convertAndSend("/topic/heronsDeleted/" + matchTiles.get(0).getMatch().getId(), 
-        Map.of(MATCH_TILES, this.matchTileService.toDTOList(matchTiles), "deletedSalmonIds", deletedSalmonsIds));
     }
 
     public void notifyPlayerAndMatchUpdate (Match match) {
@@ -180,8 +169,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             nextPlayer = players.get(currentIndex);
             if (nextPlayer.equals(currentPlayer) &&
                 this.salmonMatchService.findByPlayerIdAsCoordinateDTO(currentPlayer.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
-                match.setState(State.FINALIZED);
-                break;
+                if (!match.getState().equals(State.FINALIZED)) {
+                    match.setState(State.FINALIZED);
+                    this.finalScore(match.getId());
+                    break;
+                }
             }
         }
         return nextPlayer;
@@ -221,8 +213,12 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         List<Player> players = this.playerService.findPlayersByMatch(match.getId());
         if (tiles.isEmpty() || salmons.isEmpty() || players.stream().allMatch(p -> p.getAlive() == false) 
             || players.stream().allMatch(p -> this.playerService.checkPlayerFinished(p.getId()))) {
-            match.setState(State.FINALIZED);
-            this.save(match);
+            if (!match.getState().equals(State.FINALIZED)) {
+                match.setState(State.FINALIZED);
+                this.save(match);
+                this.finalScore(match.getId());
+                this.notifyMatchUpdate(match);
+            }
         }
     }
 
@@ -286,7 +282,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             this.changePlayerTurn(player);
         }
         this.endRound(match);
-        if (match.getRound() >= 3)
+        if (match.getRound() >= 2)
             this.checkGameHasFinished(match);
         this.playerService.notifyPlayersUpdate(matchId);
         this.notifyMatchUpdate(match);

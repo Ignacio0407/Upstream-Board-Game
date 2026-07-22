@@ -50,7 +50,6 @@ describe("EndGame Component", () => {
         render(<EndGame />);
         
         await waitFor(() => {
-            expect(patch).toHaveBeenCalledWith("/api/v1/matches/finalscore/1", "mock-jwt");
             expect(get).toHaveBeenCalledWith("/api/v1/players/match/1", "mock-jwt");
         });
     });

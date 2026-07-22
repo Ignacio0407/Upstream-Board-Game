@@ -1,13 +1,17 @@
 package es.us.dp1.l4_01_24_25.upstream.player;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.BadRequestException;
+
+import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -61,6 +65,16 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     public List<Player> findAlivePlayersByMatchSortedPlayerOrder(Integer id) {
         return this.playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(id);
+    }
+
+    public Player findMyPlayer(Integer matchId) {
+        // 1. Extract user from JWT token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        // 2. Search player
+        User authenticatedUser = this.userService.findUserByName(currentUsername);
+        Player myPlayer = this.findPlayerByUserAndMatch(authenticatedUser.getId(), matchId);
+        return myPlayer;
     }
 
     @Override
@@ -129,15 +143,14 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         this.repository.deleteById(id);
     }
 
-    public PlayerDTO updateEnergy(Integer id, Integer energyUsed) {
+    public void setEnergyToZero(Integer id) {
         Player player = this.findById(id);
-        if (player.getEnergy() - energyUsed < 0) {
-            throw new BadRequestException(String.format("Insufficient energy for that move. Actual: %d, Tried using: %d", 
-                player.getEnergy(), energyUsed));
+        Match match = player.getMatch();
+        if (!match.getActualPlayer().getId().equals(player.getId())) {
+            throw new AccessDeniedException("It is not your turn!");
         }
-        player.setEnergy(player.getEnergy() - energyUsed);
+        player.setEnergy(0);
         this.save(player);
-        return this.playerMapper.toDTO(player);
     }
 
     public PlayerDTO regenerateEnergy(Integer id) {

@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
 
@@ -46,9 +44,10 @@ class SalmonMatchControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Solo necesitamos el servicio del controlador
     @MockBean
     private SalmonMatchService salmonMatchService;
+
+    // ── GET /match/{matchId} ──────────────────────────────────────────────────
 
     @Test
     @DisplayName("GET /match/{matchId} - Happy Path")
@@ -73,44 +72,47 @@ class SalmonMatchControllerTest {
         verify(salmonMatchService, never()).findAllFromMatchDTO(any());
     }
 
-    @Test
-    @DisplayName("PATCH /coordinate/{id} - Happy Path")
-    void shouldUpdateCoordinate() throws Exception {
-        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
-        doNothing().when(salmonMatchService).updateCoordinate(eq(1), any());
+    // ── PATCH /move-batch/{id} ────────────────────────────────────────────────
 
-        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+    @Test
+    @DisplayName("PATCH /move-batch/{id} - Happy Path")
+    void shouldUpdateCoordinateBatch() throws Exception {
+        String payload = "[{\"salmonId\": 1, \"x\": 1, \"y\": 2, \"enterSpawn\": false}]";
+        doNothing().when(salmonMatchService).updateCoordinateBatch(eq(1), any());
+
+        mockMvc.perform(patch("/api/v1/salmonMatches/move-batch/1")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(newCoord)))
+               .content(payload))
                .andExpect(status().isOk());
 
-        verify(salmonMatchService).updateCoordinate(eq(1), any());
+        verify(salmonMatchService).updateCoordinateBatch(eq(1), any());
     }
 
     @Test
-    @DisplayName("PATCH /coordinate/{id} - Negative Path (Insufficient Energy -> 400)")
-    void shouldFailUpdateCoordinateNoEnergy() throws Exception {
-        Map<String, Integer> newCoord = Map.of("x", 1, "y", 0);
+    @DisplayName("PATCH /move-batch/{id} - Negative Path (Insufficient Energy -> 400)")
+    void shouldFailUpdateCoordinateBatchNoEnergy() throws Exception {
+        String payload = "[{\"salmonId\": 1, \"x\": 1, \"y\": 2, \"enterSpawn\": false}]";
         doThrow(new InsufficientEnergyException("No energy"))
-            .when(salmonMatchService).updateCoordinate(eq(1), any());
+            .when(salmonMatchService).updateCoordinateBatch(eq(1), any());
 
-        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+        mockMvc.perform(patch("/api/v1/salmonMatches/move-batch/1")
                .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(newCoord)))
+               .content(payload))
                .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("PATCH /coordinate/{id} - Edge Case (Malformed JSON -> 400)")
-    void shouldFailUpdateCoordinateOnMalformedJson() throws Exception {
-        mockMvc.perform(patch("/api/v1/salmonMatches/coordinate/1")
+    @DisplayName("PATCH /move-batch/{id} - Edge Case (Malformed JSON -> 400)")
+    void shouldFailUpdateCoordinateBatchOnMalformedJson() throws Exception {
+        mockMvc.perform(patch("/api/v1/salmonMatches/move-batch/1")
                .contentType(MediaType.APPLICATION_JSON)
-               .content("{ \"x\": 1, \"y\" }")) // JSON Roto
+               .content("[{ \"salmonId\": 1, \"x\" }]")) // Array JSON Roto
                .andExpect(status().isBadRequest());
 
-        verify(salmonMatchService, never()).updateCoordinate(any(), any());
+        verify(salmonMatchService, never()).updateCoordinateBatch(any(), any());
     }
 
+    // ── POST /player/{playerId} ───────────────────────────────────────────────
 
     @Test
     @DisplayName("POST /player/{playerId} - Happy Path")
@@ -124,43 +126,10 @@ class SalmonMatchControllerTest {
     @Test
     @DisplayName("POST /player/{playerId} - Negative Path (Player Not Found -> 404)")
     void shouldFailCreateSalmonMatchesWhenPlayerNotFound() throws Exception {
-        
-        // Inverted sintaxis to throw exceptions in void methods
         doThrow(new ResourceNotFoundException("Player not found"))
             .when(salmonMatchService).create(99);
 
         mockMvc.perform(post("/api/v1/salmonMatches/player/99"))
             .andExpect(status().isNotFound());
-    }
-
-
-    @Test
-    @DisplayName("PATCH /enterSpawn/{id} - Happy Path")
-    void shouldHandleEnterSpawn() throws Exception {
-        doNothing().when(salmonMatchService).enterSpawn(1);
-
-        mockMvc.perform(patch("/api/v1/salmonMatches/enterSpawn/1"))
-               .andExpect(status().isOk());
-
-        verify(salmonMatchService).enterSpawn(1);
-    }
-
-    @Test
-    @DisplayName("PATCH /enterSpawn/{id} - Negative Path (Not Valid Move -> 400)")
-    void shouldFailEnterSpawnWhenNotRound6() throws Exception {
-        doThrow(new NotValidMoveException("You can only enter the spawn from round 6!"))
-            .when(salmonMatchService).enterSpawn(1);
-
-        mockMvc.perform(patch("/api/v1/salmonMatches/enterSpawn/1"))
-               .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("PATCH /enterSpawn/{id} - Edge Case (Type Mismatch -> 400)")
-    void shouldFailEnterSpawnOnTypeMismatch() throws Exception {
-        mockMvc.perform(patch("/api/v1/salmonMatches/enterSpawn/abc"))
-               .andExpect(status().isBadRequest());
-
-        verify(salmonMatchService, never()).enterSpawn(any());
     }
 }

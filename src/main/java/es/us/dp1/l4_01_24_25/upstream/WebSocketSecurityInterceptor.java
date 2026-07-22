@@ -43,6 +43,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.lang.Nullable;
 
@@ -68,6 +69,7 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
         Map.entry("chat", 1),
         Map.entry("movingSalmon", 1),
         Map.entry("tilesAndSalmons", 1),
+        Map.entry("tilesAndSalmonsByMatchId", 1),
         Map.entry("herons", 1),
         Map.entry("heronsUpdated", 1),
         Map.entry("players", 1),
@@ -75,9 +77,7 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
         
         Map.entry("tiles/place", 2),
         Map.entry("tiles/rotation", 2),
-        Map.entry("salmons/spawn", 2),
-
-        Map.entry("salmon/spawn/enter", 3)
+        Map.entry("salmons/spawn", 2)
     );
     
     private static final int MAX_MESSAGES_PER_MINUTE = 60;
@@ -213,6 +213,9 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
             this.handleConnect(accessor, message);
         } else if (command == StompCommand.SEND || command == StompCommand.SUBSCRIBE) {
             this.validateMessage(accessor, message);
+            if (accessor.getUser() instanceof Authentication) {
+                SecurityContextHolder.getContext().setAuthentication((Authentication) accessor.getUser());
+            }
         }
         return message;
     }

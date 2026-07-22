@@ -1,9 +1,9 @@
-import { useState, useEffect, JSX } from 'react';
+import { useState, useEffect, JSX, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
-import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, handleGridClick, renderPlayerList, passTurn, buildGridFromSnapshot, updateGridWithSalmons, updateGridWithTile, updateGridWithMovement, coordToIndex, updateGridWithMovementFromSea, updateGridWithHerons } from './matchUtil.tsx';
+import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, renderPlayerList, buildGridFromSnapshot, updateGridWithTile, PendingMove, GRID_WIDTH, GRID_HEIGHT, confirmMovementBatch, handleUpdateTilePosition, handleNoMoves } from './matchUtil.tsx';
 import { ColorToRgb } from '../lobby/ColorParser.ts';
 import Chat from '../components/chat/Chat.tsx'
 import Match, { emptyMatch } from '../interfaces/Match.ts';
@@ -14,6 +14,8 @@ import WebSocketManager from '../components/webSocketManager/webSocketManager.ts
 import { TileType } from '../interfaces/Tile.ts';
 import { Phase } from '../interfaces/Phase.ts';
 import { State } from '../interfaces/State.ts';
+import { calculateValidMoves, ValidMove } from './calculateValidMoves.ts';
+import ConfirmModal from '../util/ConfirmModal.tsx';
 
 export default function Game() {
     const navigate = useNavigate();
@@ -38,8 +40,12 @@ export default function Game() {
     const spectatorIds:number[] = location.state?.spectatorIds || [];
     const currentUserIsSpectator = spectatorIds.includes(user.id);
     interface TilesAndSalmons { salmonMatches: SalmonMatch[], matchTiles: MatchTile[] }
-    interface SalmonMovement { salmon: SalmonMatch, myTile: MatchTile, toTravel: MatchTile }
-    interface TileAndSalmon { salmonMatch: SalmonMatch, matchTile: MatchTile }
+    const [pendingMoves, setPendingMoves] = useState<PendingMove[]>([]);
+    const [validMoves, setValidMoves] = useState<ValidMove[]>([]);
+    const [history, setHistory] = useState<{salmons: SalmonMatch[], matchTiles: MatchTile[], energy: number}[]>([]);
+    const [visible, setVisible] = useState(false);
+    const [confirmBatchIsSubmitting, setConfirmBatchIsSubmitting] = useState(false); //Remove race condition when confirming batch, to avoid double click and send twice the same batch.
+    const wsManagerRef = useRef<WebSocketManager | null>(null);
 
     // Cada vez que cambian los salmones o los matchTiles pueden cambiar los jugadores, y mejor devolverlos siempre ordenados.
 
@@ -47,7 +53,7 @@ export default function Game() {
     useEffect(() => {
         if (!allDataLoaded) return;
         setMatchTilesNoCoordinate(matchTiles.filter(t => !t.coordinate));
-        setGrid(buildGridFromSnapshot(matchTiles.filter(t => t.coordinate !== null), salmons));
+        setGrid(buildGridFromSnapshot(matchTiles.filter(t => t.coordinate !== null), salmons.filter(s => s.salmonsNumber > 0)));
         if (match.round >= 6) {
             const newGridDesove: SalmonMatch[][] = new Array(5).fill(null).map(() => []);
             let spawnIndex: number | null = null;
@@ -71,65 +77,171 @@ export default function Game() {
         if (me) setMyPlayer(me);
     }, [players, match, salmons, matchTiles]);
 
+    // --- Handlers for local movement ---
+    const onSalmonClickWrapper = (salmon: SalmonMatch) => {
+        // Allow changing salmon in any moment
+        handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon);
+        // If it is my turn, calculate where this salmon can move
+        if (myPlayer && myPlayer.id === match.actualPlayerId && myPlayer.id === salmon.playerId && match.phase === Phase.MOVING) {
+            const moves = calculateValidMoves(salmon, grid, myPlayer.energy, match.playersNumber);
+            setValidMoves(moves);
+            if (moves.length === 0)
+                handleNoMoves(myPlayer, match, jwt, history, visible, setVisible, handleConfirmBatch);
+        }
+        else setValidMoves([]);
+    };
+
+    const onGridClickWrapper = (index: number) => {
+        if (!selectedSalmon || !myPlayer) return;
+        const x = index % GRID_WIDTH;
+        const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
+        const move = validMoves.find(m => m.x === x && m.y === y);
+        if (!move) return; // Illegal move, ignored
+        // Save Backup before starting turn in case of error
+        setHistory(prev => [...prev, structuredClone({ salmons, matchTiles, energy: myPlayer.energy })]);
+        // 1. Discount energy
+        const newEnergy = myPlayer.energy - move.energyUsed;
+        setMyPlayer({ ...myPlayer, energy: newEnergy });
+        setPlayers(prev => prev.map(p => p.id === myPlayer.id ? { ...p, energy: newEnergy } : p));
+        // 2. Calculate salmon losses
+        const newSalmonsNumber = Math.max(0, selectedSalmon.salmonsNumber - move.salmonLoss);
+        let newImage = selectedSalmon.salmon.image;
+        if (newSalmonsNumber === 1 && newImage.includes('2')) newImage = newImage.replace('2', '1');
+        const updatedSalmon = { ...selectedSalmon, salmonsNumber: newSalmonsNumber, 
+            salmon: { ...selectedSalmon.salmon, image: newImage }, coordinate: { x, y } };
+        // 3. Create new lists and update grid
+        const updatedSalmonsList = salmons.map(s => s.id === updatedSalmon.id ? updatedSalmon : s).filter(s => s.salmonsNumber > 0);
+        const mysalmons = updatedSalmonsList.filter(s => s.playerId === myPlayer?.id && s.salmonsNumber > 0 && 
+            ( !s.coordinate || (s.coordinate.y < 20 && !(s.coordinate.x === 1 && s.coordinate.y === 5))));
+        console.log("mysalmons", mysalmons)
+        console.log("updatedSalmon salmons number", updatedSalmon.salmonsNumber)
+        if (mysalmons.length === 0)
+            ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch, title: "Death", message: "You are going to lose, check any possible moves, if there are none, please confirm", confirmText: "Confirm", cancelText: "Cancel" });
+        const finalX = move.x ? Number(move.x) : Number(x);
+        const finalY = move.y ? Number(move.y) : Number(y);
+        const exitX = selectedSalmon.coordinate ? Number(selectedSalmon.coordinate.x) : null;
+        const exitY = selectedSalmon.coordinate ? Number(selectedSalmon.coordinate.y) : null;
+        const nextMatchTiles = matchTiles.map(t => {
+            const newT = { ...t };
+            if (!newT.coordinate) return newT;
+            const tileX = Number(newT.coordinate.x);
+            const tileY = Number(newT.coordinate.y);
+            // 1. Remove salmon from exit
+            if (exitX !== null && exitY !== null && tileX === exitX && tileY === exitY)
+                newT.salmonsNumber = Number(newT.salmonsNumber) - 1;
+            // 2. Add salmon to destination
+            if (tileX === finalX && tileY === finalY)
+                newT.salmonsNumber = Number(newT.salmonsNumber) + 1;
+            // 3. Kill eagle if it's the destination or the jumped square
+            if ((tileX === finalX && tileY === finalY) || 
+                (move.jumpedCoords && tileX === Number(move.jumpedCoords.x) && tileY === Number(move.jumpedCoords.y))) {
+                if (newT.tile?.type === 'EAGLE') { 
+                    newT.tile = { ...newT.tile, type: 'WATER' as any }; 
+                    if (newT.tile.image) newT.tile.image = newT.tile.image.replace('eagle', 'water');
+                }
+            }
+            return newT;
+        });
+        const nextGrid = buildGridFromSnapshot(nextMatchTiles, updatedSalmonsList);
+        // 5. Save React states
+        setSalmons(updatedSalmonsList);
+        setMatchTiles(nextMatchTiles); 
+        setGrid(nextGrid);
+        const backendY = move.isJump ? y - 1 : y;
+        // 6. Add to history
+        if (x === 1 && y === 5 && match.round >= 6) {
+            setPendingMoves(prev => [...prev, { salmonId: updatedSalmon.id, x, y:backendY, enterSpawn: true }]);
+        }
+        else {
+            let backendX = x;
+            if (move.isJump && Math.abs(move.x - selectedSalmon.coordinate?.x) === 2) backendX = move.jumpedCoords!.x;
+            setPendingMoves(prev => [...prev, { salmonId: updatedSalmon.id, x: backendX, y: backendY }]);
+        }
+        setSelectedSalmon(updatedSalmon);
+        if (mysalmons.length === 0) {
+            setMyPlayer({ ...myPlayer, energy: 0 });
+            setPlayers(prev => prev.map(p => p.id === myPlayer.id ? { ...p, energy: 0 } : p));
+        }
+        // 7. Recalculate next moves with the NEW DATA
+        if (updatedSalmon.salmonsNumber > 0) {
+            const nextMoves = calculateValidMoves(updatedSalmon, nextGrid, newEnergy, match.playersNumber);
+            setValidMoves(nextMoves);
+            if (nextMoves.length === 0)
+                handleNoMoves(myPlayer, match, jwt, history, visible, setVisible, handleConfirmBatch);
+        }
+        else setValidMoves([])
+        
+    };
+
+    // --- Handlers to confirm/undo batch ---
+    const handleConfirmBatch = () => {
+        if (pendingMoves.length === 0) return;
+        // Reset visual selections
+        setConfirmBatchIsSubmitting(true);
+        setValidMoves([]);
+        setSelectedSalmon(null);
+        confirmMovementBatch(pendingMoves, jwt, match, myPlayer!.id, history[0], setConfirmBatchIsSubmitting,
+            (backup: any) => {
+                setMatchTiles(backup.matchTiles);
+                setSalmons(backup.salmons.filter((s:SalmonMatch) => s.salmonsNumber > 0));
+                
+                setGrid(buildGridFromSnapshot(backup.matchTiles, backup.salmons.filter((s:SalmonMatch) => s.salmonsNumber > 0)));
+                // setGrid(backup.grid);
+                
+                setMyPlayer(prev => prev ? { ...prev, energy: backup.energy } : null);
+                setPlayers(prev => prev.map(p => p.id === myPlayer!.id ? { ...p, energy: backup.energy } : p));
+            },
+            () => {
+                // Success callback
+                setPendingMoves([]);
+                setHistory([]);
+            }
+        );
+    };
+
+    const handleUndoLastMove = () => {
+        setHistory(prevHistory => {
+            if (prevHistory.length === 0) return prevHistory;
+            const lastState = prevHistory[prevHistory.length - 1];
+            // Restore "father" data
+            setSalmons(lastState.salmons.filter(s => s.salmonsNumber > 0));
+            setMatchTiles(lastState.matchTiles);
+            setPlayers(playersList => playersList.map(p => p.id === myPlayer!.id ? { ...p, energy: lastState.energy } : p));
+            setMyPlayer(p => p ? { ...p, energy: lastState.energy } : null);
+            // Rebuild the grid from the last state
+            setGrid(buildGridFromSnapshot(lastState.matchTiles, lastState.salmons.filter(s => s.salmonsNumber > 0)));
+            // Clean lists
+            setPendingMoves(pm => pm.slice(0, -1));
+            setValidMoves([]);
+            setSelectedSalmon(null);
+            return prevHistory.slice(0, -1);
+        });
+    };
+
+    const handleUndoAll = () => {
+        if (history.length === 0) return;
+        // Original state is in index 0
+        const firstState = history[0]; 
+        setSalmons(firstState.salmons.filter(s => s.salmonsNumber > 0));
+        setMatchTiles(firstState.matchTiles);
+        setPlayers(prev => prev.map(p => p.id === myPlayer!.id ? { ...p, energy: firstState.energy } : p));
+        setMyPlayer(prev => prev ? { ...prev, energy: firstState.energy } : null);
+        setGrid(buildGridFromSnapshot(firstState.matchTiles, firstState.salmons.filter(s => s.salmonsNumber > 0)));
+        setHistory([]);
+        setPendingMoves([]);
+        setValidMoves([]);
+        setSelectedSalmon(null);
+    };
+
     useEffect(() => {
         const wsManager = new WebSocketManager(jwt);
+        wsManagerRef.current = wsManager;
         wsManager.initConnection();
 
         wsManager.addSubscription<Match>(`match/update/${matchId}`, (updatedMatch) => {
             setMatch(updatedMatch)
             if (updatedMatch.state === State.FINALIZED)
                 navigate(`/matches/${matchId}/end`)
-        });
-
-        wsManager.addSubscription<SalmonMovement>(`movingSalmon/${matchId}`, ({ salmon, myTile, toTravel }) => {
-            setMatchTiles(prev => prev.map(tile => {
-                if (tile.id === myTile.id) return myTile;
-                if (tile.id === toTravel.id) return toTravel;
-                return tile;
-                })
-            );
-            setSalmons(prev => prev.map(s => s.id === salmon.id ? salmon : s).filter(s => s.salmonsNumber > 0));
-            setGrid(prev => updateGridWithMovement(prev, salmon, myTile, toTravel));
-        });
-
-        wsManager.addSubscription<SalmonMovement>(`movingSalmonFromSea/${matchId}`, ({ salmon, toTravel }) => {
-            setSalmons(prev => prev.map(s => s.id === salmon.id ? salmon : s).filter(s => s.salmonsNumber > 0));
-            setMatchTiles(prev => prev.map(tile => {
-                if (tile.id === toTravel.id) return toTravel;
-                return tile;
-                })
-            );
-            setGrid(prev => updateGridWithMovementFromSea(prev, salmon, toTravel));
-        });
-        
-        wsManager.addSubscription<TileAndSalmon>(`salmon/spawn/enter/${matchId}`, ({salmonMatch, matchTile}) => {
-            setSalmons(prev => prev.map(s => s.id === salmonMatch.id ? salmonMatch : s));
-            setGrid(prev => {
-                const newGrid = [...prev];
-                const index = coordToIndex(matchTile.coordinate.x, matchTile.coordinate.y);
-                newGrid[index] = {...newGrid[index],
-                    tile: matchTile,
-                    salmons: newGrid[index].salmons.filter(s => s.id !== salmonMatch.id),
-                };
-                return newGrid;
-            });
-            setGridSpawn(prev => {
-                const newGridSpawn = [...prev];
-                if (!newGridSpawn[0].some(s => s.id === salmonMatch.id)) newGridSpawn[0].push(salmonMatch);
-                return newGridSpawn;
-            });
-        });
-
-        wsManager.addSubscription<SalmonMatch[]>(`salmons/spawn/${matchId}`, () => {
-            setGridSpawn(prev => {
-                const newGridSpawn = prev.map(row => [...row]); // Deep copy
-                // i = 3 into i=4, delete i=3, i=2 into i=3, delete i=2 ...
-                for (let i = newGridSpawn.length - 2; i >= 0; i--) {
-                    newGridSpawn[i + 1] = [...newGridSpawn[i + 1], ...newGridSpawn[i]];
-                    newGridSpawn[i] = [];
-                }
-                return newGridSpawn;
-            });
         });
 
         // Update tile when placed on the board.
@@ -143,39 +255,57 @@ export default function Game() {
             setGrid(prev => updateGridWithTile(prev, updatedTile));
         });
 
-        wsManager.addSubscription<TilesAndSalmons>(`tilesAndSalmons/${matchId}`, ({ matchTiles, salmonMatches }) => {
-            setSalmons(salmonMatches);
-            setMatchTiles(matchTiles);
-            setGrid(buildGridFromSnapshot(matchTiles, salmonMatches));
-        });
-
-        wsManager.addSubscription<SalmonMatch[]>(`herons/${matchId}`, (salmonMatches) => {
-            setSalmons(prev => {
-            const updatedMap = new Map(salmonMatches.map(s => [s.id, s]));
-            const merged = prev.map(s => updatedMap.get(s.id) ?? s)
-            return merged;
-            });
-            setGrid(prev => updateGridWithSalmons(prev, salmonMatches));
-        });
-
-        wsManager.addSubscription<TilesAndSalmons & { deletedSalmonIds?: number[] }>(`heronsUpdated/${matchId}`, ({ matchTiles, salmonMatches, deletedSalmonIds }) => {
-            setSalmons(prev => { const updatedMap = new Map(salmonMatches.map(s => [s.id, s]));
-            return prev.filter(s => !deletedSalmonIds?.includes(s.id)).map(s => updatedMap.get(s.id) ?? s);
-            });
-            setMatchTiles(prev => prev.map(tile => {
-                const updated = matchTiles.find(t => t.id === tile.id);
-                return updated ?? tile;
-            }));
-            setGrid(prev => updateGridWithHerons(prev, matchTiles, salmonMatches, deletedSalmonIds));
-        });
-
         wsManager.addSubscription<MatchTile>(`tiles/rotation/${matchId}`, (updatedTile) => {
-            setMatchTilesNoCoordinate(prev => prev.map(tile => tile.id === updatedTile.id ? updatedTile : tile));
+            setMatchTilesNoCoordinate(prev => prev.map(tile => tile.id === updatedTile.id ? { ...tile, orientation: updatedTile.orientation } : tile));
+            setSelectedTile(prev => (prev && prev.id === updatedTile.id ? { ...prev, orientation: updatedTile.orientation } : prev));
         });
 
         wsManager.addSubscription(`players/${matchId}`, (updatedPlayers:Player[]) => {
             setPlayers(updatedPlayers);
             setMyPlayer(updatedPlayers.filter(p => p.userId === user.id)[0]);
+        });
+
+        wsManager.addSubscription<TilesAndSalmons>(`tilesAndSalmons/${matchId}`, ({ matchTiles: updatedTiles, salmonMatches: updatedSalmons }) => {
+            setMatchTiles(prevTiles => {
+                const tileMap = new Map(updatedTiles.map(t => [t.id, t]));
+                const mergedTiles = prevTiles.map(t => tileMap.get(t.id) ?? t);
+                setSalmons(prevSalmons => {
+                    const salmonMap = new Map(updatedSalmons.map(s => [s.id, s]));
+                    const mergedSalmons = prevSalmons.map(s => salmonMap.get(s.id) ?? s).filter(s => s.salmonsNumber > 0);
+                    setGrid(buildGridFromSnapshot(mergedTiles, mergedSalmons));
+                    return mergedSalmons;
+                });
+                return mergedTiles;
+            });
+
+            updatedSalmons.forEach(s => {
+                if (s.coordinate?.x === 1 && s.coordinate?.y === 21) {
+                    setGridSpawn(prev => {
+                        if (prev[0].some(sp => sp.id === s.id)) return prev;
+                        const newGridSpawn = [...prev];
+                        newGridSpawn[0] = [...newGridSpawn[0], s];
+                        return newGridSpawn;
+                    });
+                }
+            });
+        });
+
+        wsManager.addSubscription<TilesAndSalmons>(`tilesAndSalmonsByMatchId/${matchId}`, ({ matchTiles, salmonMatches }) => {
+            setSalmons(salmonMatches.filter(s => s.salmonsNumber > 0));
+            setMatchTiles(matchTiles);
+            setGrid(buildGridFromSnapshot(matchTiles, salmonMatches.filter(s => s.salmonsNumber > 0)));
+        });
+
+        wsManager.addSubscription<SalmonMatch[]>(`salmons/spawn/${matchId}`, () => {
+            setGridSpawn(prev => {
+                const newGridSpawn = prev.map(row => [...row]); // Deep copy
+                // i = 3 into i=4, delete i=3, i=2 into i=3, delete i=2 ...
+                for (let i = newGridSpawn.length - 2; i >= 0; i--) {
+                    newGridSpawn[i + 1] = [...newGridSpawn[i + 1], ...newGridSpawn[i]];
+                    newGridSpawn[i] = [];
+                }
+                return newGridSpawn;
+            });
         });
 
         return () => {
@@ -208,8 +338,15 @@ export default function Game() {
             <h1 className="game-title game-phase">Phase: {match.phase}</h1>
             {!currentUserIsSpectator && myPlayer && myPlayer.id === match.actualPlayerId && match.phase === Phase.MOVING && 
             <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
+            {/*Batch controls*/}
+            {(pendingMoves.length > 0) && (
+                <div className="game-title game-turn move-your-salmons batch-controls" style={{ marginBottom: '70px', display: 'flex', gap: '10px' }}>
+                    {myPlayer?.energy === 0 && <button className="btn btn-success" disabled={confirmBatchIsSubmitting} onClick={handleConfirmBatch}>Confirm</button>}
+                    <button className="btn btn-warning" onClick={handleUndoLastMove}>Undo last</button>
+                    <button className="btn btn-danger" onClick={handleUndoAll}>Undo all</button>
+                </div>
+            )}
             {renderPlayerList(playerList)}
-            {myPlayer && !currentUserIsSpectator && passTurn(match, jwt, myPlayer)}
             
         {matchTilesNoCoordinate.length > 0 && myPlayer &&
         <div role="button" tabIndex={0} key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
@@ -219,15 +356,17 @@ export default function Game() {
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
                 {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
                 <h2>Next tile:</h2>
-                {<img role="button" tabIndex={0} onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)} // NOSONAR
+                {<img role="button" tabIndex={0} 
+                    onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)} // NOSONAR
                     onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
-                src={matchTilesNoCoordinate[0].tile.image} alt='' style={{width: '150px', ...getRotationStyle(matchTilesNoCoordinate[0])} }></img>}
+                    src={matchTilesNoCoordinate[0].tile.image} alt='' 
+                    style={{width: '150px', transition: 'transform 0.35s ease-in-out', ...getRotationStyle(matchTilesNoCoordinate[0])} }>
+                </img>}
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
                 (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
                 && <button onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
         </div>
         }
-
 
         { 
         <div className='game-container'>
@@ -250,40 +389,108 @@ export default function Game() {
                 </div>
             ))}
             </div>}
-            
-            <div className={`grid1 ${match.round < 6 ? 'grid1-80' : 'grid1-100'}`}>
-            {myPlayer && grid.map((cell, index) => (<div role="button" tabIndex={0} key={index} className="grid-item" style={{ position: 'relative' }} onClick={() => 
-                handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid)}
-                    onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        handleGridClick(jwt, index, selectedSalmon, setSelectedTile, selectedTile, setSelectedSalmon, match, match.actualPlayerId, myPlayer.id, grid);
-                    }
-                    }}
-                >
-                
-                {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
 
-                {cell.salmons && cell.salmons.map((salmon, sIndex) => {
-                    const position = calculateSalmonPosition(sIndex, cell.salmons.length);
+            <div className={`grid1 ${match.round < 6 ? 'grid1-80' : 'grid1-100'}`}>
+                {myPlayer && grid.map((cell, index) => {
+                    const x = index % GRID_WIDTH;
+                    const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
+                    
+                    const isValidMove = validMoves.some(m => m.x === x && m.y === y);
+                    
+                    // Find all unique salmon IDs that have moved in this turn
+                    const movedSalmonIds = Array.from(new Set(pendingMoves.map(p => p.salmonId)));
+
+                    // A ghost salmon should be displayed in cell (x, y) if:
+                    // 1) The salmon moved during this turn.
+                    // 2) Its CURRENT real position is NOT in cell (x, y).
+                    // 3) Its starting position at history[0] OR one of its intermediate moves was in cell (x, y).
+                    const ghostSalmonsInThisCell = movedSalmonIds.map(salmonId => {
+                        const currentRealSalmon = salmons.find(s => s.id === salmonId);
+                        if (currentRealSalmon?.coordinate?.x === x && currentRealSalmon?.coordinate?.y === y) {
+                            return null;
+                        }
+                        const initialSalmon = history[0]?.salmons.find(s => s.id === salmonId);
+                        if (!initialSalmon) return null;
+
+                        const wasInitial = initialSalmon.coordinate?.x === x && initialSalmon.coordinate?.y === y;
+                        const wasIntermediate = pendingMoves.some(p => p.salmonId === salmonId && p.x === x && p.y === y);
+
+                        if (wasInitial || wasIntermediate) {
+                            return initialSalmon;
+                        }
+                        return null;
+                    }).filter((s): s is SalmonMatch => s !== null);
+
                     return (
-                        <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} alt="" className="salmon-img" // NOSONAR
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon)}}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.stopPropagation();
-                                    handleSalmonClick(salmon, myPlayer, match, setSelectedSalmon);
+                        <div role="button" tabIndex={0} key={index} className="grid-item" 
+                            style={{ 
+                                position: 'relative',
+                                cursor: isValidMove ? 'pointer' : 'default',
+                                // Mark valid tiles
+                                boxShadow: isValidMove ? 'inset 0px 0px 20px 5px rgba(0, 255, 0, 0.7)' : 'none',
+                                transition: 'box-shadow 0.2s ease-in-out'
+                            }} 
+                            onClick={() => {
+                                if (match.phase === Phase.TILES) {
+                                    handleUpdateTilePosition(jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, match.actualPlayerId, myPlayer.id, matchTilesNoCoordinate); 
                                 }
-                            }}
-                            style={{...position,
-                                filter: `drop-shadow(0px 0px 2px ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)})`,
-                                border: `3px solid ${ColorToRgb(players.find(p => p.id === salmon.playerId)?.color)}`}}
-                        />
+                                else if (match.phase === Phase.MOVING) {
+                                    onGridClickWrapper(index);
+                                }
+                                }}>
+
+                            {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
+
+                            {/*Real salmons*/}
+                            {cell.salmons && cell.salmons.map((salmon, sIndex) => {
+                                const position = calculateSalmonPosition(sIndex, cell.salmons.length + ghostSalmonsInThisCell.length);
+                                const playerColor = players.find(p => p.id === salmon.playerId)?.color;
+                                const rgbColor = playerColor ? ColorToRgb(playerColor) : 'transparent';
+                                
+                                return (
+                                    <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} 
+                                        alt="" className="salmon-img"
+                                        onClick={(e) => { e.stopPropagation(); onSalmonClickWrapper(salmon); }}
+                                        style={{
+                                            ...position,
+                                            transition: 'transform 0.35s ease-in-out',
+                                            filter: `drop-shadow(0px 0px 3px ${rgbColor})`,
+                                            border: selectedSalmon?.id === salmon.id ? `3px solid white` : `3px solid ${rgbColor}`
+                                        }}/>
+                                );
+                            })}
+
+                            {/*"Ghost" salmons indicating movement trace for ALL moved salmons in this turn*/}
+                            {ghostSalmonsInThisCell.map((ghostSalmon, ghostIdx) => {
+                                const totalSalmons = (cell.salmons?.length || 0) + ghostSalmonsInThisCell.length;
+                                const ghostPositionIndex = (cell.salmons?.length || 0) + ghostIdx;
+                                const position = calculateSalmonPosition(ghostPositionIndex, totalSalmons);
+                                return (
+                                    <img key={`ghost-${x}-${y}-${ghostSalmon.id}-${ghostIdx}`} src={ghostSalmon.salmon.image} alt="ghost" className="salmon-img"
+                                        style={{
+                                            ...position,
+                                            opacity: 0.7,
+                                            filter: 'grayscale(20%)',
+                                            pointerEvents: 'none',
+                                            zIndex: 0
+                                        }}
+                                    />
+                                );
+                            })}
+
+                            {/*Visual energy indicator (Optional)*/}
+                            {isValidMove && (
+                                <div style={{
+                                    position: 'absolute', top: 5, right: 5, 
+                                    background: 'rgba(0,0,0,0.8)', color: '#00ff00', 
+                                    padding: '2px 6px', borderRadius: '50%', fontSize: '12px', fontWeight: 'bold'
+                                }}>
+                                    -{validMoves.find(m => m.x === x && m.y === y)?.energyUsed}⚡
+                                </div>
+                            )}
+                        </div>
                     );
-                    })}
-            </div>
-            ))}
+                })}
             </div>
             
             {match.round < 2 &&
@@ -292,8 +499,8 @@ export default function Game() {
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
                         (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt="" // NOSONAR
-                            onClick={() => handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSalmonClick(s, myPlayer, match, setSelectedSalmon)}
+                            onClick={() => onSalmonClickWrapper(s)}
+                            onKeyDown={(e) => e.key === 'Enter' && onSalmonClickWrapper(s)}
                         style={{                          
                             filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
                             border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,

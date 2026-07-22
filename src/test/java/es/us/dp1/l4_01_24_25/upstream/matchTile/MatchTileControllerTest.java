@@ -25,17 +25,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
 
 @WebMvcTest(controllers = MatchTileController.class,
-    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfiguration.class))
 @AutoConfigureMockMvc(addFilters = false)
 class MatchTileControllerTest {
 
@@ -45,8 +45,13 @@ class MatchTileControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MatchTileController matchTileController;
+
     @MockBean
     private MatchTileService matchTileService;
+
+    // ── GET /match/{id} ───────────────────────────────────────────────────────
 
     @Test
     @DisplayName("GET /match/{id} - Happy Path")
@@ -81,21 +86,21 @@ class MatchTileControllerTest {
         verify(matchTileService, never()).findByMatchIdAsDTO(any());
     }
 
+    // ── PATCH /{id} ───────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("PATCH /{id} - Happy Path (Update coordinates)")
     void shouldUpdateMatchTileSuccessfully() throws Exception {
         Map<String, Integer> updates = Map.of("x", 0, "y", 0);
-        MatchTileDTO dto = new MatchTileDTO();
-        dto.setId(1);
 
-        when(matchTileService.updateCoordinate(eq(1), any())).thenReturn(dto);
+        doNothing().when(matchTileService).updateCoordinate(eq(1), any());
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
                .content(objectMapper.writeValueAsString(updates)))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.id").value(1));
+               .andExpect(status().isOk());
+        
+        verify(matchTileService).updateCoordinate(eq(1), any());
     }
 
     @Test
@@ -103,8 +108,8 @@ class MatchTileControllerTest {
     void shouldFailUpdateWhenPositionOccupied() throws Exception {
         Map<String, Integer> updates = Map.of("x", 0, "y", 0);
 
-        when(matchTileService.updateCoordinate(eq(1), any()))
-            .thenThrow(new ConflictException("Position occupied"));
+        doThrow(new ConflictException("Position occupied"))
+            .when(matchTileService).updateCoordinate(eq(1), any());
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
@@ -117,8 +122,8 @@ class MatchTileControllerTest {
     void shouldFailUpdateWhenTileNotFound() throws Exception {
         Map<String, Integer> updates = Map.of("x", 1, "y", 1);
 
-        when(matchTileService.updateCoordinate(eq(1), any()))
-            .thenThrow(new ResourceNotFoundException("Tile not found"));
+        doThrow(new ResourceNotFoundException("Tile not found"))
+            .when(matchTileService).updateCoordinate(eq(1), any());
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
@@ -131,52 +136,28 @@ class MatchTileControllerTest {
     void shouldFailUpdateOnMalformedJson() throws Exception {
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
-               .content("{ \"x\": 1, \"y\": }")) // JSON Roto
+               .content("{ \"x\": 1, \"y\": }")) // Broken JSON
                .andExpect(status().isBadRequest());
 
         verify(matchTileService, never()).updateCoordinate(any(), any());
     }
 
+    // ── MESSAGE MAPPING /{id}/rotation ────────────────────────────────────────
 
     @Test
-    @DisplayName("PATCH /{id}/rotation - Happy Path")
-    void shouldUpdateMatchTileRotation() throws Exception {
-        MatchTileDTO dto = new MatchTileDTO();
-        dto.setId(1);
-        dto.setOrientation(90);
+    @DisplayName("PATCH /{id}/rotate - Happy Path")
+    void shouldBroadcastMatchTileRotation() throws Exception {
+        doNothing().when(matchTileService).broadcastMatchTileRotation(1, 90);
 
-        when(matchTileService.updateMatchTileRotation(1, 90)).thenReturn(dto);
-
-        mockMvc.perform(patch("/api/v1/matchTiles/{id}/rotation", 1)
+        mockMvc.perform(patch("/api/v1/matchTiles/{id}/rotate", 1)
                .contentType(MediaType.APPLICATION_JSON)
-               .content("90"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.orientation").value(90));
+               .content("{\"rotation\": 90}"))
+               .andExpect(status().isOk());
+
+        verify(matchTileService).broadcastMatchTileRotation(1, 90);
     }
 
-    @Test
-    @DisplayName("PATCH /{id}/rotation - Negative Path (Not Found -> 404)")
-    void shouldFailRotationWhenTileNotFound() throws Exception {
-        when(matchTileService.updateMatchTileRotation(1, 90))
-            .thenThrow(new ResourceNotFoundException("Tile not found"));
-
-        mockMvc.perform(patch("/api/v1/matchTiles/{id}/rotation", 1)
-               .contentType(MediaType.APPLICATION_JSON)
-               .content("90"))
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("PATCH /{id}/rotation - Edge Case (String instead of Integer -> 400)")
-    void shouldFailRotationOnTypeMismatch() throws Exception {
-        mockMvc.perform(patch("/api/v1/matchTiles/{id}/rotation", 1)
-               .contentType(MediaType.APPLICATION_JSON)
-               .content("\"noventa grados\""))
-               .andExpect(status().isBadRequest());
-
-        verify(matchTileService, never()).updateMatchTileRotation(any(), any());
-    }
-
+    // ── POST /createMatchTiles/{matchId} ──────────────────────────────────────
 
     @Test
     @DisplayName("POST /createMatchTiles/{matchId} - Happy Path")
