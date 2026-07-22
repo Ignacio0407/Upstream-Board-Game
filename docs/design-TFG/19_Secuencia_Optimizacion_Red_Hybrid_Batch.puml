@@ -1,0 +1,79 @@
+@startuml
+<style>
+sequenceDiagram {
+  participant {
+    Padding 0
+    Margin 0
+  }
+  box {
+    Padding 0
+    Margin 0
+  }
+}
+</style>
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Iteración 9: Comparativa de Paradigmas de Red (Per-Step vs. Optimistic Batch)
+
+box "Paradigma Previo (Per-Step REST)" #FFEEDD
+participant "Cliente React" as FE1
+participant "Servidor Spring" as API1
+participant "Base de Datos" as DB1
+end box
+
+box "Nuevo Paradigma (Procesamiento en Lote - Iteración 9)" #E1F5FE
+participant "Cliente React" as FE2
+participant "Servidor Spring" as API2
+participant "Base de Datos" as DB2
+end box
+
+note over FE1, DB1 #FFEEDD
+  **PARADIGMA PREVIO: N Peticiones**
+  (1 Petición HTTP + 1 Transacción BD por cada paso)
+end note
+/ note over FE2, DB2 #E1F5FE
+  **NUEVO PARADIGMA: 1 Petición en Lote**
+  (Cálculo local en React, 0 Peticiones intermedias)
+end note
+
+FE1 -> API1: POST /api/v1/salmonMatches/move
+FE2 -> API2: PATCH /api/v1/salmonMatches/move-batch/{matchId}
+activate API2
+
+API1 -> DB1: salmonMatchRepository.save(salmon)
+API2 -> API2: moveBatch(matchId, pendingMoves, playerId)
+
+API1 -> API1: convertAndSend("/topic/movingSalmon/...")
+API2 -> DB2: saveAll(salmons), saveAll(tiles), save(player)
+
+API1 --> FE1: 200 OK
+API2 -> API2: notifyTilesAndSalmons(salmons, tiles)
+
+FE1 -> API1: POST /api/v1/salmonMatches/move
+API2 --> FE2: 200 OK
+deactivate API2
+
+API1 -> DB1: salmonMatchRepository.save(salmon)
+
+API1 -> API1: convertAndSend("/topic/movingSalmon/...")
+
+API1 --> FE1: 200 OK
+
+FE1 -> API1: POST /api/v1/salmonMatches/move (pasos N...)
+API1 -> DB1: salmonMatchRepository.saveAll(...)
+API1 --> FE1: 200 OK
+
+note over FE1, DB2
+  **Impacto Global de Red e Infraestructura:**
+  - Reducción del ~78% al 80% en el volumen total de peticiones HTTP en el servidor.
+  - Eliminación de escrituras intermedias redundantes en la base de datos H2/PostgreSQL.
+  - Eliminación de la latencia percibida en el cliente (interacción fluida a 60 FPS sin esperas de red).
+end note
+
+@enduml

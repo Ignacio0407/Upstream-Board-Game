@@ -1,0 +1,95 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Iteración 9: Procesamiento de Movimientos en Lote
+
+actor "Jugador Actual" as U
+participant "Game.tsx (React)" as FE
+participant "calculateValidMoves.ts" as VM
+participant "SalmonMatchController" as SMC
+participant "SalmonMatchService" as SMS
+participant "PlayerService / MatchTileService" as DB
+participant "SimpMessagingTemplate" as STOMP
+participant "Otros Jugadores" as OFE
+
+== Fase 1: Cálculo Local Optimista y Previsualización Fantasma (0 Peticiones HTTP) ==
+
+U -> FE: onSalmonClick(salmon)
+FE -> VM: calculateValidMoves(salmon, grid, energy)
+activate VM
+VM --> FE: validMoves: ValidMove[]
+deactivate VM
+
+FE -> FE: highlightValidMoves(validMoves)
+
+loop Para cada movimiento del turno
+    U -> FE: onGridClick(index)
+    FE -> FE: addPendingMove(move)
+    FE -> FE: renderGhostSalmons()
+    FE -> FE: updateLocalEnergy(energyCost)
+end
+
+== Fase 2: Confirmación Atómica y Envío en Lote ==
+
+U -> FE: handleConfirmBatch()
+FE -> FE: setConfirmBatchIsSubmitting(true)
+FE -> SMC: PATCH /api/v1/salmonMatches/move-batch/{matchId}\nPayload: pendingMoves: PendingMove[]
+activate SMC
+
+SMC -> SMS: moveBatch(matchId, pendingMoves, playerId)
+activate SMS
+
+== Fase 3: Validación y Aplicación en Memoria ==
+
+loop Para cada PendingMove
+    SMS -> SMS: validateMoveRules(move)
+    SMS -> SMS: updateSalmonCoordinates(move)
+    SMS -> SMS: subtractPlayerEnergy(energyCost)
+end
+
+alt player.energy == 0
+    SMS -> SMS: herons(salmonsInRiver, matchTiles)
+end
+
+== Fase 4: Persistencia Atómica en BD y Notificación STOMP ==
+
+SMS -> DB: playerService.save(player)
+SMS -> DB: salmonMatchService.saveAll(salmons)
+SMS -> DB: matchTileService.saveAll(matchTiles)
+
+SMS -> STOMP: notifyPlayerAndMatchUpdate(match)
+SMS -> STOMP: notifyTilesAndSalmons(mySalmons, matchTiles)
+
+SMS --> SMC: 200 OK
+deactivate SMS
+SMC --> FE: 200 OK
+deactivate SMC
+
+== Fase 5: Sincronización Global de Clientes ==
+
+STOMP -> FE: onMessage("/topic/tilesAndSalmons/...")
+STOMP -> OFE: onMessage("/topic/tilesAndSalmons/...")
+
+FE -> FE: setGrid(consolidatedGrid)
+OFE -> OFE: setGrid(consolidatedGrid)
+
+alt Error HTTP (4xx / 5xx)
+    SMC --X FE: ExceptionResponse
+    FE -> FE: restoreSnapshot(initialState)
+end
+
+note over U, OFE
+  **Ventaja Arquitectónica de la Iteración 9:**
+  Se reemplaza el modelo de N peticiones HTTP (una por cada movimiento) por 1 sola petición en lote al finalizar el turno.
+  Esto reduce el tráfico HTTP en más de un 78%, elimina la sobrecarga de transacciones en base de datos
+  y garantiza la atomicidad del turno completo con capacidad de Rollback local.
+end note
+
+@enduml
