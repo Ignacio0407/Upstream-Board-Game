@@ -69,3 +69,13 @@ Este documento centraliza y explica en profundidad los diagramas que modelan la 
 *   **Archivos:** `12_Clase_base_project_testing.puml` / `.svg`
 *   **Descripción:** Arquitectura de las pruebas automatizadas (la "carpintería fina").
 *   **Detalles:** Explica cómo el uso de clases abstractas genéricas para Servicios y Controladores permite garantizar una cobertura de calidad masiva con el mínimo código duplicado.
+
+### 18. Procesamiento de Movimientos en Lote (Batch Movement Paradigm)
+*   **Archivos:** `18_Secuencia_Procesamiento_Lote_Movimientos.puml` / `.svg`
+*   **Descripción:** Flujo de secuencia completo del nuevo paradigma de movimiento por lotes implementado en la Iteración 9.
+*   **Detalles:** Muestra el cálculo local optimista de trayectorias en el frontend React (`calculateValidMoves.ts`), la previsualización interactiva con salmones fantasma ("ghost UI"), la confirmación atómica mediante el endpoint REST `/api/v1/salmonMatches/move-batch/{matchId}` y la sincronización reactiva STOMP. Incluye el mecanismo de rollback local en caso de fallo de red.
+
+### 19. Comparativa de Paradigmas de Red (Per-Step vs. Hybrid Batch)
+*   **Archivos:** `19_Secuencia_Optimizacion_Red_Hybrid_Batch.puml` / `.svg`
+*   **Descripción:** Diagrama comparativo entre el modelo de comunicación previo y la arquitectura optimizada de la Iteración 9.
+*   **Detalles:** Ilustra cómo el sistema ha pasado de realizar 1 petición HTTP REST y 1 transacción en BD por cada paso de salmón individual (hasta 5 peticiones por turno) a 1 sola petición REST atómica al confirmar el turno completo, reduciendo el tráfico de red en un 78-80%.
