@@ -166,7 +166,7 @@ public class UserAchievementServiceTest {
                 .thenReturn(new UserAchievement());
 
         assertThatThrownBy(() -> userAchievementService.unlockRules("testUser"))
-                .isExactlyInstanceOf(Exception.class);
+                .isExactlyInstanceOf(IllegalArgumentException.class);
         verify(userAchievementRepository, never()).save(any());
     }
 

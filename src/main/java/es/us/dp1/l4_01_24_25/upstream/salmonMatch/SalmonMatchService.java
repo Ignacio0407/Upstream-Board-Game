@@ -316,46 +316,52 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     private CoordinateInteger fromGridFull (List<MatchTile> matchTiles, Coordinate myCoordinate, Coordinate newCoordinate, 
     MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, Integer energyUsed, Coordinate newCoordinate2, 
-    Player player, Match match, List<Player> players, Integer numPlayers, TileType toTravelType, MatchTile myTile, TileType myCoordinateType) {
+    Player player, TileType toTravelType, MatchTile myTile, TileType myCoordinateType) {
+        
+        MatchTile nextToTravel = toTravel2;
+        Coordinate nextCoordinate = newCoordinate2;
+        Integer finalEnergyUsed = energyUsed;
+
         if (null != myCoordinate.x()) {
             // Go up
-            if (newCoordinate.x().equals(myCoordinate.x())) { // Si subo hacia arriba
-                toTravel2 = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType, toTravel, toTravelType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
-                if (!toTravel2.isFull()) {
-                    energyUsed = 3;
-                    newCoordinate2 = newCoordinateToTravel(newCoordinate, 0, 1);
+            if (newCoordinate.x().equals(myCoordinate.x())) { 
+                nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType, toTravel, toTravelType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
+                if (!nextToTravel.isFull()) {
+                    finalEnergyUsed = 3;
+                    nextCoordinate = newCoordinateToTravel(newCoordinate, 0, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
             }
             // From left
             else if (newCoordinate.x() == myCoordinate.x() + 1) {
-                toTravel2 = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
-                if (!toTravel2.isFull()) {
-                    energyUsed = 3;
-                    newCoordinate2 = newCoordinateToTravel(newCoordinate, 1, 1);
+                nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
+                if (!nextToTravel.isFull()) {
+                    finalEnergyUsed = 3;
+                    nextCoordinate = newCoordinateToTravel(newCoordinate, 1, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
             }
             // From right
             else if (newCoordinate.x() == myCoordinate.x() - 1) {
-                toTravel2 = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
-                if (!toTravel2.isFull()) {
-                    energyUsed = 3;
-                    newCoordinate2 = newCoordinateToTravel(newCoordinate, -1, 1);
+                nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
+                if (!nextToTravel.isFull()) {
+                    finalEnergyUsed = 3;
+                    nextCoordinate = newCoordinateToTravel(newCoordinate, -1, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
             }
             else throw new NotValidMoveException("The destination tile is full and there are none to jump to!");
-            if (newCoordinate2 != null) {
+            
+            if (nextCoordinate != null) {
                 if (player.getEnergy() < 3)
                     throw new NotValidMoveException("You need 3 energy points to jump a full tile!");
-                if (toTravel2.getTile().getType().equals(TileType.EAGLE)) {
+                if (nextToTravel.getTile().getType().equals(TileType.EAGLE)) {
                     if (salmonMatch.getSalmonsNumber() > 0) salmonMatch.setSalmonsNumber(Math.max(0, salmonMatch.getSalmonsNumber() - 1));
-                    toTravel2 = this.matchTileService.eagleToWater(toTravel2);
+                    nextToTravel = this.matchTileService.eagleToWater(nextToTravel);
                 }
                 myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
                 this.setSalmonImage(salmonMatch);
-                return new CoordinateInteger(newCoordinate2, toTravel2, energyUsed);
+                return new CoordinateInteger(nextCoordinate, nextToTravel, finalEnergyUsed);
             }
         }
         throw new IllegalStateException("Move from full tile couldn't be calculated");
@@ -438,7 +444,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                 else if (Math.abs(myCoordinate.x() - newCoordinate.x()) <= 1 && Math.abs(myCoordinate.y() - newCoordinate.y()) <= 1) {
                     TileType myTileType = myTile.getTile().getType();
                     if (toTravel.isFull()) {
-                        CoordinateInteger aux = this.fromGridFull(matchTiles, myCoordinate, newCoordinate, toTravel, toTravel2, currentSalmon, energyUsed, newCoordinate2, player, match, players, numPlayers, toTravelType, myTile, myTileType);
+                        CoordinateInteger aux = this.fromGridFull(matchTiles, myCoordinate, newCoordinate, toTravel, toTravel2, currentSalmon, energyUsed, newCoordinate2, player, toTravelType, myTile, myTileType);
                         newCoordinate2 = aux.coordinate();
                         toTravel2 = aux.toTravel();
                         energyUsed = aux.energyUsed();

@@ -71,7 +71,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
         Achievement a = this.achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);
         UserAchievement repeated = this.findByUserandAchievement(u, a);
-        if(repeated != null) throw new Exception(); 
+        if(repeated != null) throw new IllegalArgumentException("User already has that achievement");
         return this.save(ua);
     }
 
