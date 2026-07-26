@@ -77,8 +77,8 @@ describe("AchievementCreate Component", () => {
         });
     });
 
-    it("shows an alert on submission error", async () => {
-        vi.mocked(post).mockRejectedValue(new Error("Network Error"));
+    it("shows an alert on submission error (Error instance and string fallback)", async () => {
+        vi.mocked(post).mockRejectedValueOnce(new Error("Network Error"));
 
         render(
             <MemoryRouter>
@@ -90,6 +90,13 @@ describe("AchievementCreate Component", () => {
 
         await waitFor(() => {
             expect(window.alert).toHaveBeenCalledWith("Network Error");
+        });
+
+        vi.mocked(post).mockRejectedValueOnce("Raw string error");
+        await capturedOnSubmit({ name: "String Error Test" });
+
+        await waitFor(() => {
+            expect(window.alert).toHaveBeenCalledWith("Raw string error");
         });
     });
 });

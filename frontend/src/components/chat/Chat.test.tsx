@@ -83,7 +83,7 @@ describe('Chat', () => {
   // ── Visibility ─────────────────────────────────────────────────────────────
 
   describe('Visibility', () => {
-    test('Toggles chat panel', () => {
+    test('Toggles chat panel with click and Enter keypress', () => {
       renderChat();
 
       expect(screen.queryByText('Match Chat')).not.toBeInTheDocument();
@@ -93,6 +93,9 @@ describe('Chat', () => {
 
       openChat();
       expect(screen.queryByText('Match Chat')).not.toBeInTheDocument();
+
+      fireEvent.keyDown(screen.getByText('Chat'), { key: 'Enter' });
+      expect(screen.getByText('Match Chat')).toBeInTheDocument();
     });
   });
 

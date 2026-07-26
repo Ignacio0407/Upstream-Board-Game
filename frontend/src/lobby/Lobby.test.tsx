@@ -185,5 +185,32 @@ describe("Lobby Component", () => {
         unmount();
         expect(mockWsManager.deactivate).toHaveBeenCalled();
     });
+
+    it("triggers websocket callbacks for match update, new player, and start", () => {
+        render(<Lobby />);
+
+        // Find subscriptions registered with mockWsManager.addSubscription
+        const calls = mockWsManager.addSubscription.mock.calls;
+        const updateCb = calls.find(c => c[0] === "match/update/1")?.[1];
+        const newPlayerCb = calls.find(c => c[0] === "match/newPlayer/1")?.[1];
+        const startCb = calls.find(c => c[0] === "match/start/1")?.[1];
+
+        expect(updateCb).toBeDefined();
+        expect(newPlayerCb).toBeDefined();
+        expect(startCb).toBeDefined();
+
+        updateCb({ ...mockMatch, name: "Updated Room" });
+        newPlayerCb({ id: 3, userId: 12, name: "player3", color: "GREEN" });
+        startCb();
+
+        expect(mockNavigate).toHaveBeenCalledWith("/matches/1/game");
+    });
+
+    it("triggers startGame when Enter key is pressed on start container", () => {
+        render(<Lobby />);
+        const container = screen.getByRole("button", { name: /Start Exit/i });
+        fireEvent.keyDown(container, { key: "Enter" });
+        expect(startGame).toHaveBeenCalled();
+    });
 });
 

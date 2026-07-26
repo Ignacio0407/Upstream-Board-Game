@@ -69,4 +69,38 @@ describe("Register Component", () => {
             expect(screen.getByText(/User already exists/i)).toBeInTheDocument();
         });
     });
+
+    it("allows selecting Admin role and handles login failure after registration", async () => {
+        const user = userEvent.setup();
+        render(<Register />);
+        
+        const usernameInput = screen.getByLabelText(/Username/i);
+        const passwordInput = screen.getByLabelText(/Password/i);
+        const firstNameInput = screen.getByLabelText(/First Name/i);
+        const lastNameInput = screen.getByLabelText(/Last Name/i);
+
+        await user.type(usernameInput, "adminuser");
+        await user.type(passwordInput, "password123");
+        await user.type(firstNameInput, "Admin");
+        await user.type(lastNameInput, "User");
+        
+        // Select Admin role
+        await user.click(screen.getByRole("button", { name: /^Admin$/i }));
+
+        // Mock signup success, signin failure
+        global.fetch = vi.fn().mockImplementation(async (url) => {
+            if (String(url).includes("/signup")) {
+                return { ok: true, json: async () => ({}) };
+            }
+            return { ok: false, status: 401, json: async () => ({ message: "Login failed" }) };
+        });
+
+        await act(async () => {
+            await user.click(screen.getByRole("button", { name: /Register/i }));
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText(/Login failed after registration/i)).toBeInTheDocument();
+        });
+    });
 });

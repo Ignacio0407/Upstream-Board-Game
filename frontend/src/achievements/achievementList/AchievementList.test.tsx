@@ -13,11 +13,11 @@ vi.mock("../../util/deleteFromList",     () => ({ default: vi.fn() }));
 vi.mock("../../util/deleteSomeFromList", () => ({ default: vi.fn() }));
 
 vi.mock("../../components/ListGenerator/ListGenerator", () => ({
-  default: ({ data, createButton, editCondition, deleteCondition, customRender }: any) => (
+  default: ({ data, createButton, editCondition, deleteCondition, customRender, editButton, deleteButton, massDeleteButton }: any) => (
     <div data-testid="list-generator">
       {createButton  && <div data-testid="create-button"  />}
-      {editCondition && <div data-testid="edit-condition" />}
-      {deleteCondition && <div data-testid="delete-condition" />}
+      {editCondition && <div data-testid="edit-condition">{data?.[0] && editButton && editButton(data[0])}</div>}
+      {deleteCondition && <div data-testid="delete-condition">{data?.[0] && deleteButton && deleteButton(data[0])}{data && massDeleteButton && massDeleteButton([data[0]])}</div>}
       {data && data.map((a: any) => (
         <div key={a.id} data-testid={`achievement-row-${a.id}`}>
           {customRender(a)}

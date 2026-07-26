@@ -156,7 +156,6 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
           role="dialog"
           aria-modal="true"
           aria-label="Mass edit modal"
-          tabIndex={0}
           onClick={() => setShowMassEdit(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setShowMassEdit(false);

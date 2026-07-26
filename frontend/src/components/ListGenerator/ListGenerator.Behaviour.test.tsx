@@ -259,6 +259,7 @@ describe("ListGenerator — sync after edit", () => {
 
     await userEventInstance.click(screen.getAllByRole("checkbox")[1]); // Charlie
     await userEventInstance.click(screen.getAllByRole("button", { name: /edit/i })[0]);
+    expect(screen.getAllByRole("checkbox")[1]).toBeChecked();
 
     // Here we would ideally interact with MassEditWizard to finish and call onClose
     // For brevity in this example, let's assume MassEditWizard is mocked to return new data

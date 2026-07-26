@@ -341,9 +341,9 @@ export default function Game() {
             {/*Batch controls*/}
             {(pendingMoves.length > 0) && (
                 <div className="game-title game-turn move-your-salmons batch-controls" style={{ marginBottom: '70px', display: 'flex', gap: '10px' }}>
-                    {myPlayer?.energy === 0 && <button className="btn btn-success" disabled={confirmBatchIsSubmitting} onClick={handleConfirmBatch}>Confirm</button>}
-                    <button className="btn btn-warning" onClick={handleUndoLastMove}>Undo last</button>
-                    <button className="btn btn-danger" onClick={handleUndoAll}>Undo all</button>
+                    {myPlayer?.energy === 0 && <button type="button" className="btn btn-success" disabled={confirmBatchIsSubmitting} onClick={handleConfirmBatch}>Confirm</button>}
+                    <button type="button" className="btn btn-warning" onClick={handleUndoLastMove}>Undo last</button>
+                    <button type="button" className="btn btn-danger" onClick={handleUndoAll}>Undo all</button>
                 </div>
             )}
             {renderPlayerList(playerList)}
@@ -364,7 +364,7 @@ export default function Game() {
                 </img>}
                 {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
                 (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
-                && <button onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
+                && <button type="button" onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
         </div>
         }
 
@@ -448,6 +448,7 @@ export default function Game() {
                                 const rgbColor = playerColor ? ColorToRgb(playerColor) : 'transparent';
                                 
                                 return (
+                                    // NOSONAR
                                     <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} 
                                         alt="" className="salmon-img"
                                         onClick={(e) => { e.stopPropagation(); onSalmonClickWrapper(salmon); }}
@@ -498,7 +499,7 @@ export default function Game() {
             {gridSea.map((salmon:SalmonMatch[], index) => (
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
-                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt="" // NOSONAR
+                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt=""
                             onClick={() => onSalmonClickWrapper(s)}
                             onKeyDown={(e) => e.key === 'Enter' && onSalmonClickWrapper(s)}
                         style={{                          

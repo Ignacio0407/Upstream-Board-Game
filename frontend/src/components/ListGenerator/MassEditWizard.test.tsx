@@ -144,4 +144,42 @@ describe("MassEditWizard — History and Navigation", () => {
     expect(screen.getByLabelText("Review Modal")).toBeInTheDocument();
   });
 
+  test("Shows ReviewModal when clicking Review button on last item and confirms changes", async () => {
+    const mockOnClose = vi.fn();
+    render(
+      <MassEditWizard items={items} massEditUri="/uri" renderItem={vi.fn()} actualUser={{}} massRequiredAuth="auth" onClose={mockOnClose} />
+    );
+
+    // Navigate to last item
+    fireEvent.click(screen.getByText("→"));
+    expect(screen.getByText("Editing 2 / 2")).toBeInTheDocument();
+
+    // Click Review button
+    fireEvent.click(screen.getByText("Review"));
+    expect(screen.getByLabelText("Review Modal")).toBeInTheDocument();
+
+    // Click Confirm all without edits -> onClose(null)
+    fireEvent.click(screen.getByText("Confirm all"));
+    expect(mockOnClose).toHaveBeenCalledWith(null);
+  });
+
+  test("Executes put API call and onClose when confirmAll is called with edited items", async () => {
+    const mockOnClose = vi.fn();
+    render(
+      <MassEditWizard items={items} massEditUri="/uri" renderItem={vi.fn()} actualUser={{}} massRequiredAuth="auth" onClose={mockOnClose} />
+    );
+
+    // Submit edit on first item
+    fireEvent.click(screen.getByText("Submit"));
+    // On second item, click Review
+    fireEvent.click(screen.getByText("Review"));
+
+    // Click Confirm all
+    fireEvent.click(screen.getByText("Confirm all"));
+
+    await vi.waitFor(() => {
+      expect(mockOnClose).toHaveBeenCalledWith([{ id: 1, name: "Charlie edited" }]);
+    });
+  });
+
 });

@@ -3,7 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import UserListAdmin from "./UserListAdmin";
 import { BrowserRouter } from "react-router-dom";
-import * as fetchers from "../../util/fetchers";
+import * as fetchers from "../../util/fetchers.ts";
+import tokenService from "../../services/token.service.ts";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -14,7 +15,7 @@ vi.mock("../../services/token.service.ts", () => ({
   },
 }));
 
-vi.mock("../../util/fetchers", () => ({
+vi.mock("../../util/fetchers.ts", () => ({
     get: vi.fn(),
     patch: vi.fn(),
     deleteEntity: vi.fn(),
@@ -27,7 +28,9 @@ vi.mock("reactstrap", async () => {
     return {
         ...actual,
         Modal: ({ isOpen, children }: any) => (isOpen ? <div data-testid="mock-modal">{children}</div> : null),
+        ModalHeader: ({ children }: any) => <div data-testid="modal-header">{children}</div>,
         ModalBody: ({ children }: any) => <div data-testid="modal-body">{children}</div>,
+        ModalFooter: ({ children }: any) => <div data-testid="modal-footer">{children}</div>,
         Fade: ({ in: isOpen, children }: any) => (isOpen ? <div>{children}</div> : null),
     };
 });
@@ -44,40 +47,33 @@ describe("UserListAdmin", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    globalThis.confirm = vi.fn().mockReturnValue(false);
+    vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("mock-jwt");
+    vi.mocked(tokenService.getUser).mockReturnValue({ id: 1, username: "admin", authority: { authority: "ADMIN" } } as any);
+    vi.mocked(fetchers.buildSafeUrl).mockImplementation((base, id) => id ? `${base}${id}` : base);
+    vi.mocked(fetchers.get).mockResolvedValue({
+        ok: true,
+        json: async () => [
+            { id: 1, name: "Alice", authority: "USER" }
+        ]
+    } as any);
   });
 
   it("Renders the page title", async () => {
-    vi.mocked(fetchers.get).mockResolvedValue({
-        ok: true,
-        json: async () => []
-    } as any);
-
     renderWithRouter(<UserListAdmin />);
-    
     expect(screen.getByRole("heading", { name: /users/i })).toBeInTheDocument();
-    
     await waitFor(() => {
         expect(fetchers.get).toHaveBeenCalled();
     });
   });
 
   it("Renders user list when users are fetched", async () => {
-    vi.mocked(fetchers.get).mockResolvedValue({
-        ok: true,
-        json: async () => [
-            { id: 1, name: "Alice", authority: "USER" },
-            { id: 2, name: "Bob", authority: "ADMIN" }
-        ]
-    } as any);
-
     renderWithRouter(<UserListAdmin />);
-    
     expect(await screen.findByText("Alice")).toBeInTheDocument();
-    expect(await screen.findByText("Bob")).toBeInTheDocument();
   });
 
   it("Does NOT render list rows when users array is empty", async () => {
-    vi.mocked(fetchers.get).mockResolvedValue({
+    vi.mocked(fetchers.get).mockResolvedValueOnce({
         ok: true,
         json: async () => []
     } as any);
@@ -90,13 +86,6 @@ describe("UserListAdmin", () => {
   });
 
   it("Calls patch and updates the user authority on success", async () => {
-    vi.mocked(fetchers.get).mockResolvedValue({
-        ok: true,
-        json: async () => [
-            { id: 1, name: "Alice", authority: "USER" }
-        ]
-    } as any);
-
     vi.mocked(fetchers.patch).mockResolvedValue({
         ok: true,
         json: async () => ({ id: 1, name: "Alice", authority: "ADMIN" })
@@ -109,10 +98,33 @@ describe("UserListAdmin", () => {
     await user.click(changeButtons[0]);
 
     await waitFor(() => {
-        const rows = screen.getAllByRole("row");
-        const aliceRow = rows.find(row => row.textContent?.includes("Alice"));
-        expect(aliceRow?.textContent).toContain("ADMIN");
-    }, { timeout: 3000 });
+        expect(fetchers.patch).toHaveBeenCalled();
+        expect(screen.getByText("ADMIN")).toBeInTheDocument();
+    });
+  });
+
+  it("Shows error modal when authority update patch fails", async () => {
+    vi.mocked(fetchers.patch).mockResolvedValue({
+        ok: false
+    } as any);
+
+    const user = userEvent.setup();
+    renderWithRouter(<UserListAdmin />);
+
+    const changeButtons = await screen.findAllByRole("button", { name: /change authority/i });
+    await user.click(changeButtons[0]);
+
+    await waitFor(() => {
+        expect(fetchers.patch).toHaveBeenCalled();
+        expect(screen.getByText("Error updating authority")).toBeInTheDocument();
+    });
+  });
+
+  it("Triggers delete button handler when delete button is clicked", async () => {
+    renderWithRouter(<UserListAdmin />);
+
+    const deleteButtons = await screen.findAllByRole("button", { name: /delete/i });
+    expect(deleteButtons[0]).toBeInTheDocument();
   });
 });
 

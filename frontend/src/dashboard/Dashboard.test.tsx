@@ -13,6 +13,20 @@ import { Authority } from '../interfaces/User';
 
 // ─── Infrastructure mocks ─────────────────────────────────────────────────────
 
+let capturedWsCallback: ((match: any) => void) | null = null;
+
+vi.mock('../components/webSocketManager/webSocketManager.ts', () => ({
+  default: vi.fn().mockImplementation(function () {
+    return {
+      initConnection: mockClientInstance.activate,
+      deactivate: mockClientInstance.deactivate,
+      addSubscription: vi.fn((destination: string, callback: (data: any) => void) => {
+        capturedWsCallback = callback;
+      }),
+    };
+  }),
+}));
+
 vi.mock('sockjs-client', () => ({ default: vi.fn() }));
 
 const mockClientInstance = {
@@ -304,26 +318,17 @@ describe('Dashboard', () => {
     });
 
     test('WebSocket callback replaces match with the same id', async () => {
-      // Capture the setMatches setter from useFetchState
-      let capturedSetMatches: React.Dispatch<React.SetStateAction<DashboardMatch[]>> | null = null;
-
       vi.mocked(useFetchStateModule.default).mockImplementation((() => {
         const [matches, setMatches] = React.useState<DashboardMatch[]>([matchWaiting]);
-        capturedSetMatches = setMatches as any;
         return [matches, setMatches];
       }) as any);
 
       renderDashboard();
 
-      await waitFor(() => expect(capturedSetMatches).not.toBeNull());
+      await waitFor(() => expect(capturedWsCallback).not.toBeNull());
 
-      // Simulate what the WebSocket subscription callback does internally
       act(() => {
-        capturedSetMatches!((prevMatches) => {
-          const updatedMatch: DashboardMatch = { ...matchWaiting, state: State.ON_GOING };
-          const filtered = prevMatches.filter((m) => m.id !== updatedMatch.id);
-          return [...filtered, updatedMatch];
-        });
+        capturedWsCallback!({ ...matchWaiting, state: State.ON_GOING });
       });
 
       await waitFor(() => {

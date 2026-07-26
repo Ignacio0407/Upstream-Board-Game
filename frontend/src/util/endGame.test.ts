@@ -53,4 +53,14 @@ describe('endGame', () => {
         expect(consoleSpy).toHaveBeenCalledWith('Player ID not found.');
         consoleSpy.mockRestore();
     });
+
+    it('logs error when deleteEntity fails', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.mocked(fetchers.deleteEntity).mockRejectedValue(new Error('Delete error'));
+
+        await endGame({ match, players, user, jwt, spectatorIds, navigate, setMatch } as any);
+
+        expect(consoleSpy).toHaveBeenCalledWith('Error exiting from match:', expect.any(Error));
+        consoleSpy.mockRestore();
+    });
 });

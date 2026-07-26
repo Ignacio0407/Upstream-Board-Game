@@ -18,9 +18,9 @@ vi.mock("./services/token.service.ts");
 let shouldThrowError = false;
 
 // Mocking sub-components to focus on App routing logic
-vi.mock("./home/home.tsx", () => ({ default: () => {
+vi.mock("./home/Home.tsx", () => ({ default: () => {
     if (shouldThrowError) throw new Error("Test Error");
-    return <div data-testid="home-page">Home</div>;
+    return <div data-testid="home-page"><img alt="Main logo" />Home</div>;
 } }));
 vi.mock("./auth/login/Login.tsx", () => ({ default: () => <div data-testid="login-page">Login</div> }));
 vi.mock("./dashboard/Dashboard.tsx", () => ({ default: () => <div data-testid="dashboard-page">Dashboard</div> }));
@@ -114,10 +114,10 @@ describe("App Component Routing", () => {
         expect(screen.getByText(/HACKER DETECTED/i)).toBeInTheDocument();
     });
 
-    it.skip("shows error fallback when an error occurs", async () => {
-        vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("");
-        shouldThrowError = true;
+    it("handles invalid JWT token gracefully without crashing", () => {
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("invalid-jwt");
+        vi.mocked(jwt_decode).mockImplementation(() => { throw new Error("Decode fail"); });
 
         render(
             <MemoryRouter initialEntries={["/"]}>
@@ -125,10 +125,27 @@ describe("App Component Routing", () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(screen.getByText(/Sorry, an unexpected error has occurred./i)).toBeInTheDocument();
-        });
+        expect(consoleSpy).toHaveBeenCalledWith("Invalid JWT token");
+        consoleSpy.mockRestore();
+    });
 
+    it("renders ErrorFallback when ErrorBoundary catches an unhandled error", () => {
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        shouldThrowError = true;
+
+        render(
+            <MemoryRouter initialEntries={["/"]}>
+                <App />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(screen.getByText("Something went wrong:")).toBeInTheDocument();
+        expect(screen.getByText("Test Error")).toBeInTheDocument();
+
+        const tryAgainBtn = screen.getByRole("button", { name: "Try again" });
+        expect(tryAgainBtn).toBeInTheDocument();
+        
         consoleSpy.mockRestore();
     });
 });

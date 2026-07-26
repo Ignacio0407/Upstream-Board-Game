@@ -216,4 +216,53 @@ describe("ListGenerator Component", () => {
         // Check it's rendered before the table (simplified check by presence)
         expect(createButton).toBeInTheDocument();
     });
+
+    it("opens mass edit modal and closes it via Close button", () => {
+        render(
+            <ListGenerator 
+                data={mockData} 
+                actualUser={mockUser as any} 
+                deactivateSecurity={true}
+                editCondition={true}
+                massEditButton={<span>Mass Edit</span>}
+                massEditUri="/api/v1/edit"
+                customRender={(item) => <div>{item.name}</div>}
+                massRequiredAuth="ADMIN"
+            />
+        );
+
+        const checkbox = screen.getAllByRole("checkbox")[1];
+        fireEvent.click(checkbox);
+
+        const massEditTrigger = screen.getByText("Mass Edit");
+        fireEvent.click(massEditTrigger);
+
+        expect(screen.getByRole("dialog", { name: "Mass edit modal" })).toBeInTheDocument();
+
+        const closeBtn = screen.getByRole("button", { name: /✕ Close/i });
+        fireEvent.click(closeBtn);
+
+        expect(screen.queryByRole("dialog", { name: "Mass edit modal" })).not.toBeInTheDocument();
+    });
+
+    it("calls massDeleteButton with selected items when mass delete button is clicked", () => {
+        const mockMassDelete = vi.fn();
+        render(
+            <ListGenerator 
+                data={mockData} 
+                actualUser={mockUser as any} 
+                deactivateSecurity={true}
+                deleteCondition={true}
+                massDeleteButton={mockMassDelete}
+            />
+        );
+
+        const checkbox = screen.getAllByRole("checkbox")[1];
+        fireEvent.click(checkbox);
+
+        const massDeleteBtn = screen.getByRole("button", { name: "Delete" });
+        fireEvent.click(massDeleteBtn);
+
+        expect(mockMassDelete).toHaveBeenCalledWith([mockData[0]]);
+    });
 });

@@ -141,4 +141,23 @@ describe("EditFormGenerator Component", () => {
         expect(screen.getByText("Medium")).toBeInTheDocument();
         expect(screen.getByText("Low")).toBeInTheDocument();
     });
+
+    it("fetches entity from API when entityToEdit is null", async () => {
+        const fetchers = await import("../../util/fetchers");
+        vi.spyOn(fetchers, "get").mockResolvedValue({
+            json: async () => mockEntity
+        } as any);
+
+        const { container } = render(
+            <EditFormGenerator<TestEntity> 
+                entityToEdit={null as any} 
+                onSubmit={vi.fn()} 
+            />
+        );
+
+        await waitFor(() => {
+            const nameInput = container.querySelector('input[name="name"]') as HTMLInputElement;
+            expect(nameInput?.value).toBe("Test Name");
+        });
+    });
 });

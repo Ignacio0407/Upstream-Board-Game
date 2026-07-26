@@ -60,4 +60,25 @@ describe("Login Component", () => {
             expect(window.location.href).not.toBe("/dashboard");
         });
     });
+
+    it("shows fallback error message when fetch rejects with non-Error value", async () => {
+        global.fetch = vi.fn().mockRejectedValue("raw string error");
+
+        const user = userEvent.setup();
+        render(<Login />);
+        
+        const usernameInput = screen.getByLabelText(/Username/i);
+        const passwordInput = screen.getByLabelText(/Password/i);
+
+        await user.type(usernameInput, "wronguser");
+        await user.type(passwordInput, "wrongpass");
+        
+        await act(async () => {
+            await user.click(screen.getByRole("button", { name: /Login/i }));
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText(/Error in login/i)).toBeInTheDocument();
+        });
+    });
 });

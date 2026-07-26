@@ -57,9 +57,9 @@ export default function ListSortBar<T>({ data, onSort }: Props<T>) {
         <option value="">Sort by...</option>
         {keys.map((key) => (<option key={key} value={key}> {key}</option>))}
       </select>
-      <button onClick={() => handleSort("asc")}>↑</button>
-      <button onClick={() => handleSort("desc")}>↓</button>
-      <button onClick={() => { setSelectedKey(""); onSort(data); }}>✖</button>
+      <button type="button" onClick={() => handleSort("asc")}>↑</button>
+      <button type="button" onClick={() => handleSort("desc")}>↓</button>
+      <button type="button" onClick={() => { setSelectedKey(""); onSort(data); }}>✖</button>
     </div>
   );
 }

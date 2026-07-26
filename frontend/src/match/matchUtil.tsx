@@ -49,11 +49,9 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
     }
 };
 
-export const passTurn = (match:Match, jwt:string, myPlayer:Player) => {
-    async () => {
-        await patch(`/api/v1/players/${myPlayer.id}/energy`, jwt)
-        changephase(match, jwt, myPlayer.id)
-    }
+export const passTurn = async (match:Match, jwt:string, myPlayer:Player) => {
+    await patch(`/api/v1/players/${myPlayer.id}/energy`, jwt);
+    changephase(match, jwt, myPlayer.id);
 };
 
 export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
