@@ -98,4 +98,19 @@ class MessageControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1));
     }
+
+    @Test
+    @DisplayName("saveAndSend - Should delegate to messageService.saveAsDTO")
+    void testSaveAndSend() throws Exception {
+        MessageDTO dto = new MessageDTO();
+        dto.setPlayerId(1);
+        dto.setMatchId(1);
+        dto.setContent("Hello World");
+
+        MessageController controller = new MessageController(messageService);
+        controller.saveAndSend(dto);
+
+        org.mockito.Mockito.verify(messageService).saveAsDTO(dto);
+    }
 }
+

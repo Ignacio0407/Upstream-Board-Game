@@ -36,6 +36,12 @@ class ExceptionHandlerControllerTest {
 
         @GetMapping("/test/generic")
         void generic() { throw new RuntimeException("Unexpected"); }
+
+        @GetMapping("/test/conflict")
+        void conflict() { throw new ConflictException("Conflict occurred"); }
+
+        @GetMapping("/test/illegal-argument")
+        void illegalArgument() { throw new IllegalArgumentException("Bad arg"); }
     }
 
     @BeforeEach
@@ -83,4 +89,46 @@ class ExceptionHandlerControllerTest {
         mockMvc.perform(get("/test/generic").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
-}
+
+    @Test
+    void shouldReturn409ForConflictException() throws Exception {
+        mockMvc.perform(get("/test/conflict").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturn400ForIllegalArgumentException() throws Exception {
+        mockMvc.perform(get("/test/illegal-argument").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testDirectHandlerCalls() {
+        ExceptionHandlerController controller = new ExceptionHandlerController();
+        org.springframework.web.context.request.WebRequest request = org.mockito.Mockito.mock(org.springframework.web.context.request.WebRequest.class);
+        org.mockito.Mockito.when(request.getDescription(false)).thenReturn("uri=/test");
+
+        // HttpMessageNotReadableException
+        org.springframework.http.converter.HttpMessageNotReadableException exNotReadable =
+                new org.springframework.http.converter.HttpMessageNotReadableException("Not readable");
+        org.springframework.http.ResponseEntity<ErrorMessage> res1 = controller.handleHttpMessageNotReadableException(exNotReadable, request);
+        org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res1.getStatusCode());
+
+        // MethodArgumentTypeMismatchException
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException exMismatch =
+                org.mockito.Mockito.mock(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class);
+        org.springframework.http.ResponseEntity<ErrorMessage> res2 = controller.handleTypeMismatch(exMismatch, request);
+        org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res2.getStatusCode());
+
+        // MethodArgumentNotValidException
+        org.springframework.web.bind.MethodArgumentNotValidException exNotValid =
+                org.mockito.Mockito.mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
+        org.springframework.validation.BindingResult bindingResult = org.mockito.Mockito.mock(org.springframework.validation.BindingResult.class);
+        org.springframework.validation.FieldError fieldError = new org.springframework.validation.FieldError("obj", "field", "must not be null");
+        org.mockito.Mockito.when(exNotValid.getBindingResult()).thenReturn(bindingResult);
+        org.mockito.Mockito.when(bindingResult.getFieldErrors()).thenReturn(java.util.List.of(fieldError));
+
+        org.springframework.http.ResponseEntity<ErrorMessage> res3 = controller.handleMethodArgumentException(exNotValid, request);
+        org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res3.getStatusCode());
+    }
+}

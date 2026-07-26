@@ -37,6 +37,8 @@ import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService.MoveRequest;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
@@ -638,4 +640,73 @@ class SalmonMatchServiceTest {
             verify(salmonService, never()).findById(any());
         }
     }
-}
+
+    @Test
+    void testRepositoryHelperMethods() {
+        when(salmonMatchRepository.findFromGameInSpawn(1)).thenReturn(List.of(salmonMatch));
+        assertThat(salmonMatchService.findFromGameInSpawn(1)).containsExactly(salmonMatch);
+
+        SalmonMatchDTO smDto = new SalmonMatchDTO();
+        when(salmonMatchRepository.findFromGameInSpawnAsDTO(1)).thenReturn(List.of(smDto));
+        assertThat(salmonMatchService.findFromGameInSpawnDTO(1)).containsExactly(smDto);
+
+        when(salmonMatchRepository.findByPlayerIdAndCoordinateIsNull(1)).thenReturn(List.of(salmonMatch));
+        when(salmonMatchRepository.findByMatchIdAndCoordinateIsNull(1)).thenReturn(List.of(salmonMatch));
+        assertThat(salmonMatchService.findAllFromPlayerInSea(1)).containsExactly(salmonMatch);
+        assertThat(salmonMatchService.findSalmonsInSea(1)).containsExactly(salmonMatch);
+        assertThat(salmonMatchService.findByMatchIdNoCoord(1)).containsExactly(salmonMatch);
+
+        when(salmonMatchRepository.findAllFromPlayerInSpawn(1)).thenReturn(List.of(salmonMatch));
+        assertThat(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).containsExactly(salmonMatch);
+
+        // findPointsFromAllSalmonInSpawn
+        salmonMatch.setCoordinate(new Coordinate(1, 23));
+        when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonMatch));
+        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(3);
+
+        salmonMatch.setCoordinate(new Coordinate(1, 15));
+        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(0);
+
+        SMCoordinateDTO dto = new SMCoordinateDTO(null);
+        when(salmonMatchRepository.findByPlayerIdInSeaAsCoordinateDTO(1)).thenReturn(List.of(dto));
+        assertThat(salmonMatchService.findByPlayerIdInSeaAsCoordinateDTO(1)).containsExactly(dto);
+    }
+
+    @Test
+    void testNotifySalmonMatchSpawnUpdateAndToDTOList() {
+        salmonMatchService.notifySalmonMatchSpawnUpdate(List.of(salmonMatch));
+        verify(messagingTemplate).convertAndSend("/topic/salmons/spawn/1", "Update salmons in spawn");
+
+        SalmonMatchDTO dto = new SalmonMatchDTO();
+        when(salmonMatchMapper.toDTOList(List.of(salmonMatch))).thenReturn(List.of(dto));
+        assertThat(salmonMatchService.toDTOList(List.of(salmonMatch))).containsExactly(dto);
+    }
+
+    @Test
+    void testUpdateEntityFields() {
+        SalmonMatch newSm = new SalmonMatch();
+        newSm.setPlayer(player);
+        newSm.setSalmonsNumber(3);
+        newSm.setSpawningNumber(1);
+        Coordinate c = new Coordinate(2, 2);
+        newSm.setCoordinate(c);
+        newSm.setSalmon(salmon);
+        newSm.setMatch(match);
+
+        SalmonMatch result = salmonMatchService.updateEntityFields(newSm, salmonMatch);
+
+        assertThat(result.getPlayer()).isEqualTo(player);
+        assertThat(result.getSalmonsNumber()).isEqualTo(3);
+        assertThat(result.getSpawningNumber()).isEqualTo(1);
+        assertThat(result.getCoordinate()).isEqualTo(c);
+        assertThat(result.getSalmon()).isEqualTo(salmon);
+        assertThat(result.getMatch()).isEqualTo(match);
+    }
+
+    @Test
+    void testUpdateCoordinateBatch_NullOrEmpty() {
+        salmonMatchService.updateCoordinateBatch(1, null);
+        salmonMatchService.updateCoordinateBatch(1, List.of());
+        verifyNoInteractions(playerService);
+    }
+}

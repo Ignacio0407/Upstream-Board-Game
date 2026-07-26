@@ -32,6 +32,7 @@ package es.us.dp1.l4_01_24_25.upstream.web;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -219,4 +220,56 @@ public class WebSocketSecurityTests {
 
         assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
     }
+
+    @Test
+    void testNullAccessorAndCommand() {
+        Message<byte[]> msgWithoutHeaders = MessageBuilder.createMessage(new byte[0], MessageBuilder.withPayload(new byte[0]).build().getHeaders());
+        Message<?> resultWithoutHeaders = interceptor.preSend(msgWithoutHeaders, null);
+        
+        assertEquals(msgWithoutHeaders, resultWithoutHeaders, "Must return original message if accessor is null");
+
+        StompHeaderAccessor accNoCommand = StompHeaderAccessor.create(StompCommand.DISCONNECT);
+        accNoCommand.setLeaveMutable(true);
+        Message<byte[]> msgNoCommand = MessageBuilder.createMessage(new byte[0], accNoCommand.getMessageHeaders());
+        Message<?> resultNoCommand = interceptor.preSend(msgNoCommand, null);
+        
+        // If command is not CONNECT, SEND or SUBSCRIBE, returns original message
+        assertEquals(msgNoCommand, resultNoCommand, "Must return original message if command does not require validation");
+    }
+
+    @Test
+    void testDestinationNotStartingWithTopic() {
+        StompHeaderAccessor acc = authenticatedAccessor("SEND", "/app/chat/1");
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
+        assertThatThrownBy(() -> interceptor.preSend(msg, null)).isInstanceOf(MessageDeliveryException.class);
+    }
+
+    @Test
+    void testThreeSegmentRouteKey() {
+        StompHeaderAccessor acc = authenticatedAccessor("SEND", "/topic/tiles/place/1");
+        when(playerService.isUserInMatch("user", 1)).thenReturn(true);
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
+        assertThatCode(() -> interceptor.preSend(msg, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void testRateLimitResetAfterOneMinute() throws Exception {
+        StompHeaderAccessor acc = authenticatedAccessor("SEND", "/topic/chat/1");
+        when(playerService.isUserInMatch("user", 1)).thenReturn(true);
+        Message<byte[]> msg = MessageBuilder.createMessage("ok".getBytes(), acc.getMessageHeaders());
+
+        // Fill rate limit
+        for (int i = 0; i < 60; i++) interceptor.preSend(msg, null);
+
+        // Manually simulate time reset in lastReset map
+        java.lang.reflect.Field lastResetField = WebSocketSecurityInterceptor.class.getDeclaredField("lastReset");
+        lastResetField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Long> lastResetMap = (java.util.Map<String, Long>) lastResetField.get(interceptor);
+        lastResetMap.put("user", System.currentTimeMillis() - 61000);
+
+        // Next send should reset counter and succeed
+        assertThatCode(() -> interceptor.preSend(msg, null)).doesNotThrowAnyException();
+    }
 }
+

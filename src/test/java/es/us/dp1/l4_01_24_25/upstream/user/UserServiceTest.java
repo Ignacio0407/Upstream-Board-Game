@@ -165,4 +165,37 @@ public class UserServiceTest {
         assertThatThrownBy(() -> userService.findAllListing())
                 .isInstanceOf(AccessDeniedException.class);
     }
-}
+
+    @Test
+    void testUpdateEntityFields() {
+        User existingUser = buildUser(1, "OldName", Authority.PLAYER);
+        User newUser = buildUser(1, "NewName", Authority.ADMIN);
+
+        User result = userService.updateEntityFields(existingUser, newUser);
+
+        assertThat(result.getName()).isEqualTo("NewName");
+        assertThat(result.getAuthority()).isEqualTo(Authority.ADMIN);
+    }
+
+    @Test
+    void testFindAllAuthorities() {
+        List<Authority> authorities = userService.findAllAuthorities();
+        assertThat(authorities).containsExactly(Authority.values());
+    }
+
+    @Test
+    void testFindUserByName() {
+        User player1 = buildUser(1, "player1", Authority.PLAYER);
+        when(userRepository.findByName("player1")).thenReturn(Optional.of(player1));
+
+        assertThat(userService.findUserByName("player1")).isEqualTo(player1);
+    }
+
+    @Test
+    void testFindAllByAuthority() {
+        User player1 = buildUser(1, "player1", Authority.PLAYER);
+        when(userRepository.findAllByAuthority(Authority.PLAYER)).thenReturn(List.of(player1));
+
+        assertThat(userService.findAllByAuthority(Authority.PLAYER)).containsExactly(player1);
+    }
+}
