@@ -1,0 +1,50 @@
+@startuml
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Paradigma Previo: Comunicación Per-Step REST (Micro-movimientos)
+
+box "Paradigma Previo (Per-Step REST)" #FFEEDD
+participant "Cliente React" as FE1
+participant "Servidor Spring" as API1
+participant "Base de Datos" as DB1
+end box
+
+note over FE1, DB1 #FFEEDD
+  **PARADIGMA PREVIO: N Peticiones por Turno**
+  (1 Petición HTTP + 1 Transacción en BD por cada paso de salmón)
+end note
+
+FE1 -> API1: POST /api/v1/salmonMatches/move (Paso 1)
+activate API1
+API1 -> DB1: salmonMatchRepository.save(salmon1)
+API1 -> API1: convertAndSend("/topic/movingSalmon/...")
+API1 --> FE1: 200 OK
+deactivate API1
+
+FE1 -> API1: POST /api/v1/salmonMatches/move (Paso 2)
+activate API1
+API1 -> DB1: salmonMatchRepository.save(salmon1)
+API1 -> API1: convertAndSend("/topic/movingSalmon/...")
+API1 --> FE1: 200 OK
+deactivate API1
+
+FE1 -> API1: POST /api/v1/salmonMatches/move (Pasos N...)
+activate API1
+API1 -> DB1: salmonMatchRepository.saveAll(...)
+API1 --> FE1: 200 OK
+deactivate API1
+
+note over FE1, DB1
+  **Inconvenientes del Paradigma Previo:**
+  - Múltiples transacciones síncronas intermedias en la base de datos.
+  - Elevada latencia percibida entre pasos individuales de salmón.
+  - Sobrecarga de peticiones HTTP REST síncronas por turno.
+end note
+
+@enduml

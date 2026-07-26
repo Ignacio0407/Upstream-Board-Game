@@ -75,7 +75,22 @@ Este documento centraliza y explica en profundidad los diagramas que modelan la 
 *   **Descripción:** Flujo de secuencia completo del nuevo paradigma de movimiento por lotes implementado en la Iteración 9.
 *   **Detalles:** Muestra el cálculo local optimista de trayectorias en el frontend React (`calculateValidMoves.ts`), la previsualización interactiva con salmones fantasma ("ghost UI"), la confirmación atómica mediante el endpoint REST `/api/v1/salmonMatches/move-batch/{matchId}` y la sincronización reactiva STOMP. Incluye el mecanismo de rollback local en caso de fallo de red.
 
-### 19. Comparativa de Paradigmas de Red (Per-Step vs. Hybrid Batch)
-*   **Archivos:** `19_Secuencia_Optimizacion_Red_Hybrid_Batch.puml` / `.svg`
-*   **Descripción:** Diagrama comparativo entre el modelo de comunicación previo y la arquitectura optimizada de la Iteración 9.
-*   **Detalles:** Ilustra cómo el sistema ha pasado de realizar 1 petición HTTP REST y 1 transacción en BD por cada paso de salmón individual (hasta 5 peticiones por turno) a 1 sola petición REST atómica al confirmar el turno completo, reduciendo el tráfico de red en un 78-80%.
+### 19. Paradigma Previo: Comunicación Per-Step REST (Micro-movimientos)
+*   **Archivos:** `19_Secuencia_Paradigma_Previo_Per_Step.puml`
+*   **Descripción:** Diagrama de secuencia del modelo de comunicación previo a la Iteración 9.
+*   **Detalles:** Muestra la ejecución paso a paso donde cada punto de energía consumido requería una petición síncrona REST (`POST /move`) y una transacción independiente en la base de datos por cada micro-movimiento.
+
+### 20. Nuevo Paradigma: Procesamiento Atómico por Lotes (Batch Movement - Iteración 9)
+*   **Archivos:** `20_Secuencia_Nuevo_Paradigma_Batch_Movement.puml`
+*   **Descripción:** Diagrama de secuencia del nuevo modelo optimizado implementado en la Iteración 9.
+*   **Detalles:** Muestra la previsualización local optimista en React (Ghost UI) y el envío consolidado en una única petición REST en lote (`PATCH /move-batch/{matchId}`) con persistencia atómica en base de datos.
+
+### 21. Arquitectura de Componentes del Frontend (React + TypeScript)
+*   **Archivos:** `21_Componentes_React_Frontend.puml`
+*   **Descripción:** Diagrama de componentes que refleja la estructura real de la SPA construida en React con TypeScript.
+*   **Detalles:** Modela la organización por capas del frontend: enrutamiento (`App.tsx`), vistas principales (`Game.tsx`, `Lobby.tsx`, `Dashboard.tsx`, `AchievementsList.tsx`, etc.), motor cliente (`calculateValidMoves.ts`, `matchUtil.tsx`), administración y tablas (`UserListAdmin.tsx` $\rightarrow$ `ListGenerator.tsx` $\rightarrow$ `MassEditWizard.tsx`, `ListSortBar.tsx`, `SearchBar.tsx` $\rightarrow$ `searchEngine.ts`, `useSearchEngine.ts`) y servicios centrados (`token.service.ts`, `api.ts`, `useFetchState.ts`).
+
+### 22. Comparativa Arquitectónica: Polling Continuo Previo vs. WebSockets + Lotes Actual (TFG)
+*   **Archivos:** `22_Secuencia_Funcionamiento_Previo_Polling_Vs_Actual.puml`
+*   **Descripción:** Diagrama de secuencia comparativo que demuestra de manera gráfica el impacto de la refactorización arquitectónica realizada durante el TFG.
+*   **Detalles:** Contrasta el funcionamiento previo —donde `Match.tsx` (padre) mantenía un `setInterval(5000ms)` enviando `GET /api/v1/matches/{id}` sin desmontarse al pasar a `Game.tsx` (hijo), sumando 5 peticiones GET automáticas cada 5 segundos más peticiones paso a paso por turno— frente al modelo optimizado actual con 0 peticiones de polling background y 1 sola petición REST en lote (`PATCH /move-batch`) confirmada de forma atómica.
