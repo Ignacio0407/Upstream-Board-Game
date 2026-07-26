@@ -1,0 +1,113 @@
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype default
+
+title Arquitectura de Componentes del Frontend (React + TypeScript)
+
+' --- CAPA SUPERIOR: Enrutamiento ---
+package "Capa de Enrutamiento (React Router)" #E3F2FD {
+    component "App.tsx\n(Enrutador Principal)" as App
+    component "AppNavbar.tsx\n(Barra Superior)" as Navbar
+}
+
+' --- CAPA CENTRAL: Vistas Principales ---
+package "Vistas Principales (Pages)" #FFF3E0 {
+    component "Home.tsx" as Home
+    component "Dashboard.tsx\n(Listado de Partidas)" as Dashboard
+    component "Lobby.tsx\n(Sala de Espera)" as Lobby
+    component "Game.tsx\n(Pantalla de Juego)" as Game
+    component "EndGame.tsx" as EndGame
+    component "AchievementsList.tsx\n(Listado de Logros)" as AchievementsList
+    component "UserListAdmin.tsx\n(Gestión de Usuarios)" as AdminUsers
+}
+
+' --- SERVICIOS E INFRAESTRUCTURA (EN EL CENTRO) ---
+package "Servicios e Infraestructura (src/services & src/util)" #FAFAFA {
+    component "api.ts & fetchers.ts\n(Cliente HTTP REST)" as ApiClient
+    component "token.service.ts\n(Gestión JWT Token)" as TokenService
+    component "useFetchState.ts\n(Hook de Datos)" as UseFetch
+    component "ErrorModal.tsx & ConfirmModal.tsx" as Modals
+}
+
+' --- MOTOR DE JUEGO (Al lado de Servicios e Infraestructura) ---
+package "Motor de Juego (src/match)" #E8F5E9 {
+    component "calculateValidMoves.ts\n(Trayectorias y Fantasmas)" as CalcMoves
+    component "matchUtil.tsx\n(Utilidades Auxiliares)" as MatchUtil
+}
+
+' --- TABLAS Y BÚSQUEDA L3 (Al lado de UserListAdmin.tsx) ---
+package "Sistema de Tablas y Búsqueda L3 (src/components)" #F3E5F5 {
+    component "ListGenerator.tsx\n(Generador de Tablas)" as ListGen
+    component "MassEditWizard.tsx\n(Edición Masiva)" as MassEdit
+    component "ListSortBar.tsx\n(Barra de Ordenación)" as SortBar
+    component "SearchBar.tsx\n(Componente Búsqueda)" as SearchBarComponent
+    component "searchEngine.ts\n(Motor Búsqueda L3)" as SearchEngine
+    component "useSearchEngine.ts\n(Hook Búsqueda L3)" as UseSearchHook
+}
+
+' --- TIEMPO REAL Y MODULARES ---
+package "Tiempo Real y Componentes Modulares" #EDE7F6 {
+    component "webSocketManager.ts\n(Cliente STOMP / SockJS)" as WSManager
+    component "Chat.tsx\n(Chat Flotante)" as Chat
+    component "ColorPickerModal.tsx\n(Gestión de Colores)" as ColorPicker
+}
+
+' ==========================================
+'  DISPOSICIÓN Y CONEXIONES DE POSICIÓN
+' ==========================================
+App -down-> Navbar
+App -down-> Home
+App -down-> Dashboard
+App -down-> Lobby
+App -down-> Game
+App -down-> EndGame
+App -down-> AchievementsList
+App -down-> AdminUsers
+
+' Motor de Juego AL LADO de Servicios e Infraestructura
+Game --> CalcMoves : Lógica optimista
+Game --> MatchUtil
+Game --> Chat
+Game --> WSManager
+
+' Posicionamiento explícito: Motor de Juego a la derecha de Servicios e Infraestructura
+ApiClient -right[hidden]-> CalcMoves
+
+' Sistema de Tablas y Búsqueda AL LADO de UserListAdmin.tsx
+AdminUsers -right-> ListGen
+
+ListGen -down-> MassEdit
+ListGen -down-> SortBar
+ListGen -down-> SearchBarComponent
+
+SearchBarComponent -right-> SearchEngine
+SearchBarComponent -right-> UseSearchHook
+
+' Modulares y Dashboard
+Dashboard -down-> WSManager
+Dashboard -down-> SearchBarComponent
+
+Lobby --> ColorPicker
+Lobby --> WSManager
+
+' Flechas centradas directas hacia Servicios e Infraestructura
+"Vistas Principales (Pages)" -down..> ApiClient : Peticiones REST
+"Vistas Principales (Pages)" -down..> UseFetch : Gestión de Estado
+Navbar -down..> TokenService : Verificación JWT
+ListGen ..> UseFetch
+ApiClient ..> TokenService
+
+note right of CalcMoves
+  **Motor Algorítmico Cliente:**
+  Calcula movimientos válidos, coste de energía
+  y salmones fantasma localmente en Game.tsx.
+end note
+
+note right of SearchEngine
+  **Motor de Búsqueda L3:**
+  Procesa filtrados en cliente con
+  algoritmo desacoplado y caché LRU.
+end note
+
+@endlum

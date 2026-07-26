@@ -1,0 +1,84 @@
+@startuml
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Comparativa Arquitectónica: Polling Continuo Previo vs. WebSockets + Lotes Actual (TFG)
+
+box "Funcionamiento Previo al TFG (Polling + Movimientos por Paso)" #FFEBEE
+participant "Match.tsx (Padre)" as MatchOld
+participant "Game.tsx (Hijo)" as GameOld
+participant "Servidor Spring" as ServerOld
+end box
+
+box "Funcionamiento Actual (WebSockets STOMP + Lote Optimista)" #E8F5E9
+participant "Game.tsx (React)" as GameNew
+participant "webSocketManager.ts" as WSNew
+participant "Servidor Spring" as ServerNew
+end box
+
+== 1. Estado del Sistema en Reposo (Durante toda la partida, sea o no tu turno) ==
+
+note over MatchOld, ServerOld #FFCDD2
+  **ARQUITECTURA PREVIA (5 peticiones GET cada 5 segundos por cliente):**
+  Match.tsx (padre) ejecuta setInterval(5000ms) con 1 GET (/api/v1/matches/{id}).
+  Game.tsx (hijo) ejecuta su propio setInterval(5000ms) con 4 GETs simultáneas.
+  Total: 5 peticiones GET cada 5s por cliente (independiente de quién tiene el turno).
+  No existe ningún polling adicional por ser tu turno.
+end note
+
+loop Cada 5 segundos (Background Polling Continuo para todos los clientes)
+    MatchOld -> ServerOld: 1. GET /api/v1/matches/{id} (Estado global de partida)
+    GameOld -> ServerOld: 2. GET /api/v1/matchTiles/match/{id} (Losetas del tablero)
+    GameOld -> ServerOld: 3. GET /api/v1/salmonMatches/match/{id} (Salmones en tablero)
+    GameOld -> ServerOld: 4. GET /api/v1/salmonMatches/match/{id}/spawn (Salmones en desove)
+    GameOld -> ServerOld: 5. GET /api/v1/players/match/sorted/{id} (Estado de jugadores)
+    ServerOld --> MatchOld: 200 OK
+    ServerOld --> GameOld: 200 OK (4 respuestas)
+end
+
+note over GameNew, ServerNew #C8E6C9
+  **ARQUITECTURA ACTUAL TFG (0 peticiones Polling):**
+  Sin temporizadores ni peticiones periodicas HTTP.
+  La sincronización se realiza en tiempo real mediante
+  suscripciones STOMP sobre WebSockets (Push en lugar de Poll).
+end note
+
+WSNew -> ServerNew: STOMP Subscribe /topic/tilesAndSalmons/{matchId}
+ServerNew --[#green]> WSNew: Frame STOMP con DTO consolidado (solo cuando hay cambios)
+
+== 2. Ejecución de un Turno Activo del Jugador ==
+
+note over MatchOld, ServerOld #FFCDD2
+  **Turno en Versión Previa (Paso a Paso):**
+  Peticiones REST activas por cada movimiento individual (oscila entre 2 y 5 pasos por turno, media de 4).
+  Más las 5 peticiones GET de polling continuo que siguen ejecutándose cada 5s.
+  Ejemplo turno 15s: ~4 REST activas (media) + 15 GETs polling = **~19 peticiones HTTP/cliente**
+end note
+
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 1)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 2)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 3)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 4 - media habitual)
+ServerOld --> GameOld: 200 OK
+
+note over GameNew, ServerNew #C8E6C9
+  **Turno en Versión Actual (Iteración 9 - Lote Optimista):**
+  Previsualización local fantasma (0 peticiones intermedias).
+  1 sola petición REST atómica al confirmar el turno completo + 1 difusión STOMP.
+  Ejemplo turno 15s: **1 única petición HTTP/cliente**
+end note
+
+GameNew -> GameNew: Renderizado local optimista (Ghost UI)
+GameNew -> ServerNew: PATCH /api/v1/salmonMatches/move-batch/{matchId} (Lote completo)
+ServerNew --> GameNew: 200 OK
+ServerNew -[#green]> WSNew: Notificación STOMP en tiempo real a todos los clientes
+
+@endlum
