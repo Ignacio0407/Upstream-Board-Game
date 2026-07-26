@@ -381,7 +381,7 @@ class PlayerServiceTest {
 
         // Same actual player -> succeeds
         playerService.setEnergyToZero(1);
-        assertThat(player.getEnergy()).isEqualTo(0);
+        assertThat(player.getEnergy()).isZero();
 
         // Different actual player -> throws AccessDeniedException
         Player otherPlayer = new Player();

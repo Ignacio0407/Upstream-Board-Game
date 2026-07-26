@@ -213,8 +213,8 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
             this.handleConnect(accessor, message);
         } else if (command == StompCommand.SEND || command == StompCommand.SUBSCRIBE) {
             this.validateMessage(accessor, message);
-            if (accessor.getUser() instanceof Authentication) {
-                SecurityContextHolder.getContext().setAuthentication((Authentication) accessor.getUser());
+            if (accessor.getUser() instanceof Authentication authentication) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
         return message;

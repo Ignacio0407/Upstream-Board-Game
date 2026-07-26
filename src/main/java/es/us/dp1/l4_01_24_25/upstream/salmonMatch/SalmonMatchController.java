@@ -35,7 +35,7 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
     }
 
     @PatchMapping("/move-batch/{id}")
-    public ResponseEntity<?> updateCoordinateBatch(@PathVariable Integer id, @RequestBody List<MoveRequest> pendingMoves) {
+    public ResponseEntity<Void> updateCoordinateBatch(@PathVariable Integer id, @RequestBody List<MoveRequest> pendingMoves) {
         this.salmonMatchService.updateCoordinateBatch(id, pendingMoves);
         return ResponseEntity.ok().build();
     }

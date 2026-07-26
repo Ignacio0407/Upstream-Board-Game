@@ -189,7 +189,7 @@ class MatchTileServiceTest {
         verify(matchTileRepository).save(matchTile);
         
         // Verifica que se lanzaron los 3 eventos correspondientes
-        verify(messagingTemplate).convertAndSend(eq("/topic/tiles/place/1"), eq(dto));
+        verify(messagingTemplate).convertAndSend("/topic/tiles/place/1", dto);
         verify(playerService).notifyPlayersUpdate(1);
         verify(matchService).notifyMatchUpdate(match);
     }

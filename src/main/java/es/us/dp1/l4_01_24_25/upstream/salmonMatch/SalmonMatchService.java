@@ -318,16 +318,14 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
     MatchTile toTravel, MatchTile toTravel2, SalmonMatch salmonMatch, Integer energyUsed, Coordinate newCoordinate2, 
     Player player, TileType toTravelType, MatchTile myTile, TileType myCoordinateType) {
         
-        MatchTile nextToTravel = toTravel2;
-        Coordinate nextCoordinate = newCoordinate2;
-        Integer finalEnergyUsed = energyUsed;
+        MatchTile nextToTravel;
+        Coordinate nextCoordinate;
 
         if (null != myCoordinate.x()) {
             // Go up
             if (newCoordinate.x().equals(myCoordinate.x())) { 
                 nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType, toTravel, toTravelType, matchTiles, List.of(3, 4), List.of(0, 1), 0, 1);
                 if (!nextToTravel.isFull()) {
-                    finalEnergyUsed = 3;
                     nextCoordinate = newCoordinateToTravel(newCoordinate, 0, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
@@ -336,7 +334,6 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             else if (newCoordinate.x() == myCoordinate.x() + 1) {
                 nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(4, 5), List.of(1, 2), 1, 1);
                 if (!nextToTravel.isFull()) {
-                    finalEnergyUsed = 3;
                     nextCoordinate = newCoordinateToTravel(newCoordinate, 1, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
@@ -345,7 +342,6 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             else if (newCoordinate.x() == myCoordinate.x() - 1) {
                 nextToTravel = handleTileFull(newCoordinate, salmonMatch, myTile, myCoordinateType,  toTravel, toTravelType, matchTiles, List.of(2, 3), List.of(0, 5), -1, 1);
                 if (!nextToTravel.isFull()) {
-                    finalEnergyUsed = 3;
                     nextCoordinate = newCoordinateToTravel(newCoordinate, -1, 1);
                 }
                 else throw new NotValidMoveException("The destination tile and the next are full!");
@@ -361,7 +357,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
                 }
                 myTile.setSalmonsNumber(myTile.getSalmonsNumber()-1);
                 this.setSalmonImage(salmonMatch);
-                return new CoordinateInteger(nextCoordinate, nextToTravel, finalEnergyUsed);
+                return new CoordinateInteger(nextCoordinate, nextToTravel, 3);
             }
         }
         throw new IllegalStateException("Move from full tile couldn't be calculated");
@@ -403,8 +399,6 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
         if (match.getPhase() != Phase.MOVING) throw new NotValidMoveException("Now the tiles have to be placed!");
         if (!match.getActualPlayer().getId().equals(player.getId())) throw new NotValidMoveException("It is not your turn!");
 
-        List<Player> players = this.playerService.findPlayersByMatch(match.getId());
-        Integer numPlayers = match.getPlayersNumber();
         List<MatchTile> matchTiles = this.matchTileService.findByMatchId(match.getId());
         List<SalmonMatch> mySalmons = this.findAllFromPlayer(player.getId());
 
@@ -413,7 +407,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
             Integer salmonId = move.salmonId;
             Integer targetX = move.x;
             Integer targetY = move.y;
-            Boolean enterSpawn = Boolean.TRUE.equals(move.enterSpawn);
+            boolean enterSpawn = Boolean.TRUE.equals(move.enterSpawn);
             
             SalmonMatch currentSalmon = mySalmons.stream().filter(s -> s.getId().equals(salmonId)).findFirst()
                     .orElseThrow(() -> new NotValidMoveException("Salmon not found or not yours"));

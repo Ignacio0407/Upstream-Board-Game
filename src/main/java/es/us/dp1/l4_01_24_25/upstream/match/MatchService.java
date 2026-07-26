@@ -168,12 +168,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             currentIndex = (currentIndex + 1) % nPlayers;
             nextPlayer = players.get(currentIndex);
             if (nextPlayer.equals(currentPlayer) &&
-                this.salmonMatchService.findByPlayerIdAsCoordinateDTO(currentPlayer.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20)) {
-                if (!match.getState().equals(State.FINALIZED)) {
-                    match.setState(State.FINALIZED);
-                    this.finalScore(match.getId());
-                    break;
-                }
+                this.salmonMatchService.findByPlayerIdAsCoordinateDTO(currentPlayer.getId()).stream().allMatch(s -> s.getCoordinate().y() > 20) &&
+                !match.getState().equals(State.FINALIZED)) {
+                match.setState(State.FINALIZED);
+                this.finalScore(match.getId());
+                break;
             }
         }
         return nextPlayer;
@@ -211,14 +210,13 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         List<MatchTile> tiles = this.matchTileService.findByMatchId(match.getId());
         List<SalmonMatch> salmons = this.salmonMatchService.findAllFromMatch(match.getId());
         List<Player> players = this.playerService.findPlayersByMatch(match.getId());
-        if (tiles.isEmpty() || salmons.isEmpty() || players.stream().allMatch(p -> p.getAlive() == false) 
-            || players.stream().allMatch(p -> this.playerService.checkPlayerFinished(p.getId()))) {
-            if (!match.getState().equals(State.FINALIZED)) {
-                match.setState(State.FINALIZED);
-                this.save(match);
-                this.finalScore(match.getId());
-                this.notifyMatchUpdate(match);
-            }
+        if ((tiles.isEmpty() || salmons.isEmpty() || players.stream().allMatch(p -> p.getAlive() == false) 
+            || players.stream().allMatch(p -> this.playerService.checkPlayerFinished(p.getId())))
+            && !match.getState().equals(State.FINALIZED)) {
+            match.setState(State.FINALIZED);
+            this.save(match);
+            this.finalScore(match.getId());
+            this.notifyMatchUpdate(match);
         }
     }
 

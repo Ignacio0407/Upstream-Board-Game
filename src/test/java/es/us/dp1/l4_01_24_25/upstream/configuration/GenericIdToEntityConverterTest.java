@@ -2,7 +2,6 @@ package es.us.dp1.l4_01_24_25.upstream.configuration;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseEntity;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +45,7 @@ class GenericIdToEntityConverterTest {
     }
 
     @Test
-    void testConvert_NullSourceOrNullEntityManager() throws Exception {
+    void testConvert_NullSourceOrNullEntityManager() {
         TypeDescriptor sourceType = TypeDescriptor.valueOf(String.class);
         TypeDescriptor targetType = TypeDescriptor.valueOf(BaseEntity.class);
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -101,7 +102,7 @@ class MessageControllerTest {
 
     @Test
     @DisplayName("saveAndSend - Should delegate to messageService.saveAsDTO")
-    void testSaveAndSend() throws Exception {
+    void testSaveAndSend() {
         MessageDTO dto = new MessageDTO();
         dto.setPlayerId(1);
         dto.setMatchId(1);
@@ -110,7 +111,7 @@ class MessageControllerTest {
         MessageController controller = new MessageController(messageService);
         controller.saveAndSend(dto);
 
-        org.mockito.Mockito.verify(messageService).saveAsDTO(dto);
+        verify(messageService).saveAsDTO(dto);
     }
 }
 

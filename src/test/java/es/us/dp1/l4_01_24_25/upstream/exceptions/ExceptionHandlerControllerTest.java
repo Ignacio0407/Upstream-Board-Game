@@ -1,5 +1,7 @@
 package es.us.dp1.l4_01_24_25.upstream.exceptions;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -105,8 +107,8 @@ class ExceptionHandlerControllerTest {
     @Test
     void testDirectHandlerCalls() {
         ExceptionHandlerController controller = new ExceptionHandlerController();
-        org.springframework.web.context.request.WebRequest request = org.mockito.Mockito.mock(org.springframework.web.context.request.WebRequest.class);
-        org.mockito.Mockito.when(request.getDescription(false)).thenReturn("uri=/test");
+        org.springframework.web.context.request.WebRequest request = mock(org.springframework.web.context.request.WebRequest.class);
+        when(request.getDescription(false)).thenReturn("uri=/test");
 
         // HttpMessageNotReadableException
         org.springframework.http.converter.HttpMessageNotReadableException exNotReadable =
@@ -116,17 +118,17 @@ class ExceptionHandlerControllerTest {
 
         // MethodArgumentTypeMismatchException
         org.springframework.web.method.annotation.MethodArgumentTypeMismatchException exMismatch =
-                org.mockito.Mockito.mock(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class);
+                mock(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class);
         org.springframework.http.ResponseEntity<ErrorMessage> res2 = controller.handleTypeMismatch(exMismatch, request);
         org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res2.getStatusCode());
 
         // MethodArgumentNotValidException
         org.springframework.web.bind.MethodArgumentNotValidException exNotValid =
-                org.mockito.Mockito.mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
-        org.springframework.validation.BindingResult bindingResult = org.mockito.Mockito.mock(org.springframework.validation.BindingResult.class);
+                mock(org.springframework.web.bind.MethodArgumentNotValidException.class);
+        org.springframework.validation.BindingResult bindingResult = mock(org.springframework.validation.BindingResult.class);
         org.springframework.validation.FieldError fieldError = new org.springframework.validation.FieldError("obj", "field", "must not be null");
-        org.mockito.Mockito.when(exNotValid.getBindingResult()).thenReturn(bindingResult);
-        org.mockito.Mockito.when(bindingResult.getFieldErrors()).thenReturn(java.util.List.of(fieldError));
+        when(exNotValid.getBindingResult()).thenReturn(bindingResult);
+        when(bindingResult.getFieldErrors()).thenReturn(java.util.List.of(fieldError));
 
         org.springframework.http.ResponseEntity<ErrorMessage> res3 = controller.handleMethodArgumentException(exNotValid, request);
         org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res3.getStatusCode());

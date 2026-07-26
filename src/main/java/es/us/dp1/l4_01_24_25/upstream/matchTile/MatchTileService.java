@@ -30,6 +30,8 @@ import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 @Service
 public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO, Integer>{
     
+    private static final String ORIENTATION_KEY = "orientation";
+
     MatchTileRepository matchTileRepository;
     MatchTileMapper matchTileMapper;
     TileService tileService;
@@ -128,8 +130,8 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
         if (!match.getActualPlayer().getId().equals(myPlayer.getId())) {
             throw new NotValidMoveException("It is not your turn!");
         }
-        if (updates.containsKey("orientation") && updates.get("orientation") != null) {
-            matchTile.setOrientation(updates.get("orientation"));
+        if (updates.containsKey(ORIENTATION_KEY) && updates.get(ORIENTATION_KEY) != null) {
+            matchTile.setOrientation(updates.get(ORIENTATION_KEY));
         }
         List<MatchTile> matchTiles = this.findByMatchId(matchTile.getMatch().getId());
         if (!Integer.valueOf(0).equals(updates.get("y"))) {

@@ -48,7 +48,7 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
     }
 
     @PatchMapping("/{id}/energy")
-    public ResponseEntity<PlayerDTO> setEnergyToZero(@PathVariable("id") Integer id) throws ResourceNotFoundException, Exception {
+    public ResponseEntity<PlayerDTO> setEnergyToZero(@PathVariable("id") Integer id) {
         this.playerService.setEnergyToZero(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
