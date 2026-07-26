@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -116,4 +118,32 @@ class MessageServiceTest {
         verify(messageRepository).save(any(Message.class));
         verify(messagingTemplate).convertAndSend(eq("/topic/chat/1"), any(Message.class));
     }
+
+    @Test
+    void testUpdateEntityFields() {
+        Message newMessage = new Message();
+        newMessage.setContent("Updated content");
+
+        Message messageToUpdate = new Message();
+        messageToUpdate.setContent("Old content");
+
+        Message result = messageService.updateEntityFields(newMessage, messageToUpdate);
+
+        assertThat(result.getContent()).isEqualTo("Updated content");
+    }
+
+    @Test
+    void testFindQueries() {
+        MessageDTO dto = new MessageDTO();
+        when(messageRepository.findMessagesByMatchIdDTO(1)).thenReturn(List.of(dto));
+        assertThat(messageService.findMatchMessages(1)).containsExactly(dto);
+
+        when(messageRepository.findMessagesByUserIdDTO(1)).thenReturn(List.of(dto));
+        assertThat(messageService.findUserMessages(1)).containsExactly(dto);
+
+        Match match = new Match();
+        when(messageRepository.findAllChatsFromUser(1)).thenReturn(List.of(match));
+        assertThat(messageService.findUserChats(1)).containsExactly(match);
+    }
 }
+

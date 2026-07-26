@@ -3,6 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.match;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -29,6 +31,7 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
@@ -46,6 +49,7 @@ import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 @DisplayName("Match Service Tests")
 class MatchServiceTest {
 
+    @Spy
     @InjectMocks
     private MatchService matchService;
 
@@ -510,4 +514,172 @@ class MatchServiceTest {
                     .isInstanceOf(ConflictException.class);
         }
     }
+
+    @Test
+    void testUpdateEntityFields() {
+        Match newMatch = new Match();
+        newMatch.setPassword("secret");
+        newMatch.setState(State.ON_GOING);
+        newMatch.setPlayersNumber(3);
+        newMatch.setRound(2);
+        newMatch.setPhase(Phase.MOVING);
+        newMatch.setFinalScoreCalculated(true);
+        newMatch.setInitialPlayer(player1);
+        newMatch.setActualPlayer(player2);
+        newMatch.setMatchCreator(user1);
+
+        Match result = matchService.updateEntityFields(newMatch, match);
+
+        assertThat(result.getPassword()).isEqualTo("secret");
+        assertThat(result.getState()).isEqualTo(State.ON_GOING);
+        assertThat(result.getPlayersNumber()).isEqualTo(3);
+        assertThat(result.getRound()).isEqualTo(2);
+        assertThat(result.getPhase()).isEqualTo(Phase.MOVING);
+        assertThat(result.getFinalScoreCalculated()).isTrue();
+        assertThat(result.getInitialPlayer()).isEqualTo(player1);
+        assertThat(result.getActualPlayer()).isEqualTo(player2);
+        assertThat(result.getMatchCreator()).isEqualTo(user1);
+    }
+
+    @Test
+    void testNotificationMethods() {
+        MatchDTO matchDTO = new MatchDTO();
+        matchDTO.setId(1);
+        matchService.notifyMatchUpdateDTO(matchDTO);
+        verify(messagingTemplate).convertAndSend("/topic/match/update/1", matchDTO);
+
+        matchService.notifyMatchStarts(1);
+        verify(messagingTemplate).convertAndSend("/topic/match/start/1", "Navigate to game screen");
+
+        SalmonMatch sm = new SalmonMatch();
+        sm.setMatch(match);
+        MatchTile mt = new MatchTile();
+        when(matchTileService.toDTOList(List.of(mt))).thenReturn(List.of());
+        when(salmonMatchService.toDTOList(List.of(sm))).thenReturn(List.of());
+
+        matchService.notifyTilesAndSalmons(List.of(sm), List.of(mt));
+        verify(messagingTemplate).convertAndSend(eq("/topic/tilesAndSalmons/1"), any(Map.class));
+
+        matchService.notifyPlayerAndMatchUpdate(match);
+        verify(playerService).notifyPlayersUpdate(1);
+    }
+
+    @Test
+    void testFindAllAsDashboardDTOAndCreateMatch() {
+        DashboardMatchDTO dashDTO = new DashboardMatchDTO(1, "m1", "pass", State.WAITING, 2);
+        when(matchRepository.findAllAsDashboardDTO()).thenReturn(List.of(dashDTO));
+        assertThat(matchService.findAllAsDashboardDTO()).containsExactly(dashDTO);
+
+        when(userService.findById(1)).thenReturn(user1);
+        MatchDTO dto = new MatchDTO();
+        when(matchMapper.toDTO(any())).thenReturn(dto);
+
+        MatchDTO created = matchService.createMatchWMatchCreator(1, Map.of("name", "NewMatch", "password", "pass"));
+        assertThat(created).isEqualTo(dto);
+        verify(matchRepository).save(any(Match.class));
+    }
+
+    @Test
+    void testStartGame() {
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+        matchService.startGame(1);
+
+        assertThat(match.getState()).isEqualTo(State.ON_GOING);
+        assertThat(match.getActualPlayer()).isEqualTo(player1);
+        assertThat(match.getInitialPlayer()).isEqualTo(player1);
+        assertThat(match.getPlayersNumber()).isEqualTo(2);
+        verify(matchRepository).save(match);
+    }
+
+    @Test
+    void testChangePhase_NoMoreTilesToPlaceRechargeEnergy() {
+        match.setPhase(Phase.TILES);
+        match.setActualPlayer(player1);
+        match.setRound(3);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findById(1)).thenReturn(player1);
+        when(matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(1)).thenReturn(List.of()); // size == 0
+        when(playerService.playersForChangePhase(1)).thenReturn(List.of(player1, player2));
+
+        matchService.changePhase(1, 1);
+
+        assertThat(match.getPhase()).isEqualTo(Phase.MOVING);
+        assertThat(match.getActualPlayer()).isEqualTo(player1);
+        assertThat(player1.getEnergy()).isEqualTo(5);
+        verify(playerService).saveAll(List.of(player1, player2));
+    }
+
+    @Test
+    void testChangePhase_NoMoreTilesToPlacePlayers_WithSpawnSalmons() {
+        match.setPhase(Phase.MOVING);
+        match.setActualPlayer(player1);
+        match.setRound(1);
+        player1.setEnergy(0);
+        player2.setEnergy(0);
+
+        when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+        when(playerService.findById(1)).thenReturn(player1);
+        when(matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(1)).thenReturn(List.of()); // size == 0
+        when(playerService.playersForChangePhase(1)).thenReturn(List.of(player1, player2));
+        when(playerService.checkPlayerNoEnergy(player1)).thenReturn(true);
+
+        SalmonMatch smSpawn = new SalmonMatch();
+        smSpawn.setId(10);
+        smSpawn.setCoordinate(new Coordinate(1, 22));
+        when(salmonMatchService.findFromGameInSpawn(1)).thenReturn(List.of(smSpawn));
+        when(playerService.findAlivePlayersByMatchSortedPlayerOrder(1)).thenReturn(List.of(player1, player2));
+        lenient().when(playerService.findNextPlayer(player1, List.of(player1, player2))).thenReturn(new NextPlayerResult(player2, 1));
+
+        matchService.changePhase(1, 1);
+
+        assertThat(smSpawn.getCoordinate().y()).isEqualTo(23);
+        verify(salmonMatchService).saveAll(List.of(smSpawn));
+        verify(salmonMatchService).notifySalmonMatchSpawnUpdate(List.of(smSpawn));
+    }
+
+    @Test
+    void testEndRound_MidGameExecution() {
+        match.setRound(3);
+        match.setPhase(Phase.TILES);
+
+        MTCoordinateDTO dtoNoC = new MTCoordinateDTO(1, null);
+        List<MTCoordinateDTO> mtNoC = IntStream.range(0, 17).mapToObj(i -> dtoNoC).toList();
+        when(matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(1)).thenReturn(mtNoC);
+
+        MatchTile mtY0 = new MatchTile();
+        mtY0.setId(1);
+        mtY0.setCoordinate(new Coordinate(1, 0));
+
+        MatchTile mtY1 = new MatchTile();
+        mtY1.setId(2);
+        mtY1.setCoordinate(new Coordinate(1, 1));
+
+        when(matchTileService.findByMatchId(1)).thenReturn(List.of(mtY0, mtY1));
+
+        SalmonMatch smY0 = new SalmonMatch();
+        smY0.setId(10);
+        smY0.setMatch(match);
+        smY0.setCoordinate(new Coordinate(1, 0));
+
+        SalmonMatch smY1 = new SalmonMatch();
+        smY1.setId(11);
+        smY1.setMatch(match);
+        smY1.setCoordinate(new Coordinate(1, 1));
+
+        when(salmonMatchService.findAllFromMatch(1)).thenReturn(List.of(smY0, smY1));
+        when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1));
+
+        org.springframework.test.util.ReflectionTestUtils.invokeMethod(matchService, "endRound", match);
+
+        verify(salmonMatchService).delete(smY0);
+        assertThat(smY1.getCoordinate().y()).isEqualTo(0);
+        verify(matchTileService).delete(mtY0);
+        assertThat(mtY1.getCoordinate().y()).isEqualTo(0);
+        verify(matchService).notifyTilesAndSalmonsByMatchId(1);
+    }
 }
+
+

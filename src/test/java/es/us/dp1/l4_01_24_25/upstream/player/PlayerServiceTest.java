@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
+import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
@@ -301,4 +302,116 @@ class PlayerServiceTest {
         assertThat(player.getAlive()).isTrue();
         assertThat(player.getEnergy()).isEqualTo(5);
     }
-}
+
+    @Test
+    void testFindPlayersByMatchAndDTO() {
+        when(playerRepository.findByMatchId(10)).thenReturn(List.of(player));
+        assertThat(playerService.findPlayersByMatch(10)).containsExactly(player);
+
+        PlayerDTO dto = new PlayerDTO();
+        when(playerRepository.findPlayersByMatchAsDTO(10)).thenReturn(List.of(dto));
+        assertThat(playerService.findPlayersByMatchAsDTO(10)).containsExactly(dto);
+    }
+
+    @Test
+    void testFindAlivePlayersByMatchSortedPlayerOrder() {
+        when(playerRepository.findByMatchIdAndAliveTrueOrderByPlayerOrderAsc(10)).thenReturn(List.of(player));
+        assertThat(playerService.findAlivePlayersByMatchSortedPlayerOrder(10)).containsExactly(player);
+    }
+
+    @Test
+    void testUpdateEntityFields() {
+        Player playerToUpdate = new Player();
+        Player newPlayer = new Player();
+        newPlayer.setName("NewName");
+        newPlayer.setColor(Color.RED);
+        newPlayer.setAlive(true);
+        newPlayer.setEnergy(4);
+        newPlayer.setPoints(10);
+        newPlayer.setPlayerOrder(2);
+
+        Player result = playerService.updateEntityFields(playerToUpdate, newPlayer);
+
+        assertThat(result.getName()).isEqualTo("NewName");
+        assertThat(result.getColor()).isEqualTo(Color.RED);
+        assertThat(result.getAlive()).isTrue();
+        assertThat(result.getEnergy()).isEqualTo(4);
+        assertThat(result.getPoints()).isEqualTo(10);
+        assertThat(result.getPlayerOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void testIsUserInMatch() {
+        when(playerRepository.existsByUsernameAndMatchId("user1", 5)).thenReturn(true);
+        assertThat(playerService.isUserInMatch("user1", 5)).isTrue();
+    }
+
+    @Test
+    void testNotifyPlayersUpdate() {
+        PlayerDTO dto = new PlayerDTO();
+        when(playerRepository.findByMatchIdOrderByPlayerOrderAscAsDTO(5)).thenReturn(List.of(dto));
+
+        playerService.notifyPlayersUpdate(5);
+        verify(messagingTemplate).convertAndSend("/topic/players/5", List.of(dto));
+    }
+
+    @Test
+    void testDeleteById() {
+        es.us.dp1.l4_01_24_25.upstream.match.Match match = new es.us.dp1.l4_01_24_25.upstream.match.Match();
+        match.setPlayersNumber(3);
+        player.setMatch(match);
+
+        when(playerRepository.findById(1)).thenReturn(Optional.of(player));
+
+        playerService.deleteById(1);
+
+        assertThat(match.getPlayersNumber()).isEqualTo(2);
+        verify(matchService).save(match);
+        verify(matchService).notifyMatchUpdate(match);
+        verify(playerRepository).deleteById(1);
+    }
+
+    @Test
+    void testSetEnergyToZero_SuccessAndAccessDenied() {
+        es.us.dp1.l4_01_24_25.upstream.match.Match match = new es.us.dp1.l4_01_24_25.upstream.match.Match();
+        match.setActualPlayer(player);
+        player.setMatch(match);
+
+        when(playerRepository.findById(1)).thenReturn(Optional.of(player));
+
+        // Same actual player -> succeeds
+        playerService.setEnergyToZero(1);
+        assertThat(player.getEnergy()).isEqualTo(0);
+
+        // Different actual player -> throws AccessDeniedException
+        Player otherPlayer = new Player();
+        otherPlayer.setId(2);
+        match.setActualPlayer(otherPlayer);
+
+        assertThatThrownBy(() -> playerService.setEnergyToZero(1))
+                .isInstanceOf(es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException.class);
+    }
+
+    @Test
+    void testRegenerateEnergy() {
+        player.setEnergy(1);
+        when(playerRepository.findById(1)).thenReturn(Optional.of(player));
+        PlayerDTO dto = new PlayerDTO();
+        when(playerMapper.toDTO(player)).thenReturn(dto);
+
+        PlayerDTO result = playerService.regenerateEnergy(1);
+
+        assertThat(player.getEnergy()).isEqualTo(5);
+        assertThat(result).isEqualTo(dto);
+        verify(playerRepository).save(player);
+    }
+
+    @Test
+    void testPlayersForChangePhase() {
+        when(playerRepository.findByMatchIdAndAliveTrue(10)).thenReturn(List.of(player));
+        when(salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(1)).thenReturn(List.of(new SMCoordinateDTO(null)));
+
+        List<Player> result = playerService.playersForChangePhase(10);
+        assertThat(result).containsExactly(player);
+    }
+}

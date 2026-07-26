@@ -28,6 +28,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
+import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
+import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
@@ -289,4 +291,77 @@ class MatchTileServiceTest {
 
         verify(matchTileRepository, atLeastOnce()).saveAll(any());
     }
-}
+
+    @Test
+    void testVariousFindMethods() {
+        when(matchTileRepository.findByMatchIdAndCoordinateIsNull(1)).thenReturn(List.of(matchTile));
+        assertThat(matchTileService.findByMatchIdNoCoord(1)).containsExactly(matchTile);
+
+        MatchTileDTO dto = new MatchTileDTO();
+        when(matchTileRepository.findByMatchIdAndCoordinateIsNullAsDTO(1)).thenReturn(List.of(dto));
+        assertThat(matchTileService.findByMatchIdNoCoordAsDTO(1)).containsExactly(dto);
+
+        when(matchTileRepository.findByCoordinate(1, 2)).thenReturn(Optional.of(matchTile));
+        assertThat(matchTileService.findByCoordinate(1, 2)).isEqualTo(matchTile);
+
+        when(matchTileRepository.findByCoordinate(9, 9)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> matchTileService.findByCoordinate(9, 9))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        when(matchTileRepository.findHeronWithCoordFromGame(1)).thenReturn(List.of(matchTile));
+        assertThat(matchTileService.findHeronWithCoordsFromGame(1)).containsExactly(matchTile);
+
+        MTCoordinateDTO mtDto = new MTCoordinateDTO(1, new Coordinate(1, 1));
+        when(matchTileRepository.findByMatchIdNoCoordAsMTCoordinateDTO(1)).thenReturn(List.of(mtDto));
+        assertThat(matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(1)).containsExactly(mtDto);
+
+        when(matchTileRepository.findByMatchIdAsMTCoordinateDTO(1)).thenReturn(List.of(mtDto));
+        assertThat(matchTileService.findByMatchIdAsMTCoordinateDTO(1)).containsExactly(mtDto);
+    }
+
+    @Test
+    void testUpdateEntityFields() {
+        MatchTile newTile = new MatchTile();
+        newTile.setCapacity(4);
+        newTile.setOrientation(2);
+        newTile.setSalmonsNumber(3);
+        Coordinate c = new Coordinate(1, 1);
+        newTile.setCoordinate(c);
+        Tile t = new Tile();
+        newTile.setTile(t);
+        Match m = new Match();
+        newTile.setMatch(m);
+
+        MatchTile result = matchTileService.updateEntityFields(newTile, matchTile);
+
+        assertThat(result.getCapacity()).isEqualTo(4);
+        assertThat(result.getOrientation()).isEqualTo(2);
+        assertThat(result.getSalmonsNumber()).isEqualTo(3);
+        assertThat(result.getCoordinate()).isEqualTo(c);
+        assertThat(result.getTile()).isEqualTo(t);
+        assertThat(result.getMatch()).isEqualTo(m);
+    }
+
+    @Test
+    void testToDTO_NullAndList() {
+        assertThat(matchTileService.toDTO((MatchTile) null)).isNull();
+
+        MatchTileDTO dto = new MatchTileDTO();
+        when(matchTileMapper.toDTOList(List.of(matchTile))).thenReturn(List.of(dto));
+        assertThat(matchTileService.toDTOList(List.of(matchTile))).containsExactly(dto);
+    }
+
+    @Test
+    void shouldSetRockCapacityToTwoWhenTwoOrLessPlayers() {
+        match.setPlayersNumber(2);
+        Tile rockTile = new Tile();
+        rockTile.setType(TileType.ROCK);
+
+        when(tileService.findById(any())).thenReturn(rockTile);
+        when(matchService.findById(1)).thenReturn(match);
+
+        matchTileService.createMultipleMatchTiles(1);
+
+        verify(matchTileRepository, atLeastOnce()).saveAll(any());
+    }
+}

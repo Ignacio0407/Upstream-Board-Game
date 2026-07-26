@@ -110,6 +110,17 @@ class AuthControllerTests {
 	}
 
 	@Test
+	void shouldNotAuthenticateUserWithBadCredentials() throws Exception {
+		when(this.authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+				.thenThrow(new org.springframework.security.authentication.BadCredentialsException("Invalid"));
+
+		mockMvc.perform(post(BASE_URL + "/signin").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginRequest))).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$").value("Bad Credentials!"));
+	}
+
+
+	@Test
 	void shouldValidateToken() throws Exception {
 		when(this.jwtUtils.validateJwtToken(token)).thenReturn(true);
 
