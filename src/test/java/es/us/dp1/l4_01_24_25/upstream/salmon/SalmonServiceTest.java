@@ -1,9 +1,9 @@
 package es.us.dp1.l4_01_24_25.upstream.salmon;
 
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -16,12 +16,8 @@ class SalmonServiceTest {
     @Mock
     private SalmonRepository salmonRepository;
 
+    @InjectMocks
     private SalmonService salmonService;
-
-    @BeforeEach
-    void setUp() {
-        salmonService = new SalmonService(salmonRepository);
-    }
 
     @Test
     void testUpdateEntityFields() {

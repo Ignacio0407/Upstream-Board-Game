@@ -431,7 +431,7 @@ class SalmonMatchServiceTest {
 
                 salmonMatchService.updateCoordinateBatch(1, moves);
 
-                assertThat(myTile.getSalmonsNumber()).isEqualTo(0);
+                assertThat(myTile.getSalmonsNumber()).isZero();
                 verify(matchTileService).saveAll(List.of(myTile));
             }
         }
@@ -458,7 +458,7 @@ class SalmonMatchServiceTest {
 
                 salmonMatchService.updateCoordinateBatch(1, moves);
 
-                assertThat(salmonMatch.getSalmonsNumber()).isEqualTo(0);
+                assertThat(salmonMatch.getSalmonsNumber()).isZero();
                 assertThat(salmonMatch.getCoordinate()).isEqualTo(new Coordinate(1, 2)); 
                 assertThat(player.getEnergy()).isEqualTo(4); 
                 verify(salmonMatchRepository).deleteAll(List.of(salmonMatch));
@@ -665,7 +665,7 @@ class SalmonMatchServiceTest {
         assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(3);
 
         salmonMatch.setCoordinate(new Coordinate(1, 15));
-        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(0);
+        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isZero();
 
         SMCoordinateDTO dto = new SMCoordinateDTO(null);
         when(salmonMatchRepository.findByPlayerIdInSeaAsCoordinateDTO(1)).thenReturn(List.of(dto));

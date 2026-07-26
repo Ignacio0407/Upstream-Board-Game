@@ -39,7 +39,7 @@ public class MatchTile extends BaseEntity {
     @ManyToOne
     Match match;
 
-    public Boolean isFull () {
+    public boolean isFull () {
         if (this.match.getPlayersNumber() > 2 && this.getTile().getType().equals(TileType.ROCK)) return this.getCapacity().equals(this.getSalmonsNumber() -1);
         else return this.getCapacity().equals(this.getSalmonsNumber()); 
     }

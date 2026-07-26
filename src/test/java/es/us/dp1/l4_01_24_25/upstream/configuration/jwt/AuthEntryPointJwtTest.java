@@ -32,7 +32,9 @@ class AuthEntryPointJwtTest {
             @Override
             public boolean isReady() { return true; }
             @Override
-            public void setWriteListener(WriteListener writeListener) {}
+            public void setWriteListener(WriteListener writeListener) {
+                throw new UnsupportedOperationException("Not required for test ServletOutputStream");
+            }
             @Override
             public void write(int b) throws IOException { baos.write(b); }
         };

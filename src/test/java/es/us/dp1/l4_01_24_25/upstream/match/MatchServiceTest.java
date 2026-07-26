@@ -675,9 +675,9 @@ class MatchServiceTest {
         org.springframework.test.util.ReflectionTestUtils.invokeMethod(matchService, "endRound", match);
 
         verify(salmonMatchService).delete(smY0);
-        assertThat(smY1.getCoordinate().y()).isEqualTo(0);
+        assertThat(smY1.getCoordinate().y()).isZero();
         verify(matchTileService).delete(mtY0);
-        assertThat(mtY1.getCoordinate().y()).isEqualTo(0);
+        assertThat(mtY1.getCoordinate().y()).isZero();
         verify(matchService).notifyTilesAndSalmonsByMatchId(1);
     }
 }

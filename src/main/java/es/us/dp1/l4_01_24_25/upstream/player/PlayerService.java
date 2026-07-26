@@ -73,8 +73,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         String currentUsername = authentication.getName();
         // 2. Search player
         User authenticatedUser = this.userService.findUserByName(currentUsername);
-        Player myPlayer = this.findPlayerByUserAndMatch(authenticatedUser.getId(), matchId);
-        return myPlayer;
+        return this.findPlayerByUserAndMatch(authenticatedUser.getId(), matchId);
     }
 
     @Override

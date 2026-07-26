@@ -3,7 +3,6 @@ package es.us.dp1.l4_01_24_25.upstream.userachievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRestController;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

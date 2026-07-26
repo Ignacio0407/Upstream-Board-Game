@@ -1,8 +1,8 @@
 package es.us.dp1.l4_01_24_25.upstream.tile;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -14,12 +14,8 @@ class TileServiceTest {
     @Mock
     private TileRepository tileRepository;
 
+    @InjectMocks
     private TileService tileService;
-
-    @BeforeEach
-    void setUp() {
-        tileService = new TileService(tileRepository);
-    }
 
     @Test
     void testUpdateEntityFields() {
