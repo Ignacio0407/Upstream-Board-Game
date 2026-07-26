@@ -34,7 +34,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
                 <h3>Pick a color:</h3>
                 <div style={styles.buttonContainer}>
                     {colors.map((color) => (
-                        <button key={color}
+                        <button type="button" key={color}
                             style={{
                                 ...styles.colorButton,
                                 backgroundColor: color,
@@ -51,7 +51,7 @@ export default function ColorPickerModal({ onColorSelect , takenColors}:ColorPic
                         </button>
                     ))}
                 </div>
-                <button onClick={handleAccept} style={styles.acceptButton}>
+                <button type="button" onClick={handleAccept} style={styles.acceptButton}>
                     Accept
                 </button>
             </div>

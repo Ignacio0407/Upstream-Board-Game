@@ -42,4 +42,31 @@ describe("PrivateRoute Component", () => {
             expect(screen.getByTestId("login-page")).toBeInTheDocument();
         });
     });
+
+    it("renders Login component when validate returns a message object", async () => {
+        vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("msg-jwt");
+        global.fetch = vi.fn().mockResolvedValue({
+            json: async () => ({ message: "Token expired" }),
+        } as any);
+
+        render(<PrivateRoute><div>Protected Content</div></PrivateRoute>);
+
+        await waitFor(() => {
+            expect(screen.getByTestId("login-page")).toBeInTheDocument();
+        });
+    });
+
+    it("renders Login component and logs error when fetch fails", async () => {
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.mocked(tokenService.getLocalAccessToken).mockReturnValue("fail-jwt");
+        global.fetch = vi.fn().mockRejectedValue(new Error("Network failed"));
+
+        render(<PrivateRoute><div>Protected Content</div></PrivateRoute>);
+
+        await waitFor(() => {
+            expect(screen.getByTestId("login-page")).toBeInTheDocument();
+        });
+        expect(consoleSpy).toHaveBeenCalledWith("Error validating token:", expect.any(Error));
+        consoleSpy.mockRestore();
+    });
 });

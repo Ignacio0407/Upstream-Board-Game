@@ -24,7 +24,7 @@ export default function Logout () {
           <Link className="auth-button" to="/" style={{textDecoration: "none"}}>
             No
           </Link>
-          <button className="auth-button" onClick={() => sendLogoutRequest()}>
+          <button type="button" className="auth-button" onClick={() => sendLogoutRequest()}>
             Yes
           </button>
         </div>

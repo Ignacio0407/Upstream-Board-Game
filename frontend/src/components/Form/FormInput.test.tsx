@@ -139,4 +139,36 @@ describe("FormInput Component", () => {
         const group = container.querySelector(".class-form-group");
         expect(group).toHaveStyle({ width: "47%" });
     });
+
+    it("renders a date input correctly and supports required flag for select, textarea, date", () => {
+        const { container } = render(
+            <FormWrapper>
+                <FormInput tag="Birthdate" name="birthdate" type="date" isRequired={true} register={null as any} errors={{}} />
+                <FormInput tag="RequiredSelect" name="reqSelect" type="select" values={["A"]} isRequired={true} register={null as any} errors={{}} />
+                <FormInput tag="RequiredTextarea" name="reqTextarea" type="textarea" isRequired={true} register={null as any} errors={{}} />
+            </FormWrapper>
+        );
+
+        const dateInput = container.querySelector('input[type="date"]');
+        expect(dateInput).toBeInTheDocument();
+        expect(screen.getByText(/Birthdate \*/i)).toBeInTheDocument();
+    });
+
+    it("displays default error fallback message when error message is not a string", () => {
+        const mockErrors = {
+            username: { message: true, type: "required" }
+        };
+        
+        render(
+            <FormInput 
+                tag="Username" 
+                name="username" 
+                type="text" 
+                register={vi.fn()} 
+                errors={mockErrors as any} 
+            />
+        );
+
+        expect(screen.getByText("This field is invalid")).toBeInTheDocument();
+    });
 });

@@ -73,7 +73,7 @@ export const parseSearchQuery = (query: string): Record<string, string[]> => {
   const filters: Record<string, string[]> = {};
   if (!query.trim()) return filters;
 
-  const regex = /([\p{L}\p{N}_\.-]+)\s*:\s*(?:"([^"]*)"|([^"\s][^\s]*))/gu;
+  const regex = /([\p{L}\p{N}_.-]+)\s*:\s*(?:"([^"]*)"|((?!")\S+))/gu;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(query)) !== null) {
     const attr = m[1].trim();

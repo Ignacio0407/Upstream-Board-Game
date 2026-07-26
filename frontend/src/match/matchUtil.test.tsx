@@ -151,22 +151,22 @@ describe('matchUtil', () => {
         });
 
         it('rethrows the error message in the catch block', async () => {
-            vi.mocked(fetchers.patch).mockRejectedValue(new Error('Catch Error'));
+            vi.mocked(fetchers.patch).mockRejectedValueOnce(new Error('Catch Error'));
             await expect(matchUtil.changephase({ id: 1 } as any, 'jwt', 1)).rejects.toBe('Catch Error');
         });
     });
 
-    describe('passTurn (current behavior, see bug warning)', () => {
-        it('does not make any patch calls synchronously or asynchronously', async () => {
+    describe('passTurn', () => {
+        it('calls patch to update energy and triggers changephase', async () => {
+            vi.mocked(fetchers.patch).mockResolvedValue({ ok: true } as any);
             const mockMatch = { id: 1 };
             const mockPlayer = { id: 5 };
-            matchUtil.passTurn(mockMatch as any, 'jwt', mockPlayer as any);
-            // Wait for a microtask tick to rule out a 'lost' asynchronous call
-            await Promise.resolve();
-            expect(fetchers.patch).not.toHaveBeenCalled();
+            await matchUtil.passTurn(mockMatch as any, 'jwt', mockPlayer as any);
+            expect(fetchers.patch).toHaveBeenCalledWith('/api/v1/players/5/energy', 'jwt');
         });
 
         it('does not throw exceptions when invoked', () => {
+            vi.mocked(fetchers.patch).mockResolvedValue({ ok: true } as any);
             expect(() => matchUtil.passTurn({ id: 1 } as any, 'jwt', { id: 1 } as any)).not.toThrow();
         });
     });
@@ -270,7 +270,7 @@ describe('matchUtil', () => {
 
         it('logs the error to the console if the response is not ok', async () => {
             const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-            vi.mocked(fetchers.patch).mockResolvedValue({ ok: false } as any);
+            vi.mocked(fetchers.patch).mockResolvedValueOnce({ ok: false } as any);
             await matchUtil.handleRotateTile(emptyTile, 'jwt');
             expect(consoleSpy).toHaveBeenCalledWith('Error rotating tile:', expect.any(Error));
             consoleSpy.mockRestore();
@@ -278,7 +278,7 @@ describe('matchUtil', () => {
 
         it('logs the error to the console if patch throws a network exception', async () => {
             const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-            vi.mocked(fetchers.patch).mockRejectedValue(new Error('Rotate Catch'));
+            vi.mocked(fetchers.patch).mockRejectedValueOnce(new Error('Rotate Catch'));
             await matchUtil.handleRotateTile({ id: 1, orientation: 0 } as any, 'jwt');
             expect(consoleSpy).toHaveBeenCalledWith('Error rotating tile:', expect.any(Error));
             consoleSpy.mockRestore();
@@ -436,7 +436,7 @@ describe('matchUtil', () => {
         it('if the batch is saved but changephase fails, retries up to 3 times and recovers on the second attempt', async () => {
             vi.mocked(fetchers.patch)
                 .mockResolvedValueOnce({ ok: true } as any)      // move-batch ok
-                .mockRejectedValueOnce(new Error('net'))          // changephase attempt 1 (inside confirmMovementBatch)
+                .mockRejectedValueOnce(new Error('net'))          // changephase initial attempt (throws to catch)
                 .mockRejectedValueOnce(new Error('net'))          // changephase retry 1
                 .mockResolvedValueOnce({ ok: true } as any);      // changephase retry 2 -> success
 
@@ -457,7 +457,10 @@ describe('matchUtil', () => {
         it('if the batch is saved but changephase fails all 3 retries, alerts of persistent failure', async () => {
             vi.mocked(fetchers.patch)
                 .mockResolvedValueOnce({ ok: true } as any) // move-batch ok
-                .mockRejectedValue(new Error('net'));       // changephase fails always
+                .mockRejectedValueOnce(new Error('net'))    // changephase initial attempt
+                .mockRejectedValueOnce(new Error('net'))    // retry 1
+                .mockRejectedValueOnce(new Error('net'))    // retry 2
+                .mockRejectedValueOnce(new Error('net'));   // retry 3
 
             vi.useFakeTimers();
             const promise = matchUtil.confirmMovementBatch(

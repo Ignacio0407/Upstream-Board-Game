@@ -154,6 +154,23 @@ describe("FormGenerator Component", () => {
         expect(mockNavigate).toHaveBeenCalledWith("/home");
     });
 
+    it("handles the cancel button with empty navigateOnCancel slicing current pathname", () => {
+        vi.mocked(reactRouterDom.useLocation).mockReturnValue({ pathname: "/parent/child" } as any);
+        render(
+            <FormGenerator 
+                fields={mockFields}
+                onSubmit={vi.fn()}
+                cancelButtonActivated={true}
+                defaultValues={mockDefaultValues}
+            />
+        );
+
+        const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+        fireEvent.click(cancelButton);
+
+        expect(mockNavigate).toHaveBeenCalledWith("/parent");
+    });
+
     it("displays the loading text when form is submitting", async () => {
         // Mock onSubmit to be a long-running task
         const mockOnSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 50)));

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { get, patch, put, post, deleteEntity } from './fetchers';
+import { get, patch, put, post, deleteEntity, buildSafeUrl } from './fetchers';
 
 describe('API Fetchers', () => {
   const uri = 'http://localhost:3000/api/test';
@@ -55,5 +55,13 @@ describe('API Fetchers', () => {
   it('deleteEntity performs a DELETE request and appends ID to URI', async () => {
     await deleteEntity(uri, jwt, 42);
     expect(fetchSpy).toHaveBeenCalledWith(`${uri}/42`, expect.objectContaining({ method: 'DELETE' }));
+  });
+
+  it('buildSafeUrl creates a safe URL with or without id', () => {
+    const urlWithId = buildSafeUrl('/api/v1/users/', 42);
+    expect(urlWithId).toBe('http://localhost:3000/api/v1/users/42');
+
+    const urlWithoutId = buildSafeUrl('/api/v1/users');
+    expect(urlWithoutId).toBe('http://localhost:3000/api/v1/users');
   });
 });

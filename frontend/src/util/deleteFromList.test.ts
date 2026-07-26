@@ -67,6 +67,37 @@ describe('deleteFromList', () => {
         });
     });
 
+    it('handles date option filtering items by creationDate', async () => {
+        vi.mocked(globalThis.confirm).mockReturnValue(true);
+        vi.mocked(fetchers.deleteEntity).mockResolvedValue({ status: 204, text: async () => '' } as any);
+        const stateWithDates = [
+            { id: 1, creationDate: 100 },
+            { id: 2, creationDate: 50 },
+            { id: 3, creationDate: 200 }
+        ];
+
+        deleteFromList('/url', 1, [stateWithDates, setState], [alerts, setAlerts], undefined, undefined, { date: 150 });
+
+        await vi.waitFor(() => {
+            expect(setState).toHaveBeenCalled();
+            const result = setState.mock.calls[0][0];
+            expect(result).toEqual([{ id: 2, creationDate: 50 }]);
+        });
+    });
+
+    it('logs error when response text is invalid JSON', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        vi.mocked(globalThis.confirm).mockReturnValue(true);
+        vi.mocked(fetchers.deleteEntity).mockResolvedValue({ status: 200, text: async () => 'not a valid json string' } as any);
+
+        deleteFromList('/url', 1, [state, setState], [alerts, setAlerts]);
+
+        await vi.waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalledWith('Failed to parse response:', expect.any(SyntaxError));
+        });
+        consoleSpy.mockRestore();
+    });
+
     it('alerts error on failure', async () => {
         vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockRejectedValue(new Error('Fail'));

@@ -62,7 +62,34 @@ describe("useFetchState Hook", () => {
         });
     });
 
-    it("handles fetch failure", async () => {
+    it("handles json.message by calling setMessage without setVisible if setVisible is missing", async () => {
+        const mockResponse = { message: "Server Message" };
+        const setMessage = vi.fn();
+        vi.mocked(fetchers.get).mockResolvedValue({
+            ok: true,
+            json: async () => mockResponse,
+        } as Response);
+
+        renderHook(() => useFetchState(null, "/api/test", "fake-jwt", setMessage));
+
+        await waitFor(() => {
+            expect(setMessage).toHaveBeenCalledWith("Server Message");
+        });
+    });
+
+    it("handles fetch failure without setMessage or setVisible callbacks", async () => {
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.mocked(fetchers.get).mockRejectedValue(new Error("Network Fail"));
+
+        renderHook(() => useFetchState(null, "/api/test", "fake-jwt"));
+
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalled();
+        });
+        consoleSpy.mockRestore();
+    });
+
+    it("handles fetch failure with setMessage or setVisible", async () => {
         const setMessage = vi.fn();
         const setVisible = vi.fn();
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});

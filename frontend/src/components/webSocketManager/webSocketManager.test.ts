@@ -276,6 +276,12 @@ describe('WebSocketManager', () => {
     expect((wsManager as any).subscriptions).toHaveLength(0);
   });
 
+  it('does nothing when attempting to remove a non-existent topic', () => {
+    wsManager.addSubscription('existing-topic', () => {});
+    wsManager.removeSubscription('non-existent-topic');
+    expect((wsManager as any).subscriptions).toHaveLength(1);
+  });
+
   it('calls deactivate and safely clears all subscriptions', () => {
     wsManager.initConnection();
     wsManager.addSubscription('topic', () => {});

@@ -16,7 +16,13 @@ describe('TokenService', () => {
         expect(tokenService.getLocalAccessToken()).toBe('aaaa.bbbb.cccc');
     });
 
-    it('returns empty string if no access token', () => {
+    it('returns empty string if no access token or invalid token format', () => {
+        expect(tokenService.getLocalAccessToken()).toBe('');
+
+        localStorage.setItem('jwt', JSON.stringify({ invalid: 'object' }));
+        expect(tokenService.getLocalAccessToken()).toBe('');
+
+        localStorage.setItem('jwt', JSON.stringify('not-a-valid-jwt'));
         expect(tokenService.getLocalAccessToken()).toBe('');
     });
 
