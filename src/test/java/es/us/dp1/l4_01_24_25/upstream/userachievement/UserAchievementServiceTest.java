@@ -139,7 +139,7 @@ public class UserAchievementServiceTest {
     // ── unlockRules ───────────────────────────────────────────────────────────
 
     @Test
-    void shouldUnlockRulesAchievementWhenNotYetUnlocked() throws Exception {
+    void shouldUnlockRulesAchievementWhenNotYetUnlocked() {
         User user = new User(); user.setId(1); user.setName("testUser");
         Achievement a4 = new Achievement(); a4.setId(4);
 

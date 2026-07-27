@@ -25,7 +25,7 @@ public class UserAchievementRestController extends BaseRestController<UserAchiev
     }
 
     @PostMapping("/unlockrules/{username}")
-    public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) throws Exception {
+    public ResponseEntity<UserAchievement> unlockRules(@PathVariable("username") String username) {
         return new ResponseEntity<>(this.userAchievementService.unlockRules(username), HttpStatus.CREATED);
     }
 

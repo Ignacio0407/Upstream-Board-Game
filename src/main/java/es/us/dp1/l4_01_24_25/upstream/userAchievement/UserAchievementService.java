@@ -66,7 +66,7 @@ public class UserAchievementService extends BaseService<UserAchievement,Integer>
     }
 
     @Transactional
-    public UserAchievement unlockRules(String username) throws Exception {
+    public UserAchievement unlockRules(String username) {
         User u = this.userService.findUserByName(username);
         Achievement a = this.achievementService.findById(4);
         UserAchievement ua = new UserAchievement(u, a);
