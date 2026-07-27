@@ -58,7 +58,7 @@ export default function Lobby () {
     }, [players, user.id, match.state]);
 
     const startingGame = async () => {
-        await startGame({matchId: match.id, jwt, setLoading, navigate});
+        await startGame({matchId: match.id, jwt, setLoading});
     };
     
     const endingGame = async () => {

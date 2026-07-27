@@ -2,7 +2,7 @@ import { JSX, useEffect, useState } from 'react';
 import { Button } from 'reactstrap';
 import { useNavigate, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts';
-import { get, patch } from '../util/fetchers.ts';
+import { get } from '../util/fetchers.ts';
 import "../static/css/game/endGame.css";
 import Player from '../interfaces/Player.ts';
 

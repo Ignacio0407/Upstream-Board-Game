@@ -72,7 +72,7 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
     else alert("Now it's salmon moving phase!")
 };
 
-export const handleUpdateTilePosition = async (jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, match:Match, actualPlayerId:number|undefined, myPlayerId:number, matchTilesNoCoordinate?: MatchTile[]) => {
+export async function handleUpdateTilePosition(jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, match:Match, actualPlayerId:number|undefined, myPlayerId:number, matchTilesNoCoordinate?: MatchTile[]) {
     const x = index % GRID_WIDTH;
     const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
     let updateTilePositionResponse;
@@ -186,8 +186,8 @@ export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile)
 
 export type PendingMove = { salmonId: number, x: number, y: number, enterSpawn?: boolean };
 // --- Send batch to backend and manage rollback ---
-export const confirmMovementBatch = async (pendingMoves: PendingMove[], jwt: string, match: Match, 
-    myPlayerId: number, initialState: any, setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void, restoreSnapshot: Function, clearPath: Function) => {
+export async function confirmMovementBatch(pendingMoves: PendingMove[], jwt: string, match: Match, 
+    myPlayerId: number, initialState: any, setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void, restoreSnapshot: Function, clearPath: Function) {
     let moveBatchSuccess = false;
     try {
         const response = await patch(`/api/v1/salmonMatches/move-batch/${match.id}`, jwt, pendingMoves);
@@ -212,6 +212,7 @@ export const confirmMovementBatch = async (pendingMoves: PendingMove[], jwt: str
                     await changephase(match, jwt, myPlayerId);
                     break;
                 } catch (retryError) {
+                    console.warn("Retry changephase failed:", retryError);
                     retries--;
                     if (retries === 0) alert("Persistent network failure. Movement was saved, reload to continue.");
                     else await new Promise(res => setTimeout(res, 1000));

@@ -1,9 +1,9 @@
 import {patch, post} from '../util/fetchers.ts';
 import { NavigateFunction } from 'react-router-dom';
 
-interface startGamePrompts {matchId:number, jwt:string, setLoading:Function, navigate:NavigateFunction};
+interface StartGamePrompts {matchId:number, jwt:string, setLoading:Function};
 
-const startGame = async ({ matchId, jwt, setLoading, navigate }:startGamePrompts) => {
+const startGame = async ({ matchId, jwt, setLoading }:StartGamePrompts) => {
     setLoading(true);
     await patch(`/api/v1/matches/${matchId}/startGame`, jwt);
     await post(`/api/v1/matchTiles/createMatchTiles/${matchId}`, jwt);

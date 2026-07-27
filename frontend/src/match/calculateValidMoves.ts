@@ -9,7 +9,7 @@ export type ValidMove = { x: number, y: number, energyUsed: number, salmonLoss: 
 type EnergyResult = { energyUsed: number, salmonLoss: number };
 type Direction = 'above' | 'left' | 'right';
 
-const calculateMovementEnergy = (
+function calculateMovementEnergy(
     myType: TileType,
     toTravelType: TileType,
     toOri: number,
@@ -18,7 +18,7 @@ const calculateMovementEnergy = (
     toTravelJumpOrientations: number[],
     myBearOrientations: number[],
     myJumpOrientations: number[]
-): EnergyResult => {
+): EnergyResult {
     let energyUsed = 1;
     let salmonLoss = 0;
 
@@ -31,7 +31,11 @@ const calculateMovementEnergy = (
             salmonLoss += (toTravelType === TileType.BEAR ? 2 : 1);
         } else if (toTravelBearHasJump || toTravelHasJump) {
             energyUsed = 2;
-            salmonLoss += (toTravelBearHasJump ? 2 : toTravelHasJump ? 1 : 0);
+            if (toTravelBearHasJump) {
+                salmonLoss += 2;
+            } else if (toTravelHasJump) {
+                salmonLoss += 1;
+            }
         }
     } else if (myType === TileType.JUMP) {
         if (myJumpOrientations.includes(myOri)) {
@@ -41,11 +45,9 @@ const calculateMovementEnergy = (
             energyUsed = 2;
             salmonLoss += (toTravelBearHasJump ? 1 : 0);
         }
-    } else {
-        if (toTravelBearHasJump || toTravelHasJump) {
-            energyUsed = 2;
-            salmonLoss += (toTravelBearHasJump ? 1 : 0);
-        }
+    } else if (toTravelBearHasJump || toTravelHasJump) {
+        energyUsed = 2;
+        salmonLoss += (toTravelBearHasJump ? 1 : 0);
     }
 
     return { energyUsed, salmonLoss };
@@ -97,7 +99,7 @@ const fromSea = (
     for (let targetX = 0; targetX < GRID_WIDTH; targetX++) {
         const targetCell = grid[coordToIndex(targetX, 0)];
         const toTravel = targetCell?.tile;
-        if (!toTravel || !toTravel.tile) continue;
+        if (!toTravel?.tile) continue;
 
         const toTravelType = toTravel.tile.type as TileType;
         const toOri = toTravel.orientation;
@@ -158,14 +160,14 @@ const fromSeaNormal = (
     return { x: targetX, y: 0, energyUsed, salmonLoss, isJump: false };
 };
 
-const fromGridFull = (
+function fromGridFull(
     grid: GridCell[],
     targetX: number, targetY: number,
     dx: number,
     myType: TileType, toTravelType: TileType,
     energy: number,
     playersNumber: number
-): ValidMove | null => {
+): ValidMove | null {
     if (energy < 3) return null;
 
     const landX = targetX + dx;
@@ -184,13 +186,13 @@ const fromGridFull = (
     return { x: landX, y: landY, energyUsed: 3, salmonLoss, isJump: true, jumpedCoords: { x: targetX, y: targetY } };
 };
 
-const fromGrid = (
+function fromGrid(
     direction: Direction,
     targetX: number, targetY: number,
     myType: TileType, toTravelType: TileType,
     toOri: number, myOri: number,
     energy: number
-): ValidMove | null => {
+): ValidMove | null {
     const { energyUsed, salmonLoss: baseLoss } = directionEnergy(direction, myType, toTravelType, toOri, myOri);
     const salmonLoss = baseLoss + (toTravelType === TileType.EAGLE ? 1 : 0);
 
@@ -204,14 +206,14 @@ export const calculateValidMoves = (
     energy: number,
     playersNumber: number
 ): ValidMove[] => {
-    if (!salmon.coordinate || salmon.coordinate.y === null || salmon.coordinate.y === undefined) {
+    if (salmon.coordinate?.y == null) {
         return fromSea(grid, energy, playersNumber);
     }
 
     const { x: myX, y: myY } = salmon.coordinate;
     const myCell = grid[coordToIndex(myX, myY)];
     const myTile = myCell?.tile;
-    if (!myTile || !myTile.tile) return [];
+    if (!myTile?.tile) return [];
 
     const validMoves: ValidMove[] = [];
     const directions: { dx: number, dy: number, type: Direction }[] = [
@@ -230,7 +232,7 @@ export const calculateValidMoves = (
 
         const targetCell = grid[coordToIndex(targetX, targetY)];
         const toTravel = targetCell?.tile;
-        if (!toTravel || !toTravel.tile) return;
+        if (!toTravel?.tile) return;
 
         const myType = myTile.tile.type as TileType;
         const toTravelType = toTravel.tile.type as TileType;

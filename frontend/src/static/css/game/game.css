@@ -12,10 +12,8 @@
     margin-left: 550px;
     margin-top: 50px;
     width: 800px;
-    /*height: 2000px;*/
     height: fit-content;
     border-radius: 10px;
-    /*background-color:  #1e95a2; */
     border: solid;
 }
 
@@ -65,12 +63,10 @@
 }
 
 .grid1-80 {
-  /*height: 80%;*/
   height: auto;
 }
 
 .grid1-100 {
-  /*height: 100%;*/
   height: auto;
 }
 
@@ -78,7 +74,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    /*height: 20%;*/
     height: 400px;
     justify-self: flex-end;
     background-image: url('/images/tiles/sea.webp');
@@ -91,7 +86,6 @@
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-  /*height: 20%;*/
   height: 400px;
   background-color:  #193963;
 }
@@ -101,6 +95,15 @@
   width: 80%;
   object-fit: cover;
   justify-self: center;
+}
+
+button.grid-item.unstyled-button {
+  height: 230px;
+  width: 250px;
+  aspect-ratio: 1/cos(30deg);
+  clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
+  background: #3B8686;
+  display: inline-block; /* Prevents that "display: block" from unstyled-button to break the grid */
 }
 
 .grid-item {
@@ -253,13 +256,38 @@
 
 .pick-the-tile-block {
   position: fixed;
-  bottom: 5vh;  /* Aparece cerca de la parte baja de la pantalla */
+  bottom: 5vh;  /* Appears close to the lower part of the screen */
   left: 2vw;
   cursor: pointer;
   z-index: 1000;
 }
 
-/* AÑADE ESTO AL FINAL DE TU CSS ORIGINAL */
+.unstyled-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  outline: none; /* Optional: Can add a visible focus for visual accesibility */
+  width: 100%;
+  display: block;
+}
+
+.shift-right {
+  margin-left: 8vh;
+}
+
+.move-btn-diagonal {
+  position: absolute;
+  bottom: 3.5vh;
+  left: 12vw;
+  z-index: 10;
+  padding: 0.6vh 0.6vw;
+  border-radius: 8px;
+}
 
 /* ==========================================================================
    Only for tablets (1024px or less)

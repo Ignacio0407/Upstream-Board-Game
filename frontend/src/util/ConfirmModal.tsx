@@ -4,7 +4,7 @@ interface ConfirmModalProps {visible: boolean, setVisible: (visible: boolean) =>
     title?: string, message?: string, confirmText?: string, cancelText?: string }
 
 export default function ConfirmModal({ visible, setVisible, onConfirm, title = "Move salmons",
-    message = "Continue and move salmons or undo moves?", confirmText = "Confirm", cancelText = "Cancel" }: ConfirmModalProps) {
+    message = "Continue and move salmons or undo moves?", confirmText = "Confirm", cancelText = "Cancel" }: Readonly<ConfirmModalProps>) {
     
         const toggle = () => setVisible(!visible);
 
