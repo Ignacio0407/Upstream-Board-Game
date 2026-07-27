@@ -5,7 +5,7 @@ import { JSX } from 'react';
 interface ColorHandlerProps {matchId:number, jwt:string, userId:number, takenColors:string[], onColorChanged:Function, 
     setNewPlayer?:Function};
 
-export default function ColorHandler({ matchId, jwt, userId, takenColors, onColorChanged }:ColorHandlerProps): JSX.Element {
+export default function ColorHandler({ matchId, jwt, userId, takenColors, onColorChanged }:Readonly<ColorHandlerProps>): JSX.Element {
     async function handleColorChange(color:string) {
         try {
             const response = await post(`/api/v1/players/match/${matchId}`, jwt, { color: color, user: userId });

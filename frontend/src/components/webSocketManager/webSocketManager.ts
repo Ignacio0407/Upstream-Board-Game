@@ -44,13 +44,13 @@ type ConnectionEvents = {
 };
 
 class WebSocketManager {
-  private jwt: string;
+  private readonly jwt: string;
   private subscriptions: Subscription<unknown>[] = [];
   public client: Client;
   private activated: boolean;
-  private baseUrl?: string;
-  private events: ConnectionEvents;
-  private useSockJS: boolean;
+  private readonly baseUrl?: string;
+  private readonly events: ConnectionEvents;
+  private readonly useSockJS: boolean;
 
   constructor(jwt: string, options?: { baseUrl?: string; events?: ConnectionEvents; useSockJS?: boolean }) {
     this.jwt = jwt;
@@ -129,7 +129,7 @@ class WebSocketManager {
 
 
   addSubscription<T = unknown>(topic: string, handler: (data: T) => void): void {
-    const existing = this.subscriptions.find((s) => s.topic === topic);
+    const existing = this.subscriptions.some((s) => s.topic === topic);
     if (existing) {
       console.warn(`Subscription for topic "${topic}" already exists`);
       return;

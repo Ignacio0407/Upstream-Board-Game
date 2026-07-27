@@ -18,7 +18,7 @@ describe('startGame', () => {
         vi.mocked(fetchers.patch).mockResolvedValue({ ok: true } as any);
         vi.mocked(fetchers.post).mockResolvedValue({ ok: true } as any);
 
-        await startGame({ matchId, jwt, setLoading, navigate } as any);
+        await startGame({ matchId, jwt, setLoading } as any);
 
         expect(setLoading).toHaveBeenCalledWith(true);
         expect(fetchers.patch).toHaveBeenCalledWith('/api/v1/matches/1/startGame', jwt);

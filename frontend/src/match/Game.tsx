@@ -202,7 +202,7 @@ export default function Game() {
     const handleUndoLastMove = () => {
         setHistory(prevHistory => {
             if (prevHistory.length === 0) return prevHistory;
-            const lastState = prevHistory[prevHistory.length - 1];
+            const lastState = prevHistory.at(-1)!;
             // Restore "father" data
             setSalmons(lastState.salmons.filter(s => s.salmonsNumber > 0));
             setMatchTiles(lastState.matchTiles);
@@ -257,12 +257,12 @@ export default function Game() {
 
         wsManager.addSubscription<MatchTile>(`tiles/rotation/${matchId}`, (updatedTile) => {
             setMatchTilesNoCoordinate(prev => prev.map(tile => tile.id === updatedTile.id ? { ...tile, orientation: updatedTile.orientation } : tile));
-            setSelectedTile(prev => (prev && prev.id === updatedTile.id ? { ...prev, orientation: updatedTile.orientation } : prev));
+            setSelectedTile(prev => (prev?.id === updatedTile.id ? { ...prev, orientation: updatedTile.orientation } : prev));
         });
 
         wsManager.addSubscription(`players/${matchId}`, (updatedPlayers:Player[]) => {
             setPlayers(updatedPlayers);
-            setMyPlayer(updatedPlayers.filter(p => p.userId === user.id)[0]);
+            setMyPlayer(updatedPlayers.find(p => p.userId === user.id) || null);
         });
 
         wsManager.addSubscription<TilesAndSalmons>(`tilesAndSalmons/${matchId}`, ({ matchTiles: updatedTiles, salmonMatches: updatedSalmons }) => {
@@ -348,23 +348,25 @@ export default function Game() {
             )}
             {renderPlayerList(playerList)}
             
-        {matchTilesNoCoordinate.length > 0 && myPlayer &&
-        <div role="button" tabIndex={0} key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'
-            onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
-            onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
+        {matchTilesNoCoordinate.length > 0 && myPlayer && 
+        <div key={matchTilesNoCoordinate[0].id} className='pick-the-tile-block'>
+            {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
+            <h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>
+            <h2>Next tile:</h2>
+            <button type="button" className="unstyled-button shift-right" style={{ width: '150px', display: 'block' }}
+                onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
             >
-                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && <h2>Pick the tile!</h2>}
-                {<h2>Remaining tiles: {matchTilesNoCoordinate.length}</h2>}
-                <h2>Next tile:</h2>
-                {<img role="button" tabIndex={0} 
-                    onClick={() => handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)} // NOSONAR
-                    onKeyDown={(e) => e.key === 'Enter' && handleTileClick(matchTilesNoCoordinate[0], myPlayer, match, setSelectedTile, setSelectedSalmon)}
-                    src={matchTilesNoCoordinate[0].tile.image} alt='' 
-                    style={{width: '150px', transition: 'transform 0.35s ease-in-out', ...getRotationStyle(matchTilesNoCoordinate[0])} }>
-                </img>}
-                {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
-                (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
-                && <button type="button" onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
+                <img src={matchTilesNoCoordinate[0].tile.image} alt='Next tile to pick' 
+                    style={{ 
+                        width: '100%', 
+                        transition: 'transform 0.35s ease-in-out', 
+                        ...getRotationStyle(matchTilesNoCoordinate[0]) 
+                    }} 
+                />
+            </button>
+            {!currentUserIsSpectator && myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES && 
+            (matchTilesNoCoordinate[0].tile.type === TileType.BEAR || matchTilesNoCoordinate[0].tile.type === TileType.JUMP)
+            && <button className='move-btn-diagonal' type="button" onClick={() => handleRotateTile(matchTilesNoCoordinate[0], jwt)}>Rotate Tile</button>}
         </div>
         }
 
@@ -374,10 +376,10 @@ export default function Game() {
                 {[...gridSpawn].reverse().map((salmons:SalmonMatch[], index) => (
                 <div key={index} className="grid-item3">    
                     <div className='salmons-containerSpawn'>
-                    {salmons.map((s, i) => ((s.coordinate.y > 20 && <img key = {i} src = {s.salmon.image} alt=""
+                    {salmons.map((s, i) => ((s.coordinate.y > 20 && <img key={`spawn-${s.id || i}`} src = {s.salmon.image} alt=""
                         style={{                          
-                            filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
-                            border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
+                            filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.find(p => p.id === s.playerId)?.color ?? '')})`,
+                            border: `3px solid ${ColorToRgb(players.find(p => p.id === s.playerId)?.color ?? '')}`,
                             borderRadius: '40px',}}
                         />
                         )
@@ -422,7 +424,7 @@ export default function Game() {
                     }).filter((s): s is SalmonMatch => s !== null);
 
                     return (
-                        <div role="button" tabIndex={0} key={index} className="grid-item" 
+                        <button type="button" key={`grid-${x}-${y}`} className="grid-item unstyled-button" 
                             style={{ 
                                 position: 'relative',
                                 cursor: isValidMove ? 'pointer' : 'default',
@@ -433,11 +435,11 @@ export default function Game() {
                             onClick={() => {
                                 if (match.phase === Phase.TILES) {
                                     handleUpdateTilePosition(jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, match.actualPlayerId, myPlayer.id, matchTilesNoCoordinate); 
-                                }
-                                else if (match.phase === Phase.MOVING) {
+                                } else if (match.phase === Phase.MOVING) {
                                     onGridClickWrapper(index);
                                 }
-                                }}>
+                            }}
+                        >
 
                             {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
 
@@ -448,16 +450,22 @@ export default function Game() {
                                 const rgbColor = playerColor ? ColorToRgb(playerColor) : 'transparent';
                                 
                                 return (
-                                    // NOSONAR
-                                    <img role="button" tabIndex={0} key={`salmon-${index}-${sIndex}`} src={salmon.salmon.image} 
-                                        alt="" className="salmon-img"
-                                        onClick={(e) => { e.stopPropagation(); onSalmonClickWrapper(salmon); }}
+                                    <button type='button' key={`salmon-btn-${x}-${y}-${salmon.id}-${sIndex}`} className="unstyled-button"
                                         style={{
                                             ...position,
+                                            position: 'absolute',
                                             transition: 'transform 0.35s ease-in-out',
-                                            filter: `drop-shadow(0px 0px 3px ${rgbColor})`,
-                                            border: selectedSalmon?.id === salmon.id ? `3px solid white` : `3px solid ${rgbColor}`
-                                        }}/>
+                                            zIndex: 10
+                                        }}
+                                        onClick={(e) => { e.stopPropagation(); onSalmonClickWrapper(salmon);}}
+                                    >
+                                        <img src={salmon.salmon.image} alt="Real salmon" className="salmon-img"
+                                            style={{
+                                                filter: `drop-shadow(0px 0px 3px ${rgbColor})`,
+                                                border: selectedSalmon?.id === salmon.id ? `3px solid white` : `3px solid ${rgbColor}`
+                                            }}
+                                        />
+                                    </button>
                                 );
                             })}
 
@@ -489,7 +497,7 @@ export default function Game() {
                                     -{validMoves.find(m => m.x === x && m.y === y)?.energyUsed}⚡
                                 </div>
                             )}
-                        </div>
+                        </button>
                     );
                 })}
             </div>
@@ -499,14 +507,18 @@ export default function Game() {
             {gridSea.map((salmon:SalmonMatch[], index) => (
                 <div key={index} className="grid-item2">    
                     {salmon.map((s, i) => (
-                        (s.coordinate === null && <img role="button" tabIndex={0} key = {i} src = {s.salmon.image} alt=""
+                        (s.coordinate === null && 
+                        <button key={`sea-salmon-${s.id || i}`} type="button" className="unstyled-button"
                             onClick={() => onSalmonClickWrapper(s)}
-                            onKeyDown={(e) => e.key === 'Enter' && onSalmonClickWrapper(s)}
-                        style={{                          
-                            filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
-                            border: `3px solid ${ColorToRgb(players.filter(p => p.id === s.playerId)[0].color)}`,
-                            borderRadius: '40px',}}
-                        />
+                            style={{ width: 'fit-content', display: 'inline-block' }}
+                        >
+                        <img src = {s.salmon.image} alt="Sea salmon"
+                            style={{                          
+                                filter: `drop-shadow(0px 0px 5px ${ColorToRgb(players.find(p => p.id === s.playerId)?.color ?? '')})`,
+                                border: `3px solid ${ColorToRgb(players.find(p => p.id === s.playerId)?.color ?? '')}`,
+                                borderRadius: '40px',}}
+                            />
+                        </button>
                         )
                     ))}
                 </div>

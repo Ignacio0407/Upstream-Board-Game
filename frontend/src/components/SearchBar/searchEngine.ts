@@ -73,7 +73,7 @@ export const parseSearchQuery = (query: string): Record<string, string[]> => {
   const filters: Record<string, string[]> = {};
   if (!query.trim()) return filters;
 
-  const regex = /([\p{L}\p{N}_.-]+)\s*:\s*(?:"([^"]*)"|((?!")\S+))/gu;
+  const regex = /([\p{L}\p{N}_.-]+)\s*:\s*(?:"([^"]*)"|([^\s"]\S*))/gu;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(query)) !== null) {
     const attr = m[1].trim();
@@ -128,8 +128,8 @@ export const searchData = <T,>(
 
 // LRU cache
 export class LRUCache<K, V> {
-  private map = new Map<K, V>();
-  constructor(private capacity = 200) {}
+  private readonly map = new Map<K, V>();
+  constructor(private readonly capacity = 200) {}
 
   get(key: K): V | undefined {
     if (!this.map.has(key)) return undefined;
