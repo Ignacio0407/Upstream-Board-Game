@@ -24,7 +24,7 @@ class UserAchievementRestControllerTest {
     private UserAchievementRestController controller;
 
     @Test
-    void testUnlockRules() throws Exception {
+    void testUnlockRules() {
         UserAchievement ua = new UserAchievement();
         ua.setId(1);
 
