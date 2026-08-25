@@ -53,7 +53,7 @@ import es.us.dp1.l4_01_24_25.upstream.configuration.jwt.JwtUtils;
 import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsServiceImpl;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 
-public class WebSocketSecurityTests {
+class WebSocketSecurityTests {
 
     private JwtUtils jwtUtils;
     private UserDetailsServiceImpl userDetailsService;
@@ -271,5 +271,5 @@ public class WebSocketSecurityTests {
         // Next send should reset counter and succeed
         assertThatCode(() -> interceptor.preSend(msg, null)).doesNotThrowAnyException();
     }
-}
 
+}

@@ -26,7 +26,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+class UserControllerTest {
 
     private static final String BASE_URL = "/api/v1/users";
 

@@ -52,7 +52,7 @@ import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestRepository;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestService;
 
 @ExtendWith(MockitoExtension.class)
-public class BaseServiceTest {
+class BaseServiceTest {
     
     @Mock
     private TestRepository repository;

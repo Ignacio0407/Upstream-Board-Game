@@ -90,4 +90,5 @@ class MatchTileMapperTest {
         when(matchService.findById(5)).thenReturn(match);
         assertEquals(match, mapper.mapMatch(5));
     }
+
 }

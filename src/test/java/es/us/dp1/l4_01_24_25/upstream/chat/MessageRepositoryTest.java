@@ -19,7 +19,7 @@ import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
 @DataJpaTest
-public class MessageRepositoryTest {
+class MessageRepositoryTest {
 
     @Autowired
     private TestEntityManager em;

@@ -23,7 +23,7 @@ import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private String ADMIN = Authority.ADMIN.name();
+    private final String admin = Authority.ADMIN.name();
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http, AuthEntryPointJwt unauthorizedHandler) throws Exception {
@@ -31,8 +31,8 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
-            .exceptionHandling((exceptionHandling) -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+            .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
             .requestMatchers(AntPathRequestMatcher.antMatcher("/")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/oups")).permitAll()
@@ -56,8 +56,8 @@ public class SecurityConfiguration {
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/matches/**")).authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/salmons")).authenticated()
 
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/users/**")).hasAuthority(ADMIN)
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements/**")).hasAuthority(ADMIN)
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/users/**")).hasAuthority(admin)
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/achievements/**")).hasAuthority(admin)
 
             .anyRequest().authenticated()
         )

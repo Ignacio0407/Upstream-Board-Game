@@ -5,8 +5,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -97,11 +98,11 @@ class AuthControllerTests {
 
 	@Test
 	void shouldAuthenticateUser() throws Exception {
-		Authentication auth = Mockito.mock(Authentication.class);
+		Authentication auth = mock(Authentication.class);
 
 		when(this.jwtUtils.generateJwtToken(any(Authentication.class))).thenReturn(token);
 		when(this.authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(auth);
-		Mockito.doReturn(userDetails).when(auth).getPrincipal();
+		doReturn(userDetails).when(auth).getPrincipal();
 
 		mockMvc.perform(post(BASE_URL + "/signin").with(csrf()).contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(loginRequest))).andExpect(status().isOk())

@@ -20,7 +20,7 @@ import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
 @DataJpaTest
-public class MatchTileRepositoryTest {
+class MatchTileRepositoryTest {
 
     @Autowired
     private TestEntityManager em;

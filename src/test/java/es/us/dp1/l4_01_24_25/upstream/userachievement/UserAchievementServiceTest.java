@@ -30,7 +30,7 @@ import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @ExtendWith(MockitoExtension.class)
-public class UserAchievementServiceTest {
+class UserAchievementServiceTest {
 
     @Mock private UserAchievementRepository userAchievementRepository;
     @Mock private UserService userService;

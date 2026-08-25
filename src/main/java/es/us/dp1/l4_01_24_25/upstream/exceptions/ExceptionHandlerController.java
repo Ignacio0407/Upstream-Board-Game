@@ -69,7 +69,7 @@ public class ExceptionHandlerController {
             WebRequest request) {
         Map<String, Object> fieldError = new HashMap<>();
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-        fieldErrors.stream().forEach(error -> fieldError.put(error.getField(), error.getDefaultMessage()));
+        fieldErrors.forEach(error -> fieldError.put(error.getField(), error.getDefaultMessage()));
         ErrorMessage message = new ErrorMessage(HttpStatus.BAD_REQUEST.value(), new Date(), fieldError.toString(),
                 request.getDescription(false));
 

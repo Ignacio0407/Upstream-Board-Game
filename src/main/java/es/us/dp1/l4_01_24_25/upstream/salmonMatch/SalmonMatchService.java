@@ -176,8 +176,7 @@ public class SalmonMatchService extends BaseServiceWithDTO<SalmonMatch, SalmonMa
 
     private MatchTile tileFullNull(SalmonMatch salmonMatch, List<MatchTile> matchTiles, Coordinate newCoordinate) {
         Coordinate newCoordinate2 = new Coordinate(newCoordinate.x(), newCoordinate.y()+1);
-        MatchTile toTravel2 = matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).findFirst().orElseThrow(() -> new NotValidMoveException("No tile exists at coordinate " + newCoordinate2));
-        return toTravel2;
+        return matchTiles.stream().filter(mT -> mT.getCoordinate() != null && mT.getCoordinate().equals(newCoordinate2)).findFirst().orElseThrow(() -> new NotValidMoveException("No tile exists at coordinate " + newCoordinate2));
     }
 
     private MatchTile handleTileFull(Coordinate newCoordinate, SalmonMatch salmonMatch, MatchTile myTile, 
