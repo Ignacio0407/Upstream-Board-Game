@@ -221,7 +221,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }
 
     private void noMoreTilesToPlaceRechargeEnergy (List<Player> players, Match match) {
-        players.stream().forEach(p -> p.setEnergy(5));
+        players.forEach(p -> p.setEnergy(5));
         this.playerService.saveAll(players);
         match.setPhase(Phase.MOVING);
         match.setActualPlayer(match.getInitialPlayer());
@@ -236,11 +236,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             List<SalmonMatch> salmonMatchesInSpawn = this.salmonMatchService.findFromGameInSpawn(match.getId());
             if(!salmonMatchesInSpawn.isEmpty() && salmonMatchesInSpawn != null) {
                 List<SalmonMatch> salmonMatchesInSpawnExceptLast = salmonMatchesInSpawn.stream().filter(s -> s.getCoordinate().y() < 25).toList();
-                salmonMatchesInSpawnExceptLast.stream().forEach(s -> s.setCoordinate(new Coordinate(s.getCoordinate().x(), s.getCoordinate().y() + 1)));
+                salmonMatchesInSpawnExceptLast.forEach(s -> s.setCoordinate(new Coordinate(s.getCoordinate().x(), s.getCoordinate().y() + 1)));
                 this.salmonMatchService.saveAll(salmonMatchesInSpawnExceptLast);
                 this.salmonMatchService.notifySalmonMatchSpawnUpdate(salmonMatchesInSpawnExceptLast);
             }
-            players.stream().forEach(p -> p.setEnergy(5));
+            players.forEach(p -> p.setEnergy(5));
             this.playerService.saveAll(players);
             match.setRound(match.getRound()+1);
         }
@@ -255,11 +255,11 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         Phase phase = match.getPhase();
         List<MTCoordinateDTO> mtNoC = new ArrayList<>();
         if (match.getRound() <= 6) mtNoC = this.matchTileService.findByMatchIdNoCoordAsMTCoordinateDTO(matchId);
-        List<Player> players = this.playerService.playersForChangePhase(matchId);;
-        if (mtNoC.size() == 0 && phase == Phase.TILES) {
+        List<Player> players = this.playerService.playersForChangePhase(matchId);
+        if (mtNoC.isEmpty() && phase == Phase.TILES) {
             this.noMoreTilesToPlaceRechargeEnergy(players, match);
         }
-        else if (mtNoC.size() == 0) {
+        else if (mtNoC.isEmpty()) {
             this.noMoreTilesToPlacePlayers(match, player, players);
         }
         else if (phase.equals(Phase.TILES)) {
@@ -329,7 +329,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         if (round == 2) {
             this.roundEquals2(salmonMatches, players);
         }
-        else if (round > 7 && mtNoc.size() == 0) {
+        else if (round > 7 && mtNoc.isEmpty()) {
             this.noMoreTilesToPlace(round, salmonMatches, players, mt);
         }
         else if (round>2 && tilesPerRound.contains(mtNoc.size()) && match.getPhase() == Phase.TILES) {
@@ -341,7 +341,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     public MatchDTO finalScore(Integer id) {
         List<Player> players = this.playerService.findPlayersByMatch(id);
         Match match = this.findById(id);
-        if (match.getFinalScoreCalculated() == true) {
+        if (Boolean.TRUE.equals(match.getFinalScoreCalculated())) {
             throw new ConflictException("Final score for this match has already been calculated");
         }
         this.calculateFinalScore(players);

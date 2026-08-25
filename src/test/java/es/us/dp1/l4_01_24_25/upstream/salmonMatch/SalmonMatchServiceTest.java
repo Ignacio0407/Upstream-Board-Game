@@ -33,6 +33,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
 import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
+import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
@@ -513,7 +514,7 @@ class SalmonMatchServiceTest {
 
                 salmonMatchService.updateCoordinateBatch(1, moves);
 
-                assertThat(player.getEnergy()).isEqualTo(0);
+                assertThat(player.getEnergy()).isZero();
                 assertThat(heronVictim.getSalmonsNumber()).isEqualTo(1); 
             }
 
@@ -709,4 +710,5 @@ class SalmonMatchServiceTest {
         salmonMatchService.updateCoordinateBatch(1, List.of());
         verifyNoInteractions(playerService);
     }
-}
+
+}

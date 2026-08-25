@@ -237,7 +237,7 @@ class PlayerServiceTest {
         playerService.setPlayerDead(player);
 
         assertThat(player.getAlive()).isFalse();
-        assertThat(player.getEnergy()).isEqualTo(0);
+        assertThat(player.getEnergy()).isZero();
         assertThat(player.getPlayerOrder()).isEqualTo(10);
         verify(playerRepository).save(player);
     }
@@ -251,7 +251,7 @@ class PlayerServiceTest {
 
         playerService.setPlayerNoEnergy(player);
 
-        assertThat(player.getEnergy()).isEqualTo(0);
+        assertThat(player.getEnergy()).isZero();
         verify(playerRepository).save(player);
     }
 
@@ -269,7 +269,7 @@ class PlayerServiceTest {
         playerService.checkPlayersDeadOrFinished(List.of(player));
 
         assertThat(player.getAlive()).isFalse();
-        assertThat(player.getEnergy()).isEqualTo(0);
+        assertThat(player.getEnergy()).isZero();
     }
 
     @Test
@@ -284,7 +284,7 @@ class PlayerServiceTest {
 
         playerService.checkPlayersDeadOrFinished(List.of(player));
 
-        assertThat(player.getEnergy()).isEqualTo(0);
+        assertThat(player.getEnergy()).isZero();
         assertThat(player.getAlive()).isTrue();
     }
 
@@ -414,4 +414,5 @@ class PlayerServiceTest {
         List<Player> result = playerService.playersForChangePhase(10);
         assertThat(result).containsExactly(player);
     }
-}
+
+}

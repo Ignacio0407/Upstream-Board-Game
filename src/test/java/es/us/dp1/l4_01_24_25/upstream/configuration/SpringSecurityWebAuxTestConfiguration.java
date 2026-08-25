@@ -12,7 +12,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import es.us.dp1.l4_01_24_25.upstream.configuration.services.UserDetailsImpl;
 
 @TestConfiguration
-public class SpringSecurityWebAuxTestConfiguration {
+class SpringSecurityWebAuxTestConfiguration {
 
     @Bean
     @Primary

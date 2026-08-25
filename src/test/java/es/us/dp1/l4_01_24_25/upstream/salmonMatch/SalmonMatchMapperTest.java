@@ -109,4 +109,5 @@ class SalmonMatchMapperTest {
         when(matchService.findById(3)).thenReturn(m);
         assertEquals(m, mapper.mapMatch(3));
     }
+
 }

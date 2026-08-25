@@ -53,7 +53,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.dummy.TestController;
 
 @ExtendWith(MockitoExtension.class)
-public class BaseRestControllerTest {
+class BaseRestControllerTest {
 
     @Mock
     private BaseService<TestEntity, Integer> service;

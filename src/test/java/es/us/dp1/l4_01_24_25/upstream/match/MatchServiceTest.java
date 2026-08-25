@@ -41,6 +41,7 @@ import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
 import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
@@ -239,7 +240,7 @@ class MatchServiceTest {
             // State verification
             assertThat(match.getActualPlayer()).isEqualTo(player2);
             assertThat(match.getPhase()).isEqualTo(Phase.TILES);
-            assertThat(match.getRound()).isEqualTo(0);
+            assertThat(match.getRound()).isZero();
         }
 
         @Test
@@ -501,7 +502,7 @@ class MatchServiceTest {
 
             // player1 = 5+2=7, player2 = 1+1=2 → user1 wins
             assertThat(user1.getVictories()).isEqualTo(1);
-            assertThat(user2.getVictories()).isEqualTo(0);
+            assertThat(user2.getVictories()).isZero();
         }
 
         @Test
@@ -680,6 +681,5 @@ class MatchServiceTest {
         assertThat(mtY1.getCoordinate().y()).isZero();
         verify(matchService).notifyTilesAndSalmonsByMatchId(1);
     }
+
 }
-
-

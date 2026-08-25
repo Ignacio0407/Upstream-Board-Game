@@ -24,7 +24,7 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -198,4 +198,4 @@ public class UserServiceTest {
 
         assertThat(userService.findAllByAuthority(Authority.PLAYER)).containsExactly(player1);
     }
-}
+}

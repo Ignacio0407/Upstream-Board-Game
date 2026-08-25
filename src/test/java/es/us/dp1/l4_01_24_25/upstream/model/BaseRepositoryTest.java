@@ -47,7 +47,7 @@ import es.us.dp1.l4_01_24_25.upstream.model.dummy.ConcreteTestRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class BaseRepositoryTest {
+class BaseRepositoryTest {
 
     @Autowired
     private ConcreteTestRepository repository;

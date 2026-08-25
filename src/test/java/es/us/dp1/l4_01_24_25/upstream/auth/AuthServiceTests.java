@@ -18,7 +18,7 @@ import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthServiceTests {
+class AuthServiceTests {
 
 	@Mock
 	private PasswordEncoder encoder;

@@ -173,12 +173,8 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
 
     // 🛡️ Payload Validation. Prevents malicious JSON, huge payloads and XSS if it is later resent to clients
     private void validatePayload(Message<?> message) {
-        Object payload = message.getPayload();
-        if (payload instanceof byte[]) {
-            byte[] data = (byte[]) payload;
-            if (data.length > 64 * 1024) {
-                throw new MessageDeliveryException(message, "Invalid payload");
-            }
+        if (message.getPayload() instanceof byte[] data && data.length > 64 * 1024) {
+            throw new MessageDeliveryException(message, "Invalid payload");
         }
     }
 
