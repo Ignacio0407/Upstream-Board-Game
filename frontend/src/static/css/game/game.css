@@ -9,57 +9,56 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    margin-left: 550px;
-    margin-top: 50px;
-    width: 800px;
+    /* Converted margins based on 1920x1080 (15.6" screen) */
+    margin-left: 28.6vw; /* 550px / 19.2 */
+    margin-top: 4.6vh;   /* 50px / 10.8 */
+    width: 74vh;         /* 800px / 10.8 - Using vh for width keeps board aspect ratio intact */
     height: fit-content;
-    border-radius: 10px;
+    border-radius: 1vh;
     border: solid;
 }
 
 .game-title {
   position: absolute;
-  margin-bottom: 10px;
-  margin-top: 20px;
-  font-size: 30px;
+  margin-bottom: 1vh;
+  margin-top: 1.85vh; /* 20px */
+  font-size: 2.8vh; /* 30px */
 }
 
 .game-name {
-  margin-left: 1208px;
+  margin-left: 62.9vw; /* 1208px / 19.2 */
 }
 
 .game-round {
-  margin-left: 552px;
+  margin-left: 28.7vw; /* 552px / 19.2 */
 }
 
 .game-phase {
-  margin-left: 830px;
+  margin-left: 43.2vw; /* 830px / 19.2 */
 }
 
 .game-turn {
-  margin-left: 1700px;
+  margin-left: 88.5vw; /* 1700px / 19.2 */
 }
 
 .salmon-img {
-  width: 80px;
+  width: 7.4vh; /* 80px */
   position: absolute;
   transition: all 0.3s ease-in-out;
   z-index: 2;
   cursor: pointer;
-  border-radius: 40px;
+  border-radius: 3.7vh; /* 40px */
 }
 
 .grid1 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  /* Recrea matemáticamente el espacio exacto que tenías antes: */
-  grid-template-rows: repeat(6, 260px); 
+  grid-template-rows: repeat(6, 24vh); /* 260px / 10.8 */
   
   background-color: #3A6B76;
-  padding-left: 10px;
-  padding-right: 10px;
-  /* ARREGLO: 120px para contener el transform de los hexágonos + 20px de margen visual */
-  padding-bottom: 140px; 
+  padding-left: 1vh;
+  padding-right: 1vh;
+  padding-bottom: 13vh; /* 140px / 10.8 */
 }
 
 .grid1-80 {
@@ -74,7 +73,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
-    height: 400px;
+    height: 37vh; /* 400px / 10.8 */
     justify-self: flex-end;
     background-image: url('/images/tiles/sea.webp');
     background-position: center;
@@ -86,7 +85,7 @@
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-  height: 400px;
+  height: 37vh; /* 400px / 10.8 */
   background-color:  #193963;
 }
 
@@ -98,8 +97,8 @@
 }
 
 button.grid-item.unstyled-button {
-  height: 230px;
-  width: 250px;
+  height: 21.3vh; /* 230px / 10.8 */
+  width: 23.1vh;  /* 250px / 10.8 */
   aspect-ratio: 1/cos(30deg);
   clip-path: polygon(50% -50%, 100% 50%, 50% 150%, 0 50%);
   background: #3B8686;
@@ -107,22 +106,40 @@ button.grid-item.unstyled-button {
 }
 
 .grid-item {
-  height: 230px;
-  width: 250px;
+  height: 21.3vh; /* 230px / 10.8 */
+  width: 23.1vh;  /* 250px / 10.8 */
   aspect-ratio: 1/cos(30deg);
   clip-path: polygon(50% -50%,100% 50%,50% 150%,0 50%);
   background: #3B8686;
   }
 
 .grid-item:nth-child(3n + 2){
-  transform: translateY(5px)
+  transform: translateY(0.46vh) /* 5px / 10.8 */
 }
 
 .grid-item:nth-child(3n + 1) {
-  transform: translateY(120px);
+  transform: translateY(11.1vh); /* 120px / 10.8 */
 }
 .grid-item:nth-child(3n + 3) {
-  transform: translateY(120px);
+  transform: translateY(11.1vh); /* 120px / 10.8 */
+}
+
+.grid-item-content {
+  display: flex; /* Uses flexbox to center elements. */
+  justify-content: center; /* Centers horizontally. */
+  align-items: center; /* Centers vertically. */
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Ensures no content leaks outside the visual shape. */
+}
+
+/* Ensure images inside the content container scale correctly without distortion. */
+.grid-item-content img:not(.salmon-img) {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain; /* Ensures aspect ratio is maintained. */
 }
 
 .grid-item2 {
@@ -131,9 +148,9 @@ button.grid-item.unstyled-button {
     display: grid;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    border-radius: 5px;
-    margin-top: 10px;
+    font-size: 1.6vh; /* 18px / 10.8 */
+    border-radius: 0.5vh;
+    margin-top: 1vh;
 }
 
 .grid-item3 {
@@ -141,44 +158,44 @@ button.grid-item.unstyled-button {
   padding: 0px;
   display: flex;
   flex-direction: row;
-  align-items: center; /* Centra los elementos verticalmente */
-  justify-content: space-between; /* Espacia los elementos: uno al centro y otro a la derecha */
-  font-size: 18px;
-  border-radius: 5px;
-  margin-top: 10px;
+  align-items: center; /* Centers elements vertically */
+  justify-content: space-between;
+  font-size: 1.6vh; /* 18px / 10.8 */
+  border-radius: 0.5vh;
+  margin-top: 1vh;
   border: solid #2a554f;
   height: auto;
-  position: relative; /* Necesario para posicionar `.desove-points` */
+  position: relative;
 }
 
 .desove-points {
-  position: absolute; /* Permite posicionarlo respecto a `.grid-item3` */
-  right: 10px; /* Pegado al borde derecho */
-  margin-right: 0; /* Sin margen adicional */
-  top: 50%; /* Centra verticalmente */
-  transform: translateY(-50%); /* Ajusta el centro */
-  font-size: 30px;
+  position: absolute;
+  right: 1vh;
+  margin-right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.8vh; /* 30px / 10.8 */
 }
 
 .salmons-containerSpawn{
-  flex: 1; /* Ocupa el espacio restante en el centro */
+  flex: 1; /* Ocupies the available space in the center */
   display: flex;
-  justify-content: center; /* Centra horizontalmente el contenido interno */
-  align-items: center; /* Centra verticalmente el contenido interno */
+  justify-content: center; /* Centers internal content horizontally */
+  align-items: center; /* Centers internal content vertically */
 }
 
 
 .grid-item2 img {
-  width: 80px; 
+  width: 7.4vh; /* 80px / 10.8 */
   height: auto;
-  margin: 2px; 
+  margin: 0.2vh; 
   transition: transform 0.2s ease-in-out;
 }
 
 .grid-item3 img {
-  width: 50px; 
-  height: 50px;
-  margin: 2px; 
+  width: 4.6vh; /* 50px / 10.8 */
+  height: 4.6vh;
+  margin: 0.2vh; 
   transition: transform 0.2s ease-in-out;
 }
 
@@ -189,25 +206,25 @@ button.grid-item.unstyled-button {
 
 .grid-item2 span {
   position: relative;
-  bottom: 5px;
-  font-size: 12px;
+  bottom: 0.46vh; /* 5px / 10.8 */
+  font-size: 1.1vh; /* 12px / 10.8 */
   color: #333;
 }
 
 .users-table {
   position: fixed;
-  top: 10vh;    /* Ajusta según prefieras */
+  top: 10vh;
   left: 0vw;
-  width: 50vw;  /* O lo que necesites */
-  max-width: 500px;
-  z-index: 1000; /* Para que no lo tape nada */
+  width: 50vw;
+  max-width: 26vw; /* 500px / 19.2 */
+  z-index: 1000;
 }
 
 .table-row {
     background-color: white;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 1vh;
     text-align: center;
     border-top: 1px solid black;
 }
@@ -216,7 +233,7 @@ button.grid-item.unstyled-button {
     background-color: white;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 1vh;
     text-align: center;
     border-top: 1px solid black;
 }
@@ -224,7 +241,7 @@ button.grid-item.unstyled-button {
 .tiles-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center; /* Centra las casillas en el contenedor */
+    justify-content: center;
     /* 
     padding: 10px;
     align-items: flex-end;
@@ -233,9 +250,9 @@ button.grid-item.unstyled-button {
 
 .tile-image {
   position: relative;
-  bottom: -850px; /* Ajusta la distancia desde la parte inferior de la página */
-  right: 20px; /* Ajusta la distancia desde el lado derecho de la página */
-  width: 150px; /* Tamaño de la imagen */
+  bottom: -78vh;
+  right: 1vw;
+  width: 14vh;
 }
 
 .table-row {
@@ -286,7 +303,7 @@ button.grid-item.unstyled-button {
   left: 12vw;
   z-index: 10;
   padding: 0.6vh 0.6vw;
-  border-radius: 8px;
+  border-radius: 0.8vh; /* 8px / 10.8 */
 }
 
 /* ==========================================================================
@@ -296,44 +313,47 @@ button.grid-item.unstyled-button {
     
     /* 1. Extra space at the bottom for scroll */
     .gamePage-container {
-        padding-bottom: 300px !important; 
+        padding-bottom: 28vh !important; /* 300px / 10.8 */
     }
 
     /* 2. The table at the top, with MAXIMUM HEIGHT and internal scroll for 5 players */
     .users-table {
         position: absolute !important;
-        top: 15px !important; 
+        top: 1.5vh !important; /* 15px / 10.8 */
         left: 50% !important;
         transform: translateX(-50%) !important;
         width: 90vw !important;
-        max-width: 600px !important;
-        max-height: 220px !important; 
+        max-width: 60vw !important; /* 600px / 10.8 - Used vw for better mobile adaptation */
+        max-height: 20.3vh !important; /* 220px / 10.8 */
         overflow-y: auto !important;  
         background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        border-radius: 1vh;
+        box-shadow: 0 0.4vh 1vh rgba(0,0,0,0.5); /* Converted 0 4px 10px */
     }
 
     /* 3. The board starts below the titles (at 300px from the top) */
     .game-container {
-        margin-left: calc((100vw - 800px) / 2) !important;
-        margin-top: 300px !important; 
+        /* Centering the 74vh board within the 100vw width */
+        margin-left: calc((100vw - 74vh) / 2) !important;
+        margin-top: 27.7vh !important; /* 300px / 10.8 */
     }
 
     /* 4. We place the titles right in the gap between the table and the board (at 260px) */
     .game-title {
         margin-top: 0 !important;
-        top: 260px !important;
+        top: 24vh !important; /* 260px / 10.8 */
     }
     
     .game-name { 
-        margin-left: calc((100vw - 800px) / 2) !important; 
+        margin-left: calc((100vw - 74vh) / 2) !important; 
     }
     .game-round { 
-        margin-left: calc(((100vw - 800px) / 2) + 260px) !important; 
+        /* 260px offset converted to vw approximation for layout consistency */
+        margin-left: calc(((100vw - 74vh) / 2) + 24vw) !important; 
     }
     .game-phase { 
-        margin-left: calc(((100vw - 800px) / 2) + 480px) !important; 
+        /* 480px offset converted */
+        margin-left: calc(((100vw - 74vh) / 2) + 44vw) !important; 
     }
     
     h1.game-turn { display: none; } 
@@ -342,22 +362,22 @@ button.grid-item.unstyled-button {
     /* 5. Confirm/Undo Buttons (Fixing stretching) */
     .move-your-salmons {
         top: auto !important; /* MAGIA: Esto anula el top:260px de .game-title para que no se estire */
-        left: 10px !important;
-        bottom: 10px !important;
+        left: 1vw !important; /* 10px */
+        bottom: 1vh !important; /* 10px */
         margin-left: 0 !important;
         background: rgba(255, 255, 255, 0.9) !important;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 1vh !important;
+        border-radius: 1vh !important;
         z-index: 1000;
     }
 
     /* 6. The tile block: Transparent and traversable */
     .pick-the-tile-block {
         left: auto !important;
-        right: 10px !important;
-        bottom: 10px !important;
-        padding: 15px;
-        border-radius: 10px;
+        right: 1vw !important; /* 10px */
+        bottom: 1vh !important; /* 10px */
+        padding: 1.5vh !important; /* 15px */
+        border-radius: 1vh !important;
         z-index: 1000;
         background: rgba(255, 255, 255, 0.3) !important; 
         pointer-events: none !important; 
@@ -369,3 +389,4 @@ button.grid-item.unstyled-button {
         pointer-events: auto !important; 
     }
 }
+
