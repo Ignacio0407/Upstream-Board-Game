@@ -232,71 +232,72 @@ export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, histo
         ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch});
 };
 
-export const calculateSalmonPosition = (index:number, totalSalmons:number) => {
-  const tileWidth = 250;
-  const tileHeight = 217;
-  const salmonWidth = 80;
-  const salmonHeight = 77;
+export const calculateSalmonPosition = (index: number, totalSalmons: number) => {
+  // We keep the original pixel values to act as our reference proportions
+  const refTileWidth = 250;
+  const refTileHeight = 217;
+  const refSalmonWidth = 80;
+  const refSalmonHeight = 77;
 
-  // Center the hexagonous (adjusted to center the salmon)
-  const centerX = tileWidth / 2 - salmonWidth / 2;
-  const centerY = tileHeight / 2 - salmonHeight / 2;
+  // Center of the hexagon (adjusted to center the salmon)
+  const centerX = refTileWidth / 2 - refSalmonWidth / 2;
+  const centerY = refTileHeight / 2 - refSalmonHeight / 2;
 
-  // Radius from hexagonous center to salmons
+  // Radius from hexagon center to salmons
   const radius = 60;
 
+  let x: number, y: number;
+
   if (totalSalmons === 1) {
-    return {
-      left: `${centerX}px`,
-      top: `${centerY}px`
-    };
-  }
+    x = centerX;
+    y = centerY;
+  } else {
+    let angle = 0;
 
-  // For 2 or more, use different figures
-  let angle = 0;
-  let x:number, y:number;
+    switch (totalSalmons) {
+      case 2: {
+        // 2 salmons: one smoothly to the left, the other to the right, in the vertical center
+        const offset = 40; // horizontal separation
+        x = refTileWidth / 2 + (index === 0 ? -offset : +offset) - refSalmonWidth / 2;
+        y = refTileHeight / 2 - refSalmonHeight / 2;
+        break;
+      }
 
-  switch (totalSalmons) {
-    case 2: {
-      // 2 salmons: one smoothly to the left, the other to the right, in the vertical center
-      const offset = 40; // horizontal separation
-      x = tileWidth / 2 + (index === 0 ? -offset : +offset) - salmonWidth / 2;
-      y = tileHeight / 2 - salmonHeight / 2;
-      break;
-    }
+      case 3: {
+        // Triangle: angles 0°, 120°, 240° (starting from the top)
+        angle = (index * 2 * Math.PI) / 3 - Math.PI / 2; // -PI/2 to start from the top
+        x = refTileWidth / 2 + radius * Math.cos(angle) - refSalmonWidth / 2;
+        y = refTileHeight / 2 + radius * Math.sin(angle) - refSalmonHeight / 2;
+        break;
+      }
 
-    case 3: {
-      // Triangle: angles 0°, 120°, 240° (starting from the top)
-      angle = (index * 2 * Math.PI) / 3 - Math.PI / 2; // -PI/2 to start from the top
-      x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
-      y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
-      break;
-    }
+      case 4: {
+        // Square: angles 45°, 135°, 225°, 315° (rotated so it's not in a cross)
+        angle = (index * 2 * Math.PI) / 4 + Math.PI / 4; // +PI/4 to start from a corner
+        x = refTileWidth / 2 + radius * Math.cos(angle) - refSalmonWidth / 2;
+        y = refTileHeight / 2 + radius * Math.sin(angle) - refSalmonHeight / 2;
+        break;
+      }
 
-    case 4: {
-      // Square: angles 45°, 135°, 225°, 315° (rotated so it's not in a cross)
-      angle = (index * 2 * Math.PI) / 4 + Math.PI / 4; // +PI/4 to start from a corner
-      x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
-      y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
-      break;
-    }
-
-    case 5: {
-      // Pentagonous: 5 points, each 72°, starting from the top
-      angle = (index * 2 * Math.PI) / 5 - Math.PI / 2; // start from the top
-      x = tileWidth / 2 + radius * Math.cos(angle) - salmonWidth / 2;
-      y = tileHeight / 2 + radius * Math.sin(angle) - salmonHeight / 2;
-      break;
-    }
-
-    default: {
-      x = centerX;
-      y = centerY;
+      case 5: {
+        // Pentagon: 5 points, each 72°, starting from the top
+        angle = (index * 2 * Math.PI) / 5 - Math.PI / 2; // start from the top
+        x = refTileWidth / 2 + radius * Math.cos(angle) - refSalmonWidth / 2;
+        y = refTileHeight / 2 + radius * Math.sin(angle) - refSalmonHeight / 2;
+        break;
+      }
+      default: {
+        x = centerX;
+        y = centerY;
+      }
     }
   }
-
+  // Convert absolute pixel positions to percentages based on the reference dimensions
+  const xPercent = (x / refTileWidth) * 100;
+  const yPercent = (y / refTileHeight) * 100;
   return {
-    left: `${x}px`,
-    top: `${y}px`
+    left: `${xPercent}%`,
+    top: `${yPercent}%`
   };
+
 };

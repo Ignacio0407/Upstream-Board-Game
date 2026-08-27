@@ -390,3 +390,149 @@ button.grid-item.unstyled-button {
     }
 }
 
+/* ==========================================================================
+   ONLY FOR MOBILE PHONES (600px or less - Portrait) Here we switch from 'vh' back to 'vw' because on mobile, the screen 
+   is taller than it is wide. If we use 'vh' for widths on mobile, everything overflows horizontally.
+   ========================================================================== */
+@media (max-width: 600px) {
+    
+    /* 1. Fix the users table so it fits the mobile width */
+    .users-table {
+        width: 96vw !important;
+        max-width: 96vw !important;
+        top: 2vh !important;
+        max-height: 25vh !important;
+        font-size: 3.5vw !important; /* Scale text down */
+    }
+
+    /* 2. Make the game board fit the screen width */
+    .game-container {
+        width: 96vw !important;
+        margin-left: 2vw !important; /* 2vw left + 96vw board + 2vw right = 100vw */
+        margin-top: 30vh !important; 
+    }
+
+    /* 3. Adjust titles position and size */
+    .game-title {
+        top: 26vh !important;
+        font-size: 4.5vw !important;
+    }
+    .game-name { margin-left: 2vw !important; }
+    .game-round { margin-left: 30vw !important; }
+    .game-phase { margin-left: 60vw !important; }
+
+    /* 4. Convert all grid dimensions to 'vw' to maintain aspect ratio */
+    /* Añadimos las 3 clases para que ninguna se quede invisible */
+    .grid1, .grid1-80, .grid1-100 {
+        display: grid !important;
+        grid-template-rows: repeat(6, 31.2vw) !important;
+        padding-bottom: 16.8vw !important; 
+    }
+
+    /* Aseguramos que el salmón cambie de vh a vw en móvil */
+    .salmon-img {
+        width: 11vw !important;
+        height: 11vw !important;
+        border-radius: 5.5vw !important;
+    }
+
+    .grid2, .grid3 {
+        height: 48vw !important; /* Matches proportional 400px */
+    }
+
+    /* 5. Resize hexagons for mobile screens */
+    button.grid-item.unstyled-button,
+    .grid-item {
+        width: 30vw !important;
+        height: 27.6vw !important;
+    }
+
+    /* 6. Re-calculate zigzag transforms for hexagons */
+    .grid-item:nth-child(3n + 2) {
+        transform: translateY(0.6vw) !important;
+    }
+    .grid-item:nth-child(3n + 1),
+    .grid-item:nth-child(3n + 3) {
+        transform: translateY(14.4vw) !important;
+    }
+
+    /* 7. Resize salmons and inner content */
+    .salmon-img,
+    .grid-item2 img {
+        width: 11vw !important;
+        height: 11vw !important;
+        border-radius: 50% !important; /* 50% guarantees a perfect circle */
+        object-fit: cover !important;  /* Prevents image distortion */
+        aspect-ratio: 1 / 1 !important; /* Forces 1:1 proportion */
+    }
+    
+    .grid-item3 img {
+        width: 6vw !important;
+        height: 6vw !important;
+    }
+
+    .desove-points {
+        font-size: 4vw !important;
+        right: 2vw !important;
+    }
+    
+    .grid-item2 span {
+        font-size: 2.5vw !important;
+        bottom: 0.6vw !important;
+    }
+
+    .grid-item2, .grid-item3 {
+        font-size: 3vw !important;
+    }
+
+    /* 8. Adjust Remaining tiles block */
+    .pick-the-tile-block {
+        padding: 3vw !important;
+        bottom: 2vw !important;
+        right: 2vw !important;
+    }
+
+    .pick-the-tile-block h2 {
+        font-size: 4vw !important; /* Reduce text size */
+        margin: 1vw 0 !important;
+    }
+
+    .pick-the-tile-block img,
+    .tile-image {
+        margin: 0vw 10vw  ;
+        width: 25vw !important; /* Reduce image size */
+        bottom: auto !important; /* Prevents it going out from the screen because of -78vh */
+        height: auto !important;
+    }
+
+    .pick-the-tile-block button {
+        font-size: 3vw !important;
+        padding: 0vw !important; /* Ajusta el relleno si es necesario */
+    }
+
+    /* 9. Fix Undo buttons stretching to cover the screen */
+    .move-your-salmons {
+        position: absolute !important; /* Se pega al tablero, no a la pantalla */
+        top: 265vw !important; /* Aumenta o disminuye este valor para colocarlo exacto sobre el mar */
+        bottom: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: min-content !important; 
+        width: max-content !important; 
+        gap: 1vw !important; 
+        left: 2vw !important;
+        padding: 1.5vw !important; 
+        background: rgba(255, 255, 255, 0.3) !important; 
+        z-index: 9999 !important; 
+    }
+
+    .move-your-salmons button {
+        width: max-content !important; 
+        height: auto !important; 
+        display: inline-block !important;
+        padding: 1vw 3vw !important; /* Reduced padding inside the buttons */
+        font-size: 3.5vw !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+    }
+}
