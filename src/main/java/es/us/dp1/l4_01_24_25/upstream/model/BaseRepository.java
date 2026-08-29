@@ -37,9 +37,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface BaseRepository<T, D, ID> extends JpaRepository<T, ID>{
+public interface BaseRepository<T, D, I> extends JpaRepository<T, I>{
 
     List<D> findAllAsDTO();
 
-    Optional<D> findByIdAsDTO(ID id);
+    Optional<D> findByIdAsDTO(I id);
 }

@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,16 +31,15 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.player.Color;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTileService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
 import es.us.dp1.l4_01_24_25.upstream.salmon.SalmonService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService.MoveRequest;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService.MoveRequest;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 

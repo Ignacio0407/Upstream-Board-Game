@@ -19,7 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
+import es.us.dp1.l4_01_24_25.upstream.userachievement.UserAchievementService;
 
 @SpringBootTest
 @AutoConfigureMockMvc

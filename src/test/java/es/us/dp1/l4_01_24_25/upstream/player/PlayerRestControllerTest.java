@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -33,10 +32,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
-import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
 @WebMvcTest(controllers = PlayerRestController.class,

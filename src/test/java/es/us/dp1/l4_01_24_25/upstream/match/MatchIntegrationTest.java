@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.MatchDTO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

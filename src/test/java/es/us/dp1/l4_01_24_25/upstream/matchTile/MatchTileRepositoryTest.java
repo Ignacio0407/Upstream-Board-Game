@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile;
+package es.us.dp1.l4_01_24_25.upstream.matchtile;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +14,8 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.match.State;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MTCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.tile.Tile;
 import es.us.dp1.l4_01_24_25.upstream.tile.TileType;
 
@@ -124,8 +124,9 @@ class MatchTileRepositoryTest {
         em.persistAndFlush(foreign);
 
         List<MatchTileDTO> result = matchTileRepository.findByMatchIdAsDTO(match.getId());
-        assertThat(result).hasSize(3);
-        assertThat(result).noneMatch(dto -> dto.getMatchId().equals(otherMatch.getId()));
+        assertThat(result)
+                .hasSize(3)
+                .noneMatch(dto -> dto.getMatchId().equals(otherMatch.getId()));
     }
 
     // ── findByMatchIdAndCoordinateIsNullAsDTO ─────────────────────────────────
@@ -219,7 +220,8 @@ class MatchTileRepositoryTest {
     @Test
     void shouldReturnMixOfNullAndNonNullCoordinatesAsMTCoordinateDTO() {
         List<MTCoordinateDTO> result = matchTileRepository.findByMatchIdAsMTCoordinateDTO(match.getId());
-        assertThat(result).anyMatch(dto -> dto.getCoordinate() == null);
-        assertThat(result).anyMatch(dto -> dto.getCoordinate() != null);
+        assertThat(result)
+                .anyMatch(dto -> dto.getCoordinate() == null)
+                .anyMatch(dto -> dto.getCoordinate() != null);
     }
 }

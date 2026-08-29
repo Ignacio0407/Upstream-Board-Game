@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.DashboardMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.MatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
 
 @RestController

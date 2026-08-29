@@ -27,13 +27,13 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 

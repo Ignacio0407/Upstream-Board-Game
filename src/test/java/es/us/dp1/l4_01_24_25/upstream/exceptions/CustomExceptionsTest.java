@@ -3,7 +3,7 @@ package es.us.dp1.l4_01_24_25.upstream.exceptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.ObjectError;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,7 +71,7 @@ class CustomExceptionsTest {
 
     @Test
     void testErrorMessage() {
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         ErrorMessage em = new ErrorMessage(400, now, "Msg", "Desc");
         assertEquals(400, em.getStatusCode());
         assertEquals(now, em.getTimestamp());

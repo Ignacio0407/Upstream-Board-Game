@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.match.DTO;
+package es.us.dp1.l4_01_24_25.upstream.match.dto;
 
 import es.us.dp1.l4_01_24_25.upstream.match.State;
 import es.us.dp1.l4_01_24_25.upstream.validation.ValidNumber;

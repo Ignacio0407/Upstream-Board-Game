@@ -25,9 +25,6 @@ import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementService;
 import es.us.dp1.l4_01_24_25.upstream.statistic.AchievementUnlocker;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievement;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementRepository;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
 
 @ExtendWith(MockitoExtension.class)
 class UserAchievementServiceTest {

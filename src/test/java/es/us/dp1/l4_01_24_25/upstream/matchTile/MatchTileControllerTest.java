@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile;
+package es.us.dp1.l4_01_24_25.upstream.matchtile;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.configuration.SecurityConfiguration;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MatchTileDTO;
 
 @WebMvcTest(controllers = MatchTileController.class,
     excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfiguration.class))

@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import java.util.List;
 
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService.MoveRequest;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService.MoveRequest;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 
 @RestController
 @RequestMapping("/api/v1/salmonMatches")

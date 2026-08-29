@@ -30,17 +30,11 @@ public class AuthService {
 		User user = new User();
 		user.setName(request.getUsername());
 		user.setPassword(encoder.encode(request.getPassword()));
-		String strRoles = request.getAuthority();
-
-		switch (strRoles.toLowerCase()) {
-		case "admin" -> {
-                    user.setAuthority(Authority.ADMIN);
-                    userService.save(user);
-                }
-		default -> {
-                    user.setAuthority(Authority.PLAYER);
-                    userService.save(user);
-                }
+		if ("admin".equalsIgnoreCase(request.getAuthority())) {
+			user.setAuthority(Authority.ADMIN);
+		} else {
+			user.setAuthority(Authority.PLAYER);
 		}
+		userService.save(user);
 	}
 }

@@ -8,17 +8,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
 
 @Repository
 public interface PlayerRepository extends BaseRepository<Player, PlayerDTO, Integer>{
 
     @Override
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p where p.id = :id")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p where p.id = :id")
     Optional<PlayerDTO> findByIdAsDTO(Integer id);
 
     @Override
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p")
     List<PlayerDTO> findAllAsDTO();
 
     public Optional<Player> findByName(String name);
@@ -29,10 +29,10 @@ public interface PlayerRepository extends BaseRepository<Player, PlayerDTO, Inte
 
     public List<Player> findByMatchIdOrderByPlayerOrderAsc(Integer id);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p WHERE p.match.id = :id")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p WHERE p.match.id = :id")
     List<PlayerDTO> findPlayersByMatchAsDTO(@Param("id") Integer id);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p WHERE p.match.id = :id ORDER BY p.playerOrder ASC")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO(p.id, p.name, p.color, p.playerOrder, p.alive, p.points, p.energy, p.userPlayer.id, p.match.id) FROM Player p WHERE p.match.id = :id ORDER BY p.playerOrder ASC")
     List<PlayerDTO> findByMatchIdOrderByPlayerOrderAscAsDTO(@Param("id") Integer id);
 
     List<Player> findByMatchIdAndAliveTrue(@Param("matchId") Integer matchId);
