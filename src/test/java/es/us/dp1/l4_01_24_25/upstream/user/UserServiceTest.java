@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

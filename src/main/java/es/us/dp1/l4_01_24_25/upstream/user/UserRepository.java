@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer>{			
@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User, Integer>{
 	@Query("SELECT u FROM User u WHERE u.authority = :auth")
 	List<User> findAllByAuthority(Authority auth);
 
-	@Query("SELECT new es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin(u.id, u.name, u.authority) FROM User u")
+	@Query("SELECT new es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin(u.id, u.name, u.authority) FROM User u")
 	List<UserListAdmin> findAllListAdmin();
 
 }

@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 
 

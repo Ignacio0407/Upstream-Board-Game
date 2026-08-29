@@ -154,7 +154,7 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
     }
 
     private void userInMatch(Message<?> message, Integer matchId, String username) {
-        if (!this.playerService.isUserInMatch(username, matchId)) throw new MessageDeliveryException(message, "Forbidden");
+        if (!Boolean.TRUE.equals(this.playerService.isUserInMatch(username, matchId))) throw new MessageDeliveryException(message, "Forbidden");
     }
 
     // 🛡️ Rate Limit. Prevents DoS (Denial of Service)

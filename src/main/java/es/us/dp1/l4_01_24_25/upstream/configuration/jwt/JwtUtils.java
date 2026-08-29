@@ -1,5 +1,6 @@
 package es.us.dp1.l4_01_24_25.upstream.configuration.jwt;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,16 +38,16 @@ public class JwtUtils {
 		claims.put("authorities",
 				userPrincipal.getAuthorities().stream().map(auth -> auth.getAuthority()).toList());
 
-		return Jwts.builder().setClaims(claims).setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+		return Jwts.builder().setClaims(claims).setSubject((userPrincipal.getUsername())).setIssuedAt(Date.from(Instant.now()))
+				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationMs)))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 
 	public String generateTokenFromUsername(String username, Authority authority) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("authorities", List.of(authority.name()));
-		return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+		return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(Date.from(Instant.now()))
+				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationMs)))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 

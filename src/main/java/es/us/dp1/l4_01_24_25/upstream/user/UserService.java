@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.AccessDeniedException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseService;
-import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin;
 
 @Service
 public class UserService extends BaseService<User,Integer> {
@@ -92,7 +92,7 @@ public class UserService extends BaseService<User,Integer> {
 
 	@Transactional
 	public List<UserListAdmin> findAllListing() {
-		if (!this.findCurrentUser().hasAuthority(Authority.ADMIN)) {
+		if (!Boolean.TRUE.equals(this.findCurrentUser().hasAuthority(Authority.ADMIN))) {
 			throw new AccessDeniedException("Only admins can list all users!");
 		}
 		return this.userRepository.findAllListAdmin();

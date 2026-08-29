@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.Phase;
 import es.us.dp1.l4_01_24_25.upstream.match.State;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
@@ -104,9 +104,10 @@ class PlayerRepositoryTest {
     @Test
     void shouldReturnPlayersDTOForMatch() {
         List<PlayerDTO> result = playerRepository.findPlayersByMatchAsDTO(match.getId());
-        assertThat(result).hasSize(3);
-        assertThat(result).anyMatch(p -> p.getName().equals("Alpha"));
-        assertThat(result).anyMatch(p -> p.getName().equals("Beta"));
+        assertThat(result)
+                .hasSize(3)
+                .anyMatch(p -> p.getName().equals("Alpha"))
+                .anyMatch(p -> p.getName().equals("Beta"));
     }
 
     @Test
@@ -141,9 +142,10 @@ class PlayerRepositoryTest {
     @Test
     void shouldReturnOnlyAlivePlayersForMatch() {
         List<Player> result = playerRepository.findByMatchIdAndAliveTrue(match.getId());
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(Player::getAlive);
-        assertThat(result).noneMatch(p -> p.getName().equals("Dead"));
+        assertThat(result)
+                .hasSize(2)
+                .allMatch(Player::getAlive)
+                .noneMatch(p -> p.getName().equals("Dead"));
     }
 
     @Test

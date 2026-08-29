@@ -36,11 +36,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-public abstract class BaseRestControllerWithDTO<T extends BaseEntity, D, ID> {
+public abstract class BaseRestControllerWithDTO<T extends BaseEntity, D, I> {
 
-    protected final BaseServiceWithDTO<T, D, ID> service;
+    protected final BaseServiceWithDTO<T, D, I> service;
 
-    protected BaseRestControllerWithDTO(BaseServiceWithDTO<T, D, ID> service) {
+    protected BaseRestControllerWithDTO(BaseServiceWithDTO<T, D, I> service) {
         this.service = service;
     }
 
@@ -50,7 +50,7 @@ public abstract class BaseRestControllerWithDTO<T extends BaseEntity, D, ID> {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<D> findById(@PathVariable ID id) {
+    public ResponseEntity<D> findById(@PathVariable I id) {
         return ResponseEntity.ok(this.service.findByIdAsDTO(id));
     }
 
@@ -60,12 +60,12 @@ public abstract class BaseRestControllerWithDTO<T extends BaseEntity, D, ID> {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<D> update(@PathVariable ID id, @RequestBody D dto) {
+    public ResponseEntity<D> update(@PathVariable I id, @RequestBody D dto) {
         return ResponseEntity.ok(this.service.updateAsDTO(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable ID id) {
+    public ResponseEntity<Void> delete(@PathVariable I id) {
         this.service.deleteById(id);
         return ResponseEntity.noContent().build();
     }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import es.us.dp1.l4_01_24_25.upstream.user.DTO.UserListAdmin;
+import es.us.dp1.l4_01_24_25.upstream.user.dto.UserListAdmin;
 
 @DataJpaTest
 class UserRepositoryTest {
@@ -35,10 +35,11 @@ class UserRepositoryTest {
     void shouldFindAllListAdmin() {
         List<UserListAdmin> listing = userRepository.findAllListAdmin();
 
-        assertThat(listing).isNotEmpty();
-        assertThat(listing).allSatisfy(dto -> {
-            assertThat(dto.getName()).isNotNull();
-            assertThat(dto.getAuthority()).isNotNull();
-        });
+        assertThat(listing)
+                .isNotEmpty()
+                .allSatisfy(dto -> {
+                    assertThat(dto.getName()).isNotNull();
+                    assertThat(dto.getAuthority()).isNotNull();
+                });
     }
 }

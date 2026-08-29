@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile.DTO;
+package es.us.dp1.l4_01_24_25.upstream.matchtile.dto;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import lombok.Getter;

@@ -1,8 +1,8 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile;
+package es.us.dp1.l4_01_24_25.upstream.matchtile;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MatchTileDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -16,22 +16,22 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.DashboardMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTileService;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MTCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
+import es.us.dp1.l4_01_24_25.upstream.userachievement.UserAchievementService;
 
 @Service
 public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
@@ -210,7 +210,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         List<MatchTile> tiles = this.matchTileService.findByMatchId(match.getId());
         List<SalmonMatch> salmons = this.salmonMatchService.findAllFromMatch(match.getId());
         List<Player> players = this.playerService.findPlayersByMatch(match.getId());
-        if ((tiles.isEmpty() || salmons.isEmpty() || players.stream().allMatch(p -> p.getAlive() == false) 
+        if ((tiles.isEmpty() || salmons.isEmpty() || players.stream().allMatch(p -> Boolean.FALSE.equals(p.getAlive())) 
             || players.stream().allMatch(p -> this.playerService.checkPlayerFinished(p.getId())))
             && !match.getState().equals(State.FINALIZED)) {
             match.setState(State.FINALIZED);
@@ -229,7 +229,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
     }
     private void noMoreTilesToPlacePlayers (Match match, Player player, List<Player> players) {
         match.setPhase(Phase.MOVING);
-        if(this.playerService.checkPlayerNoEnergy(player)){
+        if(Boolean.TRUE.equals(this.playerService.checkPlayerNoEnergy(player))){
             this.changePlayerTurn(player);
         }
         if(players.stream().allMatch(p -> p.getEnergy() <= 0)) {
@@ -269,7 +269,7 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             if (match.getRound() == 0 && mtNoC.size() != 17) this.changePlayerTurn(player);
         }
         else
-            if (this.playerService.checkPlayerNoEnergy(player)) this.changePlayerTurn(player); 
+            if (Boolean.TRUE.equals(this.playerService.checkPlayerNoEnergy(player))) this.changePlayerTurn(player); 
 
         if (match.getRound() >= 1 && this.playerService.checkPlayerIsDead(playerId)) { 
             this.playerService.setPlayerDead(player);

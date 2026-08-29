@@ -1,10 +1,10 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

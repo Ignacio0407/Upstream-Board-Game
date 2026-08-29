@@ -31,20 +31,19 @@ import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTile;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.MatchTileService;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.DashboardMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTile;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.MatchTileService;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MTCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService.NextPlayerResult;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatch;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatch;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
+import es.us.dp1.l4_01_24_25.upstream.userachievement.UserAchievementService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Match Service Tests")

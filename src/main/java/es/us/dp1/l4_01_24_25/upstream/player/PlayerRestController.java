@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestControllerWithDTO;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.LobbyPlayerDTO;
 
 @RestController
 @RequestMapping("/api/v1/players")

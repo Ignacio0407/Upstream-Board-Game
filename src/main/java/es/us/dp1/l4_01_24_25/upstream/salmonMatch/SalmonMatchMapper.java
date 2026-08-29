@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,7 @@ import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.EntityMapper;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 
 @Mapper(componentModel = "spring")
 public abstract class SalmonMatchMapper implements EntityMapper<SalmonMatch, SalmonMatchDTO> {

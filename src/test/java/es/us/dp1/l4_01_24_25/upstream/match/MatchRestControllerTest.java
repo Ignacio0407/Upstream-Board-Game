@@ -34,8 +34,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ConflictException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.MatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.DashboardMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.MatchDTO;
 
 @WebMvcTest(controllers = MatchRestController.class,
     excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class))

@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.user.DTO;
+package es.us.dp1.l4_01_24_25.upstream.user.dto;
 
 import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import lombok.Getter;

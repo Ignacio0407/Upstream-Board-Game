@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.player.playerDTO;
+package es.us.dp1.l4_01_24_25.upstream.player.playerdto;
 
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import lombok.Getter;

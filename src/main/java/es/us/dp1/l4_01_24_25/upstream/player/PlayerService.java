@@ -16,10 +16,10 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.InsufficientEnergyException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.PlayerDTO;
-import es.us.dp1.l4_01_24_25.upstream.player.playerDTO.LobbyPlayerDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.SalmonMatchService;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.PlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.player.playerdto.LobbyPlayerDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.SalmonMatchService;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 import es.us.dp1.l4_01_24_25.upstream.user.UserService;
 
@@ -189,8 +189,8 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         for(Player p : players) {
             Boolean dead = this.checkPlayerIsDead(p.getId());
             Boolean finished = this.checkPlayerFinished(p.getId());
-            if (dead) this.setPlayerDead(p);
-            if (finished) this.setPlayerNoEnergy(p);
+            if (Boolean.TRUE.equals(dead)) this.setPlayerDead(p);
+            if (Boolean.TRUE.equals(finished)) this.setPlayerNoEnergy(p);
         }
     }
 

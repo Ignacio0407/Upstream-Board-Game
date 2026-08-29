@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import es.us.dp1.l4_01_24_25.upstream.match.DTO.DashboardMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.match.dto.DashboardMatchDTO;
 
 @ExtendWith(MockitoExtension.class)
 class MatchRepositoryTest {

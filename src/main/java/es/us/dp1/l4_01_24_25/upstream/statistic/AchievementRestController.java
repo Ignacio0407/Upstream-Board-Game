@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRestController;
-import es.us.dp1.l4_01_24_25.upstream.userAchievement.UserAchievementService;
+import es.us.dp1.l4_01_24_25.upstream.userachievement.UserAchievementService;
 
 @RestController
 @RequestMapping("/api/v1/achievements")

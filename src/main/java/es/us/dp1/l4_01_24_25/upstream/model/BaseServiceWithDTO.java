@@ -38,12 +38,12 @@ import org.springframework.transaction.annotation.Transactional;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 
-public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends BaseService<T, ID> {
+public abstract class BaseServiceWithDTO<T extends BaseEntity, D, I> extends BaseService<T, I> {
 
     protected final EntityMapper<T, D> mapper;
-    protected final BaseRepository<T, D, ID> dtoRepository;
+    protected final BaseRepository<T, D, I> dtoRepository;
 
-    protected BaseServiceWithDTO(BaseRepository<T, D, ID> repository, EntityMapper<T, D> mapper) {
+    protected BaseServiceWithDTO(BaseRepository<T, D, I> repository, EntityMapper<T, D> mapper) {
         super(repository);
         this.dtoRepository = repository;
         this.mapper = mapper;
@@ -54,13 +54,13 @@ public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends Ba
         return this.dtoRepository.findAllAsDTO();
     }
 
-    public D findDTOOrResourceNotFoundException (Optional<D> entity, ID id) {
+    public D findDTOOrResourceNotFoundException (Optional<D> entity, I id) {
         if (entity.isPresent()) return entity.get(); 
         else throw new ResourceNotFoundException(this.entityName + " not found with ID: " + id);
     }
 
     @Transactional(readOnly = true)
-    public D findByIdAsDTO(ID id) {
+    public D findByIdAsDTO(I id) {
         return this.findDTOOrResourceNotFoundException(this.dtoRepository.findByIdAsDTO(id), id);
     }
 
@@ -71,7 +71,7 @@ public abstract class BaseServiceWithDTO<T extends BaseEntity, D, ID> extends Ba
     }
 
     @Transactional
-    public D updateAsDTO(ID id, @Valid D dto) {
+    public D updateAsDTO(I id, @Valid D dto) {
         T updated = this.update(id, mapper.toEntity(dto));
         return this.mapper.toDTO(updated);
     }

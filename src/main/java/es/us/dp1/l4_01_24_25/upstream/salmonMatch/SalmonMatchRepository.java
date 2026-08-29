@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,17 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import es.us.dp1.l4_01_24_25.upstream.model.BaseRepository;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 
 public interface SalmonMatchRepository extends BaseRepository<SalmonMatch, SalmonMatchDTO, Integer>{
 
     @Override
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.id = :id")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.id = :id")
     Optional<SalmonMatchDTO> findByIdAsDTO(Integer id);
 
     @Override
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm")
     List<SalmonMatchDTO> findAllAsDTO();
     
     List<SalmonMatch> findByMatchId(@Param("matchId") Integer matchId);
@@ -27,13 +27,13 @@ public interface SalmonMatchRepository extends BaseRepository<SalmonMatch, Salmo
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate.y > 20")
     List<SalmonMatch> findFromGameInSpawn(@Param("matchId") Integer matchId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.match.id = :matchId")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.match.id = :matchId")
     List<SalmonMatchDTO> findByMatchIdAsDTO(@Param("matchId") Integer matchId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.player.id = :playerId")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.player.id = :playerId")
     List<SalmonMatchDTO> findByPlayerIdAsDTO(@Param("playerId") Integer playerId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate.y > 20")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO(sm.id, sm.player.id, sm.salmonsNumber, sm.spawningNumber, sm.coordinate, sm.salmon, sm.match.id) FROM SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate.y > 20")
     List<SalmonMatchDTO> findFromGameInSpawnAsDTO(@Param("matchId") Integer matchId);
 
     @Query("SELECT sm from SalmonMatch sm WHERE sm.match.id = :matchId AND sm.coordinate IS NOT NULL AND sm.coordinate.y < 20")
@@ -49,12 +49,12 @@ public interface SalmonMatchRepository extends BaseRepository<SalmonMatch, Salmo
     @Query("SELECT sm from SalmonMatch sm WHERE sm.player.id = :playerId AND sm.coordinate.y > 20")
     List<SalmonMatch> findAllFromPlayerInSpawn(@Param("playerId") Integer playerId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId")
     List<SMCoordinateDTO> findByPlayerIdAsCoordinateDTO(@Param("playerId") Integer playerId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId AND sm.coordinate IS NOT NULL AND sm.coordinate.y < 20")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId AND sm.coordinate IS NOT NULL AND sm.coordinate.y < 20")
     List<SMCoordinateDTO> findByPlayerIdInRiverAsCoordinateDTO(@Param("playerId") Integer playerId);
 
-    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId AND sm.coordinate IS NULL")
+    @Query("SELECT new es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO(sm.coordinate) FROM SalmonMatch sm where sm.player.id = :playerId AND sm.coordinate IS NULL")
     List<SMCoordinateDTO> findByPlayerIdInSeaAsCoordinateDTO(@Param("playerId") Integer playerId);
 }

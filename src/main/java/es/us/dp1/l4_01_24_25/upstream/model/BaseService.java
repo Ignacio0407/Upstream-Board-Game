@@ -40,16 +40,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class BaseService<T, ID> {
-    protected JpaRepository<T, ID> repository;
+public abstract class BaseService<T, I> {
+    protected JpaRepository<T, I> repository;
     protected final String entityName;
 
-    protected BaseService(JpaRepository<T, ID> repository) {
+    protected BaseService(JpaRepository<T, I> repository) {
         this.repository = repository;
         this.entityName = extractEntityName(repository);
     }
 
-    public String extractEntityName(JpaRepository<T, ID> repository) {
+    public String extractEntityName(JpaRepository<T, I> repository) {
         try {
             return ((Class<?>) ((java.lang.reflect.ParameterizedType)
                 repository.getClass().getInterfaces()[0].getGenericInterfaces()[0])
@@ -66,11 +66,11 @@ public abstract class BaseService<T, ID> {
 
     @Transactional(readOnly = true)
     public List<T> findAll() {
-        return (List<T>) this.repository.findAll();
+        return this.repository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public T findById(ID id) {
+    public T findById(I id) {
         return this.findOrResourceNotFoundException(this.repository.findById(id), "ID", id);
     }
 
@@ -81,11 +81,11 @@ public abstract class BaseService<T, ID> {
 
     @Transactional
     public List<T> saveAll(List<T> entities) {
-        return (List<T>) this.repository.saveAll(entities);
+        return this.repository.saveAll(entities);
     }
 
     @Transactional
-    public void deleteById(ID id) {
+    public void deleteById(I id) {
         this.repository.deleteById(id);
     }
 
@@ -105,20 +105,20 @@ public abstract class BaseService<T, ID> {
     }
 
     @Transactional
-    public T update(ID id, @Valid T updatedEntity) {
+    public T update(I id, @Valid T updatedEntity) {
         T existingEntity = this.findById(id);
         this.updateEntityFields(existingEntity, updatedEntity); // Protected method to implement in each service
         return this.save(existingEntity);
     }
 
     @Transactional
-    public List<T> updateSome(@Valid List<ID> ids, @Valid List<T> updatedEntities) {
+    public List<T> updateSome(@Valid List<I> ids, @Valid List<T> updatedEntities) {
         if (ids.size() != updatedEntities.size())
             throw new IllegalArgumentException("Ids and entities size mismatch");
         List<T> toSave = new ArrayList<>();
         Integer index = 0;
         for (T updated : updatedEntities) {
-            ID id = ids.get(index);
+            I id = ids.get(index);
             T existing = this.findById(id);
             updateEntityFields(existing, updated);
             toSave.add(existing);

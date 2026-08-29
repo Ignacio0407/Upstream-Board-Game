@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch;
 
 import java.util.List;
 
@@ -16,8 +16,8 @@ import es.us.dp1.l4_01_24_25.upstream.match.State;
 import es.us.dp1.l4_01_24_25.upstream.player.Color;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SMCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO.SalmonMatchDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SMCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto.SalmonMatchDTO;
 import es.us.dp1.l4_01_24_25.upstream.user.Authority;
 import es.us.dp1.l4_01_24_25.upstream.user.User;
 
@@ -140,8 +140,9 @@ class SalmonMatchRepositoryTest {
         em.persistAndFlush(foreign);
 
         List<SalmonMatchDTO> result = salmonMatchRepository.findByMatchIdAsDTO(match.getId());
-        assertThat(result).hasSize(2);
-        assertThat(result).noneMatch(dto -> dto.getMatchId().equals(otherMatch.getId()));
+        assertThat(result)
+                .hasSize(2)
+                .noneMatch(dto -> dto.getMatchId().equals(otherMatch.getId()));
     }
 
     // ── findByPlayerIdAsDTO ───────────────────────────────────────────────────

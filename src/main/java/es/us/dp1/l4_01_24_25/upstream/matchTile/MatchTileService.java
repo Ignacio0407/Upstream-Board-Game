@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.matchTile;
+package es.us.dp1.l4_01_24_25.upstream.matchtile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,8 +17,8 @@ import es.us.dp1.l4_01_24_25.upstream.exceptions.NotValidMoveException;
 import es.us.dp1.l4_01_24_25.upstream.exceptions.ResourceNotFoundException;
 import es.us.dp1.l4_01_24_25.upstream.match.Match;
 import es.us.dp1.l4_01_24_25.upstream.match.MatchService;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MTCoordinateDTO;
-import es.us.dp1.l4_01_24_25.upstream.matchTile.DTO.MatchTileDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MTCoordinateDTO;
+import es.us.dp1.l4_01_24_25.upstream.matchtile.dto.MatchTileDTO;
 import es.us.dp1.l4_01_24_25.upstream.model.BaseServiceWithDTO;
 import es.us.dp1.l4_01_24_25.upstream.player.Player;
 import es.us.dp1.l4_01_24_25.upstream.player.PlayerService;
@@ -142,7 +142,7 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
                 throw new ResourceNotFoundException("No se puede actualizar el MatchTile en esta ronda", "ID", id);
             }
         }
-        Boolean positionOccupied = matchTiles.stream()
+        boolean positionOccupied = matchTiles.stream()
         .anyMatch(mT -> mT.getCoordinate() != null && mT.getCoordinate().x().equals(updates.get("x")) && mT.getCoordinate().y().equals(updates.get("y")));
         if (positionOccupied)
             throw new ConflictException("Ya existe una MatchTile en las coordenadas especificadas.");

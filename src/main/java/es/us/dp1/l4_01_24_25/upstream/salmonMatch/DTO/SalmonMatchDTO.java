@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.salmonMatch.DTO;
+package es.us.dp1.l4_01_24_25.upstream.salmonmatch.dto;
 
 import es.us.dp1.l4_01_24_25.upstream.coordinate.Coordinate;
 import es.us.dp1.l4_01_24_25.upstream.salmon.Salmon;

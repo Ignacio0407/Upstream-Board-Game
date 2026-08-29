@@ -1,4 +1,4 @@
-package es.us.dp1.l4_01_24_25.upstream.userAchievement;
+package es.us.dp1.l4_01_24_25.upstream.userachievement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

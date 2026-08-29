@@ -41,11 +41,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-public abstract class BaseRestController<T, ID> {
+public abstract class BaseRestController<T, I> {
 
-    protected final BaseService<T, ID> service;
+    protected final BaseService<T, I> service;
 
-    protected BaseRestController(BaseService<T, ID> service) {
+    protected BaseRestController(BaseService<T, I> service) {
         this.service = service;
     }
 
@@ -55,7 +55,7 @@ public abstract class BaseRestController<T, ID> {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<T> findById(@PathVariable ID id) {
+    public ResponseEntity<T> findById(@PathVariable I id) {
         return ResponseEntity.ok(this.service.findById(id));
     }
 
@@ -65,18 +65,18 @@ public abstract class BaseRestController<T, ID> {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable ID id) {
+    public ResponseEntity<Void> delete(@PathVariable I id) {
         this.service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<T> update(@PathVariable ID id, @RequestBody T entity) {
+    public ResponseEntity<T> update(@PathVariable I id, @RequestBody T entity) {
         return ResponseEntity.ok(this.service.update(id, entity));
     }
 
     @PutMapping("/some")
-    public ResponseEntity<List<T>> updateSome(@RequestBody UpdateSomeDTO<ID, T> request) {
+    public ResponseEntity<List<T>> updateSome(@RequestBody UpdateSomeDTO<I, T> request) {
         return ResponseEntity.ok(this.service.updateSome(request.getIds(), request.getEntities()));
     }
 }
