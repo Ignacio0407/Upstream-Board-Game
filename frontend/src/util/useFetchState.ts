@@ -44,8 +44,8 @@ export default function useFetchState<T>(initial: T, url: string | null, jwt: st
             }
           }
         })
-        .catch((message) => {
-          console.error(message);
+        .catch((error_) => {
+          console.error(error_);
           if (setMessage) {
             setMessage("Failed to fetch data");
           }

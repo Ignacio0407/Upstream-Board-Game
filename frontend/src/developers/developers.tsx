@@ -23,11 +23,10 @@ export default function DeveloperList() {
     }
     
     return ( 
-        <> 
-         <div className="admin-page-container"> 
+        <div className="admin-page-container"> 
             <br />
-           <h1 className="text-center">Developers</h1>
-           <div> 
+            <h1 className="text-center">Developers</h1>
+            <div> 
                 <Table aria-label="developers" className="mt-4"> 
                     <thead> 
                         <tr> 
@@ -40,7 +39,6 @@ export default function DeveloperList() {
                     <tbody>{developersList(developers)}</tbody> 
                 </Table> 
             </div> 
-            </div> 
-        </> 
-); 
+        </div> 
+    ); 
 } 

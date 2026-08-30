@@ -3,17 +3,17 @@ import "../../static/css/auth/authButton.css";
 import "../../static/css/auth/authPage.css";
 import tokenService from "../../services/token.service.ts";
 
-export default function Logout () {
-  function sendLogoutRequest() {
-    const jwt = window.localStorage.getItem("jwt");
-    if (jwt || typeof jwt === "undefined") {
-      tokenService.removeUser();
-      window.location.href = "/";
-    } else {
-      alert("There is no user logged in");
-    }
+function sendLogoutRequest() {
+  const jwt = window.localStorage.getItem("jwt");
+  if (jwt || jwt === undefined) {
+    tokenService.removeUser();
+    window.location.href = "/";
+  } else {
+    alert("There is no user logged in");
   }
+}
 
+export default function Logout () {
   return (
     <div className="auth-page-container">
       <div className="auth-form-container">

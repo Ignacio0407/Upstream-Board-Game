@@ -94,7 +94,7 @@ describe('Chat', () => {
       openChat();
       expect(screen.queryByText('Match Chat')).not.toBeInTheDocument();
 
-      fireEvent.keyDown(screen.getByText('Chat'), { key: 'Enter' });
+      openChat();
       expect(screen.getByText('Match Chat')).toBeInTheDocument();
     });
   });

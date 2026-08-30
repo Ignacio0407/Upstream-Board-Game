@@ -3,11 +3,16 @@ import tokenService from "../services/token.service.ts";
 import { deleteEntity } from "./fetchers.ts";
 import { navigateToUnauthorized } from "../components/DoNotHackMyApp/DoNotHackMyAppHelper.ts";
 
-interface DeleteSomeOptions<T> {confirmField?: keyof T}
+interface DeleteSomeOptions<T> { confirmField?: keyof T }
 
-export default function deleteSomeFromList<T extends { id: any }>(url: string, items:any[], requiredAuth: string,
-  checkAuth: Function | undefined, deactivateSecurity: boolean = false, state: T[],
-  setState: React.Dispatch<React.SetStateAction<T[]>>, navigate: NavigateFunction, options: DeleteSomeOptions<T> = {} ): void {
+export interface DeleteSomeParams<T> {readonly url: string, readonly items: any[], readonly requiredAuth: string,
+  readonly checkAuth?: Function, readonly deactivateSecurity?: boolean, readonly state?: T[],
+  readonly setState: React.Dispatch<React.SetStateAction<T[]>>, readonly navigate: NavigateFunction, 
+  readonly options?: DeleteSomeOptions<T>;
+}
+
+export default function deleteSomeFromList<T extends { id: any }>({url, items, requiredAuth, checkAuth, 
+  deactivateSecurity = false, setState, navigate, options = {}}: DeleteSomeParams<T>): void {
 
   const user = tokenService.getUser();
 

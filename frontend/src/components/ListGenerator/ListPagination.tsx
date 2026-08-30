@@ -30,9 +30,9 @@
 
 import { Pagination, PaginationItem, PaginationLink } from "reactstrap";
 
-interface Props {totalItems: number, pageSize: number, currentPage: number, onPageChange: (page: number) => void}
+interface Props {readonly totalItems: number, readonly pageSize: number, readonly currentPage: number, readonly onPageChange: (page: number) => void}
 
-export default function ListPagination({ totalItems, pageSize, currentPage, onPageChange }: Props) {
+export default function ListPagination({ totalItems, pageSize, currentPage, onPageChange }: Readonly<Props>) {
   const totalPages = Math.ceil(totalItems / pageSize);
   if (totalPages <= 1) return null;
 

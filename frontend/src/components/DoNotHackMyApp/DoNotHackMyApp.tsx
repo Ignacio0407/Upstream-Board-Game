@@ -37,11 +37,11 @@ type Flag = {id: number;
   durationMs: number, delayMs: number, rotateDeg: number, color: string | null;
 };
 
-interface DoNotHackMyAppProps {density?: number, spawnIntervalMs?: number, minSpeedMs?: number, maxSpeedMs?: number, 
-  emoji?: string, colors?: string[], maxPool?: number}
+interface DoNotHackMyAppProps {readonly density?: number, readonly spawnIntervalMs?: number, readonly minSpeedMs?: number, readonly maxSpeedMs?: number, 
+  readonly emoji?: string, readonly colors?: readonly string[], readonly maxPool?: number}
 
 export default function DoNotHackMyApp({density = 40, spawnIntervalMs = 120, minSpeedMs = 4000, maxSpeedMs = 9000,
-  emoji = "🏴‍☠️", colors = ["#000000", "#333333", "#555555"], maxPool = 120}: DoNotHackMyAppProps) {
+  emoji = "🏴‍☠️", colors = ["#000000", "#333333", "#555555"], maxPool = 120}: Readonly<DoNotHackMyAppProps>) {
 
   const [flags, setFlags] = useState<Flag[]>([]);
   const idCounter = useRef(0);

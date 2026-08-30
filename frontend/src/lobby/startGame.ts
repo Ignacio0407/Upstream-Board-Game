@@ -1,5 +1,4 @@
 import {patch, post} from '../util/fetchers.ts';
-import { NavigateFunction } from 'react-router-dom';
 
 interface StartGamePrompts {matchId:number, jwt:string, setLoading:Function};
 

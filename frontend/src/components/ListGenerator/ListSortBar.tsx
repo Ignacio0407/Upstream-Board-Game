@@ -30,9 +30,9 @@
 
 import { useState } from "react";
 
-interface Props<T> {data: T[], onSort: (sorted: T[]) => void}
+interface Props<T> {data: T[], readonly onSort: (sorted: T[]) => void}
 
-export default function ListSortBar<T>({ data, onSort }: Props<T>) {
+export default function ListSortBar<T>({ data, onSort }: Readonly<Props<T>>) {
   const keys = data.length > 0 ? Object.keys(data[0] as object).filter(k => k !== "id") : [];
   const [selectedKey, setSelectedKey] = useState<string>("");
 

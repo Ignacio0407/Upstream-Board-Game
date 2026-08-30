@@ -279,19 +279,16 @@ const SearchBar = <T extends object>({
           </button>
 
           {showAttrDropdown && (
-            <div className="search-dropdown" role="listbox">
+            <div className="search-dropdown">
               {searchableAttributes.map(attr => (
-                <div
+                <button
+                  type="button"
                   key={attr}
-                  role="option"
-                  aria-selected="false"
-                  tabIndex={0}
                   className="search-dropdown-item"
                   onClick={() => handleAttributeClick(attr)}
-                  onKeyDown={e => (e.key === "Enter" || e.key === " ") && handleAttributeClick(attr)}
                 >
                   {attr}
-                </div>
+                </button>
               ))}
             </div>
           )}

@@ -65,14 +65,13 @@ export default function Lobby () {
         await endGame({match, players, user, jwt, spectatorIds, navigate, setMatch});
     };
     
-    const playerList = players.map((p, id) => { return ( <PlayerCard key={id} name={p.name} color={p.color} /> ) });
+    const playerList = players.map((p) => <PlayerCard key={p.id ?? p.name} name={p.name} color={p.color} />);
     
     return (
         <div className='lobbyContainer'>
-            {players.find(p => p.userId === user.id)===undefined && spectatorIds.find(p => p === user.id) === undefined && (showColorPicker&&
-            (
+            {!players.some(p => p.userId === user.id) && !spectatorIds.includes(user.id) && showColorPicker && (
                 <ColorHandler matchId={Number(matchId)} jwt={jwt} userId={user.id} takenColors={takenColors} 
-                onColorChanged={() => setShowColorPicker(false)} /> )
+                onColorChanged={() => setShowColorPicker(false)} />
             )}
             <div className='lobbyTitleContainer'>
                 <h1> Room name: {match.name} </h1>
@@ -86,15 +85,9 @@ export default function Lobby () {
                 </div>
             <br />
 
-                <div role="button" className='lobbyUtilContainer' tabIndex={0} 
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" && match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) 
-                        === undefined && match.playersNumber >= 1) {
-                        startingGame();
-                    }
-                }}>
-                {match.matchCreatorId === user.id && spectatorIds.find(p => p === userPlayer.id) === undefined && 
-                match.playersNumber >=2 &&
+                <div className='lobbyUtilContainer'>
+                {match.matchCreatorId === user.id && !spectatorIds.includes(userPlayer.id) && 
+                match.playersNumber >= 2 &&
                 <Button color='success' onClick={startingGame} className='buttonStart'> Start </Button>}
                 {loading && <div>Loading tiles...</div>}
                 <Button color='danger' onClick={endingGame} className='buttonExit'> Exit </Button>

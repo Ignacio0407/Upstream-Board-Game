@@ -60,11 +60,16 @@ export function useExitMassEditOnEscape(setShowMassEdit:React.Dispatch<React.Set
 }
 
 
-export function renderData<T>(paginatedData:T[], selectedIds:Set<any>, idKey:string | keyof T,
-  toggleSelectAll:() => void, keys:(keyof T)[], editButton:((item: T) => JSX.Element | undefined) | undefined,
-  deleteButton:((item: T) => void) | undefined, toggleSelectOne:(id: any) => void, navigate:NavigateFunction,
-  customLabels: Record<string, string> = {},
-  customRender?: (item:T) => JSX.Element) {
+export interface RenderDataConfig<T> {paginatedData: T[]; selectedIds: Set<any>; idKey: string | keyof T;
+  toggleSelectAll: () => void; keys: (keyof T)[]; 
+  editButton?: (item: T) => JSX.Element | undefined; deleteButton?: (item: T) => void;
+  toggleSelectOne: (id: any) => void; navigate?: NavigateFunction;
+  customLabels?: Record<string, string>; customRender?: (item: T) => JSX.Element;
+}
+
+export function renderData<T>(config: RenderDataConfig<T>) {
+  const {paginatedData, selectedIds, idKey, toggleSelectAll, keys, 
+    editButton, deleteButton, toggleSelectOne, customLabels = {}, customRender} = config;
 
   return (
   <Table className="mt-4">
@@ -85,7 +90,7 @@ export function renderData<T>(paginatedData:T[], selectedIds:Set<any>, idKey:str
     </thead>
     <tbody>
       {paginatedData.map((item, idx) => (
-        <tr key={idx}>
+        <tr key={String(item[idKey as keyof T] ?? idx)}>
           <td>
             <input type="checkbox"
               checked={selectedIds.has(item[idKey as keyof T])}
@@ -98,7 +103,7 @@ export function renderData<T>(paginatedData:T[], selectedIds:Set<any>, idKey:str
           {(editButton || deleteButton) && (
             <td>
               <ButtonGroup>
-                {editButton && editButton(item)}
+                {editButton?.(item)}
                 {deleteButton !== undefined && (
                   <Button size="sm" color="danger" onClick={() => deleteButton(item)}>Delete</Button>
                 )}
@@ -109,5 +114,5 @@ export function renderData<T>(paginatedData:T[], selectedIds:Set<any>, idKey:str
       ))}
     </tbody>
   </Table>
-  )
+  );
 }

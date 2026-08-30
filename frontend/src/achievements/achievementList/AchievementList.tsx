@@ -14,6 +14,10 @@ import deleteSomeFromList from "../../util/deleteSomeFromList.ts";
 
 const imgnotfound = "/images/achievements/notFoundImage.png";
 
+function renderEditButton(a: Achievement) {
+  return <ButtonLink outline={false} color="warning" direction={`/achievements/${a.id}`} state={{ achievement: a }} text="Edit" />;
+}
+
 export default function AchievementList() {
 
   const jwt = tokenService.getLocalAccessToken();
@@ -66,13 +70,16 @@ export default function AchievementList() {
           createButton={user?.roles?.[0] === Authority.ADMIN ? "/achievements/new" : undefined}
           createButtonPosition="bottom"
           editCondition={user?.roles?.[0] === Authority.ADMIN}
-          editButton={(a) => <ButtonLink outline={false} color="warning" direction={`/achievements/${a.id}`} state={{ achievement: a }} text="Edit" />}
+          editButton={renderEditButton}
           deleteCondition={user.roles?.[0] === Authority.ADMIN}
           deleteButton={(a) => deleteFromList(`/api/v1/achievements`, a.id, [achievements, setAchievements], [alerts, setAlerts])}
           customLabels={{ badgeImage: "Badge Image" }}
           massEditButton={<Button outline={false} color="warning" style={{ color: "#fff" }}>Edit</Button>}
           massEditUri="/api/v1/achievements/some"
-          massDeleteButton={(items: Achievement[]) => deleteSomeFromList("/api/v1/achievements", items, Authority.ADMIN, undefined, false, achievements, setAchievements, navigate, { confirmField: "name" })}
+          massDeleteButton={(items: Achievement[]) => deleteSomeFromList({url: "/api/v1/achievements", items,
+            requiredAuth: Authority.ADMIN, state: achievements, setState: setAchievements, navigate, 
+            options: { confirmField: "name" }
+          })}
           searchBarPlaceholder={"Search achievements"}
           massRequiredAuth={Authority.ADMIN}
         />

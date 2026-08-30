@@ -140,7 +140,7 @@ describe("SearchBar Component", () => {
         const dropdownButton = screen.getByLabelText(/Show searchable attributes/i);
         fireEvent.click(dropdownButton);
 
-        const nameOption = screen.getByRole("option", { name: "name" });
+        const nameOption = screen.getByRole("button", { name: "name" });
         fireEvent.click(nameOption);
 
         const input = screen.getByRole("textbox") as HTMLInputElement;

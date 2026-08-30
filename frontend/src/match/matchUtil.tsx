@@ -72,7 +72,16 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
     else alert("Now it's salmon moving phase!")
 };
 
-export async function handleUpdateTilePosition(jwt:string, index:number, selectedSalmon:SalmonMatch|null, setSelectedTile:Function, selectedTile:MatchTile|null, match:Match, actualPlayerId:number|undefined, myPlayerId:number, matchTilesNoCoordinate?: MatchTile[]) {
+export interface HandleUpdateTilePositionConfig {jwt: string; index: number; selectedSalmon: SalmonMatch | null;
+    setSelectedTile: Function; selectedTile: MatchTile | null; match: Match; 
+    actualPlayerId: number | undefined; myPlayerId: number; matchTilesNoCoordinate?: MatchTile[];
+}
+
+export async function handleUpdateTilePosition(config: HandleUpdateTilePositionConfig) {
+    const {
+        jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, actualPlayerId, myPlayerId, matchTilesNoCoordinate
+    } = config;
+
     const x = index % GRID_WIDTH;
     const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
     let updateTilePositionResponse;
@@ -126,7 +135,7 @@ export const generatePlayerList = (players:Player[], actualPlayerId:number) => {
             <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
                 {p.energy > 0 
                     ? Array.from({ length: p.energy }).map((_, i) => (
-                        <i key={i} className="fa fa-bolt" style={{ color: '#FFD700', marginRight: '5px' }}></i>
+                        <i key={`energy-${p.id}-${i}`} className="fa fa-bolt" style={{ color: '#FFD700', marginRight: '5px' }}></i>
                     )) 
                     : <i className="fa fa-tired" style={{ color: '#FF8888' }}></i>}
             </td>
@@ -185,9 +194,16 @@ export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile)
 };
 
 export type PendingMove = { salmonId: number, x: number, y: number, enterSpawn?: boolean };
-// --- Send batch to backend and manage rollback ---
-export async function confirmMovementBatch(pendingMoves: PendingMove[], jwt: string, match: Match, 
-    myPlayerId: number, initialState: any, setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void, restoreSnapshot: Function, clearPath: Function) {
+export interface ConfirmMovementBatchConfig {pendingMoves: PendingMove[]; jwt: string; match: Match;
+    myPlayerId: number; initialState: any; setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void;
+    restoreSnapshot: Function; clearPath: Function;
+}
+
+export async function confirmMovementBatch(config: ConfirmMovementBatchConfig) {
+    const {
+        pendingMoves, jwt, match, myPlayerId, initialState, setConfirmBatchIsSubmitting, restoreSnapshot, clearPath
+    } = config;
+
     let moveBatchSuccess = false;
     try {
         const response = await patch(`/api/v1/salmonMatches/move-batch/${match.id}`, jwt, pendingMoves);

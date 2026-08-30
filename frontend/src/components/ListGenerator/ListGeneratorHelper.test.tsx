@@ -40,85 +40,79 @@ const dataset = [
 
 
 describe("renderData —  Basic rendering", () => {
-
   test("Renders each row's data by default", () => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1", "property2"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1", "property2"], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getByText("A")).toBeInTheDocument();
     expect(screen.getByText("D")).toBeInTheDocument();
   });
 
   test("Uses customRender when available", () => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {},
-      (item) => <td>{item.property1}-custom</td>);
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn(), customRender: (item) => <td>{item.property1}-custom</td> });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getByText("A-custom")).toBeInTheDocument();
     expect(screen.getByText("C-custom")).toBeInTheDocument();
   });
 
   test("Renders both Edit and Delete buttons when available", () => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      vi.fn(() => <button>Edit</button>), vi.fn(), vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], editButton: vi.fn(() => <button>Edit</button>), deleteButton: vi.fn(), toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getAllByText("Edit")).toHaveLength(2);
     expect(screen.getAllByText("Delete")).toHaveLength(2);
   });
 
   test.each([
-    ["None",         undefined,                              undefined,  false],
-    ["Only editButton", vi.fn(() => <button>Edit</button>),  undefined,  true ],
-    ["Only deleteButton", undefined,                           vi.fn(),  true ],
+    ["None",                 undefined,                            undefined, false],
+    ["Only editButton", vi.fn(() => <button>Edit</button>),  undefined, true ],
+    ["Only deleteButton", undefined,                           vi.fn(), true ],
   ])("Actions column with %s", (_label, editBtn, delBtn, shouldExist) => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      editBtn as any, delBtn as any, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], editButton: editBtn as any, deleteButton: delBtn as any, toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     const query = screen.queryByText("Actions");
     shouldExist ? expect(query).toBeInTheDocument() : expect(query).not.toBeInTheDocument();
   });
-
 });
 
 
 describe("renderData — customLabels", () => {
-
   test("Capitalizes property name (key) when there is NO customLabel", () => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getByText("Property1")).toBeInTheDocument();
   });
 
   test("Uses customLabel when available and omits capitalized key", () => {
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), { property1: "Nombre" });
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn(), customLabels: { property1: "Nombre" } });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getByText("Nombre")).toBeInTheDocument();
     expect(screen.queryByText("Property1")).not.toBeInTheDocument();
   });
-
 });
 
 
 describe("renderData — checkboxes", () => {
-
   test("Master checkbox is only checked when ALL items are selected", () => {
-    const allSelected = renderData(dataset, new Set([1, 2]), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const allSelected = renderData({ paginatedData: dataset, selectedIds: new Set([1, 2]), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn() });
     const { unmount } = render(<BrowserRouter>{allSelected}</BrowserRouter>);
     expect(screen.getAllByRole("checkbox")[0]).toBeChecked();
     unmount();
 
-    const noneSelected = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const noneSelected = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{noneSelected}</BrowserRouter>);
     expect(screen.getAllByRole("checkbox")[0]).not.toBeChecked();
   });
 
   test("Row checkboxes reflect selectedIds state", () => {
-    const component = renderData(dataset, new Set([1]), "id", vi.fn(), ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set([1]), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     const boxes = screen.getAllByRole("checkbox");
     expect(boxes[1]).toBeChecked();
@@ -127,8 +121,8 @@ describe("renderData — checkboxes", () => {
 
   test("Calls toggleSelectAll when clicking master checkbox", () => {
     const toggleAll = vi.fn();
-    const component = renderData(dataset, new Set(), "id", toggleAll, ["property1"],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: toggleAll,
+      keys: ["property1"], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     fireEvent.click(screen.getAllByRole("checkbox")[0]);
     expect(toggleAll).toHaveBeenCalledTimes(1);
@@ -136,43 +130,38 @@ describe("renderData — checkboxes", () => {
 
   test("Calls toggleSelectOne with correct id when clicking row checkbox", () => {
     const toggleOne = vi.fn();
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, undefined, toggleOne, vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], toggleSelectOne: toggleOne });
     render(<BrowserRouter>{component}</BrowserRouter>);
     fireEvent.click(screen.getAllByRole("checkbox")[1]);
     expect(toggleOne).toHaveBeenCalledWith(1);
   });
-
 });
 
 
 describe("renderData — deleteButton callback", () => {
-
   test.each([
     [0, dataset[0]],
     [1, dataset[1]],
   ])("Calls deleteButton with item of index %i upon clicking", (btnIndex, expectedItem) => {
     const del = vi.fn();
-    const component = renderData(dataset, new Set(), "id", vi.fn(), ["property1"],
-      undefined, del, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: dataset, selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: ["property1"], deleteButton: del, toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     fireEvent.click(screen.getAllByText("Delete")[btnIndex]);
     expect(del).toHaveBeenCalledWith(expectedItem);
   });
-
 });
 
 
 describe("renderData — Empty dataset", () => {
-
   test("Renders table with master checkbox unchecked with NO rows", () => {
-    const component = renderData([], new Set(), "id", vi.fn(), [],
-      undefined, undefined, vi.fn(), vi.fn(), {});
+    const component = renderData({ paginatedData: [], selectedIds: new Set(), idKey: "id", toggleSelectAll: vi.fn(),
+      keys: [], toggleSelectOne: vi.fn() });
     render(<BrowserRouter>{component}</BrowserRouter>);
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("checkbox")).not.toBeChecked();
   });
-
 });
 
 

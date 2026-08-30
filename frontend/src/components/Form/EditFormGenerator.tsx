@@ -39,13 +39,13 @@ import tokenService from '../../services/token.service.ts';
 import { useEffect, useState } from 'react';
 
 interface EditFormGeneratorProps<T extends FieldValues> extends Omit<FormGeneratorProps<T>, 'fields' | 'defaultValues'> {
-  entityToEdit: T, cancelButtonActivated?:boolean, selectOptions?: Record<string, string[]>, actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean,
-  onUnauthorizedRedirect?: string, deactivateSecurity?: boolean, baseUriToFetchEntity?: string
+  readonly entityToEdit: T, readonly cancelButtonActivated?: boolean, readonly selectOptions?: Record<string, string[]>, readonly actualUser?: BaseUser, readonly requiredAuth?: string, readonly checkAuth?: Function | boolean,
+  readonly onUnauthorizedRedirect?: string, readonly deactivateSecurity?: boolean, readonly baseUriToFetchEntity?: string
 }
 
 export function EditFormGenerator<T extends FieldValues>({entityToEdit, onSubmit, submitText = 'Submit', loadingText = 'Loading...',
   className, cancelButtonActivated=true, selectOptions, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, 
-  onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false, baseUriToFetchEntity = "/api/v1"}: EditFormGeneratorProps<T>) {
+  onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false, baseUriToFetchEntity = "/api/v1"}: Readonly<EditFormGeneratorProps<T>>) {
   const [entity, setEntity] = useState<T | null>(entityToEdit ?? null);
   const [fields, setFields] = useState<FieldDef[] | null>(buildFieldsFromEntity(entity!, selectOptions) ?? null);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<T>({defaultValues: entity as DefaultValues<T>});

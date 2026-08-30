@@ -44,7 +44,7 @@ export default function EndGame(): JSX.Element {
     };
 
     const player = playersWithPoints.map((p, index) => (
-        <div key={index} className="endgame-players" style={getPodiumStyle(index)}>
+        <div key={p.id ?? p.name} className="endgame-players" style={getPodiumStyle(index)}>
             <h2>
                 {p.name}
                 <span className="spacer"></span>

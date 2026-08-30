@@ -180,8 +180,8 @@ export default function Game() {
         setConfirmBatchIsSubmitting(true);
         setValidMoves([]);
         setSelectedSalmon(null);
-        confirmMovementBatch(pendingMoves, jwt, match, myPlayer!.id, history[0], setConfirmBatchIsSubmitting,
-            (backup: any) => {
+        confirmMovementBatch({pendingMoves, jwt, match, myPlayerId: myPlayer!.id, initialState: history[0], setConfirmBatchIsSubmitting,
+            restoreSnapshot: (backup: any) => {
                 setMatchTiles(backup.matchTiles);
                 setSalmons(backup.salmons.filter((s:SalmonMatch) => s.salmonsNumber > 0));
                 
@@ -191,12 +191,12 @@ export default function Game() {
                 setMyPlayer(prev => prev ? { ...prev, energy: backup.energy } : null);
                 setPlayers(prev => prev.map(p => p.id === myPlayer!.id ? { ...p, energy: backup.energy } : p));
             },
-            () => {
+            clearPath: () => {
                 // Success callback
                 setPendingMoves([]);
                 setHistory([]);
             }
-        );
+        });
     };
 
     const handleUndoLastMove = () => {
@@ -374,7 +374,7 @@ export default function Game() {
         <div className='game-container'>
             {match.round >= 6 && <div className='grid3'>
                 {[...gridSpawn].reverse().map((salmons:SalmonMatch[], index) => (
-                <div key={index} className="grid-item3">    
+                <div key={`spawn-col-${5 - index}`} className="grid-item3">    
                     <div className='salmons-containerSpawn'>
                     {salmons.map((s, i) => ((s.coordinate.y > 20 && <img key={`spawn-${s.id || i}`} src = {s.salmon.image} alt=""
                         style={{                          
@@ -385,7 +385,7 @@ export default function Game() {
                         )
                     ))}
                     </div>
-                    <div key={index} className='desove-points'>
+                    <div className='desove-points'>
                     {5 - index} 
                     </div>
                 </div>
@@ -434,17 +434,18 @@ export default function Game() {
                             }} 
                             onClick={() => {
                                 if (match.phase === Phase.TILES) {
-                                    handleUpdateTilePosition(jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, match.actualPlayerId, myPlayer.id, matchTilesNoCoordinate); 
+                                    handleUpdateTilePosition({jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, actualPlayerId: match.actualPlayerId, myPlayerId: myPlayer.id, matchTilesNoCoordinate}); 
                                 } else if (match.phase === Phase.MOVING) {
                                     onGridClickWrapper(index);
                                 }
                             }}
                         >
+                            <div className="grid-item-content">
 
-                            {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{ width: '250px', ...getRotationStyle(cell.tile)}}/>)}
+                            {cell.tile && (<img src={cell.tile.tile.image} alt="" style={{...getRotationStyle(cell.tile)}}/>)}
 
                             {/*Real salmons*/}
-                            {cell.salmons && cell.salmons.map((salmon, sIndex) => {
+                            {cell.salmons?.map((salmon, sIndex) => {
                                 const position = calculateSalmonPosition(sIndex, cell.salmons.length + ghostSalmonsInThisCell.length);
                                 const playerColor = players.find(p => p.id === salmon.playerId)?.color;
                                 const rgbColor = playerColor ? ColorToRgb(playerColor) : 'transparent';
@@ -497,6 +498,7 @@ export default function Game() {
                                     -{validMoves.find(m => m.x === x && m.y === y)?.energyUsed}⚡
                                 </div>
                             )}
+                            </div>
                         </button>
                     );
                 })}
@@ -505,7 +507,7 @@ export default function Game() {
             {match.round < 2 &&
             <div className='grid2'>
             {gridSea.map((salmon:SalmonMatch[], index) => (
-                <div key={index} className="grid-item2">    
+                <div key={`sea-group-${salmon[0]?.id ?? index}`} className="grid-item2">    
                     {salmon.map((s, i) => (
                         (s.coordinate === null && 
                         <button key={`sea-salmon-${s.id || i}`} type="button" className="unstyled-button"

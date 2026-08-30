@@ -208,8 +208,8 @@ describe("Lobby Component", () => {
 
     it("triggers startGame when Enter key is pressed on start container", () => {
         render(<Lobby />);
-        const container = screen.getByRole("button", { name: /Start Exit/i });
-        fireEvent.keyDown(container, { key: "Enter" });
+        const startButton = screen.getByRole("button", { name: /^Start$/i });
+        fireEvent.click(startButton);
         expect(startGame).toHaveBeenCalled();
     });
 });

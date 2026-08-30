@@ -9,24 +9,28 @@ export type ValidMove = { x: number, y: number, energyUsed: number, salmonLoss: 
 type EnergyResult = { energyUsed: number, salmonLoss: number };
 type Direction = 'above' | 'left' | 'right';
 
+interface MovementOrientations {
+    toTravelBear: number[];
+    toTravelJump: number[];
+    myBear: number[];
+    myJump: number[];
+}
+
 function calculateMovementEnergy(
     myType: TileType,
     toTravelType: TileType,
     toOri: number,
     myOri: number,
-    toTravelBearOrientations: number[],
-    toTravelJumpOrientations: number[],
-    myBearOrientations: number[],
-    myJumpOrientations: number[]
+    orientations: MovementOrientations
 ): EnergyResult {
     let energyUsed = 1;
     let salmonLoss = 0;
 
-    const toTravelBearHasJump = toTravelType === TileType.BEAR && toTravelBearOrientations.includes(toOri);
-    const toTravelHasJump = toTravelType === TileType.JUMP && toTravelJumpOrientations.includes(toOri);
+    const toTravelBearHasJump = toTravelType === TileType.BEAR && orientations.toTravelBear.includes(toOri);
+    const toTravelHasJump = toTravelType === TileType.JUMP && orientations.toTravelJump.includes(toOri);
 
     if (myType === TileType.BEAR) {
-        if (myBearOrientations.includes(myOri)) {
+        if (orientations.myBear.includes(myOri)) {
             energyUsed = 2;
             salmonLoss += (toTravelType === TileType.BEAR ? 2 : 1);
         } else if (toTravelBearHasJump || toTravelHasJump) {
@@ -38,7 +42,7 @@ function calculateMovementEnergy(
             }
         }
     } else if (myType === TileType.JUMP) {
-        if (myJumpOrientations.includes(myOri)) {
+        if (orientations.myJump.includes(myOri)) {
             energyUsed = 2;
             salmonLoss += (toTravelType === TileType.BEAR ? 1 : 0);
         } else if (toTravelBearHasJump || toTravelHasJump) {
@@ -54,28 +58,28 @@ function calculateMovementEnergy(
 };
 
 const above = (myType: TileType, toTravelType: TileType, toOri: number, myOri: number): EnergyResult =>
-    calculateMovementEnergy(myType, toTravelType, toOri, myOri,
-        [0, 1],       // toTravelBearHasJump
-        [0, 1, 5],    // toTravelHasJump
-        [3, 4],       // myType === BEAR
-        [2, 3, 4]     // myType === JUMP
-    );
+    calculateMovementEnergy(myType, toTravelType, toOri, myOri, {
+        toTravelBear: [0, 1],
+        toTravelJump: [0, 1, 5],
+        myBear: [3, 4],
+        myJump: [2, 3, 4]
+    });
 
 const left = (myType: TileType, toTravelType: TileType, toOri: number, myOri: number): EnergyResult =>
-    calculateMovementEnergy(myType, toTravelType, toOri, myOri,
-        [0, 5],
-        [0, 4, 5],
-        [2, 3],
-        [1, 2, 3]
-    );
+    calculateMovementEnergy(myType, toTravelType, toOri, myOri, {
+        toTravelBear: [0, 5],
+        toTravelJump: [0, 4, 5],
+        myBear: [2, 3],
+        myJump: [1, 2, 3]
+    });
 
 const right = (myType: TileType, toTravelType: TileType, toOri: number, myOri: number): EnergyResult =>
-    calculateMovementEnergy(myType, toTravelType, toOri, myOri,
-        [1, 2],
-        [0, 1, 2],
-        [4, 5],
-        [3, 4, 5]
-    );
+    calculateMovementEnergy(myType, toTravelType, toOri, myOri, {
+        toTravelBear: [1, 2],
+        toTravelJump: [0, 1, 2],
+        myBear: [4, 5],
+        myJump: [3, 4, 5]
+    });
 
 const directionEnergy = (
     direction: Direction,
@@ -162,12 +166,12 @@ const fromSeaNormal = (
 
 function fromGridFull(
     grid: GridCell[],
-    targetX: number, targetY: number,
-    dx: number,
+    targetCoords: { targetX: number, targetY: number, dx: number },
     myType: TileType, toTravelType: TileType,
     energy: number,
     playersNumber: number
 ): ValidMove | null {
+    const { targetX, targetY, dx } = targetCoords;
     if (energy < 3) return null;
 
     const landX = targetX + dx;
@@ -188,11 +192,12 @@ function fromGridFull(
 
 function fromGrid(
     direction: Direction,
-    targetX: number, targetY: number,
+    targetCoords: { targetX: number, targetY: number },
     myType: TileType, toTravelType: TileType,
     toOri: number, myOri: number,
     energy: number
 ): ValidMove | null {
+    const { targetX, targetY } = targetCoords;
     const { energyUsed, salmonLoss: baseLoss } = directionEnergy(direction, myType, toTravelType, toOri, myOri);
     const salmonLoss = baseLoss + (toTravelType === TileType.EAGLE ? 1 : 0);
 
@@ -241,9 +246,9 @@ export const calculateValidMoves = (
 
         let move: ValidMove | null;
         if (isFull(playersNumber, toTravel)) {
-            move = fromGridFull(grid, targetX, targetY, dx, myType, toTravelType, energy, playersNumber);
+            move = fromGridFull(grid, { targetX, targetY, dx }, myType, toTravelType, energy, playersNumber);
         } else {
-            move = fromGrid(type, targetX, targetY, myType, toTravelType, toOri, myOri, energy);
+            move = fromGrid(type, { targetX, targetY }, myType, toTravelType, toOri, myOri, energy);
         }
 
         if (move) validMoves.push(move);
