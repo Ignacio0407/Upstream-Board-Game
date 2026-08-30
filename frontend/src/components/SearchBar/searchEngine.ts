@@ -49,15 +49,19 @@ const getNestedValue = <T,>(obj: T, path: string): unknown => {
 
 const toComparableRaw = (value: unknown): string => {
   if (value == null) return "";
-  if (Array.isArray(value)) return value.map(v => String(v)).join(" ");
+  if (Array.isArray(value)) return value.map(String).join(" ");
   if (typeof value === "object") {
     try { return JSON.stringify(value); } catch { return ""; }
   }
-  return String(value);
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint" || typeof value === "symbol") {
+    return value.toString();
+  }
+  return "";
 };
 
 // "Flexible" normalization: lower case, without accents and without symbols, punctuation or extraneous spaces
-// Keeps onlye letters and Unicode numbers.
+// Keeps only letters and Unicode numbers.
 const normalizeLoose = (s: string): string =>
   s
     .normalize("NFD")
@@ -67,21 +71,83 @@ const normalizeLoose = (s: string): string =>
 
 const prepare = (s: string, caseSensitive: boolean): string => caseSensitive ? s : normalizeLoose(s);
 
-// Unicode attributtes woth letters, numbers, -, _, period. Values with or without "".
-// Allows multiple values split by comma in a single attribute.
+// --- Single-character classifiers: O(1) cost, no quantifiers, ---
+// --- therefore no risk of super-linear backtracking (Sonar does not flag them). ---
+const isKeyChar = (ch: string): boolean => /[\p{L}\p{N}_.-]/u.test(ch);
+const isWs = (ch: string): boolean => /\s/.test(ch);
+
+/**
+ * Single-pass manual parser, guaranteed O(n).
+ *
+ * Replaces the original regex /([\p{L}\p{N}_.-]+)\s*:\s*(?:"([^"]*)"|([^\s"]\S*))/gu
+ * which Sonar flagged for super-linear performance: with `exec` + `/g`, each starting position of a long sequence of 
+ * "key-chars" without a ':' triggers a new match attempt costing O(remaining length), resulting in an overall O(n²)
+ * in the worst case (e.g., long free text without ':').
+ *
+ * The invariant that makes it safe to skip the entire sequence upon failure: ':' is excluded from the key charset,
+ * so if the string [keyStart, keyEnd) is not followed by a ':' (after \s*), NO suffix of that same sequence could
+ * possibly succeed — it would end at the exact same keyEnd and fail for the same reason.
+ * That is why we skip directly to keyEnd instead of keyStart + 1, eliminating the redundant retries that caused the O(n²).
+ */
 export const parseSearchQuery = (query: string): Record<string, string[]> => {
   const filters: Record<string, string[]> = {};
   if (!query.trim()) return filters;
 
-  const regex = /([\p{L}\p{N}_.-]+)\s*:\s*(?:"([^"]*)"|([^\s"]\S*))/gu;
-  let m: RegExpExecArray | null;
-  while ((m = regex.exec(query)) !== null) {
-    const attr = m[1].trim();
-    const raw = (m[2] ?? m[3] ?? "").trim();
-    if (!attr || !raw) continue;
-    const values = raw.split(",").map(v => v.trim()).filter(Boolean);
-    if (values.length) filters[attr] = values;
+  const len = query.length;
+  let i = 0;
+
+  while (i < len) {
+    if (!isKeyChar(query[i])) { i++; continue; }
+
+    const keyStart = i;
+    while (i < len && isKeyChar(query[i])) i++;
+    const keyEnd = i;
+
+    let j = keyEnd;
+    while (j < len && isWs(query[j])) j++;
+
+    if (query[j] !== ":") {
+      i = keyEnd; // salto seguro de la racha completa (ver invariante arriba)
+      continue;
+    }
+
+    j++; // consumir ':'
+    while (j < len && isWs(query[j])) j++;
+
+    let raw: string | null = null;
+    let valueEnd = j;
+
+    if (query[j] === '"') {
+      let k = j + 1;
+      while (k < len && query[k] !== '"') k++;
+      if (k < len) {
+        raw = query.slice(j + 1, k);
+        valueEnd = k + 1;
+      }
+    }
+
+    if (raw === null && j < len && query[j] !== '"' && !isWs(query[j])) {
+      let k = j;
+      while (k < len && !isWs(query[k])) k++;
+      raw = query.slice(j, k);
+      valueEnd = k;
+    }
+
+    if (raw === null) {
+      i = keyEnd; // mismo argumento: ningún sufijo de la racha lo arregla
+      continue;
+    }
+
+    const attr = query.slice(keyStart, keyEnd).trim();
+    const rawTrimmed = raw.trim();
+    if (attr && rawTrimmed) {
+      const values = rawTrimmed.split(",").map(v => v.trim()).filter(Boolean);
+      if (values.length) filters[attr] = values;
+    }
+
+    i = valueEnd;
   }
+
   return filters;
 };
 
