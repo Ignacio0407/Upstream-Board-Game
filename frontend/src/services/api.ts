@@ -23,24 +23,20 @@ instance.interceptors.request.use(
 // 🧰 Response interceptor: handles 401 & retries with refresh token
 instance.interceptors.response.use(
   (res: AxiosResponse): AxiosResponse => res,
-  async (err: AxiosError): Promise<AxiosResponse | never> => {
+  async (err: AxiosError): Promise<AxiosResponse> => {
     const originalConfig = err.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (originalConfig?.url !== "/auth/signin" && err.response?.status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
 
-      try {
-        const rs = await instance.post("/auth/refreshtoken", {
-          refreshToken: TokenService.getLocalRefreshToken(),
-        });
+      const rs = await instance.post("/auth/refreshtoken", {
+        refreshToken: TokenService.getLocalRefreshToken(),
+      });
 
-        const { accessToken }: { accessToken: string } = rs.data;
-        TokenService.updateLocalAccessToken(accessToken);
+      const { accessToken }: { accessToken: string } = rs.data;
+      TokenService.updateLocalAccessToken(accessToken);
 
-        return instance(originalConfig);
-      } catch (_error) {
-        throw _error;
-      }
+      return instance(originalConfig);
     }
 
     throw err;

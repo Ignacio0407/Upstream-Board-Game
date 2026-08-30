@@ -237,12 +237,12 @@ describe("ListGenerator Component", () => {
         const massEditTrigger = screen.getByText("Mass Edit");
         fireEvent.click(massEditTrigger);
 
-        expect(screen.getByRole("dialog", { name: "Mass edit modal" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: /Edit 1 elements/i })).toBeInTheDocument();
 
         const closeBtn = screen.getByRole("button", { name: /✕ Close/i });
         fireEvent.click(closeBtn);
 
-        expect(screen.queryByRole("dialog", { name: "Mass edit modal" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: /Edit 1 elements/i })).not.toBeInTheDocument();
     });
 
     it("calls massDeleteButton with selected items when mass delete button is clicked", () => {

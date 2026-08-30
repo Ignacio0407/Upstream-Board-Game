@@ -1,8 +1,8 @@
 import { JSX } from "react";
 
 interface WhiteSpaceProps {
-  size?: number;
-  orientation?: 'horizontal' | 'vertical'; // restringido a valores esperados
+  readonly size?: number;
+  readonly orientation?: 'horizontal' | 'vertical'; // restringido a valores esperados
 }
 
 /**
@@ -10,7 +10,7 @@ interface WhiteSpaceProps {
  * @param {number} size - tamaño del espacio. Por defecto 30
  * @param {string} orientation - orientación (vertical, horizontal) del espacio. Por defecto horizontal
  */
-export default function WhiteSpace({ size = 30, orientation = "horizontal" }: WhiteSpaceProps): JSX.Element {
+export default function WhiteSpace({ size = 30, orientation = "horizontal" }: Readonly<WhiteSpaceProps>): JSX.Element {
   const styles = { 
     display: orientation === "horizontal" ? "inline-block" : "block",
     width: orientation === "horizontal" ? `${size}px` : "1px",

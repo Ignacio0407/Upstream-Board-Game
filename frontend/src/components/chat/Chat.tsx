@@ -58,7 +58,7 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
     return () => { wsManager.deactivate() };
   }, [match.id]);
 
-  const handleSendMessage = async (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
     try {
@@ -86,10 +86,9 @@ const Chat: React.FC<ChatPrompts> = ({match, players, currentPlayer}) => {
 
   return (
     <div className="chat-wrapper">
-      <div role="button" tabIndex={0} className="chat-tab" onClick={() => setIsChatVisible((prev) => !prev)}
-        onKeyDown={(e) => e.key === 'Enter' && setIsChatVisible((prev) => !prev)}>
+      <button type="button" className="chat-tab" onClick={() => setIsChatVisible((prev) => !prev)}>
         Chat
-      </div>
+      </button>
 
       {isChatVisible && (
         <div className="chat-container">

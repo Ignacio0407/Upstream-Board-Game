@@ -9,6 +9,16 @@ import { Authority, UserList } from "../../interfaces/User.ts";
 import "../../static/css/admin/adminPage.css";
 import { patch } from "../../util/fetchers.ts";
 
+interface EditUserButtonProps { readonly user: UserList; readonly onUpdate: (u: UserList) => void; }
+
+function EditUserButton({ user, onUpdate }: Readonly<EditUserButtonProps>) {
+  return (
+    <Button size="sm" color="primary" onClick={() => onUpdate(user)}>
+      Change authority
+    </Button>
+  );
+}
+
 export default function UserListAdmin() {
 
   const jwt = tokenService.getLocalAccessToken();
@@ -42,6 +52,7 @@ export default function UserListAdmin() {
       )
     );
   } catch (error) {
+    console.error("Error updating user authority:", error);
     setMessage("Error updating authority");
     setVisible(true);
   }
@@ -67,7 +78,7 @@ export default function UserListAdmin() {
 
         /* ✏️ Edit */
         editCondition={true}
-        editButton={(u) => (<Button size="sm" color="primary" onClick={() => updateUserAuthority(u)}> Change authority </Button>)}
+        editButton={(u) => <EditUserButton user={u} onUpdate={updateUserAuthority} />}
 
         /* 🗑️ Delete */
         deleteCondition={true}

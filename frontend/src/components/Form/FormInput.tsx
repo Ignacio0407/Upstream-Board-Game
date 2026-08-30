@@ -41,45 +41,54 @@ export const FormInput: React.FC<FormInputProps> = ({tag, name, type, register, 
 }) => {
   const hasError = errors[name];
   
-  return (
-    <div className={`class-form-group ${hasError ? "class-error-form" : ""}`} 
-         style={numberOfColumns > 1 ? { width: `${100/numberOfColumns-3}%` } : {}}>
-      
-      {type === 'select' ? (
+  const renderInput = () => {
+    const registerOptions = { 
+      required: isRequired ? `The ${tag} is required` : false,
+      ...validators 
+    };
+
+    if (type === 'select') {
+      return (
         <select id={name} className="class-form-input" disabled={disabled} defaultValue={defaultValue}
-          {...register(name, { 
-            required: isRequired ? `The ${tag} is required` : false,
-            ...validators 
-          })}
+          {...register(name, registerOptions)}
         >
-          {values?.map((option, index) => (
-            <option key={index} value={option}>
+          {values?.map((option) => (
+            <option key={String(option)} value={option}>
               {option}
             </option>
           ))}
         </select>
-      ) : type === 'textarea' ? (
+      );
+    }
+
+    if (type === 'textarea') {
+      return (
         <textarea id={name} className="class-form-input" disabled={disabled} defaultValue={defaultValue}
-          {...register(name, { 
-            required: isRequired ? `The ${tag} is required` : false,
-            ...validators 
-          })}
+          {...register(name, registerOptions)}
         />
-      ) : type === 'date' ? (
+      );
+    }
+
+    if (type === 'date') {
+      return (
         <input id={name} className="class-form-input" type="date" disabled={disabled} defaultValue={defaultValue}
-          {...register(name, { 
-            required: isRequired ? `The ${tag} is required` : false,
-            ...validators 
-          })}
+          {...register(name, registerOptions)}
         />
-      ) : (
-        <input id={name} className="class-form-input" type={type} disabled={disabled} defaultValue={defaultValue}
-          {...register(name, { 
-            required: isRequired ? `The ${tag} is required` : false,
-            ...validators 
-          })}
-        />
-      )}
+      );
+    }
+
+    return (
+      <input id={name} className="class-form-input" type={type} disabled={disabled} defaultValue={defaultValue}
+        {...register(name, registerOptions)}
+      />
+    );
+  };
+
+  return (
+    <div className={`class-form-group ${hasError ? "class-error-form" : ""}`} 
+         style={numberOfColumns > 1 ? { width: `${100/numberOfColumns-3}%` } : {}}>
+      
+      {renderInput()}
       
       <label htmlFor={name} className="class-form-label">
         {tag}{isRequired && ' *'}

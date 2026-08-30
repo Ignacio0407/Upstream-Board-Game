@@ -224,7 +224,7 @@ describe("ListGenerator — mass edit modal", () => {
     );
 
     expect(
-      screen.getByRole("dialog")
+      screen.getByRole("heading", { name: /Edit 1 elements/i })
     ).toBeInTheDocument();
   });
 
@@ -235,9 +235,9 @@ describe("ListGenerator — mass edit modal", () => {
     await userEventInstance.click(screen.getAllByRole("checkbox")[1]);
     await userEventInstance.click(screen.getAllByRole("button", { name: /edit/i })[0]);
 
-    fireEvent.click(screen.getByLabelText('Mass edit modal'));
+    fireEvent.click(screen.getByLabelText('Close mass edit modal'));
     
-    expect(screen.queryByLabelText('Mass edit modal')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Close mass edit modal')).not.toBeInTheDocument();
   });
 
 });

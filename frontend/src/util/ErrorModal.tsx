@@ -1,8 +1,8 @@
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 
-interface ErrorModalProps { visible: boolean, setVisible: (visible: boolean) => void, message: string }
+interface ErrorModalProps { readonly visible: boolean; readonly setVisible: (visible: boolean) => void; readonly message: string; }
 
-export default function ErrorModal({ visible, setVisible, message }: ErrorModalProps) {
+export default function ErrorModal({ visible, setVisible, message }: Readonly<ErrorModalProps>) {
     if (!message) return null;
 
     const toggle = () => setVisible(!visible);

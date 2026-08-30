@@ -38,19 +38,19 @@ export interface FieldDef {tag: string, name: string, type: string, isRequired?:
   defaultValue?: string, values?: any[], min?: number, max?: number, disabled?: boolean, numberOfColumns?: number;
 }
 
-export interface FormGeneratorProps<T extends FieldValues> {fields: FieldDef[], defaultValues: Partial<T>, onSubmit: SubmitHandler<T>,
-  submitText?: string;       // Text when not submitted.
-  loadingText?: string;      // Text uppon sending.
-  className?: string;        // Optional css for the form.
-  extraBeforeSubmit?: React.ReactNode;
-  cancelButtonActivated?:boolean;
-  navigateOnCancel?: string;
-  actualUser?: BaseUser, requiredAuth?: string, checkAuth?: Function | boolean, onUnauthorizedRedirect?: string, deactivateSecurity?: boolean
+export interface FormGeneratorProps<T extends FieldValues> {readonly fields: readonly FieldDef[], readonly defaultValues: Partial<T>, readonly onSubmit: SubmitHandler<T>,
+  readonly submitText?: string;       // Text when not submitted.
+  readonly loadingText?: string;      // Text uppon sending.
+  readonly className?: string;        // Optional css for the form.
+  readonly extraBeforeSubmit?: React.ReactNode;
+  readonly cancelButtonActivated?: boolean;
+  readonly navigateOnCancel?: string;
+  readonly actualUser?: BaseUser, readonly requiredAuth?: string, readonly checkAuth?: Function | boolean, readonly onUnauthorizedRedirect?: string, readonly deactivateSecurity?: boolean
 }
 
 export function FormGenerator<T extends FieldValues> ({fields, defaultValues, onSubmit, submitText = 'Submit',
   loadingText = 'Loading...', className, extraBeforeSubmit, actualUser, requiredAuth, checkAuth, 
-  cancelButtonActivated = false, navigateOnCancel = '', onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: FormGeneratorProps<T>) {
+  cancelButtonActivated = false, navigateOnCancel = '', onUnauthorizedRedirect = '/do-not-hack-my-app', deactivateSecurity = false}: Readonly<FormGeneratorProps<T>>) {
   
   const location = useLocation();
   const navigate = useNavigate();

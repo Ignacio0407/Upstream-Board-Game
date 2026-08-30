@@ -57,10 +57,10 @@
 
 /* Controls row (pills and chevrons) */
 .search-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  gap: 8px 10px;
   margin-bottom: 2px;
 }
 
@@ -104,14 +104,6 @@
    (AND/OR and Match Mode)
    ================================ */
 
-.search-controls {
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto;
-  gap: 8px 10px;
-  margin-bottom: 2px;
-}
-
 /* Positioning each control explicitly */
 .pill-dropdown-container:nth-of-type(1) {
   grid-column: 1;
@@ -126,16 +118,12 @@
 .pill-toggle-single {
   grid-column: 1 / span 2;
   grid-row: 2;
+  display: inline-block;
 }
 
 /* Wrap to position the floating menu */
 .pill-dropdown-container {
   position: relative;
-  display: inline-block;
-}
-
-/* Single pill wrapper (for case sensitive toggle) */
-.pill-toggle-single {
   display: inline-block;
 }
 

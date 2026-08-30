@@ -4,12 +4,12 @@ import Player from '../interfaces/Player.ts'
 import User from '../interfaces/User.ts'
 import { State } from "../interfaces/State.ts";
 
-interface endGamePrompts {match:Match, players:Player[], user:User, jwt:string, spectatorIds:number[], 
+interface EndGamePrompts {match:Match, players:Player[], user:User, jwt:string, spectatorIds:number[], 
     navigate:Function, setMatch:Function}
 
-export default async function endGame ({ match, players, user, jwt, spectatorIds, navigate, setMatch }:endGamePrompts) {
+export default async function endGame ({ match, players, user, jwt, spectatorIds, navigate, setMatch }:EndGamePrompts) {
     
-    if (spectatorIds.find((p) => p === user.id)) {
+    if (spectatorIds.includes(user.id)) {
         navigate("/dashboard");
         return;
     }

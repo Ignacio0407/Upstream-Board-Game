@@ -91,10 +91,10 @@ describe("UserListAdmin", () => {
         json: async () => ({ id: 1, name: "Alice", authority: "ADMIN" })
     } as any);
 
-    const user = userEvent.setup();
     renderWithRouter(<UserListAdmin />);
 
     const changeButtons = await screen.findAllByRole("button", { name: /change authority/i });
+    const user = userEvent.setup();
     await user.click(changeButtons[0]);
 
     await waitFor(() => {
@@ -108,10 +108,10 @@ describe("UserListAdmin", () => {
         ok: false
     } as any);
 
-    const user = userEvent.setup();
     renderWithRouter(<UserListAdmin />);
 
     const changeButtons = await screen.findAllByRole("button", { name: /change authority/i });
+    const user = userEvent.setup();
     await user.click(changeButtons[0]);
 
     await waitFor(() => {

@@ -24,13 +24,13 @@ describe('deleteSomeFromList', () => {
     });
 
     it('calls navigateToUnauthorized if security is active', () => {
-        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, false, state, setState, navigate);
+        deleteSomeFromList({ url: '/url', items, requiredAuth: Authority.ADMIN, checkAuth: undefined, deactivateSecurity: false, state, setState, navigate });
         expect(navigateToUnauthorized).toHaveBeenCalled();
     });
 
     it('does nothing if user cancels confirmation', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(false);
-        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
+        deleteSomeFromList({ url: '/url', items, requiredAuth: Authority.ADMIN, checkAuth: undefined, deactivateSecurity: true, state, setState, navigate });
         expect(fetchers.deleteEntity).not.toHaveBeenCalled();
     });
 
@@ -38,7 +38,7 @@ describe('deleteSomeFromList', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockResolvedValue({ status: 200 } as any);
 
-        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
+        deleteSomeFromList({ url: '/url', items, requiredAuth: Authority.ADMIN, checkAuth: undefined, deactivateSecurity: true, state, setState, navigate });
 
         await vi.waitFor(() => {
             expect(fetchers.deleteEntity).toHaveBeenCalledTimes(2);
@@ -50,7 +50,7 @@ describe('deleteSomeFromList', () => {
         vi.mocked(globalThis.confirm).mockReturnValue(true);
         vi.mocked(fetchers.deleteEntity).mockRejectedValue(new Error('Fail'));
 
-        deleteSomeFromList('/url', items, Authority.ADMIN, undefined, true, state, setState, navigate);
+        deleteSomeFromList({ url: '/url', items, requiredAuth: Authority.ADMIN, checkAuth: undefined, deactivateSecurity: true, state, setState, navigate });
 
         await vi.waitFor(() => {
             expect(globalThis.alert).toHaveBeenCalledWith('Error deleting selected items');

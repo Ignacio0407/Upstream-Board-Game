@@ -40,12 +40,12 @@ import { navigateToUnauthorized } from "../DoNotHackMyApp/DoNotHackMyAppHelper.t
 import SearchBar from "../SearchBar/SearchBar.tsx";
 import MassEditWizard from "./MassEditWizard.tsx";
 
-interface ListGeneratorProps<T extends { id: any }> {data: T[], columns?: (keyof T)[], idKey?: keyof T | string, actualUser: BaseUser,
-  customRender?: (item: T) => JSX.Element, requiredAuth?: string, checkAuth?: Function,
-  onUnauthorizedRedirect?: string, deactivateSecurity?: boolean, createButton?: string, createButtonPosition?:string,
-  editCondition?: boolean, editButton?: (item: T) => JSX.Element, deleteCondition?: boolean, deleteButton?: (item: T) => void,
-  massEditButton?: JSX.Element, massEditUri?: string, massDeleteButton?: (items: T[]) => void, massRequiredAuth?:string, 
-  cssClasses?: string[], pageSize?: number, searchBarPlaceholder?: string | null, customLabels?: Record<string, string>}
+interface ListGeneratorProps<T extends { id: any }> {data: T[], columns?: (keyof T)[], readonly idKey?: keyof T | string, readonly actualUser: BaseUser,
+  readonly customRender?: (item: T) => JSX.Element, readonly requiredAuth?: string, readonly checkAuth?: Function,
+  readonly onUnauthorizedRedirect?: string, readonly deactivateSecurity?: boolean, readonly createButton?: string, readonly createButtonPosition?:string,
+  readonly editCondition?: boolean, readonly editButton?: (item: T) => JSX.Element, readonly deleteCondition?: boolean, readonly deleteButton?: (item: T) => void,
+  readonly massEditButton?: JSX.Element, readonly massEditUri?: string, readonly massDeleteButton?: (items: T[]) => void, readonly massRequiredAuth?:string, 
+  readonly cssClasses?: readonly string[], readonly pageSize?: number, readonly searchBarPlaceholder?: string | null, readonly customLabels?: Record<string, string>}
 
 /* This component generates a list of items with pagination, sorting, and mass editing capabilities.
 sortedData
@@ -62,7 +62,7 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
   createButton, createButtonPosition = "bottom",
   editCondition = false, editButton, massEditButton, massEditUri,
   deleteCondition = false, deleteButton, massDeleteButton, massRequiredAuth,
-  cssClasses = [], pageSize = 10, searchBarPlaceholder = null, customLabels = {}}: ListGeneratorProps<T>) {
+  cssClasses = [], pageSize = 10, searchBarPlaceholder = null, customLabels = {}}: Readonly<ListGeneratorProps<T>>) {
 
   const navigate = useNavigate();
   if (!deactivateSecurity) navigateToUnauthorized(checkAuth, actualUser, requiredAuth, navigate, onUnauthorizedRedirect);
@@ -127,12 +127,20 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
   };
 
   const renderedData = useMemo(() => {
-    return renderData(visibleData, selectedIds, idKey, toggleSelectAll, keys,
-      editCondition ? editButton : undefined,
-      deleteCondition ? deleteButton : undefined,
-      toggleSelectOne, navigate, customLabels, customRender);
+    return renderData({
+      paginatedData: visibleData,
+      selectedIds,
+      idKey,
+      toggleSelectAll,
+      keys,
+      editButton: editCondition ? editButton : undefined,
+      deleteButton: deleteCondition ? deleteButton : undefined,
+      toggleSelectOne,
+      customLabels,
+      customRender
+    });
   }, [visibleData, selectedIds, idKey, keys, editCondition, editButton, deleteCondition, deleteButton,
-      toggleSelectAll, toggleSelectOne, navigate, customLabels, customRender]);
+      toggleSelectAll, toggleSelectOne, customLabels, customRender]);
 
   return (
     <div className={`list-generator-container ${cssClasses.join(" ")}`}>
@@ -143,8 +151,14 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
           <span className="selected-counter">{selectedItems.length} selected</span>
 
           {editCondition && massEditButton && (
-            <div role="button" tabIndex={0} onClick={() => setShowMassEdit(true)} onKeyDown={(e) => e.key === 'Enter' && 
-            setShowMassEdit(true)}> {massEditButton} </div>)}
+            <button
+              type="button"
+              style={{ background: 'transparent', border: 'none', padding: 0 }}
+              onClick={() => setShowMassEdit(true)}
+            >
+              {massEditButton}
+            </button>
+          )}
 
             {deleteCondition && massDeleteButton &&
               <Button color="danger" onClick={() => massDeleteButton(selectedItems)}>Delete</Button>}
@@ -152,22 +166,19 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
       )}
 
       {showMassEdit && (
-        <div className="mass-edit-overlay" 
-          role="dialog"
-          aria-modal="true"
-          aria-label="Mass edit modal"
-          onClick={() => setShowMassEdit(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setShowMassEdit(false);
-          }}
-        >
-          
-          <div role="presentation"className="mass-edit-modal" onClick={e => {e.stopPropagation()}}>
+        <div className="mass-edit-overlay">
+          <button
+            type="button"
+            aria-label="Close mass edit modal"
+            style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', background: 'transparent', border: 'none', cursor: 'default' }}
+            onClick={() => setShowMassEdit(false)}
+          />
+          <div className="mass-edit-modal" style={{ position: 'relative', zIndex: 1 }}>
             {/* Prevent closing when clicking inside the modal */}
             <div className="mass-edit-content">
               <div className="mass-edit-header">
                 <h2>Edit {selectedItems.length} elements</h2>
-                <Button color="danger" onClick={() => { setShowMassEdit(false); setSelectedIds(new Set()) }}> ✕ Close </Button>
+                <Button color="danger" onClick={() => { setShowMassEdit(false); setSelectedIds(new Set()); }}> ✕ Close </Button>
               </div>
 
               <MassEditWizard items={selectedItems} massEditUri={massEditUri!} renderItem={customRender!} actualUser={actualUser}

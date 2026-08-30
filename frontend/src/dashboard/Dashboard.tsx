@@ -10,9 +10,8 @@ import useFetchState from '../util/useFetchState.ts';
 import SearchBar from '../components/SearchBar/SearchBar.tsx';
 import deleteFromList from '../util/deleteFromList.ts';
 import WhiteSpace from '../util/WhiteSpace.tsx';
-import {DashboardMatch} from '../interfaces/Match.ts';
+import Match, { DashboardMatch } from '../interfaces/Match.ts';
 import WebSocketManager from '../components/webSocketManager/webSocketManager.ts';
-import Match from '../interfaces/Match.ts';
 import { State } from '../interfaces/State.ts';
 import { Authority } from '../interfaces/User.ts';
    
@@ -90,7 +89,6 @@ export default function Dashboard() {
     const renderedMatches = useMemo(() => matchesList(filtered.length ? filtered : matches), [filtered, matches]);
 
     return ( 
-        <> 
         <div className="dashboard-page-container">
             <h1 className='welcome'>
             Game Listing for {username}
@@ -121,6 +119,5 @@ export default function Dashboard() {
 
             </div>
         </div> 
-        </> 
-); 
+    ); 
 }

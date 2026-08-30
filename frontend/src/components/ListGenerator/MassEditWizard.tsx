@@ -42,16 +42,16 @@ interface EditTuple<T> {
 }
 
 interface MassEditWizardProps<T extends { id: any }> {
-  items: T[];
-  massEditUri: string;
-  renderItem: (item: T) => JSX.Element;
-  actualUser: any;
-  massRequiredAuth: string;
-  onClose: (updated: T[] | null) => void;
+  readonly items: readonly T[], readonly massEditUri: string, readonly renderItem: (item: T) => JSX.Element, readonly actualUser: any,
+  readonly massRequiredAuth: string, readonly onClose: (updated: T[] | null) => void;
+}
+
+function hasChanges<T extends object>(original: T, edited: T): boolean {
+  return (Object.keys(original) as (keyof T)[]).some(key => original[key] !== edited[key]);
 }
 
 export default function MassEditWizard<T extends { id: any }>({items, massEditUri, renderItem, actualUser, massRequiredAuth,
-  onClose}: MassEditWizardProps<T>) {
+  onClose}: Readonly<MassEditWizardProps<T>>) {
 
   const jwt = tokenService.getLocalAccessToken();
   const [editHistory, setEditHistory] = useState<EditTuple<T>[]>(
@@ -73,10 +73,6 @@ export default function MassEditWizard<T extends { id: any }>({items, massEditUr
     current.activeVersion >= 0
       ? current.versions[current.activeVersion]
       : current.original;
-
-  function hasChanges<T extends object>(original: T, edited: T): boolean {
-    return (Object.keys(original) as (keyof T)[]).some(key => original[key] !== edited[key]);
-  }
 
   const applyUpdate = (updated: T) => {
     if (hasChanges(currentEntity, updated)) {
