@@ -76,6 +76,7 @@ class MessageServiceTest {
         Match match = new Match();
         match.setId(1);
         when(matchService.findById(1)).thenReturn(match);
+        when(messageMapper.toDTO(any(Message.class))).thenReturn(dto);
 
         messageService.saveAndSend(dto);
 
@@ -95,10 +96,11 @@ class MessageServiceTest {
         Match match = new Match();
         match.setId(42);
         when(matchService.findById(42)).thenReturn(match);
+        when(messageMapper.toDTO(any(Message.class))).thenReturn(dto);
 
         messageService.saveAndSend(dto);
 
-        verify(messagingTemplate).convertAndSend(eq("/topic/chat/42"), any(Message.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/chat/42"), eq(dto));
     }
 
     @Test
@@ -112,11 +114,12 @@ class MessageServiceTest {
         Match match = new Match();
         match.setId(1);
         when(matchService.findById(1)).thenReturn(match);
+        when(messageMapper.toDTO(any(Message.class))).thenReturn(dto);
 
         messageService.saveAndSend(dto);
 
         verify(messageRepository).save(any(Message.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/chat/1"), any(Message.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/chat/1"), eq(dto));
     }
 
     @Test

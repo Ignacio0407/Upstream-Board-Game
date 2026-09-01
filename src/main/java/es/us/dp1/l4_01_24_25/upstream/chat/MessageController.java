@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,8 +28,8 @@ public class MessageController extends BaseRestControllerWithDTO<Message, Messag
     }
 
     @PostMapping("/send")
-    public void saveAndSend(@Valid MessageDTO messageDto) {
-        this.messageService.saveAsDTO(messageDto);
+    public void saveAndSend(@Valid @RequestBody MessageDTO messageDto) {
+        this.messageService.saveAndSend(messageDto);
     }
     
     @GetMapping("/match/{matchId}")

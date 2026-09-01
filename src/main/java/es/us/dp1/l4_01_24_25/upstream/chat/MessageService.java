@@ -53,7 +53,8 @@ public class MessageService extends BaseServiceWithDTO<Message, MessageDTO, Inte
         Match m = this.matchService.findById(messageDTO.getMatchId());
         Message message = new Message(p, m, sanitizeContent(messageDTO.getContent()));
         this.messageRepository.save(message);
-        this.messagingTemplate.convertAndSend("/topic/chat/" + m.getId(), message);
+        MessageDTO dtoToSend = this.messageMapper.toDTO(message);
+        this.messagingTemplate.convertAndSend("/topic/chat/" + m.getId(), dtoToSend);
     }
 
     @Override

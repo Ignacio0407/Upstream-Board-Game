@@ -111,8 +111,9 @@ class ExceptionHandlerControllerTest {
         when(request.getDescription(false)).thenReturn("uri=/test");
 
         // HttpMessageNotReadableException
+        org.springframework.mock.http.MockHttpInputMessage mockInputMessage = new org.springframework.mock.http.MockHttpInputMessage("".getBytes());
         org.springframework.http.converter.HttpMessageNotReadableException exNotReadable =
-                new org.springframework.http.converter.HttpMessageNotReadableException("Not readable");
+                new org.springframework.http.converter.HttpMessageNotReadableException("Not readable", mockInputMessage);
         org.springframework.http.ResponseEntity<ErrorMessage> res1 = controller.handleHttpMessageNotReadableException(exNotReadable, request);
         org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res1.getStatusCode());
 
@@ -133,4 +134,4 @@ class ExceptionHandlerControllerTest {
         org.springframework.http.ResponseEntity<ErrorMessage> res3 = controller.handleMethodArgumentException(exNotValid, request);
         org.junit.jupiter.api.Assertions.assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, res3.getStatusCode());
     }
-}
+}
