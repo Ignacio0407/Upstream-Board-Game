@@ -101,7 +101,7 @@ class MessageControllerTest {
     }
 
     @Test
-    @DisplayName("saveAndSend - Should delegate to messageService.saveAsDTO")
+    @DisplayName("saveAndSend - Should delegate to messageService.saveAndSend")
     void testSaveAndSend() {
         MessageDTO dto = new MessageDTO();
         dto.setPlayerId(1);
@@ -111,7 +111,7 @@ class MessageControllerTest {
         MessageController controller = new MessageController(messageService);
         controller.saveAndSend(dto);
 
-        verify(messageService).saveAsDTO(dto);
+        verify(messageService).saveAndSend(dto);
     }
 }
 

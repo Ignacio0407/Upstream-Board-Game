@@ -45,9 +45,6 @@ class MatchTileControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private MatchTileController matchTileController;
-
     @MockBean
     private MatchTileService matchTileService;
 
