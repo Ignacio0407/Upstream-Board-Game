@@ -28,6 +28,7 @@ export default function AchievementList() {
   const [finalUser] = useFetchState<User>({} as User, buildSafeUrl('/api/v1/users/', user.id), jwt);
   const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements/user/${encodeURIComponent(String(user.id))}`, jwt);
   const navigate = useNavigate();
+  const isAdmin = user?.roles?.[0] === Authority.ADMIN;
 
   function renderAchievement(a: Achievement) {
     const achievedClass = userAchievements.some(ua => ua.id === a.id) ? "achieved" : "text-center table-cell";
@@ -67,11 +68,11 @@ export default function AchievementList() {
           idKey="id"
           customRender={renderAchievement}
           requiredAuth={Authority.PLAYER}
-          createButton={user?.roles?.[0] === Authority.ADMIN ? "/achievements/new" : undefined}
+          createButton={isAdmin ? "/achievements/new" : undefined}
           createButtonPosition="bottom"
-          editCondition={user?.roles?.[0] === Authority.ADMIN}
+          editCondition={isAdmin}
           editButton={renderEditButton}
-          deleteCondition={user.roles?.[0] === Authority.ADMIN}
+          deleteCondition={isAdmin}
           deleteButton={(a) => deleteFromList(`/api/v1/achievements`, a.id, [achievements, setAchievements], [alerts, setAlerts])}
           customLabels={{ badgeImage: "Badge Image" }}
           massEditButton={<Button outline={false} color="warning" style={{ color: "#fff" }}>Edit</Button>}
