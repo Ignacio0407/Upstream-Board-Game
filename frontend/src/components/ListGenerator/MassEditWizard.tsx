@@ -143,10 +143,7 @@ export default function MassEditWizard<T extends { id: any }>({items, massEditUr
 
       {showReview &&
         <ReviewModal originals={editHistory.map(t => t.original)} renderItem={renderItem} onConfirm={confirmAll}
-          updated={editHistory.map(t =>
-            t.versions.length ? t.versions[t.activeVersion] : undefined
-          )}
-        />
+          updated={editHistory.map(t => t.versions.length ? t.versions[t.activeVersion] : undefined)}/>
       }
     </div>
   );

@@ -181,8 +181,8 @@ export default function ListGenerator<T extends { id: any }>({data, columns, idK
                 <Button color="danger" onClick={() => { setShowMassEdit(false); setSelectedIds(new Set()); }}> ✕ Close </Button>
               </div>
 
-              <MassEditWizard items={selectedItems} massEditUri={massEditUri!} renderItem={customRender!} actualUser={actualUser}
-                massRequiredAuth={massRequiredAuth!} onClose={(updated) => onClose(updated)}/>
+              <MassEditWizard items={selectedItems} massEditUri={massEditUri!} renderItem={customRender!}
+                actualUser={actualUser} massRequiredAuth={massRequiredAuth!} onClose={(updated) => onClose(updated)}/>
             </div>
           </div>
         </div>
