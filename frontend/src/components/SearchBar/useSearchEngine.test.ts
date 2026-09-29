@@ -1,30 +1,30 @@
 /**
  * -----------------------------------------------------------------------------
  * Autor / Author: Ignacio Gutiérrez Serrera
+ * GitHub: https://github.com/Ignacio0407 (@Ignacio0407)
+ * Contact / Email: ignaciogutierrezserrera@gmail.com
  * 
- * 🇬🇧 This software was developed by Ignacio Gutiérrez Serrera.
- * It may be used, modified, and distributed for personal or commercial 
- * purposes, provided that explicit credit is given to the original author.
+ * 🇬🇧 NON-COMMERCIAL & EDUCATIONAL LICENSE:
+ * This software was developed by Ignacio Gutiérrez Serrera.
+ * Permission is granted to use, copy, modify, and study this software for 
+ * non-commercial, personal, academic, and educational purposes, provided 
+ * that this copyright notice, author attribution, and contact details are 
+ * preserved in all copies or substantial portions of the software.
  * 
- * If this code is used as-is or with minor to moderate modifications 
- * as part of another software, proper attribution must be given to 
- * Ignacio Gutiérrez Serrera.
- * (e.g., credits, documentation, or user interface).
+ * Any commercial use, integration into proprietary software, or closed-source 
+ * distribution is strictly prohibited without prior written permission and an 
+ * express commercial license granted by the author.
  * 
- * This license notice must not be removed in any redistribution 
- * of the source code or binaries.
+ * 🇪🇸 LICENCIA PARA FINES NO LUCRATIVOS Y EDUCATIVOS:
+ * Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
+ * Se autoriza su uso, copia, modificación y estudio exclusivamente para 
+ * fines personales, académicos, de investigación y educativos no lucrativos, 
+ * con la condición obligatoria de mantener intacto este aviso de copyright, 
+ * la atribución de autoría y los datos de contacto en todas las copias.
  * 
- * 🇪🇸 Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
- * Se permite su uso, modificación y distribución con fines personales o 
- * comerciales, siempre que se mantenga el reconocimiento explícito al autor.
- * 
- * Si este código se utiliza tal cual, o con modificaciones leves o medias 
- * como parte de otro software, se debe otorgar el crédito correspondiente 
- * a Ignacio Gutiérrez Serrera.
- * (por ejemplo, en los créditos, documentación o interfaz del producto).
- * 
- * No se permite eliminar este aviso de licencia en ninguna redistribución 
- * del código fuente o binario.
+ * Queda terminantemente prohibido cualquier uso comercial, integración en 
+ * software privativo o distribución con fines lucrativos sin la autorización 
+ * previa por escrito del autor y la adquisición de una licencia comercial.
  * -----------------------------------------------------------------------------
  */
 import { renderHook } from "@testing-library/react";
