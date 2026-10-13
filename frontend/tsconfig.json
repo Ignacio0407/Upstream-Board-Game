@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "types": ["vitest", "node"],
+    "types": ["vite/client", "vitest", "node"],
     "allowImportingTsExtensions": true,
     "noEmit": true
   },

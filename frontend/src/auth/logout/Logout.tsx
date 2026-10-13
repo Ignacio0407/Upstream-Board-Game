@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import "../../static/css/auth/authButton.css";
-import "../../static/css/auth/authPage.css";
+import '../authButton.css';
+import '../authPage.css';
 import tokenService from "../../services/token.service.ts";
 
 function sendLogoutRequest() {
