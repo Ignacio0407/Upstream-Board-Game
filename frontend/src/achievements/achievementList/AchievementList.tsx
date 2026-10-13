@@ -78,7 +78,7 @@ export default function AchievementList() {
           massEditButton={<Button outline={false} color="warning" style={{ color: "#fff" }}>Edit</Button>}
           massEditUri="/api/v1/achievements/some"
           massDeleteButton={(items: Achievement[]) => deleteSomeFromList({url: "/api/v1/achievements", items,
-            requiredAuth: Authority.ADMIN, state: achievements, setState: setAchievements, navigate, 
+            requiredAuth: Authority.ADMIN, state: achievements, setState: setAchievements, navigate,
             options: { confirmField: "name" }
           })}
           searchBarPlaceholder={"Search achievements"}

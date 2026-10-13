@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Alert } from 'reactstrap';
 import { SubmitHandler } from 'react-hook-form';
-import '../../static/css/auth/authButton.css';
-import '../../static/css/auth/authPage.css';
+import '../authButton.css';
+import '../authPage.css';
 import tokenService from '../../services/token.service.ts';
 import ButtonLink from '../../components/ButtonLink/ButtonLink.tsx';
 import validators from '../validators.ts';
@@ -75,22 +75,25 @@ export default function Register() {
           loadingText="Registering..."
           deactivateSecurity={true}
           extraBeforeSubmit={
-            <div className="class-form-group" style={{ marginTop: '20px', marginLeft: '200px' }}>
-              <span style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>Select Role:</span>
-              <div style={{ display: 'flex', gap: '20px', marginTop: '10px', marginLeft: '-55px' }}>
-                <button type="button" onClick={() => setSelectedRole(Authority.PLAYER)}
-                  style={{padding: '10px 20px', backgroundColor: selectedRole === Authority.PLAYER ? '#4CAF50' : '#ddd',
-                    color: selectedRole === Authority.PLAYER ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
-                  Player
-                </button>
-                <button type="button" onClick={() => setSelectedRole(Authority.ADMIN)}
-                  style={{padding: '10px 20px', backgroundColor: selectedRole === Authority.ADMIN ? '#4CAF50' : '#ddd',
-                    color: selectedRole === Authority.ADMIN ? 'white' : 'black', border: 'none', borderRadius: '50px', cursor: 'pointer'}}>
-                  Admin
-                </button>
+              <div className="class-form-group" style={{ marginTop: '1.25rem' }}>
+                <span style={{ display: 'block', marginBottom: '0.625rem', fontWeight: 'bold' }}>Select Role:</span>
+                {/* flexWrap keeps the buttons usable on very narrow screens */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.25rem', marginTop: '0.625rem' }}>
+                  <button type="button" onClick={() => setSelectedRole(Authority.PLAYER)}
+                    style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: '999px', cursor: 'pointer',
+                      backgroundColor: selectedRole === Authority.PLAYER ? '#4CAF50' : '#ddd',
+                      color: selectedRole === Authority.PLAYER ? 'white' : 'black' }}>
+                    Player
+                  </button>
+                  <button type="button" onClick={() => setSelectedRole(Authority.ADMIN)}
+                    style={{ padding: '0.625rem 1.25rem', border: 'none', borderRadius: '999px', cursor: 'pointer',
+                      backgroundColor: selectedRole === Authority.ADMIN ? '#4CAF50' : '#ddd',
+                      color: selectedRole === Authority.ADMIN ? 'white' : 'black' }}>
+                    Admin
+                  </button>
+                </div>
               </div>
-            </div>
-          }
+            }
         />
       </div>
 

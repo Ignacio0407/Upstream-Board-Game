@@ -3,7 +3,7 @@ import { SubmitHandler } from 'react-hook-form';
 import tokenService from '../services/token.service.ts';
 import { post } from '../util/fetchers.ts';
 import { FormGenerator, FieldDef } from '../components/Form/FormGenerator.tsx';
-import '../static/css/createGame/createGame.css';
+import './createGame.css';
 import '../static/css/admin/adminPage.css';
 import { Authority } from '../interfaces/User.ts';
 

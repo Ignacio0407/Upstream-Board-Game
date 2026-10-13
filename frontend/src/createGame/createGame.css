@@ -1,0 +1,125 @@
+.createGame-page-container {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('/images/upstreamBackground.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Ensures the background doesn't cut off on scroll */
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* Centers on the X axis */
+    justify-content: center;  /* Centers on the Y axis */
+    /* Uses at least the full height of the viewport */
+    min-height: 100vh;
+    width: 100%;
+}
+
+.title-creategame {
+    display: flex;
+    justify-content: center;
+    padding: 1.85vh;        /* Removed the 8.33vh margin so it centers correctly */
+    margin-bottom: 3vh;     /* Added gap between title and form */
+    border-radius: 0.46vh;
+    margin-left: 0.52vw;
+    margin-right: 0.52vw;
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5);
+}
+
+.button-create {
+    margin-bottom: 5%;
+    height: 3.7vh; /* 40px / 10.8 */
+    width: 40%;
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5);
+    margin-top: 2%;
+    background-color: rgb(25, 191, 0);
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.custom-button-row {
+    margin-top: 1.85vh; /* 20px / 10.8 */
+}
+
+.password-container {
+    margin-top: 1.85vh; /* 20px / 10.8 */
+}
+
+.button-cancel {
+    margin-bottom: 5%;
+    height: 3.7vh; /* 40px / 10.8 */
+    width: 40%;
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5);
+    margin-top: 2%;
+    background-color: rgb(191, 41, 0);
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.form-container {
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5);
+    width: 33.33vw;
+    margin: 0.93vh 0.52vw; /* 10px */
+    padding: 1.85vh 1.04vw; /* 20px */
+}
+
+.label-input {
+    font-size: 1.85vh; /* 20px / 10.8 */
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .title-creategame {
+        margin-top: 5vh;
+        font-size: 2.5vh;
+    }
+
+    .form-container {
+        width: 60vw;
+        padding: 2vh 2vw;
+    }
+
+    .button-create,
+    .button-cancel {
+        height: 4.5vh;
+        font-size: 1.8vh;
+    }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .title-creategame {
+        margin-top: 3vh;
+        width: 92vw;
+        padding: 1.5vh;
+        font-size: 4.5vw;
+        text-align: center;
+    }
+
+    .form-container {
+        width: 92vw;
+        margin: 1vh auto;
+        padding: 2vh 3vw;
+        border-radius: 1vh;
+    }
+
+    .label-input {
+        font-size: 4vw;
+    }
+
+    .button-create,
+    .button-cancel {
+        width: 45%;
+        height: 5vh;
+        font-size: 3.8vw;
+        border-radius: 1vh;
+    }
+}

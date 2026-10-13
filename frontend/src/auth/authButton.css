@@ -1,0 +1,71 @@
+.auth-button {
+  padding: 1.3em 3em;
+  font-size: 0.75rem; /* 12px */
+  text-transform: uppercase;
+  letter-spacing: 0.15625rem; /* 2.5px */
+  font-weight: 500;
+  color: #000;
+  background-color: #fff;
+  border: solid 0.125rem var(--main-green-color); /* 2px */
+  border-radius: 2.8125rem; /* 45px */
+  box-shadow: 0 0.5rem 0.9375rem rgba(0, 0, 0, 0.1); /* 0 8px 15px */
+  transition: all 0.3s ease 0s;
+  cursor: pointer;
+  outline: none;
+}
+
+.auth-button:hover {
+  background-color: var(--main-green-color);
+  box-shadow: 0 0.9375rem 1.25rem rgba(46, 229, 157, 0.4); /* 0 15px 20px */
+  color: #fff;
+  transform: translateY(-0.4375rem); /* -7px */
+}
+
+.auth-button:active {
+  transform: translateY(-0.0625rem); /* -1px */
+}
+
+.blue {
+  border: solid 0.125rem var(--main-blue-color) !important;
+}
+
+.blue:hover {
+  background-color: var(--main-blue-color) !important;
+  box-shadow: 0 0.9375rem 1.25rem rgba(46, 92, 229, 0.4);
+}
+
+.danger {
+  border: solid 0.125rem var(--main-red-color) !important;
+}
+
+.danger:hover {
+  background-color: var(--main-red-color) !important;
+  box-shadow: 0 0.9375rem 1.25rem rgba(229, 46, 46, 0.4);
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .auth-button {
+    font-size: 1rem;
+    padding: 1.2em 2.5em;
+    letter-spacing: 0.125rem;
+    border-radius: 1.875rem;
+  }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .auth-button {
+        font-size: 1rem; /* Reduced from 1.125rem to match input font-size */
+        padding: 0.8em 1.5em; /* Reduced padding to match input height */
+        letter-spacing: 0.1rem;
+        border-radius: 1.875rem;
+        width: 100%;
+        box-sizing: border-box; /* Prevents overflow from padding */
+        box-shadow: 0 0.3125rem 0.625rem rgba(0, 0, 0, 0.1);
+    }
+}

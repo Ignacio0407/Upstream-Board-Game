@@ -98,9 +98,12 @@ describe("UserListAdmin", () => {
     await user.click(changeButtons[0]);
 
     await waitFor(() => {
-        expect(fetchers.patch).toHaveBeenCalled();
-        expect(screen.getByText("ADMIN")).toBeInTheDocument();
+        expect(fetchers.patch).toHaveBeenCalledWith(
+            "/api/v1/users/listing/1",
+            "mock-jwt",
+        );
     });
+    expect(await screen.findByText("ADMIN")).toBeInTheDocument();
   });
 
   it("Shows error modal when authority update patch fails", async () => {
