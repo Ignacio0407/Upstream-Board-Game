@@ -89,7 +89,7 @@
   background-color:  #193963;
 }
 
-.img-desove {
+.img-spawn {
   height: 90%;
   width: 80%;
   object-fit: cover;
@@ -168,7 +168,7 @@ button.grid-item.unstyled-button {
   position: relative;
 }
 
-.desove-points {
+.spawn-points {
   position: absolute;
   right: 1vh;
   margin-right: 0;
@@ -463,7 +463,7 @@ button.grid-item.unstyled-button {
         height: 6vw !important;
     }
 
-    .desove-points {
+    .spawn-points {
         font-size: 4vw !important;
         right: 2vw !important;
     }

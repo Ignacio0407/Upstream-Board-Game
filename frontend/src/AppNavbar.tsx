@@ -145,9 +145,9 @@ const AppNavbar: React.FC = () => {
   }
 
   return (
-    <div>
-      <Navbar expand="md" dark color="success">
-        <NavbarBrand href="/">
+    <div className="app-navbar-container">
+      <Navbar expand="md" dark color="success" className="app-navbar">
+        <NavbarBrand href="/" className="NavbarBrand">
         <img src="/images/salmonLogo.webp" alt="Logo" style={{ height: 40, width: 40, marginRight: 5 }} />
           <span>Upstream</span>
       </NavbarBrand>

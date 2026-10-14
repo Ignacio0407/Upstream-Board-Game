@@ -20,7 +20,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(0.93vh + 2vmin);
   color: white;
 }
 
@@ -38,6 +38,44 @@
   }
 }
 
-.NavbarBrand {
-  margin-left: 20px;
+.app-container {
+  min-width: 100%;
+  width: fit-content;
+}
+
+.app-navbar-container {
+  width: 100%;
+  min-width: 100%;
+  background-color: var(--bs-success, #198754);
+}
+
+.app-navbar-container .navbar,
+.app-navbar {
+  width: 100%;
+  min-width: 100%;
+}
+
+.NavbarBrand,
+.navbar-brand {
+  margin-left: 1.04vw; /* 20px / 19.2 */
+}
+
+/* Tablet & Mobile responsive adjustments */
+@media (max-width: 1024px) {
+  .NavbarBrand,
+  .navbar-brand {
+    margin-left: 1.5vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .NavbarBrand,
+  .navbar-brand {
+    margin-left: 2.5vw;
+  }
+
+  .app-navbar .navbar-toggler {
+    position: sticky;
+    right: 1rem;
+  }
 }

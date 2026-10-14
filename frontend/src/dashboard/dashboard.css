@@ -1,4 +1,4 @@
-.dashboard-page-container{
+.dashboard-page-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -14,46 +14,48 @@
     flex-direction: column;
 }
 
-.welcome{
-    display: flex;               
-    justify-content: center;             
-    padding: 20px;  
-    margin-top: 90px;            
-    border-radius: 5px;   
-    border: 2px solid black;      
-    margin-left: 10px; 
-    margin-right: 10px;  
-    color: white;     
+.welcome {
+    display: flex;
+    justify-content: center;
+    padding: 1.85vh; /* 20px / 10.8 */
+    margin-top: 8.33vh; /* 90px / 10.8 */
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    border: 0.18vh solid black; /* 2px / 10.8 */
+    margin-left: 0.52vw; /* 10px / 19.2 */
+    margin-right: 0.52vw; /* 10px / 19.2 */
+    color: white;
+    font-size: 1.85vh;
 }
 
 .game-table {
     width: 90%;
-    margin: 20px auto;
-    border-collapse:collapse;
-    background-color: #33678A; 
+    margin: 1.85vh auto; /* 20px / 10.8 */
+    border-collapse: collapse;
+    background-color: #33678A;
     color: white;
     align-items: center;
     justify-content: center;
-    display:table;
+    display: table;
     table-layout: fixed;
 }
 
-.cabeza {
-    padding: 10px;
-    font-size: 1.2em;
+.header {
+    padding: 0.93vh; /* 10px / 10.8 */
+    font-size: 1.85vh;
     text-align: left;
     background-color: #33678A;
     color: white;
 }
 
-.celda {
-    padding: 10px;
+.cell {
+    padding: 0.93vh; /* 10px / 10.8 */
     text-align: left;
-    border-top: 1px solid #517A94;
+    font-size: 1.48vh;
+    border-top: 0.1vh solid #517A94;
 }
 
-.fila {
-    border-bottom: 1px solid #517A94;
+.row {
+    border-bottom: 0.1vh solid #517A94;
     align-items: center;
     justify-content: center;
 }
@@ -63,8 +65,69 @@
 }
 
 .search-matches .search-container {
-  position: relative;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+    position: relative;
+    top: 0.93vh; /* 10px / 10.8 */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .welcome {
+        margin-top: 5vh;
+        padding: 1.5vh 2vw;
+        font-size: 2vh;
+    }
+
+    .game-table {
+        width: 95%;
+    }
+
+    .header {
+        padding: 1vh;
+        font-size: 1.8vh;
+    }
+
+    .cell {
+        padding: 1vh;
+        font-size: 1.6vh;
+    }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .welcome {
+        margin-top: 4vh;
+        padding: 1.5vh 3vw;
+        font-size: 4vw;
+        width: 92%;
+        text-align: center;
+    }
+
+    .game-table {
+        width: 96%;
+        display: block;
+        overflow-x: auto;
+        font-size: 3.5vw;
+        white-space: nowrap;
+    }
+
+    .header {
+        padding: 1vh 2vw;
+        font-size: 3.8vw;
+    }
+
+    .cell {
+        padding: 1vh 2vw;
+        font-size: 3.4vw;
+    }
+
+    .search-matches .search-container {
+        top: 1vh;
+        width: 94%;
+    }
 }

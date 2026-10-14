@@ -1,4 +1,4 @@
-.home-page-container{
+.home-page-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -12,59 +12,129 @@
     align-items: center;
 }
 
-.hero-div{
+.hero-div {
     background-color: rgba(255, 255, 255, 0.3);
-    padding: 2rem;
-    border-radius: 25px;
-    backdrop-filter: blur(10px);
+    padding: 3.7vh 2.08vw; /* 40px / 10.8 */
+    border-radius: 2.31vh;  /* 25px / 10.8 */
+    backdrop-filter: blur(0.93vh); /* 10px / 10.8 */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.hero-div h1{
-    font-size: 3rem;
+.hero-div h1 {
+    font-size: 5.56vh; /* 60px / 10.8 */
     font-weight: 700;
     color: #2f324f;
     text-align: center;
     text-transform: uppercase;
 }
 
-.hero-div h3{
+.hero-div h3 {
     text-align: center;
+    font-size: 2.59vh; /* 28px / 10.8 */
 }
 
-.pantallaInicio{
+.homeScreen {
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.85vh; /* 20px / 10.8 */
 }
 
-.botonesPantallaInicio{
+.homeScreenButtons {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    gap: 1rem;
+    gap: 1.04vw; /* 20px / 19.2 */
 }
 
-.imagenInicio{
-    border-radius: 25px;
+.homeImage {
+    border-radius: 2.31vh; /* 25px / 10.8 */
+    max-width: 100%;
+    height: auto;
 }
 
-.botones-juntos {
+.buttons-together {
     display: flex;
-    gap: 30px; /* Espacio entre los botones */
-  }
-  
-  .botones-juntos > * {
-    flex-shrink: 0; /* Evita que los botones se reduzcan */
-  }
+    gap: 1.56vw; /* 30px / 19.2 */
+}
 
-  
-.crear-partida {
+.buttons-together > * {
+    flex-shrink: 0; /* Prevents buttons from shrinking */
+}
+
+.create-game {
     display: flex;
     justify-content: center;
-  }
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .hero-div {
+        max-width: 80vw;
+        padding: 3vh 3vw;
+        border-radius: 2vh;
+    }
+
+    .hero-div h1 {
+        font-size: 4.5vh;
+    }
+
+    .hero-div h3 {
+        font-size: 2.2vh;
+    }
+
+    .buttons-together {
+        gap: 2vw;
+    }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .hero-div {
+        width: 92vw;
+        max-width: 92vw;
+        padding: 2.5vh 3vw;
+        border-radius: 2vh;
+    }
+
+    .hero-div h1 {
+        font-size: 6.5vw;
+    }
+
+    .hero-div h3 {
+        font-size: 4vw;
+    }
+
+    .homeScreen {
+        gap: 2vh;
+    }
+
+    .homeScreenButtons {
+        flex-direction: column;
+        gap: 2vh;
+        width: 100%;
+    }
+
+    .buttons-together {
+        flex-direction: column;
+        gap: 1.5vh;
+        width: 100%;
+    }
+
+    .buttons-together > * {
+        width: 100%;
+    }
+
+    .homeImage {
+        max-width: 80vw;
+        border-radius: 1.5vh;
+    }
+}

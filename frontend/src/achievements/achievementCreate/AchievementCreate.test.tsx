@@ -10,6 +10,11 @@ import { Metric } from "../../interfaces/Achievement";
 vi.mock("../../services/token.service", () => ({
     default: {
         getLocalAccessToken: vi.fn(() => "mock-jwt"),
+        getUser: vi.fn(() => ({
+            id: 1,
+            username: "admin",
+            authorities: [{ authority: "ADMIN" }],
+        })),
     },
 }));
 

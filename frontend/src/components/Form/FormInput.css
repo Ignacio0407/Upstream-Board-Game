@@ -3,27 +3,27 @@
  * Autor / Author: Ignacio Gutiérrez Serrera
  * GitHub: https://github.com/Ignacio0407 (@Ignacio0407)
  * Contact / Email: ignaciogutierrezserrera@gmail.com
- * 
+ *
  * 🇬🇧 NON-COMMERCIAL & EDUCATIONAL LICENSE:
  * This software was developed by Ignacio Gutiérrez Serrera.
- * Permission is granted to use, copy, modify, and study this software for 
- * non-commercial, personal, academic, and educational purposes, provided 
- * that this copyright notice, author attribution, and contact details are 
+ * Permission is granted to use, copy, modify, and study this software for
+ * non-commercial, personal, academic, and educational purposes, provided
+ * that this copyright notice, author attribution, and contact details are
  * preserved in all copies or substantial portions of the software.
- * 
- * Any commercial use, integration into proprietary software, or closed-source 
- * distribution is strictly prohibited without prior written permission and an 
+ *
+ * Any commercial use, integration into proprietary software, or closed-source
+ * distribution is strictly prohibited without prior written permission and an
  * express commercial license granted by the author.
- * 
+ *
  * 🇪🇸 LICENCIA PARA FINES NO LUCRATIVOS Y EDUCATIVOS:
  * Este software ha sido desarrollado por Ignacio Gutiérrez Serrera.
- * Se autoriza su uso, copia, modificación y estudio exclusivamente para 
- * fines personales, académicos, de investigación y educativos no lucrativos, 
- * con la condición obligatoria de mantener intacto este aviso de copyright, 
+ * Se autoriza su uso, copia, modificación y estudio exclusivamente para
+ * fines personales, académicos, de investigación y educativos no lucrativos,
+ * con la condición obligatoria de mantener intacto este aviso de copyright,
  * la atribución de autoría y los datos de contacto en todas las copias.
- * 
- * Queda terminantemente prohibido cualquier uso comercial, integración en 
- * software privativo o distribución con fines lucrativos sin la autorización 
+ *
+ * Queda terminantemente prohibido cualquier uso comercial, integración en
+ * software privativo o distribución con fines lucrativos sin la autorización
  * previa por escrito del autor y la adquisición de una licencia comercial.
  * -----------------------------------------------------------------------------
  */
@@ -41,21 +41,26 @@
   --main-black: #111;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Base                                                                       */
+/* -------------------------------------------------------------------------- */
+
 .class-form-group {
   position: relative;
-  margin-bottom: 25px; /* Espacio entre inputs */
+  margin-bottom: 1.5625rem; /* 25px */
 }
 
 input.class-form-input,
 select.class-form-input {
   width: 100%;
+  margin-left: -0%;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1rem; /* 16px */
   color: var(--color-input);
   padding: 0.6em 0.3em;
   border: none;
   outline: none;
-  border-bottom: 1px solid var(--main-button-hover-dark-color);
+  border-bottom: 0.0625rem solid var(--main-button-hover-dark-color); /* 1px */
   background-color: transparent;
   transition: border-color 0.3s ease;
 }
@@ -63,10 +68,10 @@ select.class-form-input {
 textarea.class-form-input {
   width: 100%;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1rem; /* 16px */
   color: var(--color-input);
   padding: 0.6em 0.3em;
-  border: 1px solid var(--main-button-hover-dark-color);
+  border: 0.0625rem solid var(--main-button-hover-dark-color); /* 1px */
   outline: none;
   background-color: transparent;
   resize: none;
@@ -74,40 +79,53 @@ textarea.class-form-input {
 }
 
 .class-form-label {
+  margin-left: -0%;
   color: var(--color-label);
   cursor: text;
   position: absolute;
   top: 0;
-  left: 5px;
-  transform: translateY(10px);
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  left: 0.3125rem; /* 5px */
+  font-size: 1rem; /* 16px */
+  transform: translateY(0.625rem); /* 10px */
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s ease;
   pointer-events: none;
 }
 
-/* Efecto de elevación del label al enfocar o tener valor */
+/* Floating label*/
 .class-form-input:focus + .class-form-label,
 .class-form-input:not(:placeholder-shown) + .class-form-label {
-  transform: translateY(-15px) scale(0.7);
+  transform: translateY(-0.9375rem) scale(0.7); /* -15px */
   transform-origin: top left;
   color: var(--main-button-hover-dark-color);
 }
 
-/* Estilo para select */
+/* Select*/
 select.class-form-input {
-  font-size: 16px;
+  font-size: 1rem; /* 16px */
   padding: 0.5em 0;
 }
 
-/* Asterisco rojo para campos requeridos */
+/* Required fields*/
 input.class-form-input[required] + .class-form-label::after,
 select.class-form-input[required] + .class-form-label::after,
 textarea.class-form-input[required] + .class-form-label::after {
   content: '*';
   color: var(--color-error);
-  margin-left: 2px;
+  margin-left: 0.125rem; /* 2px */
 }
 
-/* Animación de error */
+/* Centers any extra content injected before the submit button */
+.class-form-extra-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
+
+/* Error*/
 .class-error-form {
   animation: shake 0.2s ease-in-out 0s 2;
   transition: transform 0.5s, color 0.3s;
@@ -127,24 +145,102 @@ textarea.class-form-input[required] + .class-form-label::after {
   display: flex;
   width: 100%;
   position: relative;
-  font-size: 0.7em;
+  font-size: 0.75rem; /* 12px */
   color: var(--color-error);
-  padding-left: 3px;
-  margin-top: 5px;
+  padding-left: 0.1875rem; /* 3px */
+  margin-top: 0.3125rem; /* 5px */
 }
 
-/* Animación de shake */
 @keyframes shake {
-  0% { margin-left: 0; }
-  25% { margin-left: 0.5rem; }
-  75% { margin-left: -0.5rem; }
-  100% { margin-left: 0; }
+  0% {
+    margin-left: 0;
+  }
+
+  25% {
+    margin-left: 0.5rem;
+  }
+
+  75% {
+    margin-left: -0.5rem;
+  }
+
+  100% {
+    margin-left: 0;
+  }
 }
 
-/* Responsive */
+/* -------------------------------------------------------------------------- */
+/* Tablets                                                                    */
+/* -------------------------------------------------------------------------- */
+
+@media screen and (max-width: 1024px) {
+  .class-form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  input.class-form-input,
+  select.class-form-input,
+  textarea.class-form-input {
+    font-size: 1rem;
+  }
+
+  .class-form-label {
+    font-size: 1rem;
+    left: 0.3125rem;
+    transform: translateY(0.625rem);
+  }
+
+  .class-form-input:focus + .class-form-label,
+  .class-form-input:not(:placeholder-shown) + .class-form-label {
+    transform: translateY(-0.9375rem) scale(0.75);
+  }
+
+  .class-error-form .class-error-message {
+    font-size: 0.75rem;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mobile phones                                                              */
+/* -------------------------------------------------------------------------- */
+
+@media screen and (max-width: 600px) {
+  .class-form-group {
+    width: 100% !important;
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  input.class-form-input,
+  select.class-form-input,
+  textarea.class-form-input {
+    font-size: 1rem;
+  }
+
+  select.class-form-input {
+    font-size: 1rem;
+  }
+
+  .class-form-label {
+    font-size: 1rem;
+    left: 0.5rem;
+    transform: translateY(0.5rem);
+  }
+
+  .class-form-input:focus + .class-form-label,
+  .class-form-input:not(:placeholder-shown) + .class-form-label {
+    transform: translateY(-0.8125rem) scale(0.75);
+  }
+
+  .class-error-form .class-error-message {
+    font-size: 0.75rem;
+    margin-top: 0.375rem;
+  }
+}
+
 @media screen and (max-width: 450px) {
   .class-form-group {
     width: 90% !important;
-    margin-top: 20px;
+    margin-top: 1.25rem;
   }
 }
