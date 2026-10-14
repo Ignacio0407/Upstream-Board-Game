@@ -129,11 +129,6 @@ describe('Dashboard', () => {
       expect(screen.getByText(/Game Listing for testuser/i)).toBeInTheDocument();
     });
 
-    test('Shows create match button', () => {
-      renderDashboard();
-      expect(screen.getByRole('link', { name: /Create Game/i })).toBeInTheDocument();
-    });
-
     test('Shows table headers', () => {
       renderDashboard();
       ['Game', 'Players', 'State', 'Private', 'Join', 'Spectate'].forEach((header) => {

@@ -8,8 +8,8 @@
 
 .playercard-container {
     width: 17vw;
-    max-width: 400px;
-    min-width: 250px;
+    max-width: 20.8vw; /* 400px / 19.2 */
+    min-width: 13vw;   /* 250px / 19.2 */
     background-color: rgb(25, 135, 84);
     border-radius: 2vw;
     margin-top: 5vh;
@@ -41,23 +41,65 @@
     border-top: none;
 }
 
-@media (max-width: 768px) {
+/* Evita que los elementos flexibles desborden su contenedor */
+.achievement-container,
+.achievement-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.achievement-card {
+    flex: 1 1 0;
+}
+
+/* Tablets (1024px or less) */
+@media (max-width: 1024px) {
+    .achievement-container {
+        gap: 2vw;
+        padding: 2vw;
+    }
+
+    .playercard-container {
+        width: 25vw;
+        max-width: 30vw;
+        min-width: 20vw;
+        border-radius: 2vw;
+    }
+
+    .title-playercard {
+        font-size: 2.8vw;
+    }
+
+    .playercard-row {
+        font-size: 2vw;
+    }
+}
+
+/* Mobile phones (600px or less) */
+@media (max-width: 600px) {
     .achievement-container {
         flex-direction: column;
-        gap: 2vw;
+        align-items: center;
+        gap: 3vh;
+        padding: 3vw;
     }
 
     .playercard-container {
         width: 90vw;
-        margin: 0 auto;
-        border-radius: 4vw;
+        max-width: 90vw;
+        min-width: unset;
+        margin: 2vh auto 0;
+        border-radius: 2vh;
     }
 
     .title-playercard {
         font-size: 5vw;
+        margin: 1.5vh 0;
     }
 
     .playercard-row {
-        font-size: 3vw;
+        font-size: 3.5vw;
+        padding: 1vh 0;
     }
 }

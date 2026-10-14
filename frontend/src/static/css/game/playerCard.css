@@ -3,11 +3,11 @@
     align-items: center;
     justify-content: space-between;
     background-color: white;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    padding: 0.93vh; /* 10px / 10.8 */
+    margin-bottom: 0.93vh; /* 10px / 10.8 */
+    border-radius: 0.46vh; /* 5px / 10.8 */
     width: 100%;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5); 
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5); /* 0 0 5px */
 }
 
 .rowContainer {
@@ -16,21 +16,57 @@
     justify-content: center;
     align-items: center;
     border: none;
-    
 }
+
 .column-card-name {
     font-size: 1.2em;
     font-weight: bold;
     text-align: left;
     margin-left: 5%;
-    
 }
 
 .column-card-color {
-    width: 30px;
-    height: 30px;
+    width: 2.78vh;  /* 30px / 10.8 */
+    height: 2.78vh; /* 30px / 10.8 */
     border-radius: 50%;
-    margin-left: 20px; 
+    margin-left: 1.04vw; /* 20px / 19.2 */
     flex-shrink: 0; 
-    border-width: 1px;
+    border-width: 0.1vh;
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .playerCardContainer {
+        padding: 1.2vh;
+        margin-bottom: 1.2vh;
+    }
+
+    .column-card-color {
+        width: 3.5vh;
+        height: 3.5vh;
+        margin-left: 2vw;
+    }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .playerCardContainer {
+        padding: 1.5vh 3vw;
+        margin-bottom: 1.5vh;
+        border-radius: 1vh;
+    }
+
+    .column-card-name {
+        font-size: 3.8vw;
+    }
+
+    .column-card-color {
+        width: 7vw;
+        height: 7vw;
+        margin-left: 3vw;
+    }
 }

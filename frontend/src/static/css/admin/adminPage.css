@@ -14,9 +14,10 @@
 .custom-form-input-label {
   position: absolute;
   top: 0;
-  left: 5px;
+  left: 0.26vw; /* 5px / 19.2 */
+  font-size: 1.48vh;
   transition: transform 0.5s, color 0.3s;
-  transform: translateY(-15px) scale(0.7);
+  transform: translateY(-1.39vh) scale(0.7); /* -15px / 10.8 */
   transform-origin: top left;
   color: #23c483;
   cursor: pointer;
@@ -28,33 +29,71 @@
 }
 
 .custom-input,
-.custom-textarea{
-    width: 100% !important;
-    font-family: inherit !important;
-    font-size: 1rem !important;
-    color: var(--color-input) !important;
-    padding: 0.6em 0.3em !important;
-    outline: none !important;
-    background-color: transparent !important;
-    margin: 20px 0;
+.custom-textarea {
+  width: 100% !important;
+  font-family: inherit !important;
+  font-size: 1.48vh !important; /* 16px / 10.8 */
+  color: var(--color-input) !important;
+  padding: 0.6em 0.3em !important;
+  outline: none !important;
+  background-color: transparent !important;
+  margin: 1.85vh 0; /* 20px / 10.8 */
 }
 
-.custom-input{
+.custom-input {
   border: none !important;
-  border-bottom: 1px solid var(--main-button-hover-dark-color) !important;
+  border-bottom: 0.18vh solid var(--main-button-hover-dark-color) !important;
 }
 
-.custom-input:disabled{
+.custom-input:disabled {
   background-color: rgb(239, 239, 239) !important;
 }
 
-.custom-textarea{
-  border: 1px solid var(--main-button-hover-dark-color) !important;
+.custom-textarea {
+  border: 0.18vh solid var(--main-button-hover-dark-color) !important;
 }
 
-.custom-button-row{
+.custom-button-row {
   width: 100%;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .admin-page-container {
+    width: 90%;
+    margin: 0 auto;
+  }
+  .custom-input,
+  .custom-textarea {
+    font-size: 1.8vh !important;
+  }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+  .admin-page-container {
+    width: 95%;
+    margin: 0 auto;
+  }
+  .custom-form-input-label {
+    left: 1vw;
+    font-size: 3.8vw;
+    transform: translateY(-1.2vh) scale(0.75);
+  }
+  .custom-input,
+  .custom-textarea {
+    font-size: 3.8vw !important;
+    margin: 1.5vh 0;
+  }
+  .custom-button-row {
+    flex-direction: column;
+    gap: 1.5vh;
+  }
 }

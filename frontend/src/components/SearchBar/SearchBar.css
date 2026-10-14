@@ -29,14 +29,14 @@
  */
 
 /* ================================
-   Theme variables (tweak as needed)
+   Theme variables
    ================================ */
 :root {
-  --sb-accent: #00BFFF;          /* primary accent (matches search-bar border) */
-  --sb-accent-weak: #e6f8ff;     /* light accent used on hover states */
-  --sb-fg: #1f2a37;              /* text color */
-  --sb-bg: #ffffff;              /* surfaces */
-  --sb-border: #00BFFF;          /* pill + input borders aligned to accent */
+  --sb-accent: #00BFFF;
+  --sb-accent-weak: #e6f8ff;
+  --sb-fg: #1f2a37;
+  --sb-bg: #ffffff;
+  --sb-border: #00BFFF;
   --sb-shadow: rgba(0, 191, 255, 0.25);
 }
 
@@ -51,69 +51,57 @@
 .search-container {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;       /* allow wrapping on small screens */
-  gap: 8px 10px;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.625rem;              /* 8px 10px */
 }
 
-/* Controls row (pills and chevrons) */
 .search-controls {
   display: grid;
   grid-template-columns: auto auto;
   grid-template-rows: auto auto;
-  gap: 8px 10px;
-  margin-bottom: 2px;
+  gap: 0.5rem 0.625rem;
+  margin-bottom: 0.125rem;
 }
 
 /* ================================
    Search input and button
    ================================ */
-.search-bar { 
-  width: 200px; /* Tamaño pequeño */ 
-  padding: 5px; 
-  border: 2px solid #00BFFF; /* Borde celeste */ 
-  border-radius: 15px; /* Esquinas redondeadas */ 
-  outline: none; 
+.search-bar {
+  width: 12.5rem;                    /* 200px at 100% zoom */
+  padding: 0.3125rem;
+  border: 0.125rem solid var(--sb-border);
+  border-radius: 0.9375rem;
+  outline: none;
 }
 
 .search-bar:focus {
-  border-color: #00BFFF;
-  box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.25);
+  border-color: var(--sb-border);
+  box-shadow: 0 0 0 0.1875rem var(--sb-shadow);
   background: #fff;
 }
 
-.search-button { 
-  background-color: transparent; 
-  border: none; 
-  cursor: pointer; 
-  margin-left: -35px; /* Ajustar para que la lupa se superponga al borde del input */ 
+.search-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: -2.1875rem;           /* magnifier overlaps the input's right edge */
 }
 
 .search-button:focus {
   outline: none;
-  border-color: #00BFFF;
-  box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.25);
+  box-shadow: 0 0 0 0.1875rem var(--sb-shadow);
 }
 
-.search-button .fa-search { 
-  font-size: 16px; 
-  color: #13d2e779; /* Color de la lupa */ 
+.search-button .fa-search {
+  font-size: 1rem;
+  color: #13d2e779;
 }
 
 /* ================================
    Pill-sized dropdown controls
-   (AND/OR and Match Mode)
    ================================ */
-
-/* Positioning each control explicitly */
-.pill-dropdown-container:nth-of-type(1) {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.pill-dropdown-container:nth-of-type(2) {
-  grid-column: 2;
-  grid-row: 1;
-}
+.pill-dropdown-container:nth-of-type(1) { grid-column: 1; grid-row: 1; }
+.pill-dropdown-container:nth-of-type(2) { grid-column: 2; grid-row: 1; }
 
 .pill-toggle-single {
   grid-column: 1 / span 2;
@@ -121,91 +109,77 @@
   display: inline-block;
 }
 
-/* Wrap to position the floating menu */
 .pill-dropdown-container {
   position: relative;
   display: inline-block;
 }
 
-/* The pill itself (shared by all controls) */
 .pill-toggle,
 .pill-toggle-single .pill-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 12px;
+  gap: 0.5rem;
+  height: 2rem;                      /* 32px */
+  padding: 0 0.75rem;
   border-radius: 9999px;
-  border: 2px solid var(--sb-border);
+  border: 0.125rem solid var(--sb-border);
   background: var(--sb-bg);
   color: var(--sb-accent);
-  font-size: 13px;
+  font-size: 0.8125rem;              /* 13px */
   line-height: 1;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
 }
 
-.pill-toggle:hover {
-  background: var(--sb-accent-weak);
-}
+.pill-toggle:hover { background: var(--sb-accent-weak); }
 
 .pill-toggle.active,
 .pill-toggle[aria-pressed="true"] {
   background: var(--sb-accent);
   color: #fff;
   border-color: var(--sb-accent);
-  box-shadow: 0 0 0 3px var(--sb-shadow);
+  box-shadow: 0 0 0 0.1875rem var(--sb-shadow);
 }
 
 .pill-toggle:focus {
   outline: none;
   border-color: var(--sb-accent);
-  box-shadow: 0 0 0 3px var(--sb-shadow);
+  box-shadow: 0 0 0 0.1875rem var(--sb-shadow);
 }
 
-.pill-toggle .fa-chevron-down {
-  font-size: 12px;
-  opacity: 0.9;
-}
+.pill-toggle .fa-chevron-down { font-size: 0.75rem; opacity: 0.9; }
+.pill-toggle-label { white-space: nowrap; }
 
-.pill-toggle-label {
-  white-space: nowrap;
-}
-
-/* Floating menu for pill dropdowns */
 .pill-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 0.375rem);
   left: 0;
-  min-width: 160px;
+  min-width: 10rem;                  /* 160px */
+  max-width: calc(100vw - 2rem);     /* never wider than the screen */
   z-index: 30;
-  padding: 6px;
-  border-radius: 10px;
-  border: 2px solid var(--sb-border);
+  padding: 0.375rem;
+  border-radius: 0.625rem;
+  border: 0.125rem solid var(--sb-border);
   background: var(--sb-bg);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0.625rem 1.75rem rgba(0, 0, 0, 0.12);
 }
 
-/* Options inside the pill menu */
 .pill-option {
   display: block;
   width: 100%;
   text-align: left;
   background: transparent;
   border: 0;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
   color: var(--sb-fg);
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
 }
 
 .pill-option:hover,
-.pill-option:focus {
-  background: var(--sb-accent-weak);
-  outline: none;
-}
+.pill-option:focus { background: var(--sb-accent-weak); outline: none; }
 
 .pill-option.selected,
 .pill-option[aria-selected="true"] {
@@ -217,90 +191,107 @@
 /* ================================
    Attribute dropdown (chevron-only)
    ================================ */
-
 .search-dropdown-container {
   position: relative;
   display: inline-block;
 }
 
-/* Chevron trigger aligned to pill height */
 .search-dropdown-toggle {
-  height: 32px;
-  width: 32px;
+  height: 2rem;
+  width: 2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 2px solid var(--sb-border);
+  border: 0.125rem solid var(--sb-border);
   background: var(--sb-bg);
   color: var(--sb-accent);
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
 }
 
-.search-dropdown-toggle:hover {
-  background: var(--sb-accent-weak);
-}
+.search-dropdown-toggle:hover { background: var(--sb-accent-weak); }
 
 .search-dropdown-toggle.active,
 .search-dropdown-toggle[aria-expanded="true"] {
   border-color: var(--sb-accent);
-  box-shadow: 0 0 0 3px var(--sb-shadow);
+  box-shadow: 0 0 0 0.1875rem var(--sb-shadow);
   background: var(--sb-accent);
   color: #fff;
 }
 
-.search-dropdown-toggle .fa-chevron-down {
-  font-size: 12px;
-}
+.search-dropdown-toggle .fa-chevron-down { font-size: 0.75rem; }
 
-/* Attribute list panel */
 .search-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 0.375rem);
   left: 0;
-  min-width: 200px;
-  max-height: 280px;
+  min-width: 12.5rem;
+  max-width: calc(100vw - 2rem);
+  max-height: 17.5rem;               /* 280px; scrolls if there are many attributes */
   overflow: auto;
   z-index: 25;
-  padding: 6px;
-  border-radius: 10px;
-  border: 2px solid var(--sb-border);
+  padding: 0.375rem;
+  border-radius: 0.625rem;
+  border: 0.125rem solid var(--sb-border);
   background: var(--sb-bg);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0.625rem 1.75rem rgba(0, 0, 0, 0.12);
 }
 
 .search-dropdown-item {
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--sb-fg);
   transition: background 120ms ease, color 120ms ease;
 }
 
 .search-dropdown-item:hover,
-.search-dropdown-item:focus {
-  background: var(--sb-accent-weak);
-  outline: none;
+.search-dropdown-item:focus { background: var(--sb-accent-weak); outline: none; }
+
+/* ==========================================================================
+   Tablets (1024px or less): larger touch targets, wider input
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .search-bar {
+    width: 16rem;
+    padding: 0.4375rem 0.75rem;
+    font-size: 1rem;
+  }
+  .search-button { margin-left: -2.5rem; }
+  .pill-toggle,
+  .pill-toggle-single .pill-toggle { height: 2.5rem; font-size: 0.9375rem; padding: 0 1rem; }
+  .search-dropdown-toggle { height: 2.5rem; width: 2.5rem; }
+  .pill-option,
+  .search-dropdown-item { font-size: 0.9375rem; padding: 0.625rem 0.75rem; }
 }
 
-/* ================================
-   Responsive details
-   ================================ */
-@media (max-width: 640px) {
+/* ==========================================================================
+   Mobile phones (600px or less): controls centered, input on its own full row
+   ========================================================================== */
+@media (max-width: 600px) {
   .search-container {
-    gap: 6px 8px;
+    justify-content: center;         /* controls + chevron centered on row 1 */
+    gap: 0.75rem;
+    position: relative;              /* anchor for the absolute search button */
   }
-  .pill-menu,
-  .search-dropdown {
-    min-width: 180px;
+  .search-controls {
+    justify-content: center;
+    justify-items: center;
   }
-}
-
-/* ================================
-   Optional: subtle spacing helpers
-   ================================ */
-.search-controls + .search-bar {
-  margin-left: 2px;
+  .search-bar {
+    flex: 1 1 100%;                  /* forces its own row, so controls stay centered above */
+    width: 100%;
+    padding: 0.625rem 2.75rem 0.625rem 0.875rem; /* right room for the magnifier */
+    border-radius: 1.25rem;
+    font-size: 1rem;                 /* >=16px prevents iOS auto-zoom on focus */
+  }
+  .search-button {
+    position: absolute;
+    right: 0.875rem;
+    bottom: 0.625rem;
+    margin-left: 0;
+  }
+  .search-button .fa-search { font-size: 1.125rem; }
 }

@@ -4,10 +4,12 @@ import Achievement, { emptyAchievement, Metric } from '../../interfaces/Achievem
 import { EditFormGenerator } from '../../components/Form/EditFormGenerator.tsx';
 import { SubmitHandler } from 'react-hook-form';
 import tokenService from '../../services/token.service.ts';
+import { Authority } from '../../interfaces/User.ts';
 
 export default function AchievementCreate() {
   const jwt = tokenService.getLocalAccessToken();
   const achievement = emptyAchievement;
+  const user = tokenService.getUser();
 
   const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ export default function AchievementCreate() {
       <div className="auth-form-container">
         <EditFormGenerator<Achievement> entityToEdit={achievement} onSubmit={onSubmit} submitText="Save" loadingText="Saving..."
           selectOptions={{ metric: Object.values(Metric) }}
+          actualUser={user} requiredAuth={Authority.ADMIN}
         />
       </div>
     </div>

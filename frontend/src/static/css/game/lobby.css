@@ -5,65 +5,203 @@
     right: 0;
     bottom: 0;
     z-index: -1;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('/images/upstreamBackground.jpg');
+    background-image:
+        linear-gradient(
+            rgba(0, 0, 0, 0.2),
+            rgba(0, 0, 0, 0.2)
+        ),
+        url('/images/upstreamBackground.jpg');
     background-size: cover;
+    background-position: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center;      /* Centrado en el eje X */
+    justify-content: center;  /* Centrado en el eje Y */
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
 
+.lobbyTitleContainer {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    padding: 1.85vh 2.08vw; /* 20px / 10.8, 40px / 19.2 */
+    backdrop-filter: blur(0.46vh); /* 5px / 10.8 */
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5); /* 5px / 10.8 */
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: 2vh;
+    min-width: 25vw;
+    box-sizing: border-box;
+}
+
+.lobbyTitleContainer h1 {
+    font-size: 3.5vh;
+    margin-bottom: 1vh;
+}
+
+.lobbyTitleContainer h4,
+.passwordContainer {
+    font-size: 2vh;
+    margin-bottom: 0.5vh;
 }
 
 .lobbyMainContainer {
     text-align: center;
     display: flex;
     flex-direction: column;
-    margin-top: 3%;
-    
-}
-.lobbyTitleContainer {  
-    margin-top: 7%;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-    padding: 2%;
-    backdrop-filter: blur(5px);
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
     align-items: center;
-    align-content: center;
-    text-align: center;
+    margin-bottom: auto;
+    min-width: 25vw;
+    box-sizing: border-box;
 }
 
-
-
-.lobbyPlayerContainer {
-    display: flex;
-    flex-direction: column;
-    align-self: flex-end;
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 5%;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-}
-
+.lobbyPlayerContainer,
 .lobbyUtilContainer {
     display: flex;
     flex-direction: column;
     background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 5%;
-    padding: 20px;
-    backdrop-filter: blur(5px);
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    padding: 1.85vh 1.04vw; /* 20px / 10.8 */
+    backdrop-filter: blur(0.46vh); /* 5px / 10.8 */
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5); /* 5px / 10.8 */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.lobbyUtilContainer h2 {
+    font-size: 2.5vh;
+    margin-bottom: 1vh;
 }
 
 .buttonStart {
-    margin-bottom: 5%;
-    height: 60px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-    margin-top: 2%;
+    height: 5.56vh; /* 60px / 10.8 */
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5); /* 5px / 10.8 */
+    margin-top: 0.93vh;
+    margin-bottom: 1.85vh;
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    font-size: 1.85vh;
+    width: 100%;
 }
 
 .buttonExit {
-    height: 40px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-    margin-bottom: 2%;
+    height: 3.7vh; /* 40px / 10.8 */
+    box-shadow: 0 0 0.46vh rgba(0, 0, 0, 0.5); /* 5px / 10.8 */
+    margin-bottom: 0.93vh;
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    font-size: 1.85vh;
+    width: 100%;
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+
+    .lobbyTitleContainer {
+        width: 80vw;
+        padding: 2vh 3vw;
+        margin-bottom: 2vh;
+    }
+
+    .lobbyTitleContainer h1 {
+        font-size: 3vh;
+    }
+
+    .lobbyTitleContainer h4,
+    .passwordContainer {
+        font-size: 1.8vh;
+    }
+
+    .lobbyMainContainer {
+        width: 80vw;
+    }
+
+    .lobbyPlayerContainer,
+    .lobbyUtilContainer {
+        width: 100%;
+        align-self: center;
+        padding: 2vh 2vw;
+    }
+
+    .lobbyUtilContainer h2 {
+        font-size: 2.2vh;
+    }
+
+    .buttonStart {
+        height: 5vh;
+        font-size: 1.8vh;
+    }
+
+    .buttonExit {
+        height: 4.5vh;
+        font-size: 1.8vh;
+    }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+
+@media (max-width: 600px) {
+
+    .lobbyContainer {
+        padding: 3vh 0;
+    }
+
+    .lobbyTitleContainer {
+        width: 92vw;
+        padding: 1.5vh 3vw;
+        margin-bottom: 1.5vh;
+        border-radius: 1vh;
+    }
+
+    .lobbyTitleContainer h1 {
+        font-size: 5vw;
+        margin-bottom: 0.8vh;
+    }
+
+    .lobbyTitleContainer h4,
+    .passwordContainer {
+        font-size: 3.8vw;
+        margin-bottom: 0.5vh;
+    }
+
+    .lobbyMainContainer {
+        width: 92vw;
+    }
+
+    .lobbyPlayerContainer,
+    .lobbyUtilContainer {
+        width: 100%;
+        align-self: center;
+        padding: 1.5vh 3vw;
+        border-radius: 1vh;
+    }
+
+    .lobbyUtilContainer h2 {
+        font-size: 4.5vw;
+        margin-bottom: 1vh;
+    }
+
+    .buttonStart {
+        height: 5vh;
+        font-size: 3.8vw;
+        width: 100%;
+        border-radius: 1vh;
+        margin-top: 1vh;
+        margin-bottom: 1.5vh;
+    }
+
+    .buttonExit {
+        height: 5vh;
+        font-size: 3.8vw;
+        width: 100%;
+        border-radius: 1vh;
+        margin-bottom: 1vh;
+    }
 }

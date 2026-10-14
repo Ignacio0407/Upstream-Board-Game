@@ -11,9 +11,9 @@ export default function Home(){
 
     return(
         <div className="home-page-container">
-            <div className="pantallaInicio">
-                <img  className="imagenInicio" alt='Main logo' src={'/images/logoCentralUPS.jpg'}/>
-                <div className='botonesPantallaInicio'>
+            <div className="homeScreen">
+                <img  className="homeImage" alt='Main logo' src={'/images/logoCentralUPS.jpg'}/>
+                <div className='homeScreenButtons'>
                 {!jwt ? <ButtonLink color={"success"} direction={"/login"} text={"Game List"} /> : 
                 <ButtonLink color={"success"} direction={"/dashboard"} text={"Game List"} />}
                 {!jwt ? <ButtonLink color={"success"} direction={"/login"} text={"Create Game"} /> : 

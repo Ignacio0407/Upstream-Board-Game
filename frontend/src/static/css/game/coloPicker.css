@@ -1,44 +1,95 @@
-
 .modalOverlay {
-        position: 'fixed';
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
 .modalContent {
-        background-color: '#fff';
-        padding: 20px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
+    background-color: #fff;
+    padding: 1.85vh 1.04vw; /* 20px */
+    border-radius: 0.74vh;   /* 8px / 10.8 */
+    text-align: center;
+    box-shadow: 0 0.37vh 0.74vh rgba(0, 0, 0, 0.2); /* 0 4px 8px */
+}
+
 .buttonContainer {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 10px;
-        margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 0.52vw;           /* 10px / 19.2 */
+    margin-top: 0.93vh;    /* 10px / 10.8 */
+    margin-bottom: 1.85vh; /* 20px / 10.8 */
+}
+
+.colorButton {
+    width: 3.7vh;  /* 40px / 10.8 */
+    height: 3.7vh; /* 40px / 10.8 */
+    cursor: pointer;
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    outline: none;
+}
+
+.acceptButton {
+    padding: 0.93vh 1.04vw; /* 10px 20px */
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 0.46vh; /* 5px / 10.8 */
+    cursor: pointer;
+    font-size: 1.48vh;
+}
+
+/* ==========================================================================
+   Tablets (1024px or less)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .modalContent {
+        padding: 2vh 2vw;
+        border-radius: 1vh;
     }
 
     .colorButton {
-        width: 40px;
-        height: 40px;
-        cursor: pointer;
-        border-radius: 5px;
-        outline: none;
+        width: 5vh;
+        height: 5vh;
     }
+
     .acceptButton {
-        padding: 10px 20px;
-        background-color: '#4CAF50';
-        color: '#fff';
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
+        padding: 1.2vh 2.5vw;
+        font-size: 1.8vh;
     }
+}
+
+/* ==========================================================================
+   Mobile phones (600px or less)
+   ========================================================================== */
+@media (max-width: 600px) {
+    .modalContent {
+        width: 90vw;
+        padding: 2.5vh 3vw;
+        border-radius: 1.5vh;
+    }
+
+    .buttonContainer {
+        gap: 2.5vw;
+        flex-wrap: wrap;
+    }
+
+    .colorButton {
+        width: 12vw;
+        height: 12vw;
+        border-radius: 1.5vw;
+    }
+
+    .acceptButton {
+        width: 100%;
+        padding: 1.5vh;
+        font-size: 4vw;
+        border-radius: 1vh;
+    }
+}

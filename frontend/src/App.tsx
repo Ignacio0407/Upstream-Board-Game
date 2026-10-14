@@ -114,7 +114,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="app-container">
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <AppNavbar />
         <Routes>

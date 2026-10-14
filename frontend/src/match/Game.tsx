@@ -385,7 +385,7 @@ export default function Game() {
                         )
                     ))}
                     </div>
-                    <div className='desove-points'>
+                    <div className='spawn-points'>
                     {5 - index} 
                     </div>
                 </div>
