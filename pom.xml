@@ -2,8 +2,8 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>es.us.dp1</groupId>
-    <artifactId>l4-01-2425-l4-01</artifactId>
+    <groupId>github.ignacio0407</groupId>
+    <artifactId>upstream-board-game</artifactId>
     <version>0.1.0.BUILD-SNAPSHOT</version>
 
     <parent>

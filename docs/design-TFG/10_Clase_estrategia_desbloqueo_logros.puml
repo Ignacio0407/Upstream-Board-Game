@@ -1,5 +1,5 @@
 @startuml
-package "es.us.dp1.l4_01_24_25.upstream.statistic" {
+package "upstream.statistic" {
     
     interface AchievementStrategy <<Strategy>> {
         + boolean isUnlockedByUser(User, Achievement)

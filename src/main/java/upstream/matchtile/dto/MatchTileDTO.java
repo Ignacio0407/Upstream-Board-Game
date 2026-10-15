@@ -1,0 +1,46 @@
+package upstream.matchtile.dto;
+
+import upstream.coordinate.Coordinate;
+import upstream.tile.Tile;
+import upstream.validation.ValidNumber;
+import jakarta.persistence.Embedded;
+import jakarta.validation.Valid;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class MatchTileDTO {
+    
+    Integer id;
+
+    @ValidNumber(min=0, max=5)
+    Integer capacity;
+
+    @ValidNumber(min=0)
+    Integer orientation;
+
+    @ValidNumber(min=0, max=5)
+    Integer salmonsNumber;
+
+    @Embedded
+    @Valid
+    Coordinate coordinate;
+
+    Tile tile;
+
+    Integer matchId;
+
+    public MatchTileDTO(Integer id, Integer capacity, Integer orientation, Integer salmonsNumber, Coordinate coordinate, Tile tile, Integer matchId) {
+        this.id = id;
+        this.capacity = capacity;
+        this.orientation = orientation;
+        this.salmonsNumber = salmonsNumber;
+        this.coordinate = coordinate;
+        this.tile = tile;
+        this.matchId = matchId;
+    }
+
+    public MatchTileDTO() {}
+
+}

@@ -1,0 +1,32 @@
+package upstream.chat;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import upstream.match.Match;
+import upstream.model.BaseRepository;
+
+@Repository
+public interface MessageRepository extends BaseRepository<Message, MessageDTO, Integer> {
+
+    @Override
+    @Query("SELECT new upstream.chat.MessageDTO(m.id, m.player.id, m.player.name, m.match.id, m.content) FROM Message m WHERE m.id = :id")
+    Optional<MessageDTO> findByIdAsDTO(Integer id);
+
+    @Override
+    @Query("SELECT new upstream.chat.MessageDTO(m.id, m.player.id, m.player.name, m.match.id, m.content) FROM Message m")
+    List<MessageDTO> findAllAsDTO();
+
+    @Query("SELECT new upstream.chat.MessageDTO(m.id, m.player.id, m.player.name, m.match.id, m.content) FROM Message m WHERE m.match.id = :matchId ORDER BY m.createdAt")
+    List<MessageDTO> findMessagesByMatchIdDTO(@Param("matchId") Integer matchId);
+
+    @Query("SELECT new upstream.chat.MessageDTO(m.id, m.player.id, m.player.name, m.match.id, m.content) FROM Message m WHERE m.player.userPlayer.id = :userId ORDER BY m.createdAt DESC")
+    List<MessageDTO> findMessagesByUserIdDTO(@Param("userId") Integer userId);
+    
+    @Query("SELECT DISTINCT m.match FROM Message m WHERE m.player.userPlayer.id = :userId")
+    List<Match> findAllChatsFromUser(@Param("userId") Integer userId);
+}
