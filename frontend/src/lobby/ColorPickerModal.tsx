@@ -1,7 +1,7 @@
 import { JSX, useState } from 'react';
 import {RgbToColor} from './ColorParser.ts';
 
-interface ColorPickerModalPrompts { readonly onColorSelect: Function; readonly takenColors: readonly string[]; }
+interface ColorPickerModalPrompts { readonly onColorSelect: (color: string) => void; readonly takenColors: readonly string[]; }
 
 export default function ColorPickerModal({ onColorSelect, takenColors }: Readonly<ColorPickerModalPrompts>): JSX.Element {
     const [isVisible, setIsVisible] = useState(true);

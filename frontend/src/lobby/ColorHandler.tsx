@@ -2,8 +2,8 @@ import ColorPickerModal from './ColorPickerModal.tsx';
 import {buildSafeUrl, post} from '../util/fetchers.ts'
 import { JSX } from 'react';
 
-interface ColorHandlerProps {matchId:number, jwt:string, userId:number, takenColors:string[], onColorChanged:Function, 
-    setNewPlayer?:Function};
+interface ColorHandlerProps {matchId:number, jwt:string, userId:number, takenColors:string[], onColorChanged: () => void, 
+    setNewPlayer?: (player: any) => void};
 
 export default function ColorHandler({ matchId, jwt, userId, takenColors, onColorChanged }:Readonly<ColorHandlerProps>): JSX.Element {
     async function handleColorChange(color:string) {

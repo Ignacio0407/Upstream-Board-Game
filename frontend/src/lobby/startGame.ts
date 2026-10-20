@@ -1,6 +1,6 @@
 import {patch, post} from '../util/fetchers.ts';
 
-interface StartGamePrompts {matchId:number, jwt:string, setLoading:Function};
+interface StartGamePrompts {matchId:number, jwt:string, setLoading: (loading: boolean) => void};
 
 const startGame = async ({ matchId, jwt, setLoading }:StartGamePrompts) => {
     setLoading(true);

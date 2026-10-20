@@ -1,64 +1,55 @@
-export const get = async (uri:string, jwt:string|null) => {
+const createHeaders = (jwt: string | null): Record<string, string> => {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  };
+  if (jwt && jwt.trim() !== "" && jwt !== "null") {
+    headers["Authorization"] = `Bearer ${jwt}`;
+  }
+  return headers;
+};
+
+export const get = async (uri: string, jwt: string | null) => {
   const safeUri = new URL(uri, window.location.origin).href;
   return fetch(safeUri, {
     method: "GET",
-    headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-    },
+    headers: createHeaders(jwt),
   });
-}
-
-export const patch = async (uri:string, jwt:string|null, data?:any) => {
-    const safeUri = new URL(uri, window.location.origin).href;
-    return fetch(safeUri, {
-      method: "PATCH",
-      headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data)
-    });
 };
 
-export const put = async (uri:string, jwt:string|null, data?:any) => {
-    const safeUri = new URL(uri, window.location.origin).href;
-    return fetch(safeUri, {
-      method: "PUT",
-      headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data)
-    });
+export const patch = async (uri: string, jwt: string | null, data?: unknown) => {
+  const safeUri = new URL(uri, window.location.origin).href;
+  return fetch(safeUri, {
+    method: "PATCH",
+    headers: createHeaders(jwt),
+    body: JSON.stringify(data),
+  });
 };
 
-export const post = async (uri:string, jwt:string|null, data?:any) => {
-    const safeUri = new URL(uri, window.location.origin).href;
-    return await fetch(safeUri, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
+export const put = async (uri: string, jwt: string | null, data?: unknown) => {
+  const safeUri = new URL(uri, window.location.origin).href;
+  return fetch(safeUri, {
+    method: "PUT",
+    headers: createHeaders(jwt),
+    body: JSON.stringify(data),
+  });
 };
 
-export const deleteEntity = async (uri:string, jwt:string|null, id:number) => {
-    const safeUri = new URL(`${uri}/${encodeURIComponent(String(id))}`, window.location.origin).href;
-    return fetch(safeUri, {
-      method: "DELETE",
-      headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
-      }
-    });
+export const post = async (uri: string, jwt: string | null, data?: unknown) => {
+  const safeUri = new URL(uri, window.location.origin).href;
+  return await fetch(safeUri, {
+    method: "POST",
+    headers: createHeaders(jwt),
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteEntity = async (uri: string, jwt: string | null, id: number) => {
+  const safeUri = new URL(`${uri}/${encodeURIComponent(String(id))}`, window.location.origin).href;
+  return fetch(safeUri, {
+    method: "DELETE",
+    headers: createHeaders(jwt),
+  });
 };
 
 export function buildSafeUrl(base: string, id?: string | number): string {

@@ -21,14 +21,14 @@ export function isFull (playersNumber:number, tile:MatchTile) {
     else return tile.capacity === tile.salmonsNumber; 
 }
 
-export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile:Function, setSelectedSalmon:Function) => {
+export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile: (tile: MatchTile | null) => void, setSelectedSalmon: (salmon: SalmonMatch | null) => void) => {
     if (myPlayer.id === match.actualPlayerId && match.phase === Phase.TILES) {
         setSelectedTile(tile);
         setSelectedSalmon(null);
     }
 }
 
-export const handleSalmonClick = (salmon: SalmonMatch, myPlayer: Player | null, match: Match, setSelectedSalmon: Function) => {
+export const handleSalmonClick = (salmon: SalmonMatch, myPlayer: Player | null, match: Match, setSelectedSalmon: (salmon: SalmonMatch | null) => void) => {
     if (myPlayer?.id === match.actualPlayerId && myPlayer?.id === salmon.playerId && match.phase === Phase.MOVING)
         setSelectedSalmon(salmon);
     else
@@ -73,7 +73,7 @@ export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt
 };
 
 export interface HandleUpdateTilePositionConfig {jwt: string; index: number; selectedSalmon: SalmonMatch | null;
-    setSelectedTile: Function; selectedTile: MatchTile | null; match: Match; 
+    setSelectedTile: (tile: MatchTile | null) => void; selectedTile: MatchTile | null; match: Match; 
     actualPlayerId: number | undefined; myPlayerId: number; matchTilesNoCoordinate?: MatchTile[];
 }
 
@@ -196,7 +196,7 @@ export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile)
 export type PendingMove = { salmonId: number, x: number, y: number, enterSpawn?: boolean };
 export interface ConfirmMovementBatchConfig {pendingMoves: PendingMove[]; jwt: string; match: Match;
     myPlayerId: number; initialState: any; setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void;
-    restoreSnapshot: Function; clearPath: Function;
+    restoreSnapshot: () => void; clearPath: () => void;
 }
 
 export async function confirmMovementBatch(config: ConfirmMovementBatchConfig) {

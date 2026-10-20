@@ -6,7 +6,7 @@ import { navigateToUnauthorized } from "../components/DoNotHackMyApp/DoNotHackMy
 interface DeleteSomeOptions<T> { confirmField?: keyof T }
 
 export interface DeleteSomeParams<T> {readonly url: string, readonly items: any[], readonly requiredAuth: string,
-  readonly checkAuth?: Function, readonly deactivateSecurity?: boolean, readonly state?: T[],
+  readonly checkAuth?: ((requiredAuth: string) => boolean) | boolean, readonly deactivateSecurity?: boolean, readonly state?: T[],
   readonly setState: React.Dispatch<React.SetStateAction<T[]>>, readonly navigate: NavigateFunction, 
   readonly options?: DeleteSomeOptions<T>;
 }

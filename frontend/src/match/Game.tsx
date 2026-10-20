@@ -113,8 +113,6 @@ export default function Game() {
         const updatedSalmonsList = salmons.map(s => s.id === updatedSalmon.id ? updatedSalmon : s).filter(s => s.salmonsNumber > 0);
         const mysalmons = updatedSalmonsList.filter(s => s.playerId === myPlayer?.id && s.salmonsNumber > 0 && 
             ( !s.coordinate || (s.coordinate.y < 20 && !(s.coordinate.x === 1 && s.coordinate.y === 5))));
-        console.log("mysalmons", mysalmons)
-        console.log("updatedSalmon salmons number", updatedSalmon.salmonsNumber)
         if (mysalmons.length === 0)
             ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch, title: "Death", message: "You are going to lose, check any possible moves, if there are none, please confirm", confirmText: "Confirm", cancelText: "Cancel" });
         const finalX = move.x ? Number(move.x) : Number(x);

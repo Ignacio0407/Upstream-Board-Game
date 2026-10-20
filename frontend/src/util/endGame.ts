@@ -5,7 +5,7 @@ import User from '../interfaces/User.ts'
 import { State } from "../interfaces/State.ts";
 
 interface EndGamePrompts {match:Match, players:Player[], user:User, jwt:string, spectatorIds:number[], 
-    navigate:Function, setMatch:Function}
+    navigate: (to: string) => void, setMatch: (match: any) => void}
 
 export default async function endGame ({ match, players, user, jwt, spectatorIds, navigate, setMatch }:EndGamePrompts) {
     
