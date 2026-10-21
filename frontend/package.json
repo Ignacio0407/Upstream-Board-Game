@@ -1,5 +1,4 @@
 {
-  "proxy": "https://localhost:8080",
   "name": "upstream",
   "version": "0.1.0",
   "type": "module",
@@ -17,7 +16,8 @@
     "react-router-dom": "^6.11.0",
     "reactstrap": "^9.1.6",
     "sockjs-client": "^1.6.1",
-    "swagger-ui-react": "^5.32.0"
+    "swagger-ui-react": "^5.32.0",
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -42,21 +42,6 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "jest": {
-    "transformIgnorePatterns": [
-      "/node_modules/(?!(swagger-ui-react|swagger-client|react-syntax-highlighter)/)"
-    ],
-    "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
-      "\\.(css|less)$": "identity-obj-proxy"
-    }
   },
   "browserslist": {
     "production": [
