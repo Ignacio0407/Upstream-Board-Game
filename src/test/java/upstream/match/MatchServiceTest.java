@@ -405,7 +405,7 @@ class MatchServiceTest {
 
             matchService.changePhase(1, 1);
 
-            verify(matchTileService).deleteById(10); // Deleted outdated tile
+            verify(matchTileService).deleteAllInBatch(List.of(oldTile)); // Deleted outdated tile
             verify(salmonMatchService).deleteAllInBatch(List.of(oldSalmon)); // Deleted outdated salmon
         }
     }
@@ -466,7 +466,7 @@ class MatchServiceTest {
             sm.setCoordinate(new Coordinate(1, yCoord));
 
             when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm));
-            when(salmonMatchService.findPointsFromAllSalmonInSpawn(1))
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm))
                     .thenReturn(yCoord > 20 ? yCoord - 20 : 0);
             when(matchRepository.save(match)).thenReturn(match);
             when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
@@ -492,8 +492,8 @@ class MatchServiceTest {
 
             when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
             when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(List.of(sm2));
-            when(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).thenReturn(5);
-            when(salmonMatchService.findPointsFromAllSalmonInSpawn(2)).thenReturn(1);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(5);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2)).thenReturn(1);
             when(matchRepository.save(match)).thenReturn(match);
             when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
 
@@ -512,6 +512,121 @@ class MatchServiceTest {
 
             assertThatThrownBy(() -> matchService.finalScore(1))
                     .isInstanceOf(ConflictException.class);
+        }
+
+        @Test
+        @DisplayName("Tie-break 1: Should award victory to player with more salmons when points are equal")
+        void shouldBreakTieByMostSalmonsWhenPointsAreEqual() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+            when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+            // player1: 1 token with 3 points, 2 salmons = 5 total
+            SalmonMatch sm1 = new SalmonMatch(); sm1.setId(1); sm1.setSalmonsNumber(2);
+            sm1.setCoordinate(new Coordinate(1, 23));
+            // player2: 1 token with 4 points, 1 salmon = 5 total
+            SalmonMatch sm2 = new SalmonMatch(); sm2.setId(2); sm2.setSalmonsNumber(1);
+            sm2.setCoordinate(new Coordinate(1, 24));
+
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(List.of(sm2));
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(3);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2)).thenReturn(4);
+            when(matchRepository.save(match)).thenReturn(match);
+            when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
+
+            matchService.finalScore(1);
+
+            // Points: 5 vs 5, Salmons: 2 vs 1 -> user1 wins
+            assertThat(user1.getVictories()).isEqualTo(1);
+            assertThat(user2.getVictories()).isZero();
+        }
+
+        @Test
+        @DisplayName("Tie-break 2: Should award victory to player with more tokens when points and salmons are equal")
+        void shouldBreakTieByMostTokensWhenPointsAndSalmonsAreEqual() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+            when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+            // player1: 1 token of 2 salmons, 2 spawn pts = 4 total pts, 2 salmons, 1 token
+            SalmonMatch sm1 = new SalmonMatch(); sm1.setId(1); sm1.setSalmonsNumber(2);
+            sm1.setCoordinate(new Coordinate(1, 22));
+            // player2: 2 tokens of 1 salmon each, 1 spawn pt each = 4 total pts, 2 salmons, 2 tokens
+            SalmonMatch sm2a = new SalmonMatch(); sm2a.setId(2); sm2a.setSalmonsNumber(1);
+            sm2a.setCoordinate(new Coordinate(1, 21));
+            SalmonMatch sm2b = new SalmonMatch(); sm2b.setId(3); sm2b.setSalmonsNumber(1);
+            sm2b.setCoordinate(new Coordinate(2, 21));
+
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(List.of(sm2a, sm2b));
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(2);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2a)).thenReturn(1);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2b)).thenReturn(1);
+            when(matchRepository.save(match)).thenReturn(match);
+            when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
+
+            matchService.finalScore(1);
+
+            // Points: 4 vs 4, Salmons: 2 vs 2, Tokens: 1 vs 2 -> user2 wins
+            assertThat(user1.getVictories()).isZero();
+            assertThat(user2.getVictories()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Tie-break 3: Should award victory to player with furthest tokens when points, salmons and tokens are equal")
+        void shouldBreakTieByFurthestPositionWhenPointsSalmonsAndTokensAreEqual() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+            when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+            // player1: token at y=25
+            SalmonMatch sm1 = new SalmonMatch(); sm1.setId(1); sm1.setSalmonsNumber(1);
+            sm1.setCoordinate(new Coordinate(1, 25));
+            // player2: token at y=24
+            SalmonMatch sm2 = new SalmonMatch(); sm2.setId(2); sm2.setSalmonsNumber(1);
+            sm2.setCoordinate(new Coordinate(1, 24));
+
+            // Manually equal points for test
+            player1.setPoints(6);
+            player2.setPoints(6);
+
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(List.of(sm2));
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(5);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2)).thenReturn(5);
+            when(matchRepository.save(match)).thenReturn(match);
+            when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
+
+            matchService.finalScore(1);
+
+            // Furthest Y: 25 vs 24 -> user1 wins
+            assertThat(user1.getVictories()).isEqualTo(1);
+            assertThat(user2.getVictories()).isZero();
+        }
+
+        @Test
+        @DisplayName("Tie-break 4: In 2-player match, should award victory to non-initial player when all else is tied")
+        void shouldBreakTieInTwoPlayerGameByNonInitialPlayer() {
+            match.setPlayersNumber(2);
+            match.setInitialPlayer(player1);
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+            when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+            SalmonMatch sm1 = new SalmonMatch(); sm1.setId(1); sm1.setSalmonsNumber(1);
+            sm1.setCoordinate(new Coordinate(1, 23));
+            SalmonMatch sm2 = new SalmonMatch(); sm2.setId(2); sm2.setSalmonsNumber(1);
+            sm2.setCoordinate(new Coordinate(2, 23));
+
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(List.of(sm2));
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(3);
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm2)).thenReturn(3);
+            when(matchRepository.save(match)).thenReturn(match);
+            when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
+
+            matchService.finalScore(1);
+
+            // Points, salmons, tokens, and coords all equal. Non-initial player (player2) wins
+            assertThat(user1.getVictories()).isZero();
+            assertThat(user2.getVictories()).isEqualTo(1);
         }
     }
 
@@ -674,9 +789,9 @@ class MatchServiceTest {
 
         org.springframework.test.util.ReflectionTestUtils.invokeMethod(matchService, "endRound", match);
 
-        verify(salmonMatchService).delete(smY0);
+        verify(salmonMatchService).deleteAllInBatch(List.of(smY0));
         assertThat(smY1.getCoordinate().y()).isZero();
-        verify(matchTileService).delete(mtY0);
+        verify(matchTileService).deleteAllInBatch(List.of(mtY0));
         assertThat(mtY1.getCoordinate().y()).isZero();
         verify(matchService).notifyTilesAndSalmonsByMatchId(1);
     }

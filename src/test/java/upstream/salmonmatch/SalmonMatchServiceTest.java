@@ -11,7 +11,6 @@ import static org.mockito.Mockito.lenient;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -141,9 +140,8 @@ class SalmonMatchServiceTest {
         void shouldCalculateSpawnPoints(int y, int expectedPoints) {
             SalmonMatch sm = new SalmonMatch();
             sm.setCoordinate(new Coordinate(1, y));
-            when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(sm));
 
-            assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(expectedPoints);
+            assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(sm)).isEqualTo(expectedPoints);
         }
     }
 
@@ -661,11 +659,10 @@ class SalmonMatchServiceTest {
 
         // findPointsFromAllSalmonInSpawn
         salmonMatch.setCoordinate(new Coordinate(1, 23));
-        when(salmonMatchRepository.findById(1)).thenReturn(Optional.of(salmonMatch));
-        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isEqualTo(3);
+        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(salmonMatch)).isEqualTo(3);
 
         salmonMatch.setCoordinate(new Coordinate(1, 15));
-        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(1)).isZero();
+        assertThat(salmonMatchService.findPointsFromAllSalmonInSpawn(salmonMatch)).isZero();
 
         SMCoordinateDTO dto = new SMCoordinateDTO(null);
         when(salmonMatchRepository.findByPlayerIdInSeaAsCoordinateDTO(1)).thenReturn(List.of(dto));

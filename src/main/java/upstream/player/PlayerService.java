@@ -17,6 +17,7 @@ import upstream.match.MatchService;
 import upstream.model.BaseServiceWithDTO;
 import upstream.player.playerdto.PlayerDTO;
 import upstream.player.playerdto.LobbyPlayerDTO;
+import upstream.player.playerdto.CreatePlayerRequest;
 import upstream.salmonmatch.SalmonMatchService;
 import upstream.salmonmatch.dto.SMCoordinateDTO;
 import upstream.user.User;
@@ -24,7 +25,7 @@ import upstream.user.UserService;
 
 @Service
 public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer>{
-        
+
     PlayerRepository playerRepository;
     PlayerMapper playerMapper;
     SalmonMatchService salmonMatchService;
@@ -96,24 +97,24 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         this.messagingTemplate.convertAndSend("/topic/match/newPlayer/" + lobbyPlayer.getMatchId(), lobbyPlayer);
     }
 
-    public void notifyPlayersUpdate(Integer matchId) { 
-        List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId); 
-        this.messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO); 
+    public void notifyPlayersUpdate(Integer matchId) {
+        List<PlayerDTO> playersDTO = this.findPlayersByMatchSortedPlayerOrderAsDTO(matchId);
+        this.messagingTemplate.convertAndSend("/topic/players/" + matchId, playersDTO);
     }
 
     public void throwExceptionNotEnoughEnergy(Player player, Integer energyUsed) {
         if (player.getEnergy() - energyUsed < 0) {
-            throw new InsufficientEnergyException(String.format("Insufficient energy for that move. Actual: %d, Tried using: %d", 
+            throw new InsufficientEnergyException(String.format("Insufficient energy for that move. Actual: %d, Tried using: %d",
                 player.getEnergy(), energyUsed));
         }
     }
 
-    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {
-        User user = this.userService.findById(Integer.valueOf(playerDTO.get("user")));
+    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, CreatePlayerRequest request) {
+        User user = this.userService.findById(request.user());
         Match match = this.matchService.findById(matchId);
         Player p = new Player();
         p.setName(user.getName());
-        p.setColor(Color.valueOf(playerDTO.get("color")));
+        p.setColor(request.color());
         p.setAlive(true);
         p.setEnergy(5);
         p.setUserPlayer(user);
@@ -128,6 +129,12 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
         LobbyPlayerDTO result = this.playerMapper.toLobby(p);
         this.notifyNewPlayer(result);
         return result;
+    }
+
+    public LobbyPlayerDTO createPlayerInMatch(Integer matchId, Map<String,String> playerDTO) {
+        Integer userId = Integer.valueOf(playerDTO.get("user"));
+        Color color = Color.valueOf(playerDTO.get("color"));
+        return createPlayerInMatch(matchId, new CreatePlayerRequest(userId, color));
     }
 
     @Override
@@ -161,8 +168,8 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     @Transactional
     public void setPlayerDead(Player player) {
         player.setAlive(false);
-        player.setEnergy(0); 
-        player.setPlayerOrder(10); 
+        player.setEnergy(0);
+        player.setPlayerOrder(10);
         this.save(player);
     }
 
@@ -173,6 +180,16 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     }
 
     @Transactional
+    private Boolean checkPlayerFinished(List<SMCoordinateDTO> salmons) {
+        return !salmons.isEmpty() && salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20);
+    }
+
+    @Transactional
+    private Boolean checkPlayerIsDead(List<SMCoordinateDTO> salmons) {
+        return salmons.isEmpty();
+    }
+
+    @Transactional
     public Boolean checkPlayerFinished(Integer playerId) {
         List<SMCoordinateDTO> salmons = this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId);
         return !salmons.isEmpty() && salmons.stream().allMatch(s -> s.getCoordinate() != null && s.getCoordinate().y() > 20);
@@ -180,14 +197,16 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
 
     @Transactional
     public Boolean checkPlayerIsDead(Integer playerId) {
-        return this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId).isEmpty();
+        List<SMCoordinateDTO> salmons = this.salmonMatchService.findByPlayerIdAsCoordinateDTO(playerId);
+        return salmons.isEmpty();
     }
 
     @Transactional
     public void checkPlayersDeadOrFinished (List<Player> players) {
         for(Player p : players) {
-            Boolean dead = this.checkPlayerIsDead(p.getId());
-            Boolean finished = this.checkPlayerFinished(p.getId());
+            List<SMCoordinateDTO> salmons = this.salmonMatchService.findByPlayerIdAsCoordinateDTO(p.getId());
+            Boolean dead = this.checkPlayerIsDead(salmons);
+            Boolean finished = this.checkPlayerFinished(salmons);
             if (Boolean.TRUE.equals(dead)) this.setPlayerDead(p);
             if (Boolean.TRUE.equals(finished)) this.setPlayerNoEnergy(p);
         }
@@ -212,7 +231,7 @@ public class PlayerService extends BaseServiceWithDTO<Player, PlayerDTO, Integer
     @Transactional(readOnly = true)
     public List<Player> playersForChangePhase (Integer matchId) {
         return this.findAlivePlayersByMatch(matchId).stream().filter(
-            p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty() 
+            p -> !this.salmonMatchService.findByPlayerIdInRiverAsCoordinateDTO(p.getId()).isEmpty()
             || !this.salmonMatchService.findByPlayerIdInSeaAsCoordinateDTO(p.getId()).isEmpty()).toList();
     }
 
