@@ -66,8 +66,8 @@ class WebSocketSecurityTests {
         userDetailsService = mock(UserDetailsServiceImpl.class);
         playerService = mock(PlayerService.class);
         interceptor = new WebSocketSecurityInterceptor(jwtUtils, userDetailsService, playerService);
-        interceptor.matchIdCache.clear();
-        interceptor.userMatchCache.clear();
+        interceptor.getMatchIdCache().clear();
+        interceptor.getUserMatchCache().clear();
     }
 
     // Accessor with autenticated user
@@ -212,7 +212,7 @@ class WebSocketSecurityTests {
     // 5. Cache cross-match
     @Test
     void cachedUserInDifferentMatch_shouldFail() {
-        interceptor.userMatchCache.put("user", 2);
+        interceptor.getUserMatchCache().put("user", 2);
 
         StompHeaderAccessor acc = authenticatedAccessor("SEND", "/topic/chat/1");
         when(playerService.isUserInMatch("user", 1)).thenReturn(false);

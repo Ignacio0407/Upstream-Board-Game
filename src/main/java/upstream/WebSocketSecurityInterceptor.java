@@ -59,8 +59,16 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
     private final JwtUtils jwtUtils;
     private final UserDetailsServiceImpl userDetailsService;
     private final PlayerService playerService;
-    public final Map<String, Integer> matchIdCache = new ConcurrentHashMap<>();
-    public final Map<String, Integer> userMatchCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> matchIdCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> userMatchCache = new ConcurrentHashMap<>();
+
+    public Map<String, Integer> getMatchIdCache() {
+        return matchIdCache;
+    }
+
+    public Map<String, Integer> getUserMatchCache() {
+        return userMatchCache;
+    }
 
     private static final List<String> EXACT_PREFIXES = 
     List.of("/topic/matches/dashboard", "/topic/match/newPlayer/", "/topic/match/start", "/topic/match/update");
@@ -214,5 +222,10 @@ public class WebSocketSecurityInterceptor implements ChannelInterceptor {
             }
         }
         return message;
+    }
+
+    @Override
+    public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
+        SecurityContextHolder.clearContext();
     }
 }
