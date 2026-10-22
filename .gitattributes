@@ -1,0 +1,21 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto eol=lf
+
+# Windows batch & PowerShell scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Unix shell scripts & wrappers
+*.sh text eol=lf
+mvnw text eol=lf
+
+# Binary files to prevent line-ending corruption
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.jar binary
+*.p12 binary
