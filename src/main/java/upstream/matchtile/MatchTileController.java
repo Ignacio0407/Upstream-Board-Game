@@ -1,7 +1,6 @@
 package upstream.matchtile;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import upstream.matchtile.dto.MatchTileDTO;
+import upstream.matchtile.dto.PlaceTileRequest;
+import upstream.matchtile.dto.RotateMatchTileRequest;
 import upstream.model.BaseRestControllerWithDTO;
 
 @RestController
@@ -35,14 +37,14 @@ public class MatchTileController extends BaseRestControllerWithDTO<MatchTile, Ma
     }
     
     @PatchMapping("/{id}")
-    public ResponseEntity<MatchTileDTO> updateMatchTile(@PathVariable("id") Integer id, @RequestBody Map<String, Integer> updates) {
-        this.matchTileService.updateCoordinate(id, updates);
+    public ResponseEntity<MatchTileDTO> updateMatchTile(@PathVariable("id") Integer id, @Valid @RequestBody PlaceTileRequest request) {
+        this.matchTileService.updateCoordinate(id, request);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/rotate")
-    public ResponseEntity<Void> broadcastMatchTileRotation(@PathVariable("id") Integer id, @RequestBody Map<String, Integer> rotation) {
-        this.matchTileService.broadcastMatchTileRotation(id, rotation.get("rotation"));
+    public ResponseEntity<Void> broadcastMatchTileRotation(@PathVariable("id") Integer id, @Valid @RequestBody RotateMatchTileRequest request) {
+        this.matchTileService.broadcastMatchTileRotation(id, request.rotation());
         return ResponseEntity.ok().build();
     }
 

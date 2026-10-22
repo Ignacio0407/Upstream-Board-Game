@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import upstream.model.BaseRestControllerWithDTO;
 import upstream.salmonmatch.SalmonMatchService.MoveRequest;
 import upstream.salmonmatch.dto.SalmonMatchDTO;
@@ -35,7 +36,9 @@ public class SalmonMatchController extends BaseRestControllerWithDTO<SalmonMatch
     }
 
     @PatchMapping("/move-batch/{id}")
-    public ResponseEntity<Void> updateCoordinateBatch(@PathVariable Integer id, @RequestBody List<MoveRequest> pendingMoves) {
+    public ResponseEntity<Void> updateCoordinateBatch(
+            @PathVariable Integer id, 
+            @RequestBody List<@Valid MoveRequest> pendingMoves) {
         this.salmonMatchService.updateCoordinateBatch(id, pendingMoves);
         return ResponseEntity.ok().build();
     }

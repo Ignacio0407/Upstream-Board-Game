@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import upstream.match.dto.CreateMatchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -85,7 +86,7 @@ class MatchRestControllerTest {
 
         Map<String, String> body = Map.of("name", "New Match", "password", "pass");
 
-        when(matchService.createMatchWMatchCreator(eq(1), any())).thenReturn(dto);
+        when(matchService.createMatchWMatchCreator(eq(1), any(CreateMatchRequest.class))).thenReturn(dto);
 
         mockMvc.perform(post("/api/v1/matches/matchCreator/1")
                .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +94,7 @@ class MatchRestControllerTest {
                .andExpect(status().isCreated())
                .andExpect(jsonPath("$.name").value("New Match"));
 
-        verify(matchService).createMatchWMatchCreator(eq(1), any());
+        verify(matchService).createMatchWMatchCreator(eq(1), any(CreateMatchRequest.class));
     }
 
     @Test
@@ -101,7 +102,7 @@ class MatchRestControllerTest {
     void shouldFailCreateMatchWhenUserNotFound() throws Exception {
         Map<String, String> body = Map.of("name", "New Match");
 
-        when(matchService.createMatchWMatchCreator(eq(99), any()))
+        when(matchService.createMatchWMatchCreator(eq(99), any(CreateMatchRequest.class)))
             .thenThrow(new ResourceNotFoundException("User not found"));
 
         mockMvc.perform(post("/api/v1/matches/matchCreator/99")
@@ -118,7 +119,7 @@ class MatchRestControllerTest {
                .content("{ \"name\": \"Broken JSON ")) // JSON Roto
                .andExpect(status().isBadRequest());
 
-        verify(matchService, never()).createMatchWMatchCreator(any(), any());
+        verify(matchService, never()).createMatchWMatchCreator(any(), any(CreateMatchRequest.class));
     }
 
     @Test
@@ -129,7 +130,7 @@ class MatchRestControllerTest {
                .content("{}"))
                .andExpect(status().isBadRequest());
 
-        verify(matchService, never()).createMatchWMatchCreator(any(), any());
+        verify(matchService, never()).createMatchWMatchCreator(any(), any(CreateMatchRequest.class));
     }
 
 

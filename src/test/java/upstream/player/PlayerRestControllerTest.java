@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import upstream.player.playerdto.CreatePlayerRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -90,7 +91,7 @@ class PlayerRestControllerTest {
         LobbyPlayerDTO lobbyDto = new LobbyPlayerDTO();
         lobbyDto.setMatchId(1);
         
-        when(playerService.createPlayerInMatch(eq(1), any())).thenReturn(lobbyDto);
+        when(playerService.createPlayerInMatch(eq(1), any(CreatePlayerRequest.class))).thenReturn(lobbyDto);
 
         mockMvc.perform(post("/api/v1/players/match/{id}", 1)
                 .contentType(MediaType.APPLICATION_JSON)

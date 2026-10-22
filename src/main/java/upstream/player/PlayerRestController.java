@@ -1,7 +1,6 @@
 package upstream.player;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import upstream.exceptions.ResourceNotFoundException;
 import upstream.model.BaseRestControllerWithDTO;
 import upstream.player.playerdto.PlayerDTO;
 import upstream.player.playerdto.LobbyPlayerDTO;
+import upstream.player.playerdto.CreatePlayerRequest;
 
 @RestController
 @RequestMapping("/api/v1/players")
@@ -43,8 +44,10 @@ public class PlayerRestController extends BaseRestControllerWithDTO<Player, Play
     }
 
     @PostMapping("/match/{id}")
-    public ResponseEntity<LobbyPlayerDTO> createPlayerInMatch(@PathVariable("id") Integer matchId, @RequestBody Map<String,String> playerdata) {
-        return new ResponseEntity<>(this.playerService.createPlayerInMatch(matchId, playerdata), HttpStatus.CREATED);
+    public ResponseEntity<LobbyPlayerDTO> createPlayerInMatch(
+            @PathVariable("id") Integer matchId, 
+            @Valid @RequestBody CreatePlayerRequest request) {
+        return new ResponseEntity<>(this.playerService.createPlayerInMatch(matchId, request), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}/energy")

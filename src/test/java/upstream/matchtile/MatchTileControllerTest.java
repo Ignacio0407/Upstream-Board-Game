@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import upstream.matchtile.dto.PlaceTileRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -90,14 +91,14 @@ class MatchTileControllerTest {
     void shouldUpdateMatchTileSuccessfully() throws Exception {
         Map<String, Integer> updates = Map.of("x", 0, "y", 0);
 
-        doNothing().when(matchTileService).updateCoordinate(eq(1), any());
+        doNothing().when(matchTileService).updateCoordinate(eq(1), any(PlaceTileRequest.class));
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
                .content(objectMapper.writeValueAsString(updates)))
                .andExpect(status().isOk());
         
-        verify(matchTileService).updateCoordinate(eq(1), any());
+        verify(matchTileService).updateCoordinate(eq(1), any(PlaceTileRequest.class));
     }
 
     @Test
@@ -106,7 +107,7 @@ class MatchTileControllerTest {
         Map<String, Integer> updates = Map.of("x", 0, "y", 0);
 
         doThrow(new ConflictException("Position occupied"))
-            .when(matchTileService).updateCoordinate(eq(1), any());
+            .when(matchTileService).updateCoordinate(eq(1), any(PlaceTileRequest.class));
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +121,7 @@ class MatchTileControllerTest {
         Map<String, Integer> updates = Map.of("x", 1, "y", 1);
 
         doThrow(new ResourceNotFoundException("Tile not found"))
-            .when(matchTileService).updateCoordinate(eq(1), any());
+            .when(matchTileService).updateCoordinate(eq(1), any(PlaceTileRequest.class));
 
         mockMvc.perform(patch("/api/v1/matchTiles/{id}", 1)
                .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +137,7 @@ class MatchTileControllerTest {
                .content("{ \"x\": 1, \"y\": }")) // Broken JSON
                .andExpect(status().isBadRequest());
 
-        verify(matchTileService, never()).updateCoordinate(any(), any());
+        verify(matchTileService, never()).updateCoordinate(any(), any(PlaceTileRequest.class));
     }
 
     // ── MESSAGE MAPPING /{id}/rotation ────────────────────────────────────────

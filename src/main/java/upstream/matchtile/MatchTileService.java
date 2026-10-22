@@ -2,6 +2,7 @@ package upstream.matchtile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import upstream.match.Match;
 import upstream.match.MatchService;
 import upstream.matchtile.dto.MTCoordinateDTO;
 import upstream.matchtile.dto.MatchTileDTO;
+import upstream.matchtile.dto.PlaceTileRequest;
 import upstream.model.BaseServiceWithDTO;
 import upstream.player.Player;
 import upstream.player.PlayerService;
@@ -120,6 +122,17 @@ public class MatchTileService extends BaseServiceWithDTO<MatchTile, MatchTileDTO
 
     public MatchTile findMyTile (List<MatchTile> matchTiles, Coordinate myCoordinate) {
         return matchTiles.stream().filter(mt -> mt.getCoordinate() != null && mt.getCoordinate().equals(myCoordinate)).findFirst().orElse(null);
+    }
+
+    @Transactional
+    public void updateCoordinate(Integer id, PlaceTileRequest request) throws NotValidMoveException {
+        Map<String, Integer> updates = new HashMap<>();
+        updates.put("x", request.x());
+        updates.put("y", request.y());
+        if (request.orientation() != null) {
+            updates.put(ORIENTATION_KEY, request.orientation());
+        }
+        updateCoordinate(id, updates);
     }
 
     @Transactional

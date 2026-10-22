@@ -1,7 +1,6 @@
 package upstream.match;
 
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import upstream.exceptions.ResourceNotFoundException;
+import upstream.match.dto.CreateMatchRequest;
 import upstream.match.dto.DashboardMatchDTO;
 import upstream.match.dto.MatchDTO;
 import upstream.model.BaseRestControllerWithDTO;
@@ -36,8 +37,10 @@ public class MatchRestController extends BaseRestControllerWithDTO<Match, MatchD
     }
 
     @PostMapping("/matchCreator/{userId}")
-    public ResponseEntity<MatchDTO> createMatchWMatchCreator(@PathVariable("userId") Integer userId, @RequestBody Map<String, String> requestBody) {
-        MatchDTO created = this.matchService.createMatchWMatchCreator(userId, requestBody);
+    public ResponseEntity<MatchDTO> createMatchWMatchCreator(
+            @PathVariable("userId") Integer userId, 
+            @Valid @RequestBody CreateMatchRequest request) {
+        MatchDTO created = this.matchService.createMatchWMatchCreator(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).header("Content-Type", "application/json").body(created);
     }
 
