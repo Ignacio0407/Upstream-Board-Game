@@ -89,64 +89,39 @@ const isWs = (ch: string): boolean => /\s/.test(ch);
  * possibly succeed — it would end at the exact same keyEnd and fail for the same reason.
  * That is why we skip directly to keyEnd instead of keyStart + 1, eliminating the redundant retries that caused the O(n²).
  */
+
+ type ParsedValue = { raw: string, valueEnd: number };
+
+const advanceWhile = (s: string, from: number, predicate: (ch: string) => boolean): number => { let k = from; while (k < s.length && predicate(s[k])) k++; return k; };
+
+const skipWs = (s: string, from: number): number => advanceWhile(s, from, isWs);
+
+const parseQuotedValue = (query: string, j: number): ParsedValue | null => { const k = query.indexOf('"', j + 1); return k === -1 ? null : { raw: query.slice(j + 1, k), valueEnd: k + 1 }; };
+
+const parseBareValue = (query: string, j: number): ParsedValue | null => { if (j >= query.length || isWs(query[j])) return null; const k = advanceWhile(query, j, ch => !isWs(ch)); return { raw: query.slice(j, k), valueEnd: k }; };
+
+const parseValue = (query: string, j: number): ParsedValue | null => query[j] === '"' ? parseQuotedValue(query, j) : parseBareValue(query, j);
+
+const splitValues = (raw: string): string[] => raw.split(",").map(v => v.trim()).filter(Boolean);
+
+const addFilter = (filters: Record<string, string[]>, attr: string, raw: string): void => { const rawTrimmed = raw.trim(); if (!attr || !rawTrimmed) return; const values = splitValues(rawTrimmed); if (values.length) filters[attr] = values; };
+
+const parseEntry = (query: string, start: number, filters: Record<string, string[]>): number => {
+  const keyEnd = advanceWhile(query, start, isKeyChar);
+  const colon = skipWs(query, keyEnd);
+  if (query[colon] !== ":") return keyEnd; // safe skip of the whole run (see invariant)
+  const parsed = parseValue(query, skipWs(query, colon + 1));
+  if (!parsed) return keyEnd; // same argument: no suffix of the run can succeed
+  addFilter(filters, query.slice(start, keyEnd).trim(), parsed.raw);
+  return parsed.valueEnd;
+};
+
 export const parseSearchQuery = (query: string): Record<string, string[]> => {
   const filters: Record<string, string[]> = {};
   if (!query.trim()) return filters;
 
-  const len = query.length;
   let i = 0;
-
-  while (i < len) {
-    if (!isKeyChar(query[i])) { i++; continue; }
-
-    const keyStart = i;
-    while (i < len && isKeyChar(query[i])) i++;
-    const keyEnd = i;
-
-    let j = keyEnd;
-    while (j < len && isWs(query[j])) j++;
-
-    if (query[j] !== ":") {
-      i = keyEnd; // salto seguro de la racha completa (ver invariante arriba)
-      continue;
-    }
-
-    j++; // consumir ':'
-    while (j < len && isWs(query[j])) j++;
-
-    let raw: string | null = null;
-    let valueEnd = j;
-
-    if (query[j] === '"') {
-      let k = j + 1;
-      while (k < len && query[k] !== '"') k++;
-      if (k < len) {
-        raw = query.slice(j + 1, k);
-        valueEnd = k + 1;
-      }
-    }
-
-    if (raw === null && j < len && query[j] !== '"' && !isWs(query[j])) {
-      let k = j;
-      while (k < len && !isWs(query[k])) k++;
-      raw = query.slice(j, k);
-      valueEnd = k;
-    }
-
-    if (raw === null) {
-      i = keyEnd; // mismo argumento: ningún sufijo de la racha lo arregla
-      continue;
-    }
-
-    const attr = query.slice(keyStart, keyEnd).trim();
-    const rawTrimmed = raw.trim();
-    if (attr && rawTrimmed) {
-      const values = rawTrimmed.split(",").map(v => v.trim()).filter(Boolean);
-      if (values.length) filters[attr] = values;
-    }
-
-    i = valueEnd;
-  }
+  while (i < query.length) i = isKeyChar(query[i]) ? parseEntry(query, i, filters) : i + 1;
 
   return filters;
 };

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
-import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, renderPlayerList, buildGridFromSnapshot, updateGridWithTile, PendingMove, GRID_WIDTH, GRID_HEIGHT, confirmMovementBatch, handleUpdateTilePosition, handleNoMoves, HistoryState } from './matchUtil.tsx';
+import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, renderPlayerList, buildGridFromSnapshot, updateGridWithTile, PendingMove, GRID_WIDTH, GRID_HEIGHT, confirmMovementBatch, handleUpdateTilePosition, handleNoMoves, HistoryState, buildPendingMove, buildUpdatedSalmon, getExitCoords, indexToCoords, isActiveSalmonOf, replaceSalmon, setPlayerEnergy, toNumberOr, updateMatchTile } from './matchUtil.tsx';
 import { ColorToRgb } from '../lobby/ColorParser.ts';
 import Chat from '../components/chat/Chat.tsx'
 import Match, { emptyMatch } from '../interfaces/Match.ts';
@@ -93,8 +93,7 @@ export default function Game() {
 
     const onGridClickWrapper = (index: number) => {
         if (!selectedSalmon || !myPlayer) return;
-        const x = index % GRID_WIDTH;
-        const y = GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH);
+        const { x, y } = indexToCoords(index);
         const move = validMoves.find(m => m.x === x && m.y === y);
         if (!move) return; // Illegal move, ignored
         // Save Backup before starting turn in case of error
@@ -102,63 +101,29 @@ export default function Game() {
         // 1. Discount energy
         const newEnergy = myPlayer.energy - move.energyUsed;
         setMyPlayer({ ...myPlayer, energy: newEnergy });
-        setPlayers(prev => prev.map(p => p.id === myPlayer.id ? { ...p, energy: newEnergy } : p));
+        setPlayers(prev => setPlayerEnergy(prev, myPlayer.id, newEnergy));
         // 2. Calculate salmon losses
-        const newSalmonsNumber = Math.max(0, selectedSalmon.salmonsNumber - move.salmonLoss);
-        let newImage = selectedSalmon.salmon.image;
-        if (newSalmonsNumber === 1 && newImage.includes('2')) newImage = newImage.replace('2', '1');
-        const updatedSalmon = { ...selectedSalmon, salmonsNumber: newSalmonsNumber, 
-            salmon: { ...selectedSalmon.salmon, image: newImage }, coordinate: { x, y } };
+        const updatedSalmon = buildUpdatedSalmon(selectedSalmon, move, x, y);
         // 3. Create new lists and update grid
-        const updatedSalmonsList = salmons.map(s => s.id === updatedSalmon.id ? updatedSalmon : s).filter(s => s.salmonsNumber > 0);
-        const mysalmons = updatedSalmonsList.filter(s => s.playerId === myPlayer?.id && s.salmonsNumber > 0 && 
-            ( !s.coordinate || (s.coordinate.y < 20 && !(s.coordinate.x === 1 && s.coordinate.y === 5))));
+        const updatedSalmonsList = replaceSalmon(salmons, updatedSalmon);
+        const mysalmons = updatedSalmonsList.filter(s => isActiveSalmonOf(s, myPlayer?.id));
         if (mysalmons.length === 0)
             ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch, title: "Death", message: "You are going to lose, check any possible moves, if there are none, please confirm", confirmText: "Confirm", cancelText: "Cancel" });
-        const finalX = move.x ? Number(move.x) : Number(x);
-        const finalY = move.y ? Number(move.y) : Number(y);
-        const exitX = selectedSalmon.coordinate ? Number(selectedSalmon.coordinate.x) : null;
-        const exitY = selectedSalmon.coordinate ? Number(selectedSalmon.coordinate.y) : null;
-        const nextMatchTiles = matchTiles.map(t => {
-            const newT = { ...t };
-            if (!newT.coordinate) return newT;
-            const tileX = Number(newT.coordinate.x);
-            const tileY = Number(newT.coordinate.y);
-            // 1. Remove salmon from exit
-            if (exitX !== null && exitY !== null && tileX === exitX && tileY === exitY)
-                newT.salmonsNumber = Number(newT.salmonsNumber) - 1;
-            // 2. Add salmon to destination
-            if (tileX === finalX && tileY === finalY)
-                newT.salmonsNumber = Number(newT.salmonsNumber) + 1;
-            // 3. Kill eagle if it's the destination or the jumped square
-            if ((tileX === finalX && tileY === finalY) || 
-                (move.jumpedCoords && tileX === Number(move.jumpedCoords.x) && tileY === Number(move.jumpedCoords.y))) {
-                if (newT.tile?.type === 'EAGLE') { 
-                    newT.tile = { ...newT.tile, type: 'WATER' as any }; 
-                    if (newT.tile.image) newT.tile.image = newT.tile.image.replace('eagle', 'water');
-                }
-            }
-            return newT;
-        });
+        const finalX = toNumberOr(move.x, x);
+        const finalY = toNumberOr(move.y, y);
+        const { exitX, exitY } = getExitCoords(selectedSalmon);
+        const nextMatchTiles = matchTiles.map(t => updateMatchTile(t, finalX, finalY, exitX, exitY, move));
         const nextGrid = buildGridFromSnapshot(nextMatchTiles, updatedSalmonsList);
         // 5. Save React states
         setSalmons(updatedSalmonsList);
-        setMatchTiles(nextMatchTiles); 
+        setMatchTiles(nextMatchTiles);
         setGrid(nextGrid);
-        const backendY = move.isJump ? y - 1 : y;
         // 6. Add to history
-        if (x === 1 && y === 5 && match.round >= 6) {
-            setPendingMoves(prev => [...prev, { salmonId: updatedSalmon.id, x, y:backendY, enterSpawn: true }]);
-        }
-        else {
-            let backendX = x;
-            if (move.isJump && Math.abs(move.x - selectedSalmon.coordinate?.x) === 2) backendX = move.jumpedCoords!.x;
-            setPendingMoves(prev => [...prev, { salmonId: updatedSalmon.id, x: backendX, y: backendY }]);
-        }
+        setPendingMoves(prev => [...prev, buildPendingMove(updatedSalmon.id, x, y, move, selectedSalmon, match.round)]);
         setSelectedSalmon(updatedSalmon);
         if (mysalmons.length === 0) {
             setMyPlayer({ ...myPlayer, energy: 0 });
-            setPlayers(prev => prev.map(p => p.id === myPlayer.id ? { ...p, energy: 0 } : p));
+            setPlayers(prev => setPlayerEnergy(prev, myPlayer.id, 0));
         }
         // 7. Recalculate next moves with the NEW DATA
         if (updatedSalmon.salmonsNumber > 0) {
@@ -167,8 +132,7 @@ export default function Game() {
             if (nextMoves.length === 0)
                 handleNoMoves(myPlayer, match, jwt, history, visible, setVisible, handleConfirmBatch);
         }
-        else setValidMoves([])
-        
+        else setValidMoves([]);
     };
 
     // --- Handlers to confirm/undo batch ---

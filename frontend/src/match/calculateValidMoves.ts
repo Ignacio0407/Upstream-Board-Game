@@ -16,45 +16,26 @@ interface MovementOrientations {
     myJump: number[];
 }
 
-function calculateMovementEnergy(
-    myType: TileType,
-    toTravelType: TileType,
-    toOri: number,
-    myOri: number,
-    orientations: MovementOrientations
-): EnergyResult {
-    let energyUsed = 1;
-    let salmonLoss = 0;
+const bit = (condition: boolean): number => condition ? 1 : 0;
 
-    const toTravelBearHasJump = toTravelType === TileType.BEAR && orientations.toTravelBear.includes(toOri);
-    const toTravelHasJump = toTravelType === TileType.JUMP && orientations.toTravelJump.includes(toOri);
+const hasBearJump = (toTravelType: TileType, toOri: number, o: MovementOrientations): boolean => toTravelType === TileType.BEAR && o.toTravelBear.includes(toOri);
 
-    if (myType === TileType.BEAR) {
-        if (orientations.myBear.includes(myOri)) {
-            energyUsed = 2;
-            salmonLoss += (toTravelType === TileType.BEAR ? 2 : 1);
-        } else if (toTravelBearHasJump || toTravelHasJump) {
-            energyUsed = 2;
-            if (toTravelBearHasJump) {
-                salmonLoss += 2;
-            } else if (toTravelHasJump) {
-                salmonLoss += 1;
-            }
-        }
-    } else if (myType === TileType.JUMP) {
-        if (orientations.myJump.includes(myOri)) {
-            energyUsed = 2;
-            salmonLoss += (toTravelType === TileType.BEAR ? 1 : 0);
-        } else if (toTravelBearHasJump || toTravelHasJump) {
-            energyUsed = 2;
-            salmonLoss += (toTravelBearHasJump ? 1 : 0);
-        }
-    } else if (toTravelBearHasJump || toTravelHasJump) {
-        energyUsed = 2;
-        salmonLoss += (toTravelBearHasJump ? 1 : 0);
-    }
+const hasJumpJump = (toTravelType: TileType, toOri: number, o: MovementOrientations): boolean => toTravelType === TileType.JUMP && o.toTravelJump.includes(toOri);
 
-    return { energyUsed, salmonLoss };
+const isOwnJump = (myType: TileType, myOri: number, o: MovementOrientations): boolean => (myType === TileType.BEAR && o.myBear.includes(myOri)) || (myType === TileType.JUMP && o.myJump.includes(myOri));
+
+const ownJumpLoss = (myType: TileType, toTravelType: TileType): number => bit(myType === TileType.BEAR) + bit(toTravelType === TileType.BEAR);
+
+const travelJumpLoss = (myType: TileType, bearHasJump: boolean): number => bit(bearHasJump) + bit(myType === TileType.BEAR);
+
+function calculateMovementEnergy(myType: TileType, toTravelType: TileType, toOri: number, myOri: number, 
+    orientations: MovementOrientations): EnergyResult {
+    const bearHasJump = hasBearJump(toTravelType, toOri, orientations);
+    const jumpHasJump = hasJumpJump(toTravelType, toOri, orientations);
+
+    if (isOwnJump(myType, myOri, orientations)) return { energyUsed: 2, salmonLoss: ownJumpLoss(myType, toTravelType) };
+    if (bearHasJump || jumpHasJump) return { energyUsed: 2, salmonLoss: travelJumpLoss(myType, bearHasJump) };
+    return { energyUsed: 1, salmonLoss: 0 };
 };
 
 const above = (myType: TileType, toTravelType: TileType, toOri: number, myOri: number): EnergyResult =>

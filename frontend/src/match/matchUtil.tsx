@@ -8,6 +8,8 @@ import SalmonMatch from "../interfaces/SalmonMatch.ts";
 import { JSX } from "react";
 import { Phase } from "../interfaces/Phase.ts";
 import ConfirmModal from "../util/ConfirmModal.tsx";
+import { ValidMove } from "./calculateValidMoves.ts";
+import Coordinate from "../interfaces/Coordinate.ts";
 
 export const GRID_WIDTH = 3;
 export const GRID_HEIGHT = 6;
@@ -314,4 +316,62 @@ export const calculateSalmonPosition = (index: number, totalSalmons: number) => 
     top: `${yPercent}%`
   };
 
+};
+
+// onGridClickWrapper Helpers
+
+export const indexToCoords = (index: number) => ({ x: index % GRID_WIDTH, y: GRID_HEIGHT - 1 - Math.floor(index / GRID_WIDTH) });
+
+export const setPlayerEnergy = (players: Player[], playerId: number, energy: number) => players.map(p => p.id === playerId ? { ...p, energy } : p);
+
+const getSalmonImage = (image: string, salmonsNumber: number) => salmonsNumber === 1 && image.includes('2') ? image.replace('2', '1') : image;
+
+export const buildUpdatedSalmon = (selectedSalmon: SalmonMatch, move: any, x: number, y: number) => {
+    const newSalmonsNumber = Math.max(0, selectedSalmon.salmonsNumber - move.salmonLoss);
+    const newImage = getSalmonImage(selectedSalmon.salmon.image, newSalmonsNumber);
+    return { ...selectedSalmon, salmonsNumber: newSalmonsNumber, salmon: { ...selectedSalmon.salmon, image: newImage }, coordinate: { x, y } };
+};
+
+export const replaceSalmon = (salmons: SalmonMatch[], updatedSalmon: SalmonMatch) => salmons.map(s => s.id === updatedSalmon.id ? updatedSalmon : s).filter(s => s.salmonsNumber > 0);
+
+const isPlayableCoordinate = (coordinate: Coordinate | null) => !coordinate || (coordinate.y < 20 && !(coordinate.x === 1 && coordinate.y === 5));
+
+export const isActiveSalmonOf = (salmon: SalmonMatch, playerId: number) => salmon.playerId === playerId && salmon.salmonsNumber > 0 && isPlayableCoordinate(salmon.coordinate);
+
+export const toNumberOr = (value: any, fallback: number) => value ? Number(value) : Number(fallback);
+
+export const getExitCoords = (salmon: SalmonMatch) => ({ exitX: salmon.coordinate ? Number(salmon.coordinate.x) : null, exitY: salmon.coordinate ? Number(salmon.coordinate.y) : null });
+
+const isSameCell = (tileX: number, tileY: number, cellX: number | null, cellY: number | null) => cellX !== null && cellY !== null && tileX === cellX && tileY === cellY;
+
+const isJumpedCell = (tileX: number, tileY: number, move: ValidMove) => !!move.jumpedCoords && tileX === Number(move.jumpedCoords.x) && tileY === Number(move.jumpedCoords.y);
+
+const isEagleKillZone = (tileX: number, tileY: number, finalX: number, finalY: number, move: ValidMove) => isSameCell(tileX, tileY, finalX, finalY) || isJumpedCell(tileX, tileY, move);
+
+const killEagle = (tile: MatchTile) => {
+    if (tile.tile?.type !== 'EAGLE') return;
+    tile.tile = { ...tile.tile, type: 'WATER' as any };
+    if (tile.tile.image) tile.tile.image = tile.tile.image.replace('eagle', 'water');
+};
+
+export const updateMatchTile = (t: MatchTile, finalX: number, finalY: number, exitX: number | null, exitY: number | null, move: ValidMove) => {
+    const newT = { ...t };
+    if (!newT.coordinate) return newT;
+    const tileX = Number(newT.coordinate.x);
+    const tileY = Number(newT.coordinate.y);
+    // 1. Remove salmon from exit
+    if (isSameCell(tileX, tileY, exitX, exitY)) newT.salmonsNumber = Number(newT.salmonsNumber) - 1;
+    // 2. Add salmon to destination
+    if (isSameCell(tileX, tileY, finalX, finalY)) newT.salmonsNumber = Number(newT.salmonsNumber) + 1;
+    // 3. Kill eagle if it's the destination or the jumped square
+    if (isEagleKillZone(tileX, tileY, finalX, finalY, move)) killEagle(newT);
+    return newT;
+};
+
+const getBackendX = (move: any, selectedSalmon: any, x: number) => move.isJump && Math.abs(move.x - selectedSalmon.coordinate?.x) === 2 ? move.jumpedCoords!.x : x;
+
+export const buildPendingMove = (salmonId: any, x: number, y: number, move: any, selectedSalmon: any, round: number) => {
+    const backendY = move.isJump ? y - 1 : y;
+    if (x === 1 && y === 5 && round >= 6) return { salmonId, x, y: backendY, enterSpawn: true };
+    return { salmonId, x: getBackendX(move, selectedSalmon, x), y: backendY };
 };

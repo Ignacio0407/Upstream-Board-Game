@@ -23,7 +23,7 @@ export default function AchievementList() {
   const jwt = tokenService.getLocalAccessToken();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([])
-  useEffect(() => {get(`/api/v1/achievements`, jwt).then(res => res.json()).then(data => setAchievements(data))}, [jwt]);
+  useEffect(() => {void get(`/api/v1/achievements`, jwt).then(res => res.json()).then(data => setAchievements(data))}, [jwt]);
   const user = tokenService.getUser();
   const [finalUser] = useFetchState<User>({} as User, buildSafeUrl('/api/v1/users/', user.id), jwt);
   const [userAchievements] = useFetchState<Achievement[]>([], `/api/v1/achievements/user/${encodeURIComponent(String(user.id))}`, jwt);
