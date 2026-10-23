@@ -1,84 +1,108 @@
+
 import { render, screen, waitFor, act } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import Login from "./Login";
 import tokenService from "../../services/token.service.ts";
 
-// --- Mocks ---
 vi.mock("../../services/token.service.ts");
 
 describe("Login Component", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        // Mock window.location.href
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { href: 'http://localhost/login' },
-        });
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.stubGlobal("fetch", vi.fn());
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      writable: true,
+      value: { href: "http://localhost/login" },
     });
+  });
 
-    it("performs successful login and redirects to dashboard", async () => {
-        const user = userEvent.setup();
-        render(<Login />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
-        await user.type(usernameInput, "testuser");
-        await user.type(passwordInput, "password123");
-        
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Login/i }));
-        });
+  it("performs successful login and redirects to dashboard", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        token: "mock-jwt",
+        username: "testuser",
+      }),
+    } as Response);
 
-        await waitFor(() => {
-            expect(tokenService.setUser).toHaveBeenCalledWith(expect.objectContaining({
-                token: "mock-jwt",
-                username: "testuser"
-            }));
-            expect(tokenService.updateLocalAccessToken).toHaveBeenCalledWith("mock-jwt");
-            expect(window.location.href).toBe("/dashboard");
-        });
+    const user = userEvent.setup();
+    render(<Login />);
+
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const passwordInput = screen.getByLabelText(/Password/i);
+
+    await user.type(usernameInput, "testuser");
+    await user.type(passwordInput, "password123");
+
+    await user.click(screen.getByRole("button", { name: /^Login$/i }));
+
+    await waitFor(() => {
+      expect(tokenService.setUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: "mock-jwt",
+          username: "testuser",
+        })
+      );
+
+      expect(tokenService.updateLocalAccessToken).toHaveBeenCalledWith(
+        "mock-jwt"
+      );
+
+      expect(window.location.href).toBe("/dashboard");
     });
+  });
 
-    it("shows error message on failed login", async () => {
-        const user = userEvent.setup();
-        render(<Login />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+  it("shows error message on failed login", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({}),
+    } as Response);
 
-        await user.type(usernameInput, "wronguser");
-        await user.type(passwordInput, "wrongpass");
-        
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Login/i }));
-        });
+    const user = userEvent.setup();
+    render(<Login />);
 
-        await waitFor(() => {
-            expect(screen.getByText(/Invalid login attempt/i)).toBeInTheDocument();
-            expect(window.location.href).not.toBe("/dashboard");
-        });
-    });
+    await user.type(screen.getByLabelText(/Username/i), "wronguser");
+    await user.type(screen.getByLabelText(/Password/i), "wrongpass");
 
-    it("shows fallback error message when fetch rejects with non-Error value", async () => {
-        global.fetch = vi.fn().mockRejectedValue("raw string error");
+    await user.click(screen.getByRole("button", { name: /^Login$/i }));
 
-        const user = userEvent.setup();
-        render(<Login />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
+    expect(
+      await screen.findByText(/Invalid login attempt/i)
+    ).toBeInTheDocument();
 
-        await user.type(usernameInput, "wronguser");
-        await user.type(passwordInput, "wrongpass");
-        
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Login/i }));
-        });
+    expect(window.location.href).not.toBe("/dashboard");
+  });
 
-        await waitFor(() => {
-            expect(screen.getByText(/Error in login/i)).toBeInTheDocument();
-        });
-    });
+  it("shows fallback error message when fetch rejects with non-Error value", async () => {
+    vi.mocked(fetch).mockRejectedValue("raw string error");
+
+    const user = userEvent.setup();
+    render(<Login />);
+
+    await user.type(screen.getByLabelText(/Username/i), "wronguser");
+    await user.type(screen.getByLabelText(/Password/i), "wrongpass");
+
+    await user.click(screen.getByRole("button", { name: /^Login$/i }));
+
+    expect(
+      await screen.findByText(/Error in login/i)
+    ).toBeInTheDocument();
+  });
 });

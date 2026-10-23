@@ -1,106 +1,134 @@
-import { render, screen, waitFor, act } from "../../test-utils";
+
+import { render, screen, waitFor } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import Register from "./Register";
 import tokenService from "../../services/token.service.ts";
 
-// --- Mocks ---
 vi.mock("../../services/token.service.ts");
 
 describe("Register Component", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        // Mock window.location.href
-        Object.defineProperty(window, 'location', {
-            configurable: true,
-            value: { href: 'http://localhost/register' },
-        });
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.stubGlobal("fetch", vi.fn());
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      writable: true,
+      value: { href: "http://localhost/register" },
     });
+  });
 
-    it("performs successful registration and login", async () => {
-        const user = userEvent.setup();
-        render(<Register />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
-        const firstNameInput = screen.getByLabelText(/First Name/i);
-        const lastNameInput = screen.getByLabelText(/Last Name/i);
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
 
-        await user.type(usernameInput, "newuser");
-        await user.type(passwordInput, "password123");
-        await user.type(firstNameInput, "First");
-        await user.type(lastNameInput, "Last");
-        
-        // Select role
-        await user.click(screen.getByRole("button", { name: /Player/i }));
+  it("performs successful registration and login", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          token: "mock-jwt",
+          username: "newuser",
+        }),
+      } as Response);
 
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Register/i }));
-        });
+    const user = userEvent.setup();
+    render(<Register />);
 
-        await waitFor(() => {
-            expect(tokenService.setUser).toHaveBeenCalledWith(expect.objectContaining({
-                token: "mock-jwt",
-                username: "newuser"
-            }));
-            expect(window.location.href).toBe("/dashboard");
-        });
+    await user.type(screen.getByLabelText(/Username/i), "newuser");
+    await user.type(screen.getByLabelText(/Password/i), "password123");
+    await user.type(screen.getByLabelText(/First Name/i), "First");
+    await user.type(screen.getByLabelText(/Last Name/i), "Last");
+
+    await user.click(screen.getByRole("button", { name: /^Player$/i }));
+    await user.click(screen.getByRole("button", { name: /^Register$/i }));
+
+    await waitFor(() => {
+        expect(tokenService.setUser).toHaveBeenCalledWith(
+            expect.objectContaining({
+            token: "mock-jwt",
+            username: "newuser",
+            })
+        );
+
+        expect(tokenService.updateLocalAccessToken).toHaveBeenCalledWith(
+            "mock-jwt"
+        );
+
+        expect(window.location.href).toBe("/dashboard");
     });
+  });
 
-    it("shows error if registration fails", async () => {
-        const user = userEvent.setup();
-        render(<Register />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
-        const firstNameInput = screen.getByLabelText(/First Name/i);
-        const lastNameInput = screen.getByLabelText(/Last Name/i);
+  it("shows error if registration fails", async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 409,
+      json: async () => ({
+        message: "User already exists",
+      }),
+    } as Response);
 
-        await user.type(usernameInput, "existinguser");
-        await user.type(passwordInput, "password123");
-        await user.type(firstNameInput, "First");
-        await user.type(lastNameInput, "Last");
-        
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Register/i }));
-        });
+    const user = userEvent.setup();
+    render(<Register />);
 
-        await waitFor(() => {
-            expect(screen.getByText(/User already exists/i)).toBeInTheDocument();
-        });
-    });
+    await user.type(screen.getByLabelText(/Username/i), "existinguser");
+    await user.type(screen.getByLabelText(/Password/i), "password123");
+    await user.type(screen.getByLabelText(/First Name/i), "First");
+    await user.type(screen.getByLabelText(/Last Name/i), "Last");
 
-    it("allows selecting Admin role and handles login failure after registration", async () => {
-        const user = userEvent.setup();
-        render(<Register />);
-        
-        const usernameInput = screen.getByLabelText(/Username/i);
-        const passwordInput = screen.getByLabelText(/Password/i);
-        const firstNameInput = screen.getByLabelText(/First Name/i);
-        const lastNameInput = screen.getByLabelText(/Last Name/i);
+    await user.click(screen.getByRole("button", { name: /^Register$/i }));
 
-        await user.type(usernameInput, "adminuser");
-        await user.type(passwordInput, "password123");
-        await user.type(firstNameInput, "Admin");
-        await user.type(lastNameInput, "User");
-        
-        // Select Admin role
-        await user.click(screen.getByRole("button", { name: /^Admin$/i }));
+    expect(
+      await screen.findByText(/User already exists/i)
+    ).toBeInTheDocument();
 
-        // Mock signup success, signin failure
-        global.fetch = vi.fn().mockImplementation(async (url) => {
-            if (String(url).includes("/signup")) {
-                return { ok: true, json: async () => ({}) };
-            }
-            return { ok: false, status: 401, json: async () => ({ message: "Login failed" }) };
-        });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 
-        await act(async () => {
-            await user.click(screen.getByRole("button", { name: /Register/i }));
-        });
+  it("allows selecting Admin role and handles login failure after registration", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({
+          message: "Login failed",
+        }),
+      } as Response);
 
-        await waitFor(() => {
-            expect(screen.getByText(/Login failed after registration/i)).toBeInTheDocument();
-        });
-    });
+    const user = userEvent.setup();
+    render(<Register />);
+
+    await user.type(screen.getByLabelText(/Username/i), "adminuser");
+    await user.type(screen.getByLabelText(/Password/i), "password123");
+    await user.type(screen.getByLabelText(/First Name/i), "Admin");
+    await user.type(screen.getByLabelText(/Last Name/i), "User");
+
+    await user.click(screen.getByRole("button", { name: /^Admin$/i }));
+    await user.click(screen.getByRole("button", { name: /^Register$/i }));
+
+    expect(
+      await screen.findByText(/Login failed after registration/i)
+    ).toBeInTheDocument();
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(tokenService.setUser).not.toHaveBeenCalled();
+  });
 });
