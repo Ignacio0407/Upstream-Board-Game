@@ -14,11 +14,13 @@ export default function AchievementCreate() {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Achievement> = async (data) => {
-    post(`/api/v1/achievements`, jwt, data).then((response) => response.json())
-      .then((updated) => {
-        navigate("/achievements", { state: { updated } });
-      })
-      .catch((error) => alert(error instanceof Error ? error.message : String(error)));
+    try {
+      const response = await post(`/api/v1/achievements`, jwt, data);
+      const updated = await response.json();
+      navigate("/achievements", { state: { updated } });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : String(error));
+    }
   };
 
   return (

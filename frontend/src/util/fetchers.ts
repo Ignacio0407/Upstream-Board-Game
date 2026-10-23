@@ -9,50 +9,36 @@ const createHeaders = (jwt: string | null): Record<string, string> => {
   return headers;
 };
 
-export const get = async (uri: string, jwt: string | null) => {
-  const safeUri = new URL(uri, window.location.origin).href;
-  return fetch(safeUri, {
-    method: "GET",
-    headers: createHeaders(jwt),
-  });
-};
+const API_PREFIX = "/api/";
 
-export const patch = async (uri: string, jwt: string | null, data?: unknown) => {
-  const safeUri = new URL(uri, window.location.origin).href;
-  return fetch(safeUri, {
-    method: "PATCH",
-    headers: createHeaders(jwt),
-    body: JSON.stringify(data),
-  });
-};
+function toApiUrl(path: string): string {
+  const url = new URL(path, window.location.origin);
+  if (url.origin !== window.location.origin || !url.pathname.startsWith(API_PREFIX)) {
+    throw new TypeError("URL outside the allowed API");
 
-export const put = async (uri: string, jwt: string | null, data?: unknown) => {
-  const safeUri = new URL(uri, window.location.origin).href;
-  return fetch(safeUri, {
-    method: "PUT",
-    headers: createHeaders(jwt),
-    body: JSON.stringify(data),
-  });
-};
-
-export const post = async (uri: string, jwt: string | null, data?: unknown) => {
-  const safeUri = new URL(uri, window.location.origin).href;
-  return await fetch(safeUri, {
-    method: "POST",
-    headers: createHeaders(jwt),
-    body: JSON.stringify(data),
-  });
-};
-
-export const deleteEntity = async (uri: string, jwt: string | null, id: number) => {
-  const safeUri = new URL(`${uri}/${encodeURIComponent(String(id))}`, window.location.origin).href;
-  return fetch(safeUri, {
-    method: "DELETE",
-    headers: createHeaders(jwt),
-  });
-};
+  }
+  return url.href; // pathname already normalized: ../ and %2e%2e are resolved before the check
+}
 
 export function buildSafeUrl(base: string, id?: string | number): string {
-    const path = id !== undefined ? `${base}${encodeURIComponent(String(id))}` : base;
-    return new URL(path, window.location.origin).href;
+  if (id === undefined) return toApiUrl(base);
+  const segment = encodeURIComponent(String(id));
+  if (segment === "." || segment === "..") throw new TypeError("ID not valid");
+  const prefix = base.endsWith("/") ? base.slice(0, -1) : base; // without regex
+  return toApiUrl(`${prefix}/${segment}`);
 }
+
+const request = async (method: string, uri: string, jwt: string | null, data?: unknown) =>
+  fetch(toApiUrl(uri), {
+    method,
+    headers: createHeaders(jwt),
+    body: JSON.stringify(data),
+  });
+
+export const get = (uri: string, jwt: string | null) => request("GET", uri, jwt);
+export const patch = (uri: string, jwt: string | null, data?: unknown) => request("PATCH", uri, jwt, data);
+export const put = (uri: string, jwt: string | null, data?: unknown) => request("PUT", uri, jwt, data);
+export const post = (uri: string, jwt: string | null, data?: unknown) => request("POST", uri, jwt, data);
+
+export const deleteEntity = (uri: string, jwt: string | null, id: number) =>
+  fetch(buildSafeUrl(uri, id), { method: "DELETE", headers: createHeaders(jwt) });

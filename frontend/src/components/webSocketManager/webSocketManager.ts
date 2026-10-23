@@ -101,7 +101,7 @@ class WebSocketManager {
       onStompError: (frame) => {
         console.error('❌ STOMP error', frame);
         this.events.onError?.(frame);
-        this.client.deactivate();
+        void this.client.deactivate();
       },
       onWebSocketError: (error) => {
         console.warn('⚠️ WebSocket error', error);
@@ -151,7 +151,7 @@ class WebSocketManager {
 
   deactivate(): void {
     if (this.client) {
-      this.client.deactivate();
+      void this.client.deactivate();
       this.activated = false;
     }
     this.subscriptions = [];

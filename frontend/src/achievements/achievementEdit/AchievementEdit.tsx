@@ -16,12 +16,13 @@ export default function AchievementEdit() {
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Achievement> = async (data) => {
-    put(`/api/v1/achievements/${achievement.id}`, jwt, data)
-      .then((response) => response.json())
-      .then((updated) => {
-        navigate("/achievements", { state: { updated } });
-      })
-      .catch((error) => alert(error instanceof Error ? error.message : String(error)));
+    try {
+      const response = await put(`/api/v1/achievements/${achievement.id}`, jwt, data);
+      const updated = await response.json();
+      navigate("/achievements", { state: { updated } });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : String(error));
+    }
   };
 
   return (

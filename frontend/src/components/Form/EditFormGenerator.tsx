@@ -54,13 +54,14 @@ export function EditFormGenerator<T extends FieldValues>({entityToEdit, onSubmit
   const location = useLocation();
   useEffect(() => {
     if (entity == null) {
-      get(baseUriToFetchEntity + location.pathname, jwt).then(res => res.json())
+      void get(baseUriToFetchEntity + location.pathname, jwt).then(res => res.json())
         .then(data => {
           console.log('Fetched entity to edit:', data);
           setEntity(data as T);
           reset(data);
           setFields(buildFieldsFromEntity(data, selectOptions));
-        });
+        })
+        .catch(err => console.error(err));
     } else {
       reset(entity);
     }
