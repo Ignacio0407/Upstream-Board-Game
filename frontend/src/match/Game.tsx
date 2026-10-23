@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import tokenService from '../services/token.service.ts'
 import useFetchState from "../util/useFetchState.ts";
 import '../static/css/game/game.css'
-import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, renderPlayerList, buildGridFromSnapshot, updateGridWithTile, PendingMove, GRID_WIDTH, GRID_HEIGHT, confirmMovementBatch, handleUpdateTilePosition, handleNoMoves } from './matchUtil.tsx';
+import { GridCell, handleTileClick, handleSalmonClick, handleRotateTile, getRotationStyle, generatePlayerList, calculateSalmonPosition, renderPlayerList, buildGridFromSnapshot, updateGridWithTile, PendingMove, GRID_WIDTH, GRID_HEIGHT, confirmMovementBatch, handleUpdateTilePosition, handleNoMoves, HistoryState } from './matchUtil.tsx';
 import { ColorToRgb } from '../lobby/ColorParser.ts';
 import Chat from '../components/chat/Chat.tsx'
 import Match, { emptyMatch } from '../interfaces/Match.ts';
@@ -42,7 +42,7 @@ export default function Game() {
     interface TilesAndSalmons { salmonMatches: SalmonMatch[], matchTiles: MatchTile[] }
     const [pendingMoves, setPendingMoves] = useState<PendingMove[]>([]);
     const [validMoves, setValidMoves] = useState<ValidMove[]>([]);
-    const [history, setHistory] = useState<{salmons: SalmonMatch[], matchTiles: MatchTile[], energy: number}[]>([]);
+    const [history, setHistory] = useState<HistoryState[]>([]);
     const [visible, setVisible] = useState(false);
     const [confirmBatchIsSubmitting, setConfirmBatchIsSubmitting] = useState(false); //Remove race condition when confirming batch, to avoid double click and send twice the same batch.
     const wsManagerRef = useRef<WebSocketManager | null>(null);
@@ -178,7 +178,7 @@ export default function Game() {
         setConfirmBatchIsSubmitting(true);
         setValidMoves([]);
         setSelectedSalmon(null);
-        confirmMovementBatch({pendingMoves, jwt, match, myPlayerId: myPlayer!.id, initialState: history[0], setConfirmBatchIsSubmitting,
+        void confirmMovementBatch({pendingMoves, jwt, match, myPlayerId: myPlayer!.id, initialState: history[0], setConfirmBatchIsSubmitting,
             restoreSnapshot: (backup: any) => {
                 setMatchTiles(backup.matchTiles);
                 setSalmons(backup.salmons.filter((s:SalmonMatch) => s.salmonsNumber > 0));
@@ -338,7 +338,7 @@ export default function Game() {
             <h1 className="game-title game-turn move-your-salmons">Move your salmons!</h1>}
             {/*Batch controls*/}
             {(pendingMoves.length > 0) && (
-                <div className="game-title game-turn move-your-salmons batch-controls" style={{ marginBottom: '70px', display: 'flex', gap: '10px' }}>
+                <div className="game-title game-turn move-your-salmons batch-controls">
                     {myPlayer?.energy === 0 && <button type="button" className="btn btn-success" disabled={confirmBatchIsSubmitting} onClick={handleConfirmBatch}>Confirm</button>}
                     <button type="button" className="btn btn-warning" onClick={handleUndoLastMove}>Undo last</button>
                     <button type="button" className="btn btn-danger" onClick={handleUndoAll}>Undo all</button>
@@ -432,7 +432,7 @@ export default function Game() {
                             }} 
                             onClick={() => {
                                 if (match.phase === Phase.TILES) {
-                                    handleUpdateTilePosition({jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, actualPlayerId: match.actualPlayerId, myPlayerId: myPlayer.id, matchTilesNoCoordinate}); 
+                                    void handleUpdateTilePosition({jwt, index, selectedSalmon, setSelectedTile, selectedTile, match, actualPlayerId: match.actualPlayerId, myPlayerId: myPlayer.id, matchTilesNoCoordinate}); 
                                 } else if (match.phase === Phase.MOVING) {
                                     onGridClickWrapper(index);
                                 }

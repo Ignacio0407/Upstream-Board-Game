@@ -15,10 +15,9 @@ export const GRID_HEIGHT = 6;
 export const coordToIndex = (x: number, y: number) => { return (GRID_HEIGHT - 1 - y) * GRID_WIDTH + x; };
 export type GridCell = {tile: MatchTile, salmons: SalmonMatch[]};
 
-export function isFull (playersNumber:number, tile:MatchTile) {
+export function isFull (tile: MatchTile) {
     if (tile.capacity === 0) return false;
-    if (playersNumber > 2 && (tile.tile.type === TileType.ROCK)) return tile.capacity === (tile.salmonsNumber - 1);
-    else return tile.capacity === tile.salmonsNumber; 
+    return tile.salmonsNumber >= tile.capacity;
 }
 
 export const handleTileClick = (tile:MatchTile, myPlayer:Player, match:Match, setSelectedTile: (tile: MatchTile | null) => void, setSelectedSalmon: (salmon: SalmonMatch | null) => void) => {
@@ -193,10 +192,11 @@ export const updateGridWithTile = (prevGrid: GridCell[], updatedTile: MatchTile)
   return newGrid;
 };
 
+export interface HistoryState { salmons: SalmonMatch[], matchTiles: MatchTile[], energy: number };
 export type PendingMove = { salmonId: number, x: number, y: number, enterSpawn?: boolean };
 export interface ConfirmMovementBatchConfig {pendingMoves: PendingMove[]; jwt: string; match: Match;
-    myPlayerId: number; initialState: any; setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void;
-    restoreSnapshot: () => void; clearPath: () => void;
+    myPlayerId: number; initialState: HistoryState; setConfirmBatchIsSubmitting: (isSubmitting: boolean) => void;
+    restoreSnapshot: (state: HistoryState) => void; clearPath: () => void;
 }
 
 export async function confirmMovementBatch(config: ConfirmMovementBatchConfig) {
@@ -240,7 +240,7 @@ export async function confirmMovementBatch(config: ConfirmMovementBatchConfig) {
     }
 };
 
-export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, history: any[], 
+export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, history: HistoryState[], 
         visible: boolean, setVisible: (visible: boolean) => void, handleConfirmBatch: () => void) => {
     if (history.length === 0)
         passTurn(match, jwt, myPlayer);

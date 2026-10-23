@@ -47,27 +47,26 @@ describe('matchUtil', () => {
 
         it('returns false if capacity is 0, even if salmonsNumber matches', () => {
             const tile = { ...mockTile, capacity: 0, salmonsNumber: 0 };
-            expect(matchUtil.isFull(2, tile as any)).toBe(false);
+            expect(matchUtil.isFull(tile as any)).toBe(false);
         });
 
-        it('returns true if salmonsNumber === capacity in a non-ROCK tile', () => {
-            expect(matchUtil.isFull(2, mockTile as any)).toBe(true);
+        it('returns true if salmonsNumber === capacity', () => {
+            expect(matchUtil.isFull(mockTile as any)).toBe(true);
         });
 
-        it('in ROCK with more than 2 players, it is considered full when capacity === salmonsNumber - 1', () => {
-            const rockTile = { ...mockTile, tile: { type: TileType.ROCK }, capacity: 1, salmonsNumber: 2 };
-            expect(matchUtil.isFull(3, rockTile as any)).toBe(true);
+        it('returns true if salmonsNumber > capacity', () => {
+            const overCapacityTile = { ...mockTile, capacity: 2, salmonsNumber: 3 };
+            expect(matchUtil.isFull(overCapacityTile as any)).toBe(true);
         });
 
-        it('in ROCK with exactly 2 players, the general rule applies (not the ROCK rule)', () => {
-            // playersNumber > 2 is strictly greater than 2, so with 2 players it falls into the "else" block
-            const rockTile = { ...mockTile, tile: { type: TileType.ROCK }, capacity: 1, salmonsNumber: 2 };
-            expect(matchUtil.isFull(2, rockTile as any)).toBe(false);
+        it('in ROCK tiles, it is considered full when salmonsNumber reaches capacity', () => {
+            const rockTile = { ...mockTile, tile: { type: TileType.ROCK }, capacity: 2, salmonsNumber: 2 };
+            expect(matchUtil.isFull(rockTile as any)).toBe(true);
         });
 
         it('returns false if not full', () => {
             const tile = { ...mockTile, salmonsNumber: 1 };
-            expect(matchUtil.isFull(2, tile as any)).toBe(false);
+            expect(matchUtil.isFull(tile as any)).toBe(false);
         });
     });
 

@@ -108,7 +108,7 @@ const fromSea = (
         const toTravelType = toTravel.tile.type as TileType;
         const toOri = toTravel.orientation;
 
-        if (isFull(playersNumber, toTravel)) {
+        if (isFull(toTravel)) {
             const jumpMove = fromSeaFull(grid, targetX, toTravel, toTravelType, energy, playersNumber);
             if (jumpMove) validMoves.push(jumpMove);
             continue;
@@ -132,7 +132,7 @@ const fromSeaFull = (
     if (energy < 3) return null;
 
     const landCell = grid[coordToIndex(targetX, 1)];
-    if (!landCell?.tile || isFull(playersNumber, landCell.tile)) return null;
+    if (!landCell?.tile || isFull(landCell.tile)) return null;
 
     let salmonLoss = 0;
     if (toTravelType === TileType.BEAR) salmonLoss++;
@@ -179,7 +179,7 @@ function fromGridFull(
     if (landY >= GRID_HEIGHT || landX < 0 || landX >= GRID_WIDTH) return null;
 
     const landCell = grid[coordToIndex(landX, landY)];
-    if (!landCell?.tile || isFull(playersNumber, landCell.tile)) return null;
+    if (!landCell?.tile || isFull(landCell.tile)) return null;
 
     let salmonLoss = 0;
     if (myType === TileType.BEAR) salmonLoss++;
@@ -245,7 +245,7 @@ export const calculateValidMoves = (
         const toOri = toTravel.orientation;
 
         let move: ValidMove | null;
-        if (isFull(playersNumber, toTravel)) {
+        if (isFull(toTravel)) {
             move = fromGridFull(grid, { targetX, targetY, dx }, myType, toTravelType, energy, playersNumber);
         } else {
             move = fromGrid(type, { targetX, targetY }, myType, toTravelType, toOri, myOri, energy);
