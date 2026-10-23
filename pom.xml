@@ -11,7 +11,7 @@
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.3</version>
     </parent>
-    <name>Upstream</name>
+    <name>Upstream-Board-Game</name>
 
     <properties>
 
@@ -38,6 +38,7 @@
         <ngrok.authToken>${env.NGROK_AUTH_TOKEN}</ngrok.authToken>
 
         <sonar.organization>tfg-upstream</sonar.organization>
+        <sonar.projectName>Upstream-Board-Game</sonar.projectName>
         <sonar.coverage.exclusions>
             **/DTO/**,
             /*DTO.java,
