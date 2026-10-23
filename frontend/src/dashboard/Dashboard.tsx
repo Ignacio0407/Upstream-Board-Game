@@ -85,6 +85,7 @@ export default function Dashboard() {
             <WhiteSpace />
             <div className="game-table">
                 <ListGenerator<DashboardMatch>
+                    cssClasses={["dashboard-listing"]}
                     data={matches}
                     columns={["name", "playersNumber", "state", "password", "join", "spectate"] as (keyof DashboardMatch)[]}
                     customLabels={{

@@ -131,13 +131,18 @@ textarea.class-form-input[required] + .class-form-label::after {
   transition: transform 0.5s, color 0.3s;
 }
 
-.class-error-form .class-form-label {
-  color: var(--color-error) !important;
+.class-error-form .class-form-label,
+.class-error-form .class-form-input:focus + .class-form-label,
+.class-error-form .class-form-input:not(:placeholder-shown) + .class-form-label {
+  color: var(--color-error);
 }
 
+.class-error-form input.class-form-input,
+.class-error-form select.class-form-input,
+.class-error-form textarea.class-form-input,
 .class-error-form .class-form-input {
   background-color: var(--color-error-background);
-  border-color: var(--color-error) !important;
+  border-color: var(--color-error);
   outline: none;
 }
 
@@ -205,8 +210,9 @@ textarea.class-form-input[required] + .class-form-label::after {
 /* -------------------------------------------------------------------------- */
 
 @media screen and (max-width: 600px) {
+  div.class-form-group,
   .class-form-group {
-    width: 100% !important;
+    width: 100%;
     margin-top: 1.25rem;
     margin-bottom: 1.5rem;
   }
@@ -239,8 +245,9 @@ textarea.class-form-input[required] + .class-form-label::after {
 }
 
 @media screen and (max-width: 450px) {
+  div.class-form-group,
   .class-form-group {
-    width: 90% !important;
+    width: 90%;
     margin-top: 1.25rem;
   }
 }

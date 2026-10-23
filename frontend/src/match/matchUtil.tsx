@@ -6,7 +6,6 @@ import Player from '../interfaces/Player.ts'
 import Match from "../interfaces/Match.ts";
 import SalmonMatch from "../interfaces/SalmonMatch.ts";
 import { JSX } from "react";
-import { TileType } from "../interfaces/Tile.ts";
 import { Phase } from "../interfaces/Phase.ts";
 import ConfirmModal from "../util/ConfirmModal.tsx";
 
@@ -50,7 +49,7 @@ export const changephase = async(match:Match, jwt:string, myPlayerId:number) => 
 
 export const passTurn = async (match:Match, jwt:string, myPlayer:Player) => {
     await patch(`/api/v1/players/${myPlayer.id}/energy`, jwt);
-    changephase(match, jwt, myPlayer.id);
+    await changephase(match, jwt, myPlayer.id);
 };
 
 export const updateTilePosition = async (tile:MatchTile, x:number, y:number, jwt:string, actualPlayerId:number|undefined, myPlayerId:number, match:Match) => {
@@ -118,23 +117,20 @@ export const getRotationStyle = (tile:MatchTile) => {
 export const generatePlayerList = (players:Player[], actualPlayerId:number) => {
     return players.map((p) => (
         <tr key={p.id} className={`table-row ${p.id === actualPlayerId ? 'table-row-active' : ''}`}>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>{p.name}</td>
-            <td className="table-cell" style={{ padding: '0', textAlign: 'center', verticalAlign: 'middle'}}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: `${ColorToRgb(p.color)}`, 
-                border: '1px solid #000', display: 'inline-block'}}>
-                    
-                </div>
+            <td className="table-cell player-cell-name">{p.name}</td>
+            <td className="table-cell player-cell-color" style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                <div className="player-color-circle" style={{ backgroundColor: `${ColorToRgb(p.color)}` }}></div>
             </td>   
-            <td className="table-cell" style={{ position: 'relative', padding: '20px', paddingLeft: '55px', paddingRight: '40px'}}>{p.points}</td>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
+            <td className="table-cell player-cell-points">{p.points}</td>
+            <td className="table-cell player-cell-alive">
                 {p.alive 
                     ? <i className="fa fa-check-circle" style={{ color: 'green' }}></i> 
                     : <i className="fa fa-times-circle" style={{ color: 'red' }}></i>}
             </td>
-            <td className="table-cell" style={{ position: 'relative', padding: '20px' }}>
+            <td className="table-cell player-cell-energy">
                 {p.energy > 0 
                     ? Array.from({ length: p.energy }).map((_, i) => (
-                        <i key={`energy-${p.id}-${i}`} className="fa fa-bolt" style={{ color: '#FFD700', marginRight: '5px' }}></i>
+                        <i key={`energy-${p.id}-${i}`} className="fa fa-bolt" style={{ color: '#FFD700', marginRight: '4px' }}></i>
                     )) 
                     : <i className="fa fa-tired" style={{ color: '#FF8888' }}></i>}
             </td>
@@ -143,14 +139,14 @@ export const generatePlayerList = (players:Player[], actualPlayerId:number) => {
 };
 
 export const renderPlayerList = (playerList:JSX.Element[]) => {
-    return <table className="users-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+    return <table className="users-table">
                 <thead>
                     <tr>
-                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Name</th>
-                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Color</th>
-                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Points</th>
-                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Alive</th>
-                        <th className="table-header" style={{ textAlign: 'left', padding: '15px' }}>Energy</th>
+                        <th className="table-header">Name</th>
+                        <th className="table-header">Color</th>
+                        <th className="table-header">Points</th>
+                        <th className="table-header">Alive</th>
+                        <th className="table-header">Energy</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -222,28 +218,30 @@ export async function confirmMovementBatch(config: ConfirmMovementBatchConfig) {
         } 
         // CASE B: All was saved, but changePhase failed. We retry.
         else {
-            let retries = 3;
-            while (retries > 0) {
+            const attemptChangePhase = async (remaining: number): Promise<void> => {
                 try {
                     await changephase(match, jwt, myPlayerId);
-                    break;
                 } catch (retryError) {
                     console.warn("Retry changephase failed:", retryError);
-                    retries--;
-                    if (retries === 0) alert("Persistent network failure. Movement was saved, reload to continue.");
-                    else await new Promise(res => setTimeout(res, 1000));
+                    if (remaining <= 1) {
+                        alert("Persistent network failure. Movement was saved, reload to continue.");
+                    } else {
+                        await new Promise(res => setTimeout(res, 1000));
+                        await attemptChangePhase(remaining - 1);
+                    }
                 }
-            }
+            };
+            await attemptChangePhase(3);
         }
         clearPath();
         setConfirmBatchIsSubmitting(false);
     }
 };
 
-export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, history: HistoryState[], 
+export const handleNoMoves = (myPlayer: Player, match: Match, jwt: string, history: any[], 
         visible: boolean, setVisible: (visible: boolean) => void, handleConfirmBatch: () => void) => {
     if (history.length === 0)
-        passTurn(match, jwt, myPlayer);
+        void passTurn(match, jwt, myPlayer);
     else 
         ConfirmModal({ visible: visible, setVisible: setVisible, onConfirm: handleConfirmBatch});
 };

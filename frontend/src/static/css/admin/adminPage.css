@@ -25,32 +25,40 @@
 
 .custom-form-input-label:after {
   content: "*";
-  color: #cc0033 !important;
+  color: #cc0033;
 }
 
+input.custom-input,
+select.custom-input,
+textarea.custom-textarea,
 .custom-input,
 .custom-textarea {
-  width: 100% !important;
-  font-family: inherit !important;
-  font-size: 1.48vh !important; /* 16px / 10.8 */
-  color: var(--color-input) !important;
-  padding: 0.6em 0.3em !important;
-  outline: none !important;
-  background-color: transparent !important;
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.48vh; /* 16px / 10.8 */
+  color: var(--color-input);
+  padding: 0.6em 0.3em;
+  outline: none;
+  background-color: transparent;
   margin: 1.85vh 0; /* 20px / 10.8 */
 }
 
+input.custom-input,
+select.custom-input,
 .custom-input {
-  border: none !important;
-  border-bottom: 0.18vh solid var(--main-button-hover-dark-color) !important;
+  border: none;
+  border-bottom: 0.18vh solid var(--main-button-hover-dark-color);
 }
 
+input.custom-input:disabled,
+select.custom-input:disabled,
 .custom-input:disabled {
-  background-color: rgb(239, 239, 239) !important;
+  background-color: rgb(239, 239, 239);
 }
 
+textarea.custom-textarea,
 .custom-textarea {
-  border: 0.18vh solid var(--main-button-hover-dark-color) !important;
+  border: 0.18vh solid var(--main-button-hover-dark-color);
 }
 
 .custom-button-row {
@@ -68,9 +76,12 @@
     width: 90%;
     margin: 0 auto;
   }
+  input.custom-input,
+  select.custom-input,
+  textarea.custom-textarea,
   .custom-input,
   .custom-textarea {
-    font-size: 1.8vh !important;
+    font-size: 1.8vh;
   }
 }
 
@@ -87,9 +98,12 @@
     font-size: 3.8vw;
     transform: translateY(-1.2vh) scale(0.75);
   }
+  input.custom-input,
+  select.custom-input,
+  textarea.custom-textarea,
   .custom-input,
   .custom-textarea {
-    font-size: 3.8vw !important;
+    font-size: 3.8vw;
     margin: 1.5vh 0;
   }
   .custom-button-row {

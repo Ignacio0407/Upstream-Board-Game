@@ -25,21 +25,25 @@
   transform: translateY(-0.0625rem); /* -1px */
 }
 
+.auth-button.blue,
 .blue {
-  border: solid 0.125rem var(--main-blue-color) !important;
+  border: solid 0.125rem var(--main-blue-color);
 }
 
+.auth-button.blue:hover,
 .blue:hover {
-  background-color: var(--main-blue-color) !important;
+  background-color: var(--main-blue-color);
   box-shadow: 0 0.9375rem 1.25rem rgba(46, 92, 229, 0.4);
 }
 
+.auth-button.danger,
 .danger {
-  border: solid 0.125rem var(--main-red-color) !important;
+  border: solid 0.125rem var(--main-red-color);
 }
 
+.auth-button.danger:hover,
 .danger:hover {
-  background-color: var(--main-red-color) !important;
+  background-color: var(--main-red-color);
   box-shadow: 0 0.9375rem 1.25rem rgba(229, 46, 46, 0.4);
 }
 

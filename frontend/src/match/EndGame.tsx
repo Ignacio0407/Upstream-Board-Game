@@ -26,7 +26,7 @@ export default function EndGame(): JSX.Element {
                 await fetchPlayers();
                 setInitialized(true);
             };
-            initialize();
+            void initialize();
         }
     }, [initialized, matchId, jwt]);
 

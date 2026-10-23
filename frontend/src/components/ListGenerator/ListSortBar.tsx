@@ -28,16 +28,19 @@
  * -----------------------------------------------------------------------------
  */
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
+import "./listGenerator.css";
 
 interface Props<T> {data: T[], readonly onSort: (sorted: T[]) => void}
 
 export default function ListSortBar<T>({ data, onSort }: Readonly<Props<T>>) {
   const keys = data.length > 0 ? Object.keys(data[0] as object).filter(k => k !== "id") : [];
   const [selectedKey, setSelectedKey] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   const handleSort = (order: "asc" | "desc") => {
     if (!selectedKey) return;
+    setSortOrder(order);
     const sorted = [...data].sort((a, b) => {
       const valA = a[selectedKey as keyof T];
       const valB = b[selectedKey as keyof T];
@@ -51,15 +54,55 @@ export default function ListSortBar<T>({ data, onSort }: Readonly<Props<T>>) {
     onSort(sorted);
   };
 
+  const handleReset = () => {
+    setSelectedKey("");
+    setSortOrder(null);
+    onSort(data);
+  };
+
+  const handleKeyChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedKey(e.target.value);
+    setSortOrder(null);
+  };
+
   return (
     <div className="sort-bar">
-      <select value={selectedKey} onChange={(e) => setSelectedKey(e.target.value)}>
-        <option value="">Sort by...</option>
-        {keys.map((key) => (<option key={key} value={key}> {key}</option>))}
-      </select>
-      <button type="button" onClick={() => handleSort("asc")}>↑</button>
-      <button type="button" onClick={() => handleSort("desc")}>↓</button>
-      <button type="button" onClick={() => { setSelectedKey(""); onSort(data); }}>✖</button>
+      <div className="sort-bar-select-wrapper">
+        <select 
+          className="sort-bar-select"
+          value={selectedKey} 
+          onChange={handleKeyChange}
+        >
+          <option value="">Sort by...</option>
+          {keys.map((key) => (<option key={key} value={key}> {key}</option>))}
+        </select>
+      </div>
+      <div className="sort-bar-buttons">
+        <button 
+          type="button" 
+          className={`sort-bar-btn sort-bar-btn-asc ${sortOrder === "asc" ? "active" : ""}`}
+          onClick={() => handleSort("asc")}
+          title="Sort ascending"
+        >
+          ↑
+        </button>
+        <button 
+          type="button" 
+          className={`sort-bar-btn sort-bar-btn-desc ${sortOrder === "desc" ? "active" : ""}`}
+          onClick={() => handleSort("desc")}
+          title="Sort descending"
+        >
+          ↓
+        </button>
+        <button 
+          type="button" 
+          className="sort-bar-btn sort-bar-btn-reset"
+          onClick={handleReset}
+          title="Clear sorting"
+        >
+          ✖
+        </button>
+      </div>
     </div>
   );
 }

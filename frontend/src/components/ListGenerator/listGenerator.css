@@ -32,12 +32,136 @@
   padding: 1.85vh 1.04vw;
 }
 
+/* ==========================================================================
+   Sort Bar
+   ========================================================================== */
 .sort-bar {
   display: flex;
-  gap: 0.52vw;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.625rem; /* 10px */
   margin-bottom: 1.85vh;
+  padding: 0.45rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 0.08rem solid rgba(35, 196, 131, 0.35);
+  border-radius: 2rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
+.sort-bar:focus-within {
+  border-color: var(--main-green-color, #23c483);
+  box-shadow: 0 0.25rem 1rem rgba(46, 229, 157, 0.3);
+}
+
+.sort-bar-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sort-bar-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2323c483' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.875rem;
+  border: 0.08rem solid #cbd5e1;
+  border-radius: 1.25rem;
+  color: #1f2937;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  height: 2.25rem;
+  padding: 0.25rem 2.2rem 0.25rem 0.9rem;
+  min-width: 10rem;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.sort-bar-select:hover {
+  border-color: var(--main-green-color, #23c483);
+  background-color: #fafdfb;
+}
+
+.sort-bar-select:focus {
+  border-color: var(--main-green-color, #23c483);
+  box-shadow: 0 0 0 0.1875rem var(--green-shadow-color, rgba(46, 229, 157, 0.4));
+  background-color: #ffffff;
+}
+
+.sort-bar-buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sort-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 0.08rem solid #cbd5e1;
+  background-color: #ffffff;
+  color: #374151;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  padding: 0;
+  line-height: 1;
+}
+
+.sort-bar-btn:hover {
+  border-color: var(--main-green-color, #23c483);
+  color: #0f3824;
+  background-color: #e8f8f0;
+  transform: translateY(-0.1rem);
+  box-shadow: 0 0.25rem 0.5rem var(--green-shadow-color, rgba(46, 229, 157, 0.4));
+}
+
+.sort-bar-btn:active {
+  transform: translateY(0);
+}
+
+.sort-bar-btn.active {
+  background-color: var(--main-green-color, #23c483);
+  border-color: var(--main-green-color, #23c483);
+  color: #0f291e;
+  box-shadow: 0 0.25rem 0.625rem var(--green-shadow-color, rgba(46, 229, 157, 0.4));
+}
+
+.sort-bar-btn-reset {
+  color: #9ca3af;
+}
+
+.sort-bar-btn-reset:hover {
+  border-color: var(--main-red-color, #c42323);
+  background-color: var(--main-red-color, #c42323);
+  color: #ffffff;
+  box-shadow: 0 0.25rem 0.5rem var(--red-shadow-color, rgba(229, 46, 46, 0.4));
+}
+
+.sort-bar-btn:focus-visible {
+  outline: 0.125rem solid var(--main-green-color, #23c483);
+  outline-offset: 0.125rem;
+}
+
+/* ==========================================================================
+   Table & Actions
+   ========================================================================== */
 .list-generator-container .table {
   background-color: transparent;
   border-radius: 0.37vh; /* 4px / 10.8 */
@@ -138,9 +262,35 @@
     padding: 1vh 2vw;
   }
   .sort-bar {
-    flex-direction: column;
-    gap: 1vh;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 1rem;
     margin-bottom: 1.5vh;
+  }
+  .sort-bar-select-wrapper {
+    flex: 1;
+    min-width: 0;
+  }
+  .sort-bar-select {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.85rem;
+    height: 2.2rem;
+    padding-left: 0.75rem;
+    padding-right: 2rem;
+  }
+  .sort-bar-buttons {
+    flex-shrink: 0;
+    gap: 0.25rem;
+  }
+  .sort-bar-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 0.95rem;
   }
   .mass-actions-bar {
     flex-direction: column;
