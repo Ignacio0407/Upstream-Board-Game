@@ -1,17 +1,12 @@
 {"properties": [
   {
-    "name": "jwtSecret",
+    "name": "upstream.game.app.jwtSecret",
     "type": "java.lang.String",
     "description": "Secret Key for JWT"
   },
   {
-    "name": "petclinic.app.jwtRefreshExpirationMs",
+    "name": "upstream.game.app.jwtExpirationMs",
     "type": "java.lang.String",
-    "description": "Miliseconds for JWT Refresh expiration"
-  },
-  {
-    "name": "petclinic.app.jwtExpirationMs",
-    "type": "java.lang.String",
-    "description": "Miliseconds for JWT expiration'"
+    "description": "Milliseconds for JWT expiration"
   }
 ]}

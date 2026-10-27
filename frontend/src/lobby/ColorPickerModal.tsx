@@ -1,7 +1,11 @@
 import { JSX, useState } from 'react';
-import {RgbToColor} from './ColorParser.ts';
+import { RgbToColor } from './ColorParser.ts';
+import '../static/css/game/coloPicker.css';
 
-interface ColorPickerModalPrompts { readonly onColorSelect: (color: string) => void; readonly takenColors: readonly string[]; }
+interface ColorPickerModalPrompts {
+    readonly onColorSelect: (color: string) => void;
+    readonly takenColors: readonly string[];
+}
 
 export default function ColorPickerModal({ onColorSelect, takenColors }: Readonly<ColorPickerModalPrompts>): JSX.Element {
     const [isVisible, setIsVisible] = useState(true);
@@ -9,19 +13,17 @@ export default function ColorPickerModal({ onColorSelect, takenColors }: Readonl
     
     const colors = ['#FFFF00', '#FF0000', '#008F39', '#572364', '#FFFFFF'];
 
-    const handleColorClick = (color:string) => {
-        
+    const handleColorClick = (color: string) => {
         if (!takenColors.includes(color)) {
             setSelectedColor(color);
         }
-          
         setSelectedColor(color);
     };
 
     const handleAccept = () => {
         if (selectedColor) {
             const colorTransformed = RgbToColor(selectedColor);
-            onColorSelect(colorTransformed);  // Calls the function of father component with selected color
+            onColorSelect(colorTransformed); // Calls the function of father component with selected color
             setIsVisible(false);
         }
     };
@@ -29,14 +31,13 @@ export default function ColorPickerModal({ onColorSelect, takenColors }: Readonl
     if (!isVisible) return <></>;
 
     return (
-        <div style={styles.modalOverlay}>
-            <div style={styles.modalContent}>
+        <div className="modalOverlay">
+            <div className="modalContent">
                 <h3>Pick a color:</h3>
-                <div style={styles.buttonContainer}>
+                <div className="buttonContainer">
                     {colors.map((color) => (
-                        <button type="button" key={color}
+                        <button type="button" key={color} className="colorButton"
                             style={{
-                                ...styles.colorButton,
                                 backgroundColor: color,
                                 border: color === selectedColor ? '3px solid black' : '1px solid #ccc',
                                 cursor: takenColors.includes(color) ? 'not-allowed' : 'pointer',
@@ -46,73 +47,15 @@ export default function ColorPickerModal({ onColorSelect, takenColors }: Readonl
                             disabled={takenColors.includes(color)}
                         >
                             {takenColors.includes(color) && (
-                                <div style={styles.crossOverlay}>✖</div>
+                                <div className="crossOverlay">✖</div>
                             )}
                         </button>
                     ))}
                 </div>
-                <button type="button" onClick={handleAccept} style={styles.acceptButton}>
+                <button type="button" onClick={handleAccept} className="acceptButton">
                     Accept
                 </button>
             </div>
         </div>
     );
 }
-
-const styles = {
-    modalOverlay: {
-        position: 'fixed' as const,
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000,
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        padding: '20px',
-        borderRadius: '8px',
-        textAlign: 'center' as const,
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-    },
-    buttonContainer: {
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '10px',
-        marginTop: '10px',
-        marginBottom: '20px',
-    },
-    colorButton: {
-        width: '40px',
-        height: '40px',
-        cursor: 'pointer' as const,
-        borderRadius: '5px',
-        outline: 'none',
-    },
-    acceptButton: {
-        padding: '10px 20px',
-        backgroundColor: '#4CAF50',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer' as const,
-    },
-    crossOverlay: {
-        position: 'absolute' as const,
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: '24px',
-        color: 'red',
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-        borderRadius: '5px',
-    },
-};

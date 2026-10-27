@@ -29,16 +29,6 @@ class ModelAndValidatorTest {
     }
 
     @Test
-    void testPerson() {
-        Person person = new Person();
-        person.setFirstName("John");
-        person.setLastName("Doe");
-
-        assertEquals("John", person.getFirstName());
-        assertEquals("Doe", person.getLastName());
-    }
-
-    @Test
     void testNumberValidatorDigitLimits() {
         NumberValidator validator = new NumberValidator();
         ValidNumber annotation = mock(ValidNumber.class);

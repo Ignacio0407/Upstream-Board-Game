@@ -28,10 +28,10 @@ import java.util.Map;
 public class JwtUtils {
 	private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-	@Value("${dp1.game.app.jwtSecret}")
+	@Value("${upstream.game.app.jwtSecret}")
 	private String jwtSecret;
 
-	@Value("${dp1.game.app.jwtExpirationMs}")
+	@Value("${upstream.game.app.jwtExpirationMs}")
 	private int jwtExpirationMs;
 
 	private SecretKey getSigningKey() {

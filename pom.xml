@@ -28,11 +28,6 @@
         <jacoco.version>0.8.12</jacoco.version>
         <spring-format.version>0.0.19</spring-format.version>
 
-        <frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
-        <node.version>v18.12.1</node.version>
-        <npm.version>8.19.2</npm.version>
-        <frontend-src-dir>${project.basedir}/frontend</frontend-src-dir>
-
         <!-- ngrok configuration -->
         <ngrok.enabled>false</ngrok.enabled>
         <ngrok.authToken>${env.NGROK_AUTH_TOKEN}</ngrok.authToken>
@@ -231,21 +226,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${frontend-maven-plugin.version}</version>
-
-                <configuration>
-                    <nodeVersion>${node.version}</nodeVersion>
-                    <npmVersion>${npm.version}</npmVersion>
-                    <workingDirectory>${frontend-src-dir}</workingDirectory>
-                    <installDirectory>${project.build.directory}</installDirectory>
-                </configuration>
-
-                <executions>
-                </executions>
-            </plugin>
+            
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
