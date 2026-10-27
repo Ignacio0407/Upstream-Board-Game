@@ -35,11 +35,43 @@ public class SecurityConfiguration {
             .headers(headers -> headers.frameOptions(FrameOptionsConfig::disable))
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedHandler))
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+
+	    // 1. Frontend entry point and static assets
+	    .requestMatchers(
+        	"/",
+	        "/index.html",
+	        "/login",
+        	"/favicon.ico",
+	        "/manifest.json",
+        	"/assets/**",
+	        "/static/**",
+        	"/css/**",
+	        "/js/**",
+        	"/images/**"
+	    	).permitAll()
+
+	    // 2. React Router frontend routes
+	    .requestMatchers(
+        	"/dashboard",
+	        "/register",
+        	"/plans",
+	        "/rules",
+        	"/users",
+	        "/developers",
+        	"/creategame",
+	        "/docs",
+        	"/do-not-hack-my-app",
+	        "/achievements",
+        	"/achievements/",
+	        "/achievements/**",
+        	"/matches/*/waiting",
+	        "/matches/*/game",
+        	"/matches/*/end"
+		).permitAll()
+
+	    .requestMatchers("/rules_*.pdf").permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/")).permitAll()
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/oups")).permitAll()
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/resources/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/static/**")).permitAll()
-            .requestMatchers(AntPathRequestMatcher.antMatcher("/webjars/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui.html")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-resources/**")).permitAll()
@@ -70,8 +102,15 @@ public class SecurityConfiguration {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOriginPatterns(java.util.Arrays.asList("http://localhost:3000", "https://localhost:3000", "https://localhost:8080",
-        "http://192.168.*.*:3000", "https://192.168.*.*:3000", "https://192.168.*.*:8080"));
+        configuration.setAllowedOriginPatterns(java.util.Arrays.asList( 
+        "http://localhost:3000",
+            "https://localhost:3000",
+            "https://localhost:8080",
+            "http://192.168.*.*:3000",
+            "https://192.168.*.*:3000",
+            "https://192.168.*.*:8080",
+            "https://*.ngrok-free.app"
+        ));
         configuration.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(java.util.Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
         configuration.setExposedHeaders(java.util.Arrays.asList("Authorization"));

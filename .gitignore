@@ -1,3 +1,4 @@
+src/main/resources/static
 .settings/*
 .classpath
 .project
