@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -502,6 +506,35 @@ class MatchServiceTest {
             // player1 = 5+2=7, player2 = 1+1=2 → user1 wins
             assertThat(user1.getVictories()).isEqualTo(1);
             assertThat(user2.getVictories()).isZero();
+        }
+
+        @Test
+        @DisplayName("Should evaluate achievements after saving points and victory count to winner")
+        void shouldCheckAchievementsAfterVictoryAndStatsAreSaved() {
+            when(matchRepository.findById(1)).thenReturn(Optional.of(match));
+            when(playerService.findPlayersByMatch(1)).thenReturn(List.of(player1, player2));
+
+            SalmonMatch sm1 = new SalmonMatch(); sm1.setId(1); sm1.setSalmonsNumber(2);
+            sm1.setCoordinate(new Coordinate(1, 25));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(1)).thenReturn(List.of(sm1));
+            when(salmonMatchService.findSalmonsFromPlayerInSpawn(2)).thenReturn(Collections.emptyList());
+            when(salmonMatchService.findPointsFromAllSalmonInSpawn(sm1)).thenReturn(5);
+            when(matchRepository.save(match)).thenReturn(match);
+            when(matchMapper.toDTO(match)).thenReturn(new MatchDTO());
+
+            AtomicInteger victoriesWhenCheckingUser1 = new AtomicInteger(-1);
+            doAnswer(invocation -> {
+                victoriesWhenCheckingUser1.set(user1.getVictories());
+                return null;
+            }).when(userAchievementService).checkAndUnlockAchievements(1);
+
+            matchService.finalScore(1);
+
+            assertThat(victoriesWhenCheckingUser1.get()).isEqualTo(1);
+            InOrder inOrder = inOrder(userService, userAchievementService);
+            inOrder.verify(userService).saveAll(any());
+            inOrder.verify(userAchievementService).checkAndUnlockAchievements(1);
+            inOrder.verify(userAchievementService).checkAndUnlockAchievements(2);
         }
 
         @Test

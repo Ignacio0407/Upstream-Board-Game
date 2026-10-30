@@ -357,8 +357,24 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
         if (Boolean.TRUE.equals(match.getFinalScoreCalculated())) {
             throw new ConflictException("Final score for this match has already been calculated");
         }
-        this.calculateFinalScore(players);
+
+        // 1. Calculate game scores
+        List<User> updatedUsers = this.calculateFinalScore(players);
+
+        // 2. Determine the winner
         this.findWinner(players);
+
+        // 3. Persist users and players
+        this.playerService.saveAll(players);
+        this.userService.saveAll(updatedUsers);
+
+        // 4. Evaluate achievements
+        for (Player p : players) {
+            if (p.getUserPlayer() != null) {
+                this.userAchievementService.checkAndUnlockAchievements(p.getUserPlayer().getId());
+            }
+        }
+
         match.setFinalScoreCalculated(true);
         return this.matchMapper.toDTO(this.save(match));
     }
@@ -431,28 +447,31 @@ public class MatchService extends BaseServiceWithDTO<Match, MatchDTO, Integer>{
             User winnerUser = winner.get().getUserPlayer();
             if (winnerUser != null) {
                 winnerUser.setVictories((winnerUser.getVictories() != null ? winnerUser.getVictories() : 0) + 1);
-                this.userService.save(winnerUser);
             }
         }
     }
-    private void calculateFinalScore (List<Player> players) {
+    private List<User> calculateFinalScore (List<Player> players) {
         List<User> updatedUsers = new ArrayList<>();
         for (Player p : players) {
             User u = p.getUserPlayer();
             List<SalmonMatch> salmons = this.salmonMatchService.findSalmonsFromPlayerInSpawn(p.getId());
-            u.setPlayedgames(u.getPlayedgames() + 1);
+            if (u != null) {
+                u.setPlayedgames((u.getPlayedgames() != null ? u.getPlayedgames() : 0) + 1);
+            }
             if(!salmons.isEmpty()) {
                 Integer salmonPoints = salmons.stream().mapToInt(s -> this.salmonMatchService.findPointsFromAllSalmonInSpawn(s)).sum();
                 Integer filePoints = salmons.stream().mapToInt(sM -> sM.getSalmonsNumber()).sum();
                 Integer totalPoints = salmonPoints + filePoints;
                 p.setPoints(totalPoints);
-                u.setTotalpoints(u.getTotalpoints() + totalPoints);
+                if (u != null) {
+                    u.setTotalpoints((u.getTotalpoints() != null ? u.getTotalpoints() : 0) + totalPoints);
+                }
+            }
+            if (u != null && !updatedUsers.contains(u)) {
                 updatedUsers.add(u);
             }
-            this.userAchievementService.checkAndUnlockAchievements(u.getId());
         }
-        this.playerService.saveAll(players);
-        this.userService.saveAll(updatedUsers);
+        return updatedUsers;
     }
 
 }
