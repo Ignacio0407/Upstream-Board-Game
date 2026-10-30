@@ -1,40 +1,96 @@
 @startuml
 skinparam shadowing false
-skinparam sequence {
+skinparam conditionStyle inside
+skinparam defaultTextAlignment center
+skinparam activity {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
     ArrowColor #2C3E50
-    LifeLineBorderColor #2C3E50
-    ParticipantBorderColor #2C3E50
-    ParticipantBackgroundColor #ECF0F1
 }
 
-title Nuevo Paradigma: Procesamiento Atómico por Lotes (Batch Movement - Iteración 9)
+title Patrón Command en Cliente: Flujo de Historial, Deshacer (Undo) y Rollback Local (Game.tsx)
 
-box "Nuevo Paradigma (Procesamiento en Lote - Iteración 9)" #E1F5FE
-participant "Cliente React" as FE2
-participant "Servidor Spring" as API2
-participant "Base de Datos" as DB2
-end box
+start
 
-note over FE2, DB2 #E1F5FE
-  **NUEVO PARADIGMA: 1 Petición por Lote al Finalizar Turno**
-  (Cálculo local optimista en React, 0 peticiones intermedias)
-end note
+partition "Inicialización del Turno" {
+    :Turno activo del jugador en Game.tsx;
+    :history = [] (Pila de snapshots inmutables);
+    :pendingMoves = [] (Cola de movimientos del lote);
+}
 
-FE2 -> FE2: Renderizado local optimista (Ghost UI / Fantasmas)
-FE2 -> API2: PATCH /api/v1/salmonMatches/move-batch/{matchId}
-activate API2
+while (¿Turno en curso y jugador realiza una acción?) is ([sí])
 
-API2 -> API2: moveBatch(matchId, pendingMoves, playerId)
-API2 -> DB2: saveAll(salmons), saveAll(tiles), save(player)
-API2 -> API2: notifyTilesAndSalmons(salmons, tiles)
-API2 --> FE2: 200 OK (DTO Consolidado)
-deactivate API2
+    if (¿Tipo de acción disparada?) then ([Clic en casilla válida: Nuevo Paso])
+        partition "Ejecución de Movimiento (Command)" {
+            :Capturar snapshot inmutable del estado previo:\nstructuredClone({ salmons, matchTiles, energy });
+            :Apilar snapshot en historial:\nsetHistory(prev => [...prev, snapshot]);
+            :Encolar movimiento:\nsetPendingMoves(prev => [...prev, buildPendingMove(...)]);
+            :Actualizar posición local de salmón y decrementar energía;
+            :Renderizar vista previa en la cuadrícula (optimistic UI);
+        }
 
-note over FE2, DB2
-  **Ventajas del Nuevo Paradigma:**
-  - Reducción masiva del tráfico HTTP y transacciones en base de datos.
-  - Confirmación atómica del turno en una sola operación de persistencia.
-  - Experiencia de juego fluida a 60 FPS sin esperas de red.
-end note
+    elseif (¿Tipo de acción disparada?) then ([Clic en "Undo last": Deshacer Último])
+        partition "Deshacer Último Paso (Undo)" {
+            if (history.length > 0) then ([sí])
+                :Obtener último snapshot:\nlastState = history[history.length - 1];
+                :Restaurar estado en memoria:\nsetSalmons(lastState.salmons)\nsetMatchTiles(lastState.matchTiles)\nsetMyPlayerEnergy(lastState.energy);
+                :Desapilar snapshot: setHistory(h => h.slice(0, -1));
+                :Desencolar movimiento: setPendingMoves(pm => pm.slice(0, -1));
+                :Reconstruir cuadrícula con el estado restituido;
+            else ([no])
+                :Sin pasos que deshacer;
+            endif
+        }
+
+    elseif (¿Tipo de acción disparada?) then ([Clic en "Undo all": Deshacer Todo])
+        partition "Reversión Completa del Turno" {
+            if (history.length > 0) then ([sí])
+                :Recuperar snapshot inicial: history[0];
+                :Restituir salmones, losetas y energía al inicio del turno;
+                :setHistory([]);
+                :setPendingMoves([]);
+                :Reconstruir cuadrícula original;
+            else ([no])
+                :Ya en estado inicial;
+            endif
+        }
+
+    elseif (¿Tipo de acción disparada?) then ([Clic en "Confirm": Confirmar Lote])
+        partition "Confirmación Atómica y Resiliencia (Rollback)" {
+            if (pendingMoves.length > 0) then ([sí])
+                :Bloquear controles: setConfirmBatchIsSubmitting(true);
+                :Enviar lote consolidado al backend:\nPATCH /api/v1/salmonMatches/move-batch/{matchId};
+                note right
+                  Petición HTTP atómica única.
+                  Véase diagrama de secuencia:
+                  18_Secuencia_Procesamiento_Lote_Movimientos
+                end note
+
+                if (¿Resultado de la petición HTTP?) then ([200 OK: Éxito])
+                    :Limpiar historial y pendientes:\nsetHistory([]), setPendingMoves([]);
+                    :setConfirmBatchIsSubmitting(false);
+                    :Aguardar evento reactivo STOMP con el nuevo estado oficial;
+                    stop
+                else ([Error 4xx/5xx o fallo de red])
+                    :Ejecutar Rollback Local: restaurar history[0];
+                    :setHistory([]);
+                    :setPendingMoves([]);
+                    :setConfirmBatchIsSubmitting(false);
+                    :Notificar error al usuario y restituir tablero;
+                    note right
+                      Garantía de tolerancia a fallos:
+                      El cliente nunca queda en un estado
+                      inconsistente ante caídas de red.
+                    end note
+                endif
+            else ([no])
+                :Operación no disponible sin movimientos;
+            endif
+        }
+    endif
+
+endwhile ([jugador concluye turno o pasa])
+
+stop
 
 @enduml

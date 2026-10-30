@@ -1,0 +1,78 @@
+@startuml
+skinparam shadowing false
+skinparam class {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+title Arquitectura de Pruebas Unitarias para Componentes Genéricos Base (upstream.model)
+
+package "upstream.model (Componentes en Producción)" {
+    abstract class BaseEntity {
+        - Integer id
+    }
+
+    abstract class BaseService<T extends BaseEntity, ID> {
+        # BaseRepository<T, ID> repository
+        + List<T> findAll()
+        + T findById(ID id)
+        + T save(T entity)
+        + void deleteById(ID id)
+    }
+
+    abstract class BaseRestController<T extends BaseEntity, ID> {
+        # BaseService<T, ID> service
+        + ResponseEntity<List<T>> findAll()
+        + ResponseEntity<T> findById(ID id)
+        + ResponseEntity<T> create(T entity)
+        + ResponseEntity<Void> delete(ID id)
+    }
+}
+
+package "upstream.model (Dobles de Prueba / Test Dummies)" {
+    class TestEntity {
+        - String sampleField
+    }
+
+    class TestService {
+        + TestService(TestRepository repo)
+    }
+
+    interface TestRepository
+}
+
+package "src/test/java/upstream/model (Suites de Test Unitario con Mocks)" {
+    class BaseServiceTest {
+        - TestRepository repository
+        - TestService service
+        + void testFindAll()
+        + void testFindById_Success()
+        + void testFindById_NotFound()
+        + void testSave()
+        + void testDeleteById()
+    }
+
+    class BaseRestControllerTest {
+        - MockMvc mockMvc
+        - TestService service
+        + void testFindAll_Returns200()
+        + void testFindById_Returns200()
+        + void testCreate_Returns201()
+    }
+}
+
+BaseServiceTest ..> TestService : ejercita
+BaseServiceTest ..> TestRepository : mock con Mockito
+BaseRestControllerTest ..> TestService : mock con Mockito
+TestService --|> BaseService
+TestEntity --|> BaseEntity
+
+note bottom of BaseServiceTest
+  ref Diagrama 04 del Toolkit (04_Clase_Arquitectura_Testing_Unitario_Dummies)
+  Valida de forma aislada la lógica CRUD transversal
+  compartida por todos los servicios del sistema,
+  asegurando la cobertura sin requerir base de datos activa.
+end note
+
+@enduml

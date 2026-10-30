@@ -1,0 +1,72 @@
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+title Diagrama de Despliegue Físico y Topología de Red (UML Deployment)
+
+node "Dispositivo Cliente (PC / Móvil)" <<device>> as ClientDevice {
+    node "Navegador Web (Chrome / Firefox)" <<executionEnvironment>> as Browser {
+        artifact "SPA React 18 (Bundle Vite)" <<artifact>> as ReactBundle
+        artifact "Cliente STOMP / SockJS" <<artifact>> as StompClient
+        artifact "LocalStorage (JWT Token)" <<artifact>> as ClientStorage
+    }
+}
+
+cloud "Internet Pública" as Internet {
+    node "Túnel Seguro Ngrok Edge" <<network>> as NgrokEdge {
+        component "Ingress Proxy HTTPS / WSS\n(*.ngrok-free.app)" as NgrokProxy
+    }
+}
+
+node "Servidor de Ejecución (Host)" <<device>> as ServerHost {
+    
+    node "Proceso Ngrok Agent" <<process>> as NgrokAgent {
+        component "Túnel Local Inverso\n(ngrok http https://localhost:8080)" as TunnelClient
+    }
+
+    node "Java Virtual Machine (JVM 17)" <<executionEnvironment>> as JVM {
+        node "Servidor Tomcat Embebido (Puerto 8080)" <<container>> as TomcatContainer {
+            artifact "Certificado SSL / TLS (PKCS12 keystore.p12)" <<artifact>> as SSLCert
+            component "Protocolo HTTP/2 Multiplexado" as HTTP2
+            component "Endpoint WebSocket (/ws-upstream)" as WSEndpoint
+        }
+        
+        artifact "Upstream Application (Spring Boot 3 JAR)" <<artifact>> as SpringApp {
+            component "Spring Security & JWT Filter" as SecurityLayer
+            component "STOMP Message Broker (/topic)" as StompBroker
+            component "Spring Data JPA & Hibernate" as ORMLayer
+            component "Pool de Conexiones HikariCP" as ConnectionPool
+        }
+    }
+    
+    database "Sistema de Base de Datos" <<databaseSystem>> as DatabaseEngine {
+        component "Motor Relacional H2 (testdb) / PostgreSQL" as RDBMS
+        storage "Tablas de Esquema (JPA)" as Tables
+    }
+}
+
+' Enlaces de comunicación física y protocolos
+ReactBundle -- NgrokProxy : HTTPS / REST (Puerto 443)
+StompClient -- NgrokProxy : WSS / STOMP sobre SockJS (Puerto 443)
+
+NgrokProxy == TunnelClient : Túnel seguro TLS cifrado
+
+TunnelClient -- TomcatContainer : HTTPS / WSS loopback (Puerto 8080)
+TomcatContainer -- SpringApp : Despacho interno de hilos
+
+ConnectionPool -- RDBMS : Conexión JDBC (HikariCP)
+RDBMS -- Tables : Persistencia en disco / memoria
+
+note right of NgrokProxy
+  Permite el acceso remoto a la aplicación
+  sin requerir apertura estática de puertos en el router,
+  facilitando pruebas remotas multi-dispositivo.
+end note
+
+note bottom of TomcatContainer
+  server.http2.enabled=true
+  server.ssl.enabled=true
+  Optimización de cabeceras HPACK y multiplexación.
+end note
+
+@enduml

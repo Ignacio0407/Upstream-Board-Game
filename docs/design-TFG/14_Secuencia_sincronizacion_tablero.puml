@@ -1,0 +1,60 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Sincronización Reactiva del Tablero: Ciclo de Vida en Cliente (React)
+
+actor "Jugador" as Player
+participant "Game.tsx" as View
+participant "WebSocketManager" as WSClient
+participant "Servidor STOMP" as Server
+participant "matchUtil" as Utility
+
+== 1. Carga Inicial y Suscripción ==
+
+Player -> View: Accede a /matches/:matchId/game
+activate View
+
+View -> View: useFetchState (Carga inicial vía REST de Match, Players, Tiles y Salmons)
+
+View -> WSClient: initConnection(jwt)
+WSClient -> Server: STOMP CONNECT (Cabecera Authorization: Bearer <jwt>)
+Server --> WSClient: STOMP CONNECTED
+
+View -> WSClient: addSubscription("/topic/match/update/{matchId}")
+View -> WSClient: addSubscription("/topic/tilesAndSalmons/{matchId}")
+View -> WSClient: addSubscription("/topic/tiles/place/{matchId}")
+View -> WSClient: addSubscription("/topic/tiles/rotation/{matchId}")
+
+== 2. Recepción de Eventos y Renderizado ==
+
+Server -> WSClient: Mensaje STOMP: { matchTiles: [...], salmonMatches: [...] }
+WSClient -> View: Invoca callback de suscripción
+
+View -> Utility: buildGridFromSnapshot(matchTiles, salmonMatches)
+activate Utility
+note right of Utility
+  Mapea coordenadas relativas a índices del tablero
+  y compone celdas inmutables con losetas y salmones.
+end note
+Utility --> View: newGrid
+deactivate Utility
+
+View -> View: Actualizar estado reactivo local (losetas, salmones, cuadrícula)
+
+View -> Player: Renderiza tablero actualizado
+
+== 3. Cierre de Conexión ==
+
+Player -> View: Abandona partida o desmonta componente
+View -> WSClient: deactivate()
+WSClient -> Server: STOMP DISCONNECT
+deactivate View
+
+@enduml

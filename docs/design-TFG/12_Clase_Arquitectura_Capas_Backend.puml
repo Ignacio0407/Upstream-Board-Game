@@ -1,0 +1,135 @@
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+title Arquitectura en Capas Limpia del Backend (N-Tier Pattern en Spring Boot 3)
+
+package "1. Capa de Controladores (API REST & WebSocket Controllers)" #E1F5FE {
+    abstract class BaseRestControllerWithDTO<T, D, ID> {
+        # BaseServiceWithDTO<T, D, ID> service
+        + ResponseEntity<List<D>> findAll()
+        + ResponseEntity<D> findById(ID id)
+        + ResponseEntity<D> save(D dto)
+        + ResponseEntity<D> update(ID id, D dto)
+        + ResponseEntity<Void> delete(ID id)
+    }
+
+    class SalmonMatchController {
+        - SalmonMatchService salmonMatchService
+        + ResponseEntity<Void> updateCoordinateBatch(Integer id, List<MoveRequest> moves)
+    }
+
+    class MatchRestController {
+        - MatchService matchService
+        + ResponseEntity<MatchDTO> startGame(Integer matchId)
+        + ResponseEntity<MatchDTO> changePhase(Integer matchId, Integer playerId)
+    }
+}
+
+package "2. Capa de Mapeo y Contratos de Transferencia (DTOs)" #FFF9C4 {
+    interface EntityMapper<T, D> {
+        + D toDTO(T entity)
+        + T toEntity(D dto)
+    }
+
+    class SalmonMatchMapper implements EntityMapper
+    class MatchMapper implements EntityMapper
+
+    class MoveRequest <<Record>> {
+        + Integer salmonId
+        + Integer x
+        + Integer y
+        + Boolean enterSpawn
+    }
+
+    class MatchDTO {
+        + Integer id
+        + String name
+        + State state
+        + Integer playersNumber
+        + Integer round
+        + Phase phase
+        + Boolean finalScoreCalculated
+        + Integer initialPlayerId
+        + Integer actualPlayerId
+        + Integer matchCreatorId
+    }
+}
+
+package "3. Capa de Servicios de Negocio (Business Logic Layer)" #C8E6C9 {
+    abstract class BaseServiceWithDTO<T, D, ID> {
+        # BaseRepository<T, D, ID> dtoRepository
+        # EntityMapper<T, D> mapper
+        + List<D> findAllAsDTO()
+        + D findDTOOrResourceNotFoundException(Optional<D> entity, ID id)
+    }
+
+    class SalmonMatchService {
+        - SalmonMatchRepository salmonMatchRepository
+        - SimpMessagingTemplate messagingTemplate
+        + void updateCoordinateBatch(Integer matchId, List<MoveRequest> moves)
+    }
+
+    class MatchService {
+        - MatchRepository matchRepository
+        - SimpMessagingTemplate messagingTemplate
+        + void changePhase(Integer matchId, Integer playerId)
+        + void startGame(Integer matchId)
+    }
+}
+
+package "4. Capa de Acceso a Datos (Spring Data JPA Repositories)" #DCEDC8 {
+    interface BaseRepository<T, D, ID> <<Repository>> {
+        + List<D> findAllAsDTO()
+        + Optional<D> findByIdAsDTO(ID id)
+    }
+
+    interface SalmonMatchRepository extends BaseRepository {
+        + List<SalmonMatch> findByMatchId(Integer matchId)
+        + List<SalmonMatchDTO> findByMatchIdAsDTO(Integer matchId)
+    }
+
+    interface MatchRepository extends BaseRepository {
+        + List<DashboardMatchDTO> findAllAsDashboardDTO()
+    }
+
+package "5. Capa de Dominio (Entidades JPA Relacionales)" #F1F8E9 {
+    abstract class BaseEntity {
+        - Integer id
+    }
+
+    abstract class NamedEntity extends BaseEntity {
+        - String name
+    }
+
+    class Match extends NamedEntity
+    class SalmonMatch extends BaseEntity
+}
+
+' Relaciones entre capas (Inyección de Dependencias)
+SalmonMatchController --|> BaseRestControllerWithDTO
+MatchRestController --|> BaseRestControllerWithDTO
+
+SalmonMatchController --> SalmonMatchService : Inyecta
+MatchRestController --> MatchService : Inyecta
+
+SalmonMatchController ..> MoveRequest : Recibe en @RequestBody
+SalmonMatchService --> SalmonMatchMapper : Mapeo bidireccional
+MatchService --> MatchMapper : Mapeo bidireccional
+
+SalmonMatchService --|> BaseServiceWithDTO
+MatchService --|> BaseServiceWithDTO
+
+SalmonMatchService --> SalmonMatchRepository : Inyecta
+MatchService --> MatchRepository : Inyecta
+
+SalmonMatchRepository ..> SalmonMatch : Administra
+MatchRepository ..> Match : Administra
+
+note right of BaseRestControllerWithDTO
+  ref Diagrama 03 del Toolkit (03_Clase_Jerarquia_Generica_Backend)
+  Desacopla las entidades de persistencia
+  de la representación externa en JSON.
+end note
+
+@enduml

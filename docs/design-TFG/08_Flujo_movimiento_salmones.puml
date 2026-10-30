@@ -1,0 +1,71 @@
+@startuml
+skinparam shadowing false
+skinparam activity {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+title Motor de Reglas: Validación de Movimiento y Cálculo de Amenazas
+
+start
+:Recibir posición origen y coordenada destino del salmón;
+:Verificar turno de jugador y saldo de energía disponible;
+
+if (Origen es el Mar) then ([sí])
+    if (Casilla de entrada al río está ocupada a máxima capacidad) then ([sí])
+        :Calcular salto sobre casilla ocupada;
+        :Coste de energía base: 1 + Penalización por salto (2) = 3;
+        :Coordenada final = Destino + 1;
+    else ([no])
+        :Movimiento simple de entrada al río;
+        :Coste de energía: 1;
+    endif
+else ([origen en el Río])
+    :Validar sentido de avance (hacia adelante o diagonal frontal);
+    if (Casilla destino inmediata está ocupada a máxima capacidad) then ([sí])
+        :Calcular salto sobre casilla ocupada;
+        :Coste de energía base: 1 + Penalización por salto (2) = 3;
+        :Coordenada final = Destino + 1;
+    else ([no])
+        if (Movimiento frontal directo) then ([sí])
+            :Coste de energía: 1;
+        else ([movimiento diagonal])
+            :Coste de energía: 2;
+        endif
+    endif
+endif
+
+partition "Evaluación de Amenazas y Obstáculos en el Trayecto" {
+    if (Se realizó un Salto (Coste >= 3)) then ([sí])
+        if (Origen, casilla intermedia o destino contienen Oso (BEAR)) then ([sí])
+            :Pérdida de 1 salmón por cada casilla con oso involucrada;
+            note right
+              El salto sobre casillas con oso
+              expone al salmón a ser capturado.
+            end note
+        endif
+        
+        if (Trayecto cruza Cascada / Salto de agua (JUMP)) then ([sí])
+            :Validar que el salmón dispone de energía suficiente para el remonte;
+        endif
+    else ([movimiento simple a nado])
+        :Nado seguro: no activa el ataque del Oso;
+    endif
+
+    if (Casilla de aterrizaje contiene Águila (EAGLE)) then ([sí])
+        :Pérdida inmediata de 1 salmón;
+        :Transformar loseta de Águila en Casilla de Agua corriente;
+    endif
+}
+
+:Descontar energía calculada del saldo del jugador;
+:Retornar estado resultante: { nuevaCoordenada, salmonesRestantes, energiaConsumida };
+stop
+
+note right
+  Lógica compartida entre calculateValidMoves.ts (cliente)
+  y validateMoveRules (servidor).
+end note
+
+@enduml

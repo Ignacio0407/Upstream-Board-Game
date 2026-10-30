@@ -1,0 +1,63 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Integración del Chat: Ingesta REST Transaccional y Difusión Reactiva STOMP
+
+actor "Jugador A" as UserA
+participant "Chat.tsx (Frontend)" as ClientA
+participant "MessageController" as Controller
+participant "MessageService" as ServiceLayer
+participant "MessageRepository" as Repository
+participant "SimpMessagingTemplate" as StompBroker
+participant "Clientes de Partida" as RemoteClients
+
+== 1. Redacción y Envío del Mensaje ==
+
+UserA -> ClientA: Introduce texto y pulsa "Send"
+ClientA -> Controller: POST /api/v1/messages/send\n[Cabecera: Authorization: Bearer <jwt>]\n[Payload: { playerId, playerName, matchId, content }]
+activate Controller
+
+== 2. Procesamiento y Persistencia Transaccional ==
+
+Controller -> ServiceLayer: saveAndSend(messageDTO)
+activate ServiceLayer
+
+ServiceLayer -> ServiceLayer: sanitizeContent(content)
+note right
+  Previene inyecciones XSS limpiando
+  el cuerpo del mensaje antes de persistir.
+end note
+
+ServiceLayer -> ServiceLayer: Instanciar y mapear entidad Message
+ServiceLayer -> Repository: save(message)
+activate Repository
+Repository --> ServiceLayer: Message persistido
+deactivate Repository
+
+ServiceLayer -> ServiceLayer: Convertir entidad a DTO de difusión
+
+== 3. Difusión Reactiva a la Sala ==
+
+ServiceLayer -> StompBroker: convertAndSend("/topic/chat/" + matchId, dtoToSend)
+deactivate ServiceLayer
+
+Controller --> ClientA: 200 OK
+deactivate Controller
+
+StompBroker -> ClientA: Frame STOMP en /topic/chat/{matchId}\n[Payload: MessageDTO]
+StompBroker -> RemoteClients: Frame STOMP en /topic/chat/{matchId}\n[Payload: MessageDTO]
+
+ClientA -> ClientA: Incorporar mensaje a la conversación
+RemoteClients -> RemoteClients: Incorporar mensaje a la conversación
+
+ClientA -> UserA: Muestra mensaje en el panel de conversación
+RemoteClients -> RemoteClients: Actualiza panel de conversación
+
+@enduml

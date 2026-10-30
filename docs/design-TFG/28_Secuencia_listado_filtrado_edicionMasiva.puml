@@ -1,0 +1,96 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Edición Masiva: Revisión y Persistencia Atómica de Cambios
+
+actor "Administrador" as Admin
+participant "ListGenerator" as TableView
+participant "MassEditWizard" as Wizard
+participant "EditFormGenerator" as Form
+participant "ReviewModal" as Review
+participant "BaseRestController" as Controller
+participant "BaseService" as Service
+participant "BaseRepository" as Repo
+
+== 1. Inicialización del Historial de Versiones ==
+
+Admin -> TableView: Selecciona registros y pulsa "Edición Masiva"
+TableView -> Wizard: Abre asistente con selectedItems: T[]
+activate Wizard
+
+Wizard -> Wizard: Inicializa historial de versiones en memoria
+
+== 2. Edición Secuencial con Historial de Versiones (Undo / Redo) ==
+
+loop Para cada elemento seleccionado
+    Wizard -> Form: Renderizar formulario con datos de la entidad
+    Admin -> Form: Modificar campos y pulsar "Update & Next"
+    Form -> Wizard: applyUpdate(updatedEntity)
+
+    Wizard -> Wizard: Registrar cambios en el historial
+    note right of Wizard
+        Gestiona versiones y puntero activo
+        (Undo/Redo local sin red).
+        Algoritmo detallado en diagrama del toolkit:
+        19_Flujo_MassEditWizard_Historial_UndoRedo.
+    end note
+end
+
+== 3. Revisión Comparativa de Cambios (ReviewModal) ==
+
+Admin -> Wizard: Pulsa botón "Revisar Cambios"
+Wizard -> Review: Abre modal comparativo pasando originals[] y updated[]
+activate Review
+
+Admin -> Review: Revisa diferencias y pulsa "Confirm Changes"
+
+Review -> Wizard: onConfirm()
+deactivate Review
+
+== 4. Envío por Lotes y Persistencia Atómica en Backend ==
+
+Wizard -> Wizard: Obtiene ediciones consolidadas
+
+Wizard -> Controller: PUT /api/v1/{recurso}/some\n[Payload: UpdateSomeDTO { ids: [...], entities: [...] }]
+activate Controller
+
+Controller -> Service: updateSome(request.getIds(), request.getEntities())
+activate Service
+
+Service -> Service: Valida paridad: ids.size() == updatedEntities.size()
+loop Para cada id y entidad en el lote
+    Service -> Repo: findById(id)
+    Service -> Service: updateEntityFields(existing, updated)
+    Service -> Service: toSave.add(existing)
+end
+
+Service -> Repo: saveAll(toSave)
+activate Repo
+Repo --> Service: savedEntities: List<T>
+deactivate Repo
+
+Service --> Controller: savedEntities: List<T>
+deactivate Service
+
+Controller --> Wizard: 200 OK [JSON con entidades persistidas]
+deactivate Controller
+
+Wizard --> TableView: onClose(savedEntities) [Refresca tabla con datos consolidados]
+deactivate Wizard
+
+TableView --> Admin: Presenta vista actualizada con cambios confirmados
+
+note over TableView, Repo
+  ref Diagrama 07 del Toolkit (07_Secuencia_MassEditWizard_UndoRedo_Persistencia)
+  ref Diagrama 17 del Toolkit (17_Flujo_BaseService_updateSome_Transaccional)
+  ref Diagrama 19 del Toolkit (19_Flujo_MassEditWizard_Historial_UndoRedo)
+end note
+
+@enduml

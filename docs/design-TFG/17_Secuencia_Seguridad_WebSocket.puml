@@ -1,0 +1,73 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Seguridad en WebSockets: Autenticación JWT, Rate Limiting y Control de Acceso
+
+actor "Cliente (Frontend)" as Client
+participant "Servidor SockJS / Tomcat" as Transport
+participant "WebSocketSecurityInterceptor" as Interceptor
+participant "JwtUtils" as JWTService
+participant "PlayerService" as PlayerService
+participant "SimpleBroker (STOMP)" as Broker
+
+== 1. Negociación de Transporte y Handshake ==
+
+Client -> Transport: GET /ws-upstream/info
+Transport --> Client: 200 OK { websocket: true, origins: [...] }
+
+Client -> Transport: GET /ws-upstream/{server}/{session}/websocket\n[Cabeceras: Upgrade: websocket, Connection: Upgrade]
+Transport --> Client: 101 Switching Protocols
+
+== 2. Autenticación de Sesión STOMP (CONNECT) ==
+
+Client -> Interceptor: STOMP Frame: CONNECT\n[Cabecera: Authorization: Bearer <jwt>]
+activate Interceptor
+
+Interceptor -> JWTService: validateJwtToken(jwt)
+JWTService --> Interceptor: true [Token válido y firmado]
+
+Interceptor -> JWTService: getUserNameFromJwtToken(jwt)
+JWTService --> Interceptor: username
+
+Interceptor -> Interceptor: Asociar usuario autenticado a la sesión STOMP
+Interceptor --> Broker: Permite conexión de sesión
+deactivate Interceptor
+
+Broker --> Client: STOMP Frame: CONNECTED
+
+== 3. Control de Suscripción y Límite de Frecuencia (SUBSCRIBE) ==
+
+Client -> Interceptor: STOMP Frame: SUBSCRIBE /topic/tilesAndSalmons/{matchId}
+activate Interceptor
+
+Interceptor -> Interceptor: checkRateLimit(username) [Máximo 60 mensajes / minuto]
+Interceptor -> Interceptor: validatePayload(frame) [Límite de 64 KB]
+
+Interceptor -> Interceptor: validateRouteAndExtractMatchId(destination)
+note right
+  Verifica coincidencia contra rutas
+  permitidas y extrae el identificador.
+end note
+
+Interceptor -> PlayerService: isUserInMatch(username, matchId)
+PlayerService --> Interceptor: true [Usuario es participante de la partida]
+
+Interceptor -> Interceptor: Registrar participante en caché (userMatchCache)
+Interceptor --> Broker: Autoriza suscripción al canal
+deactivate Interceptor
+
+Broker --> Client: Suscripción confirmada
+
+note over Client, Broker
+  ref Diagrama 10 del Toolkit (10_Secuencia_Seguridad_WebSocket_Interceptor)
+  Defensas DoS a nivel de transporte (Rate Limiting y límite de 64 KB de payload).
+end note
+
+@enduml

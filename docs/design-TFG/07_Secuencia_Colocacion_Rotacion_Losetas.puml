@@ -1,0 +1,76 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Fase de Losetas (Phase.TILES): Rotación en Tiempo Real y Colocación en el Tablero
+
+actor "Jugador Actual" as Player
+participant "Game.tsx" as View
+participant "MatchTileController" as Controller
+participant "MatchTileService" as ServiceLayer
+participant "MatchTileRepository" as Repository
+participant "SimpMessagingTemplate" as StompBroker
+participant "Otros Jugadores" as RemoteClients
+
+== 1. Selección y Rotación Concurrente de Loseta (BEAR / JUMP) ==
+
+Player -> View: Selecciona siguiente loseta del mazo de pendientes
+alt La loseta seleccionada admite orientación (Oso o Salto de agua)
+    Player -> View: Pulsa "Rotate Tile"
+    View -> Controller: PATCH /api/v1/matchTiles/{id}/rotate\n[Payload: RotateMatchTileRequest { orientation }]
+    activate Controller
+    
+    Controller -> ServiceLayer: broadcastMatchTileRotation(id, orientation)
+    activate ServiceLayer
+    
+    ServiceLayer -> StompBroker: convertAndSend("/topic/tiles/rotation/" + matchId, updatedTile)
+    deactivate ServiceLayer
+    
+    Controller --> View: 200 OK
+    deactivate Controller
+    
+    StompBroker -> RemoteClients: Frame STOMP en /topic/tiles/rotation/{matchId}
+    RemoteClients -> RemoteClients: Actualiza orientación visual de la loseta activa
+end
+
+== 2. Colocación de Loseta en el Río ==
+
+Player -> View: Clic en celda válida del tablero (coordenadas X, Y)
+View -> Controller: PATCH /api/v1/matchTiles/{id}\n[Payload: PlaceTileRequest { coordinate, orientation }]
+activate Controller
+
+Controller -> ServiceLayer: updateCoordinate(id, request)
+activate ServiceLayer
+
+ServiceLayer -> ServiceLayer: validateTilePlacement(round, y)
+note right
+  Verifica que la coordenada vertical Y pertenezca
+  a la franja navegable autorizada para la ronda activa.
+end note
+
+ServiceLayer -> Repository: save(matchTile)
+activate Repository
+Repository --> ServiceLayer: MatchTile persistido
+deactivate Repository
+
+ServiceLayer -> StompBroker: convertAndSend("/topic/tiles/place/" + matchId, tileDTO)
+deactivate ServiceLayer
+
+Controller --> View: 200 OK [MatchTileDTO]
+deactivate Controller
+
+== 3. Actualización Reactiva de Tableros ==
+
+StompBroker -> View: Frame STOMP en /topic/tiles/place/{matchId}
+StompBroker -> RemoteClients: Frame STOMP en /topic/tiles/place/{matchId}
+
+View -> View: Sincronizar cuadrícula con loseta colocada y actualizar mazo
+RemoteClients -> RemoteClients: Sincronizar cuadrícula con loseta colocada y actualizar mazo
+
+@enduml

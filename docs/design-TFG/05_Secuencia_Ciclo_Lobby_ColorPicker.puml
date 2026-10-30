@@ -1,0 +1,93 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Sala de Espera (Lobby): Entrada Concurrente, Asignación de Color y Arranque de Partida
+
+actor "Jugador 1 (Anfitrión)" as Host
+actor "Jugador 2 (Invitado)" as Guest
+participant "Lobby.tsx (Frontend)" as Client
+participant "ColorHandler (Modal)" as ColorPicker
+participant "PlayerRestController" as PlayerAPI
+participant "SalmonMatchController" as SalmonAPI
+participant "MatchRestController" as MatchAPI
+participant "PlayerService" as PlayerService
+participant "MatchService" as MatchService
+participant "SimpMessagingTemplate" as StompBroker
+
+== 1. Incorporación a Sala y Selección Exclusiva de Color ==
+
+Guest -> Client: Accede al enlace de la sala /matches/:id/waiting
+activate Client
+Client -> Client: Detecta que usuario no tiene Player asignado
+Client -> ColorPicker: Renderiza modal de selección de color
+deactivate Client
+
+Guest -> ColorPicker: Selecciona color libre (ej. "BLUE")
+activate ColorPicker
+ColorPicker -> PlayerAPI: POST /api/v1/players/match/{matchId}\n[Payload: CreatePlayerRequest { user: userId, color: BLUE }]
+activate PlayerAPI
+
+PlayerAPI -> PlayerService: createPlayerInMatch(matchId, request)
+activate PlayerService
+
+PlayerService -> PlayerService: Asignar color, energía (5), estado vivo y orden
+PlayerService -> PlayerService: match.setPlayersNumber(playersNumber + 1)
+PlayerService -> PlayerService: playerRepository.save(p)
+PlayerService -> PlayerService: matchService.save(match)
+PlayerService -> StompBroker: convertAndSend("/topic/match/newPlayer/" + matchId, lobbyPlayerDTO)
+PlayerService -> StompBroker: convertAndSend("/topic/match/update/" + matchId, matchDTO)
+PlayerService --> PlayerAPI: LobbyPlayerDTO
+deactivate PlayerService
+
+PlayerAPI --> ColorPicker: 201 Created [LobbyPlayerDTO]
+deactivate PlayerAPI
+
+ColorPicker -> SalmonAPI: POST /api/v1/salmonMatches/player/{createdPlayerId}
+activate SalmonAPI
+SalmonAPI -> SalmonAPI: Inicializar salmones del jugador en el mar
+SalmonAPI --> ColorPicker: 201 Created
+deactivate SalmonAPI
+
+ColorPicker -> Client: onColorChanged() [Cierra modal]
+deactivate ColorPicker
+
+== 2. Sincronización en Tiempo Real de Participantes ==
+
+StompBroker -> Client: Frame STOMP en /topic/match/newPlayer/{matchId}
+Client -> Host: Actualiza lista visual de participantes (nuevo jugador con color)
+Client -> Guest: Presenta sala de espera con su jugador configurado
+
+== 3. Validación de Quórum y Arranque de Partida ==
+
+note over Host, Client
+  Quórum alcanzado: >= 2 jugadores sin colores duplicados.
+end note
+
+Host -> Client: Pulsa botón "Start Game"
+Client -> MatchAPI: PATCH /api/v1/matches/{matchId}/startGame
+activate MatchAPI
+
+MatchAPI -> MatchService: startGame(matchId)
+activate MatchService
+
+MatchService -> MatchService: Establecer orden aleatorio de turnos (playerOrder)
+MatchService -> MatchService: Asignar initialPlayer y actualPlayer
+MatchService -> MatchService: Transición de Match a State.ON_GOING y Phase.TILES
+MatchService -> StompBroker: convertAndSend("/topic/match/start/" + matchId, matchDTO)
+deactivate MatchService
+
+MatchAPI --> Client: 200 OK
+deactivate MatchAPI
+
+StompBroker -> Client: Frame STOMP en /topic/match/start/{matchId}
+Client -> Host: Redirige automáticamente a /matches/:id/game
+Client -> Guest: Redirige automáticamente a /matches/:id/game
+
+@enduml

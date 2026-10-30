@@ -1,0 +1,90 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Secuencia de Turno de Juego: Ejecución de Movimiento y Sincronización en Tiempo Real
+
+actor "Jugador Actual" as Player
+participant "Frontend (React)" as Client
+participant "SalmonMatchController" as Controller
+participant "SalmonMatchService" as SalmonService
+participant "MatchRestController" as MatchController
+participant "MatchService" as MatchService
+participant "Persistencia (JPA Repositories)" as Repositories
+participant "SimpMessagingTemplate (STOMP)" as Broker
+participant "Clientes Suscritos" as RemoteClients
+
+== 1. Planificación Local del Turno ==
+
+Player -> Client: Selecciona salmón y marca casillas de destino
+Client -> Client: Calcula movimientos y acumula acciones en lote
+Player -> Client: Confirma fin de turno
+
+== 2. Envío y Procesamiento Atómico ==
+
+Client -> Controller: PATCH /api/v1/salmonMatches/move-batch/{matchId}\n[Payload: List<MoveRequest>]
+activate Controller
+
+Controller -> SalmonService: updateCoordinateBatch(matchId, moves)
+activate SalmonService
+
+ref over SalmonService
+  Validación de reglas y amenazas
+  según Diagrama 08 (Motor de Reglas)
+end ref
+
+opt Saldo de energía del jugador llega a 0
+    SalmonService -> SalmonService: Procesar casillas con garzas (herons)
+end
+
+== 3. Persistencia Atómica ==
+
+SalmonService -> Repositories: playerRepository.save(player)
+SalmonService -> Repositories: salmonMatchRepository.saveAll(salmons)
+SalmonService -> Repositories: matchTileRepository.saveAll(matchTiles)
+
+== 4. Difusión STOMP y Sincronización Reactiva ==
+
+SalmonService -> Broker: convertAndSend("/topic/tilesAndSalmons/{matchId}", consolidatedData)
+SalmonService -> Broker: convertAndSend("/topic/players/{matchId}", playersData)
+
+SalmonService --> Controller: void
+deactivate SalmonService
+
+Controller --> Client: 200 OK
+deactivate Controller
+
+Broker -> Client: Frame STOMP { matchTiles, salmonMatches }
+Broker -> RemoteClients: Frame STOMP { matchTiles, salmonMatches }
+
+Client -> Client: buildGridFromSnapshot(matchTiles, salmonMatches)
+RemoteClients -> RemoteClients: buildGridFromSnapshot(matchTiles, salmonMatches)
+
+== 5. Conclusión de Turno o Cambio de Fase ==
+
+alt Saldo de energía agotado (0) o Jugador pasa turno
+    Client -> MatchController: PATCH /api/v1/matches/{matchId}/changePhase/{playerId}
+    activate MatchController
+    MatchController -> MatchService: changePhase(matchId, playerId)
+    activate MatchService
+    ref over MatchService
+      Coordinación de fases, turnos y avance del río
+      según Diagrama 06 (Motor de Juego)
+    end ref
+    MatchService -> Broker: convertAndSend("/topic/match/update/" + matchId, matchDTO)
+    MatchService -> Broker: convertAndSend("/topic/players/" + matchId, playersDTO)
+    MatchService --> MatchController: MatchDTO
+    deactivate MatchService
+    MatchController --> Client: 200 OK [MatchDTO]
+    deactivate MatchController
+    Broker -> Client: Frame STOMP (nuevo turno / fase)
+    Broker -> RemoteClients: Frame STOMP (nuevo turno / fase)
+end
+
+@enduml

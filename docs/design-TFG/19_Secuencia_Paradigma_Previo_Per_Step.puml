@@ -1,4 +1,5 @@
 @startuml
+autonumber
 skinparam shadowing false
 skinparam sequence {
     ArrowColor #2C3E50
@@ -7,44 +8,57 @@ skinparam sequence {
     ParticipantBackgroundColor #ECF0F1
 }
 
-title Paradigma Previo: Comunicación Per-Step REST (Micro-movimientos)
+title Arquitectura Histórica: Cuello de Botella de Transacciones Síncronas Per-Step (REST)
 
-box "Paradigma Previo (Per-Step REST)" #FFEEDD
-participant "Cliente React" as FE1
-participant "Servidor Spring" as API1
-participant "Base de Datos" as DB1
-end box
+actor "Jugador" as Player
+participant "Cliente React" as Client
+participant "SalmonMatchController" as API
+participant "SalmonMatchService" as ServiceLayer
+participant "Base de Datos (H2)" as Database
 
-note over FE1, DB1 #FFEEDD
-  **PARADIGMA PREVIO: N Peticiones por Turno**
-  (1 Petición HTTP + 1 Transacción en BD por cada paso de salmón)
+note over Player, Database #FFEEDD
+  Modelo previo: Cada punto de energía consumido disparaba
+  una transacción HTTP + persistencia en base de datos independiente.
 end note
 
-FE1 -> API1: POST /api/v1/salmonMatches/move (Paso 1)
-activate API1
-API1 -> DB1: salmonMatchRepository.save(salmon1)
-API1 -> API1: convertAndSend("/topic/movingSalmon/...")
-API1 --> FE1: 200 OK
-deactivate API1
+== Paso 1: Primer Movimiento de Salmón (1 Energía) ==
 
-FE1 -> API1: POST /api/v1/salmonMatches/move (Paso 2)
-activate API1
-API1 -> DB1: salmonMatchRepository.save(salmon1)
-API1 -> API1: convertAndSend("/topic/movingSalmon/...")
-API1 --> FE1: 200 OK
-deactivate API1
+Player -> Client: Mueve salmón a casilla adyacente
+Client -> API: POST /api/v1/salmonMatches/move (Paso 1)
+activate API
+API -> ServiceLayer: moveSalmon(salmonId, coord)
+activate ServiceLayer
+ServiceLayer -> Database: BEGIN TRANSACTION
+ServiceLayer -> Database: UPDATE salmon_match SET coordinate = ...
+ServiceLayer -> Database: COMMIT TRANSACTION
+ServiceLayer --> API: 200 OK
+deactivate ServiceLayer
+API --> Client: 200 OK
+deactivate API
 
-FE1 -> API1: POST /api/v1/salmonMatches/move (Pasos N...)
-activate API1
-API1 -> DB1: salmonMatchRepository.saveAll(...)
-API1 --> FE1: 200 OK
-deactivate API1
+== Paso 2: Segundo Movimiento de Salmón (1 Energía) ==
 
-note over FE1, DB1
-  **Inconvenientes del Paradigma Previo:**
-  - Múltiples transacciones síncronas intermedias en la base de datos.
-  - Elevada latencia percibida entre pasos individuales de salmón.
-  - Sobrecarga de peticiones HTTP REST síncronas por turno.
+Player -> Client: Mueve salmón a siguiente casilla
+Client -> API: POST /api/v1/salmonMatches/move (Paso 2)
+activate API
+API -> ServiceLayer: moveSalmon(salmonId, coord)
+activate ServiceLayer
+ServiceLayer -> Database: BEGIN TRANSACTION
+ServiceLayer -> Database: UPDATE salmon_match SET coordinate = ...
+ServiceLayer -> Database: COMMIT TRANSACTION
+ServiceLayer --> API: 200 OK
+deactivate ServiceLayer
+API --> Client: 200 OK
+deactivate API
+
+== Pasos Subsiguientes del Mismo Turno ==
+
+note over Client, Database
+  Para un turno estándar de 5 puntos de energía:
+  - 5 conexiones HTTP síncronas independientes.
+  - 5 transacciones de escritura intermedias en base de datos.
+  - Posibilidad de inconsistencias si la conexión falla a mitad del turno.
+  - Imposibilidad de deshacer un paso previo sin otra llamada REST inversa.
 end note
 
 @enduml

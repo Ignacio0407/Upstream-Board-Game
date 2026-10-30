@@ -1,0 +1,65 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Manejo Centralizado de Excepciones con Spring Boot (@RestControllerAdvice)
+
+actor "Cliente (Frontend)" as Client
+participant "DispatcherServlet (Spring MVC)" as Dispatcher
+participant "SalmonMatchController" as Controller
+participant "SalmonMatchService" as ServiceLayer
+participant "ExceptionHandlerController (@RestControllerAdvice)" as AdviceHandler
+
+== 1. Petición y Detección de Conflicto de Negocio ==
+
+Client -> Dispatcher: PATCH /api/v1/salmonMatches/move-batch/{id}\n[Payload con movimientos no válidos]
+activate Dispatcher
+
+Dispatcher -> Controller: updateCoordinateBatch(id, moves)
+activate Controller
+
+Controller -> ServiceLayer: updateCoordinateBatch(id, moves)
+activate ServiceLayer
+
+ServiceLayer -> ServiceLayer: validateMoveRules(move)
+note right
+  Se detecta que el coste supera
+  el saldo de energía del jugador.
+end note
+
+ServiceLayer --[#red]> Controller: throw new InsufficientEnergyException("Not enough energy")
+deactivate ServiceLayer
+
+Controller --[#red]> Dispatcher: Propagación de excepción no controlada
+deactivate Controller
+
+== 2. Intercepción Transversal y Mapeo de Respuesta ==
+
+Dispatcher -> AdviceHandler: Resolver excepción mediante HandlerExceptionResolver
+activate AdviceHandler
+note over AdviceHandler
+  @ExceptionHandler(InsufficientEnergyException.class)
+  Transforma la excepción en una respuesta estructurada.
+end note
+
+AdviceHandler -> AdviceHandler: buildErrorMessage(HttpStatus.BAD_REQUEST, exception.getMessage())
+AdviceHandler --> Dispatcher: ResponseEntity (400 Bad Request, { "message": "Not enough energy" })
+deactivate AdviceHandler
+
+Dispatcher --> Client: HTTP 400 Bad Request\n{ "message": "Not enough energy", "status": 400 }
+deactivate Dispatcher
+
+Client -> Client: Renderiza notificación de error y ejecuta rollback de estado local
+
+note over Client, AdviceHandler
+  ref Diagrama 12 del Toolkit (12_Secuencia_Gestion_Excepciones_Global)
+  Mecanismo transversal de captura y serialización de errores (@RestControllerAdvice).
+end note
+
+@enduml

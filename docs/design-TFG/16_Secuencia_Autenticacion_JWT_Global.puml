@@ -1,0 +1,77 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Ciclo Global de Seguridad: Autenticación JWT, Persistencia Local y Autorización Multi-Protocolo
+
+actor "Usuario" as User
+participant "Login.tsx (Frontend)" as LoginView
+participant "tokenService (LocalStorage)" as TokenStorage
+participant "AuthController" as AuthAPI
+participant "AuthenticationManager" as AuthManager
+participant "JwtUtils" as JWTService
+participant "AuthTokenFilter (REST)" as RESTFilter
+participant "WebSocketSecurityInterceptor (STOMP)" as WSInterceptor
+participant "Controladores / Broker" as ProtectedResources
+
+== 1. Autenticación Inicial y Emisión de Token ==
+
+User -> LoginView: Introduce credenciales (username y password)
+LoginView -> AuthAPI: POST /api/v1/auth/signin\n[Payload: LoginRequest { username, password }]
+activate AuthAPI
+
+AuthAPI -> AuthManager: authenticate(UsernamePasswordAuthenticationToken)
+AuthManager --> AuthAPI: Authentication (UserDetails autenticado)
+
+AuthAPI -> JWTService: generateJwtToken(authentication)
+JWTService --> AuthAPI: jwtString (Token firmado con HMAC-SHA256)
+
+AuthAPI --> LoginView: 200 OK [JwtResponse { token, id, username, roles }]
+deactivate AuthAPI
+
+LoginView -> TokenStorage: setLocalAccessToken(token)
+LoginView -> User: Redirige a pantalla principal (/dashboard)
+
+== 2. Consumo de Endpoints REST Protegidos ==
+
+User -> LoginView: Navega a sección protegida (ej. /matches/dashboard)
+LoginView -> RESTFilter: GET /api/v1/matches/dashboard\n[Cabecera: Authorization: Bearer <token>]
+activate RESTFilter
+
+RESTFilter -> JWTService: validateJwtToken(token)
+RESTFilter -> JWTService: getUserNameFromJwtToken(token)
+RESTFilter -> RESTFilter: Establecer contexto de seguridad autenticado
+
+RESTFilter -> ProtectedResources: Despacha petición al controlador
+ProtectedResources --> RESTFilter: 200 OK [DashboardMatchDTO[]]
+RESTFilter --> LoginView: 200 OK [Datos protegidos]
+deactivate RESTFilter
+
+== 3. Establecimiento de Sesión Segura en WebSockets ==
+
+LoginView -> WSInterceptor: STOMP Frame: CONNECT\n[Cabecera nativa: Authorization: Bearer <token>]
+activate WSInterceptor
+
+ref over WSInterceptor, JWTService
+  Autenticación STOMP y defensas de canal
+  según Diagrama 17 (Seguridad en WebSockets)
+end ref
+
+WSInterceptor --> ProtectedResources: Autoriza apertura de canal STOMP
+deactivate WSInterceptor
+
+ProtectedResources --> LoginView: STOMP Frame: CONNECTED
+
+note over LoginView, ProtectedResources
+  ref Diagrama 11 del Toolkit (11_Secuencia_Autenticacion_JWT_Global)
+  A partir de este punto, el cliente está autenticado
+  tanto para el canal HTTP REST como para el canal bidireccional STOMP.
+end note
+
+@enduml

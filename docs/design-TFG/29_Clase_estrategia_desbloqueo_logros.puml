@@ -1,0 +1,89 @@
+@startuml
+skinparam shadowing false
+skinparam class {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+title Patrón Strategy: Evaluación de Desbloqueo de Logros (upstream.statistic)
+
+package "upstream.statistic" {
+    
+    enum Metric <<enumeration>> {
+        GAMES_PLAYED
+        TOTAL_POINTS
+        VICTORIES
+    }
+
+    interface AchievementStrategy <<Strategy>> {
+        + boolean isUnlockedByUser(User user, Achievement achievement)
+    }
+
+    class AchievementUnlocker <<Context>> {
+        - Map<Metric, AchievementStrategy> strategies
+        + AchievementUnlocker()
+        + boolean checkUnlock(User user, Achievement achievement)
+    }
+
+    class AUGamesPlayed implements AchievementStrategy {
+        + boolean isUnlockedByUser(User user, Achievement achievement)
+    }
+
+    class AUTotalPoints implements AchievementStrategy {
+        + boolean isUnlockedByUser(User user, Achievement achievement)
+    }
+
+    class AUVictories implements AchievementStrategy {
+        + boolean isUnlockedByUser(User user, Achievement achievement)
+    }
+
+    class Achievement {
+        - String description
+        - String badgeImage
+        - Double threshold
+        - Metric metric
+    }
+
+    class AchievementService {
+        - AchievementRepository repo
+    }
+}
+
+package "upstream.userachievement" {
+    class UserAchievementService {
+        - AchievementUnlocker achievementUnlocker
+        - UserAchievementRepository userAchievementRepository
+        - AchievementService achievementService
+        + void checkAndUnlockAchievements(Integer userId)
+    }
+
+    class UserAchievement {
+        - User user
+        - Achievement achievement
+    }
+}
+
+package "upstream.user" {
+    class User {
+        - Integer victories
+        - Integer playedgames
+        - Integer totalpoints
+    }
+}
+
+UserAchievementService "1" o-- "1" AchievementUnlocker : delega
+UserAchievementService ..> UserAchievement : persiste
+AchievementUnlocker "1" o-- "*" AchievementStrategy : indexa mediante Metric
+AchievementUnlocker ..> Metric : utiliza como clave de estrategia
+AchievementStrategy ..> User : evalúa métricas
+AchievementStrategy ..> Achievement : comprueba umbral threshold
+
+note top of AchievementUnlocker
+  Contexto del patrón Strategy.
+  Mantiene un EnumMap indexado por Metric.
+  Permite incorporar nuevas reglas de desbloqueo
+  cumpliendo el principio Open/Closed (OCP).
+end note
+
+@enduml

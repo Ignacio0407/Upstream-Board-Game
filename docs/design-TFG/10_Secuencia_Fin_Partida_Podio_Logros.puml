@@ -1,0 +1,91 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Finalización de Partida: Cálculo de Puntuaciones, Podio y Desbloqueo de Logros
+
+participant "MatchService" as MatchService
+participant "PlayerService" as PlayerService
+participant "UserService" as UserService
+participant "UserAchievementService" as UserAchievementService
+participant "AchievementService" as AchievementService
+participant "AchievementUnlocker (Context)" as Unlocker
+participant "AchievementStrategy (Strategy)" as Strategy
+participant "SimpMessagingTemplate" as StompBroker
+actor "Jugadores (Navegador)" as Clients
+
+== 1. Detección de Fin de Partida y Transición ==
+
+MatchService -> MatchService: checkGameHasFinished(match, data)
+note right
+  Condición de fin: todos los salmones han desovado
+  o han muerto, o se han completado las rondas del río.
+end note
+
+MatchService -> MatchService: match.setState(State.FINALIZED)
+
+== 2. Cómputo de Podio y Puntuaciones Finales ==
+
+MatchService -> MatchService: finalScore(matchId)
+activate MatchService
+
+MatchService -> PlayerService: findPlayersByMatch(matchId)
+PlayerService --> MatchService: players: List<Player>
+
+loop Para cada jugador de la partida
+    MatchService -> MatchService: Calcular puntos de salmones en zona de desove
+    MatchService -> UserService: user.setPlayedgames(playedgames + 1)
+end
+
+MatchService -> MatchService: findWinner(players) [Asigna victoria al jugador con mayor puntuación]
+MatchService -> UserService: winnerUser.setVictories(victories + 1)
+MatchService -> PlayerService: playerRepository.saveAll(players)
+MatchService -> UserService: userRepository.saveAll(updatedUsers)
+
+== 3. Evaluación de Logros (Patrón Strategy) ==
+
+loop Para cada jugador de la partida
+    MatchService -> UserAchievementService: checkAndUnlockAchievements(user.getId())
+    activate UserAchievementService
+    
+    UserAchievementService -> AchievementService: findAll()
+    AchievementService --> UserAchievementService: achievements: List<Achievement>
+    
+    loop Para cada logro configurado en el sistema
+        UserAchievementService -> Unlocker: checkUnlock(user, achievement)
+        activate Unlocker
+        
+        Unlocker -> Unlocker: strategies.get(achievement.getMetric())
+        Unlocker -> Strategy: isUnlockedByUser(user, achievement)
+        activate Strategy
+        Strategy --> Unlocker: boolean (cumple condición de métrica)
+        deactivate Strategy
+        
+        Unlocker --> UserAchievementService: resultado
+        deactivate Unlocker
+        
+        opt Logro recién alcanzado y no registrado previamente
+            UserAchievementService -> UserAchievementService: userAchievementRepository.save(new UserAchievement(user, a))
+        end
+    end
+    deactivate UserAchievementService
+end
+
+MatchService -> MatchService: match.setFinalScoreCalculated(true)
+
+== 4. Difusión de Fin de Partida y Visualización de Podio ==
+
+MatchService -> StompBroker: convertAndSend("/topic/match/update/" + matchId, matchDTO)
+deactivate MatchService
+
+StompBroker -> Clients: Frame STOMP en /topic/match/update/{matchId} [State: FINALIZED]
+Clients -> Clients: Redirige a /matches/:matchId/end (EndGame.tsx)
+Clients -> Clients: Renderiza podio, puntuaciones finales y logros recién obtenidos
+
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Comparativa de Rendimiento y Tráfico de Red: Polling Continuo Previo vs WebSockets y Lote Atómico
+
+box "Arquitectura Previa (Polling por Intervalo + REST Per-Step)" #FFEBEE
+participant "Match.tsx (Padre)" as MatchOld
+participant "Game.tsx (Hijo)" as GameOld
+participant "Servidor Spring" as ServerOld
+end box
+
+box "Arquitectura Basada en Eventos (STOMP Push + Lote Atómico)" #E8F5E9
+participant "Game.tsx (React)" as GameNew
+participant "WebSocketManager" as WSNew
+participant "Servidor Spring" as ServerNew
+end box
+
+== 1. Estado del Sistema en Espera (Inactividad de Turno) ==
+
+note over MatchOld, ServerOld #FFCDD2
+  Polling continuo por setInterval(5000ms):
+  Match.tsx ejecuta 1 GET (/api/v1/matches/{id}).
+  Game.tsx ejecuta 4 GETs simultáneos (losetas, salmones, desove, jugadores).
+  Total en reposo: 5 peticiones HTTP GET cada 5 segundos por cliente conectado.
+end note
+
+loop Cada 5 segundos en segundo plano
+    MatchOld -> ServerOld: GET /api/v1/matches/{id}
+    GameOld -> ServerOld: GET /api/v1/matchTiles/match/{id}
+    GameOld -> ServerOld: GET /api/v1/salmonMatches/match/{id}
+    GameOld -> ServerOld: GET /api/v1/salmonMatches/match/{id}/spawn
+    GameOld -> ServerOld: GET /api/v1/players/match/sorted/{id}
+    ServerOld --> MatchOld: 200 OK
+    ServerOld --> GameOld: 200 OK (4 respuestas)
+end
+
+note over GameNew, ServerNew #C8E6C9
+  Sincronización por eventos:
+  La sincronización se realiza mediante una única
+  conexión persistente y suscripciones STOMP sobre WebSockets.
+end note
+
+WSNew -> ServerNew: STOMP SUBSCRIBE /topic/tilesAndSalmons/{matchId}
+ServerNew --[#green]> WSNew: Frame STOMP con payload consolidado (únicamente cuando ocurre un cambio)
+
+== 2. Ejecución de un Turno Activo (Ejemplo: 4 Pasos de Movimiento en 15 Segundos) ==
+
+note over MatchOld, ServerOld #FFCDD2
+  Tráfico acumulado durante el turno:
+  - 4 peticiones REST POST síncronas individuales (/salmonMatches/move).
+  - 15 peticiones GET automáticas de polling (3 ciclos de 5s x 5 GETs).
+  Total de la versión previa: ~19 peticiones HTTP por cliente en 15 segundos.
+end note
+
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 1)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 2)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 3)
+ServerOld --> GameOld: 200 OK
+GameOld -> ServerOld: POST /api/v1/salmonMatches/move (Paso 4)
+ServerOld --> GameOld: 200 OK
+
+note over GameNew, ServerNew #C8E6C9
+  Tráfico acumulado durante el turno:
+  - 0 peticiones HTTP intermedias (cálculo local en memoria).
+  - 1 única petición REST atómica al confirmar el turno completo.
+  Total de la versión actual: 1 petición HTTP por turno.
+  Reducción de 19 a 1 petición por turno.
+end note
+
+GameNew -> GameNew: Renderiza vista previa en cliente
+GameNew -> ServerNew: PATCH /api/v1/salmonMatches/move-batch/{matchId} [Lote de 4 movimientos]
+ServerNew --> GameNew: 200 OK
+ServerNew -[#green]> WSNew: Difusión STOMP consolidada a todos los participantes de la partida
+
+@enduml

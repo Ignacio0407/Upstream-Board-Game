@@ -1,0 +1,67 @@
+@startuml
+skinparam shadowing false
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+}
+
+title Comparativa de Capa de Transporte Web: HTTP/1.1 vs HTTP/2
+
+box "HTTP/1.1 (Conexiones Secuenciales / HOL Blocking)" #FFEBEE
+participant "Navegador" as Browser1
+participant "Tomcat Server" as Server1
+end box
+
+box "HTTP/2 (Multiplexación sobre Conexión Persistente Única)" #E1F5FE
+participant "Navegador" as Browser2
+participant "Tomcat Server (SSL)" as Server2
+end box
+
+== 1. Descarga Secuencial en HTTP/1.1 ==
+
+Browser1 -> Server1: GET /api/v1/matches/dashboard (Stream 1)
+activate Server1
+Server1 --> Browser1: 200 OK [DashboardMatchDTO]
+deactivate Server1
+
+Browser1 -> Server1: GET /api/v1/achievements (Stream 2)
+note right Browser1
+  Head-of-Line (HOL) Blocking:
+  La segunda petición espera el cierre de la primera.
+end note
+activate Server1
+Server1 --> Browser1: 200 OK [AchievementDTO]
+deactivate Server1
+
+|||
+
+== 2. Descarga Multiplexada en HTTP/2 ==
+
+Browser2 -> Server2: Establecimiento de conexión TLS / ALPN (h2)
+
+par Peticiones concurrentes en paralelo
+    Browser2 -> Server2: Frame HEADERS + DATA (Stream ID: 1, GET /api/v1/matches/dashboard)
+    Browser2 -> Server2: Frame HEADERS + DATA (Stream ID: 3, GET /api/v1/achievements)
+    Browser2 -> Server2: Frame HEADERS + DATA (Stream ID: 5, GET /api/v1/users)
+end
+
+note right Browser2
+  Multiplexación binaria:
+  Múltiples flujos independientes
+  sobre una única conexión TCP.
+end note
+
+Server2 --> Browser2: Frame DATA (Stream ID: 3)
+Server2 --> Browser2: Frame DATA (Stream ID: 1)
+Server2 --> Browser2: Frame DATA (Stream ID: 5)
+
+note over Browser2, Server2
+  Características de server.http2.enabled=true:
+  1. Supresión del bloqueo Head-of-Line en capa de aplicación.
+  2. Compresión de cabeceras mediante HPACK.
+  3. Reutilización persistente del socket TLS.
+end note
+
+@enduml

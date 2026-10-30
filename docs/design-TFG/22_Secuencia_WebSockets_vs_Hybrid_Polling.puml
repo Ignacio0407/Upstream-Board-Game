@@ -1,0 +1,65 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ParticipantPadding 20
+    MessageAlign center
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Patrones de Transporte en Tiempo Real: Antipatrón Signal + Pull (Prototipo Inicial) vs Push con Payload Directo (TFG)
+
+box "Prototipo Inicial (DP1): Antipatrón Signal + Pull" #FFF3E0
+participant "Lobby.jsx / Game.jsx" as OldClient
+participant "Servidor Spring (DP1)" as OldServer
+end box
+
+box "Arquitectura Optimizada (TFG): Push Reactivo Directo" #E8F5E9
+participant "Lobby.tsx / Game.tsx" as NewClient
+participant "Servidor Spring Boot 3" as NewServer
+end box
+
+== 1. Evento de Negocio: Modificación de Estado (ej. Nuevo Jugador) ==
+
+OldServer <- OldServer: Jugador se une a la sala (createPlayer)
+NewServer <- NewServer: Jugador se une a la sala (createPlayer)
+
+== 2. Entrega y Sincronización del Evento ==
+
+OldServer -> OldClient: Frame STOMP en /topic/refresh (Señal de evento vacía)
+note over OldClient
+  El cliente recibe la señal de aviso,
+  pero carece de los datos del nuevo jugador.
+  Dispara fetchPlayers() inmediatamente.
+end note
+
+OldClient -> OldServer: GET /api/v1/matches/{matchId}/players (Petición HTTP Pull adicional)
+activate OldServer
+OldServer --> OldClient: 200 OK [Player[]]
+deactivate OldServer
+
+note over OldClient, OldServer
+  Sobrecarga del patrón híbrido Signal + Pull:
+  2 intercambios de red por evento (notificación WS + llamada REST síncrona).
+  Multiplicado concurrentemente por cada cliente conectado en la sala.
+end note
+
+|||
+
+NewServer -> NewClient: Frame STOMP en /topic/match/newPlayer/{matchId}\n[Payload consolidado: LobbyPlayerDTO]
+note over NewClient
+  El cliente procesa y actualiza
+  el estado en una única operación
+  sin consultas HTTP intermedias.
+end note
+
+note over NewClient, NewServer
+  Ventaja del patrón Server Push de Upstream:
+  1 único envío de red unidireccional con el DTO completo serializado.
+  0 peticiones HTTP satélite.
+end note
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml
+skinparam shadowing false
+skinparam activity {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
+}
+
+title Motor de Juego: Coordinación de Fases y Turnos (MatchService.changePhase)
+
+start
+:Invocación changePhase(matchId, playerId);
+:Validar turno activo (actualPlayer == player);
+
+if (Quedan losetas por colocar en el mazo) then ([sí])
+    if (Fase actual es TILES) then ([sí])
+        if (Ronda es 0 (Preparación inicial)) then ([sí])
+            if (Se han colocado las 12 losetas iniciales) then ([sí])
+                :Recargar energía (5) a todos los jugadores;
+                :Establecer fase en MOVING;
+                :Asignar turno al jugador inicial (initialPlayer);
+            else ([no])
+                :Avanzar turno al siguiente jugador;
+            endif
+        else ([ronda > 0])
+            if (Se han colocado las 3 losetas de la ronda) then ([sí])
+                :Recargar energía (5) a todos los jugadores;
+                :Establecer fase en MOVING;
+                :Asignar turno al jugador inicial (initialPlayer);
+            else ([no])
+                :Avanzar turno al siguiente jugador;
+            endif
+        endif
+    else ([fase MOVING])
+        if (Jugador consumió toda la energía) then ([sí])
+            :Avanzar turno al siguiente jugador;
+        endif
+    endif
+else ([no quedan losetas])
+    :Avanzar contador de ronda (round++);
+    if (Ronda < 8) then ([sí])
+        :Desplazar losetas del río hacia abajo (-1 Y);
+        :Eliminar salmones y losetas que caen por el borde (Y <= 0);
+    else ([ronda >= 8])
+        :Eliminar losetas y salmones rezagados (Y == round - 8);
+    endif
+    :Recargar energía (5) a todos los jugadores;
+    :Establecer fase en MOVING;
+endif
+
+partition "Control de Supervivencia y Estado" {
+    if (Ronda == 2) then ([sí])
+        :Eliminar salmones rezagados en el mar (Coordinate == null);
+        :Verificar jugadores sin salmones activos;
+    endif
+
+    if (Jugador no tiene salmones vivos) then ([sí])
+        :Marcar jugador como eliminado (Dead);
+        :Avanzar turno al siguiente jugador disponible;
+    endif
+    
+    if (Ronda >= 6 y todos los salmones del jugador desovaron) then ([sí])
+        :Marcar jugador como completado (Finished);
+        :Avanzar turno al siguiente jugador disponible;
+    endif
+}
+
+if (Cumple condiciones de fin de partida) then ([sí])
+    :Establecer estado en FINALIZED;
+    :Ejecutar finalScore(matchId);
+    :Evaluar y persistir desbloqueo de logros;
+endif
+
+:Emitir evento WebSocket STOMP a /topic/match/update/{matchId};
+:Emitir evento WebSocket STOMP a /topic/players/{matchId};
+stop
+
+@enduml

@@ -8,88 +8,83 @@ skinparam sequence {
     ParticipantBackgroundColor #ECF0F1
 }
 
-title Iteración 9: Procesamiento de Movimientos en Lote
+title Procesamiento de Movimientos en Lote (Batch Movement Paradigm)
 
-actor "Jugador Actual" as U
-participant "Game.tsx (React)" as FE
-participant "calculateValidMoves.ts" as VM
-participant "SalmonMatchController" as SMC
-participant "SalmonMatchService" as SMS
-participant "PlayerService / MatchTileService" as DB
-participant "SimpMessagingTemplate" as STOMP
-participant "Otros Jugadores" as OFE
+actor "Jugador Actual" as Player
+participant "Game.tsx" as View
+participant "calculateValidMoves" as MoveCalculator
+participant "SalmonMatchController" as Controller
+participant "SalmonMatchService" as ServiceLayer
+participant "Repositorios JPA" as Repositories
+participant "SimpMessagingTemplate" as StompBroker
+participant "Clientes Suscritos" as RemoteClients
 
-== Fase 1: Cálculo Local Optimista y Previsualización Fantasma (0 Peticiones HTTP) ==
+== 1. Selección y Acumulación de Acciones en Cliente ==
 
-U -> FE: onSalmonClick(salmon)
-FE -> VM: calculateValidMoves(salmon, grid, energy)
-activate VM
-VM --> FE: validMoves: ValidMove[]
-deactivate VM
+Player -> View: Clic en salmón activo
+View -> MoveCalculator: calculateValidMoves(salmon, grid, energy, playersNumber)
+activate MoveCalculator
+MoveCalculator --> View: validMoves: ValidMove[]
+deactivate MoveCalculator
 
-FE -> FE: highlightValidMoves(validMoves)
+View -> View: Resaltar casillas válidas en la cuadrícula
 
-loop Para cada movimiento del turno
-    U -> FE: onGridClick(index)
-    FE -> FE: addPendingMove(move)
-    FE -> FE: renderGhostSalmons()
-    FE -> FE: updateLocalEnergy(energyCost)
+loop Para cada paso del turno (hasta agotar energía o confirmar)
+    Player -> View: Clic en celda destino válida
+    View -> View: Registrar paso en cola de lote y actualizar vista previa en memoria
+    note right of View
+      Se acumulan los movimientos y snapshots en memoria (Undo/Redo local)
+      descontando energía visual sin invocar al servidor hasta confirmar.
+    end note
 end
 
-== Fase 2: Confirmación Atómica y Envío en Lote ==
+== 2. Envío Consolidado del Turno ==
 
-U -> FE: handleConfirmBatch()
-FE -> FE: setConfirmBatchIsSubmitting(true)
-FE -> SMC: PATCH /api/v1/salmonMatches/move-batch/{matchId}\nPayload: pendingMoves: PendingMove[]
-activate SMC
+Player -> View: Pulsa "Confirmar Turno"
+View -> View: setConfirmBatchIsSubmitting(true)
 
-SMC -> SMS: moveBatch(matchId, pendingMoves, playerId)
-activate SMS
+View -> Controller: PATCH /api/v1/salmonMatches/move-batch/{matchId}\n[Payload: List<MoveRequest>]
+activate Controller
 
-== Fase 3: Validación y Aplicación en Memoria ==
+Controller -> ServiceLayer: updateCoordinateBatch(matchId, moves)
+activate ServiceLayer
 
-loop Para cada PendingMove
-    SMS -> SMS: validateMoveRules(move)
-    SMS -> SMS: updateSalmonCoordinates(move)
-    SMS -> SMS: subtractPlayerEnergy(energyCost)
+== 3. Validación y Mutación en Servidor ==
+
+loop Para cada MoveRequest de la lista
+    ServiceLayer -> ServiceLayer: Validar reglas de casilla, coste y amenazas
+    note right of ServiceLayer
+      Detalle exhaustivo de las reglas de movimiento
+      y amenazas se modela en el diagrama de flujo 08.
+    end note
+    ServiceLayer -> ServiceLayer: Actualizar coordenadas de salmón y restar energía
 end
 
-alt player.energy == 0
-    SMS -> SMS: herons(salmonsInRiver, matchTiles)
+opt Saldo de energía del jugador == 0
+    ServiceLayer -> ServiceLayer: Procesar amenazas de Garzas (herons)
 end
 
-== Fase 4: Persistencia Atómica en BD y Notificación STOMP ==
+== 4. Persistencia Atómica en Base de Datos ==
 
-SMS -> DB: playerService.save(player)
-SMS -> DB: salmonMatchService.saveAll(salmons)
-SMS -> DB: matchTileService.saveAll(matchTiles)
+ServiceLayer -> Repositories: playerRepository.save(player)
+ServiceLayer -> Repositories: salmonMatchRepository.saveAll(salmons)
+ServiceLayer -> Repositories: matchTileRepository.saveAll(matchTiles)
 
-SMS -> STOMP: notifyPlayerAndMatchUpdate(match)
-SMS -> STOMP: notifyTilesAndSalmons(mySalmons, matchTiles)
+ServiceLayer -> StompBroker: convertAndSend("/topic/tilesAndSalmons/" + matchId, payload)
+ServiceLayer -> StompBroker: convertAndSend("/topic/players/" + matchId, playersPayload)
 
-SMS --> SMC: 200 OK
-deactivate SMS
-SMC --> FE: 200 OK
-deactivate SMC
+ServiceLayer --> Controller: void
+deactivate ServiceLayer
 
-== Fase 5: Sincronización Global de Clientes ==
+Controller --> View: 200 OK
+deactivate Controller
 
-STOMP -> FE: onMessage("/topic/tilesAndSalmons/...")
-STOMP -> OFE: onMessage("/topic/tilesAndSalmons/...")
+== 5. Sincronización Global de Clientes ==
 
-FE -> FE: setGrid(consolidatedGrid)
-OFE -> OFE: setGrid(consolidatedGrid)
+StompBroker -> View: Mensaje en /topic/tilesAndSalmons/{matchId}
+StompBroker -> RemoteClients: Mensaje en /topic/tilesAndSalmons/{matchId}
 
-alt Error HTTP (4xx / 5xx)
-    SMC --X FE: ExceptionResponse
-    FE -> FE: restoreSnapshot(initialState)
-end
-
-note over U, OFE
-  **Ventaja Arquitectónica de la Iteración 9:**
-  Se reemplaza el modelo de N peticiones HTTP (una por cada movimiento) por 1 sola petición en lote al finalizar el turno.
-  Esto reduce el tráfico HTTP en más de un 78%, elimina la sobrecarga de transacciones en base de datos
-  y garantiza la atomicidad del turno completo con capacidad de Rollback local.
-end note
+View -> View: Sincronizar cuadrícula y renderizar nuevo estado
+RemoteClients -> RemoteClients: Sincronizar cuadrícula y renderizar nuevo estado
 
 @enduml

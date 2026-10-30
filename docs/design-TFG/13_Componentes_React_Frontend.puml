@@ -1,0 +1,116 @@
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title Arquitectura Modular de Componentes del Frontend (React + TypeScript)
+
+package "Capa de Enrutamiento y Control de Acceso" #E3F2FD {
+    component "App.tsx\n(Enrutador Principal)" as App
+    component "PrivateRoute.tsx\n(Guardia de Autenticación)" as PrivateRoute
+    component "AppNavbar.tsx\n(Barra de Navegación)" as Navbar
+    component "ErrorBoundary\n(Control de Fallos)" as ErrorBoundary
+}
+
+package "Módulos de Autenticación" #FFF9C4 {
+    component "Login.tsx" as Login
+    component "Register.tsx" as Register
+    component "Logout.tsx" as Logout
+}
+
+package "Vistas Principales del Juego" #FFF3E0 {
+    component "Home.tsx" as Home
+    component "Dashboard.tsx\n(Partidas Activas)" as Dashboard
+    component "CreateGame.tsx\n(Creación de Sala)" as CreateGame
+    component "Lobby.tsx\n(Sala de Espera)" as Lobby
+    component "Game.tsx\n(Mesa de Juego)" as Game
+    component "EndGame.tsx\n(Podio y Resumen)" as EndGame
+    component "Rules.tsx\n(Manual de Reglas)" as Rules
+}
+
+package "Vistas de Administración y Estadísticas" #EDE7F6 {
+    component "UserListAdmin.tsx\n(Usuarios)" as AdminUsers
+    component "AchievementList.tsx\n(Logros)" as AchievementsList
+    component "AchievementEdit.tsx" as AchievementEdit
+    component "AchievementCreate.tsx" as AchievementCreate
+    component "DoNotHackMyApp.tsx\n(Seguridad)" as SecurityWall
+}
+
+package "Motor de Juego en Cliente (src/match)" #E8F5E9 {
+    component "calculateValidMoves.ts\n(Cálculo de Rutas)" as CalcMoves
+    component "matchUtil.tsx\n(Utilidades de Tablero e Inmutabilidad)" as MatchUtil
+}
+
+package "Sistema de Tablas y Búsqueda (src/components)" #F3E5F5 {
+    component "ListGenerator.tsx\n(Tabla Genérica)" as ListGen
+    component "MassEditWizard.tsx\n(Edición en Lote)" as MassEdit
+    component "ListSortBar.tsx\n(Barra de Ordenación)" as SortBar
+    component "SearchBar.tsx\n(Input de Búsqueda)" as SearchBarComponent
+    component "useSearchEngine.ts\n(Hook con Debounce y LRU)" as UseSearchHook
+    component "searchEngine.ts\n(Motor de Búsqueda)" as SearchEngine
+}
+
+package "Servicios e Infraestructura (src/services & src/util)" #FAFAFA {
+    component "token.service.ts\n(Almacenamiento JWT)" as TokenService
+    component "fetchers.ts & api.ts\n(Cliente HTTP REST)" as ApiClient
+    component "useFetchState.ts\n(Hook de Consulta REST)" as UseFetch
+    component "webSocketManager.ts\n(Cliente STOMP / SockJS)" as WSManager
+    component "Chat.tsx\n(Panel de Conversación)" as Chat
+    component "ColorPickerModal.tsx\n(Selección de Color)" as ColorPicker
+}
+
+' Relaciones de enrutamiento
+App --> ErrorBoundary
+App --> Navbar
+App --> Home
+App --> Rules
+App --> Login
+App --> Register
+App --> Logout
+App --> PrivateRoute
+
+PrivateRoute --> Dashboard
+PrivateRoute --> CreateGame
+PrivateRoute --> Lobby
+PrivateRoute --> Game
+PrivateRoute --> EndGame
+PrivateRoute --> AdminUsers
+PrivateRoute --> AchievementsList
+PrivateRoute --> SecurityWall
+
+' Módulos de juego
+Game --> CalcMoves
+Game --> MatchUtil
+Game --> Chat
+Game --> WSManager
+
+Lobby --> ColorPicker
+Lobby --> WSManager
+
+Dashboard --> WSManager
+Dashboard --> SearchBarComponent
+
+' Módulos de administración y tablas
+AdminUsers --> ListGen
+AchievementsList --> ListGen
+
+ListGen --> MassEdit
+ListGen --> SortBar
+ListGen --> SearchBarComponent
+
+SearchBarComponent --> UseSearchHook
+UseSearchHook --> SearchEngine
+
+' Consumo de servicios
+Navbar ..> TokenService
+ApiClient ..> TokenService
+Game ..> ApiClient
+ListGen ..> UseFetch
+UseFetch ..> ApiClient
+
+note bottom of ListGen
+  ref Diagrama 02 del Toolkit (02_Componente_Arquitectura_Frontend_Toolkit)
+  src/components: componentes genéricos de tabla, búsqueda y edición masiva.
+end note
+
+@enduml

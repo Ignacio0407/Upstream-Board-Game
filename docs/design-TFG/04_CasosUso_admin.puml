@@ -1,0 +1,37 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Administrador" as Admin
+
+rectangle "Subsistema de Administración" {
+    usecase "Gestionar Usuarios" as UC_ManageUsers
+    usecase "Filtrar y Ordenar Registros" as UC_FilterSort
+    usecase "Modificar Registros en Lote" as UC_BatchEdit
+    usecase "Auditar Partidas" as UC_AuditMatches
+    usecase "Configurar Logros" as UC_ManageAchievements
+}
+
+Admin --> UC_ManageUsers
+Admin --> UC_AuditMatches
+Admin --> UC_ManageAchievements
+
+UC_FilterSort ..> UC_ManageUsers : <<extend>>
+UC_FilterSort ..> UC_AuditMatches : <<extend>>
+UC_FilterSort ..> UC_ManageAchievements : <<extend>>
+
+UC_BatchEdit ..> UC_ManageUsers : <<extend>>
+UC_BatchEdit ..> UC_ManageAchievements : <<extend>>
+
+note right of UC_FilterSort
+  Capacidad de búsqueda por criterios
+  y ordenación dinámica reutilizada en
+  usuarios, partidas y logros.
+end note
+
+note right of UC_BatchEdit
+  Modificación simultánea de múltiples entidades seleccionadas.
+end note
+
+@enduml

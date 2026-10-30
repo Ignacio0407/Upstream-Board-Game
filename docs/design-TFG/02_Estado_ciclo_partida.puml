@@ -1,25 +1,59 @@
 @startuml
-[*] --> WAITING : Crear Partida
-
-state WAITING {
-    [*] --> LOBBY
-    LOBBY --> LOBBY : Jugador entra/sale
+skinparam shadowing false
+skinparam state {
+    BackgroundColor #F8F9FA
+    BorderColor #2C3E50
+    ArrowColor #2C3E50
 }
 
-WAITING --> ON_GOING : Iniciar Partida (MatchCreator)
+title Máquina de Estados: Ciclo de Vida de la Partida (Match)
+
+[*] --> WAITING : createMatch()
+
+state WAITING {
+    WAITING : Partida en sala de espera
+    WAITING : Admite de 2 a 5 jugadores
+    WAITING : Selección exclusiva de color
+}
+
+WAITING --> ON_GOING : startGame() [quórum 2..5 jugadores]
 
 state ON_GOING {
     [*] --> Phase_TILES
-    Phase_TILES --> Phase_MOVING : Colocación completada / Recarga Energía
-    Phase_MOVING --> Phase_TILES : Fin de ronda (avanzar río)
-    Phase_MOVING --> Phase_MOVING : Siguiente turno
+    
+    state Phase_TILES {
+        Phase_TILES : Colocación de losetas en el río
+        Phase_TILES : Rotación opcional de losetas BEAR/JUMP
+    }
+    
+    state Phase_MOVING {
+        Phase_MOVING : Planificación y ejecución de movimientos
+        Phase_MOVING : Consumo de energía (máx. 5 por turno)
+        Phase_MOVING : Evaluación de garzas al agotar energía
+    }
+    
+    Phase_TILES --> Phase_MOVING : losetasColocadas / recargarEnergia(5), turnoInitialPlayer()
+    
+    Phase_MOVING --> Phase_TILES : finRonda [quedan losetas en mazo] / recargarEnergia(5)
+    Phase_MOVING --> Phase_MOVING : finRonda [mazo agotado] / avanzarRio(), purgarFila(), recargarEnergia(5)
+    Phase_MOVING --> Phase_MOVING : finTurnoJugador [energía agotada o confirmación] / siguienteJugador()
 }
 
-ON_GOING --> FINALIZED : Condiciones de Fin (Sin fichas, todos terminan/mueren)
+ON_GOING --> FINALIZED : checkGameHasFinished [salmones en desove o muertos || rondas completadas]
+
+state FINALIZED {
+    FINALIZED : entry / finalScore()
+    FINALIZED : entry / actualizarEstadisticasUsuarios()
+    FINALIZED : entry / evaluarLogros(AchievementUnlocker)
+    FINALIZED : do / consultarPodioYEstadisticas()
+}
+
 FINALIZED --> [*]
 
 note right of ON_GOING
-  La transición de fases es gestionada
-  automáticamente por MatchService.
+  Las fases corresponden al enum Phase (TILES, MOVING).
+  Cuando el mazo de losetas se agota, el motor omite
+  la fase TILES y avanza las losetas del río automáticamente.
 end note
+
 @enduml

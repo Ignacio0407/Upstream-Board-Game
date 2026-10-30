@@ -1,0 +1,78 @@
+@startuml
+autonumber
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #2C3E50
+    LifeLineBorderColor #2C3E50
+    ParticipantBorderColor #2C3E50
+    ParticipantBackgroundColor #ECF0F1
+}
+
+title Ciclo de Búsqueda y Filtrado: SearchBar con Caché LRU
+
+actor "Usuario" as User
+participant "SearchBar (UI)" as View
+participant "useSearchEngine (Hook)" as SearchHook
+participant "LRUCache (Memoria)" as Cache
+participant "searchEngine (Core)" as SearchCore
+participant "ListGenerator (Contenedor)" as ParentView
+
+== 1. Captura de Entrada y Temporizador de Debounce ==
+
+User -> View: Introduce texto de búsqueda (ej. "name:admin")
+View -> View: setInputValue("name:admin")
+
+loop Durante ventana de debounce (300 ms)
+    User -> View: Entrada continua de caracteres
+    View -> View: Reiniciar temporizador
+end
+
+... Ventana de 300 ms transcurrida sin nuevas entradas ...
+
+View -> SearchHook: executeSearch("name:admin")
+activate SearchHook
+
+== 2. Consulta en Caché LRU ==
+
+SearchHook -> SearchHook: Generar clave de consulta: JSON.stringify({query, options})
+SearchHook -> Cache: get(queryKey)
+activate Cache
+
+alt Acierto en Caché (Cache Hit)
+    Cache --> SearchHook: Retorna resultados previamente calculados
+else Fallo en Caché (Cache Miss)
+    Cache --> SearchHook: null / undefined
+    deactivate Cache
+    
+    == 3. Ejecución de Motor de Búsqueda ==
+    
+    SearchHook -> SearchCore: searchData(dataset, query, options)
+    activate SearchCore
+    
+    SearchCore -> SearchCore: Evaluar criterios de búsqueda sobre la colección
+    note right of SearchCore
+      Parsea consulta (campo y término), normaliza
+      cadenas y resuelve rutas de propiedades anidadas.
+      Algoritmo detallado en diagramas del toolkit:
+      13_Flujo_parseSearchQuery y 14_Flujo_searchData.
+    end note
+    
+    SearchCore --> SearchHook: filteredResults
+    deactivate SearchCore
+    
+    SearchHook -> Cache: put(queryKey, filteredResults) [Desalojo LRU si excede capacidad]
+end
+
+SearchHook --> View: onSearchResults(filteredResults)
+deactivate SearchHook
+
+View -> ParentView: onFilterChange(filteredResults)
+ParentView -> ParentView: setFilteredData(filteredResults)
+ParentView -> User: Presenta vista paginada con resultados
+
+note over View, SearchCore
+  ref Diagrama 20 del Toolkit (20_Secuencia_SearchBar_useSearchEngine_LRUCache)
+  ref Diagramas 13 y 14 del Toolkit (Flujos algorítmicos parseSearchQuery y searchData)
+end note
+
+@enduml

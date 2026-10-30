@@ -1,0 +1,81 @@
+@startuml
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+title Arquitectura Global del Sistema y Flujo de Comunicación
+
+actor "Jugador (Navegador Web)" as Browser
+
+package "Perímetro de Red y Conectividad Externa" #ECEFF1 {
+    component "Ngrok Ingress Tunnel\n(HTTPS / WSS)" as Ngrok
+}
+
+package "Frontend (React 18 + Vite + TypeScript)" #E3F2FD {
+    component "Componentes de Vista (Bootstrap 5)" as UI
+    component "Motor Cliente (calculateValidMoves)" as Engine
+    component "Cliente STOMP / SockJS" as WSClient
+}
+
+package "Backend (Spring Boot 3 + Java 17)" #F1F8E9 {
+    package "Capa de Seguridad" #FFF9C4 {
+        component "AuthTokenFilter (JWT)" as JWTFilter
+        component "WebSocketSecurityInterceptor" as WSInterceptor
+    }
+    
+    package "Capa de Controladores (API)" #C8E6C9 {
+        component "Controladores REST" as RESTControllers
+        component "SimpleBroker (STOMP)" as MessageBroker
+    }
+    
+    package "Capa de Servicios de Negocio" #A5D6A7 {
+        component "MatchService" as MatchService
+        component "SalmonMatchService" as SalmonService
+        component "AchievementService" as AchievementService
+        component "SimpMessagingTemplate" as StompTemplate
+    }
+    
+    package "Capa de Acceso a Datos (Spring Data JPA)" #DCEDC8 {
+        component "Repositorios JPA" as Repositories
+    }
+}
+
+database "Base de Datos Relacional (H2 / PostgreSQL)" #ECEFF1 {
+    storage "Tablas de Esquema" as DatabaseStorage
+}
+
+' Relaciones de comunicación
+Browser <--> UI : Renderizado e Interacción
+UI --> Ngrok : Tráfico HTTPS / WSS
+
+Ngrok --> JWTFilter : Peticiones HTTPS (Bearer JWT)
+JWTFilter --> RESTControllers : Despacho autenticado (SecurityContext)
+
+Ngrok --> WSInterceptor : Conexión WSS y frames STOMP
+WSInterceptor --> MessageBroker : Canal autenticado y filtrado (Rate Limit 60/min, 64 KB)
+
+RESTControllers --> MatchService : Invoca casos de uso
+RESTControllers --> SalmonService
+
+MatchService --> Repositories : Persistencia transaccional
+SalmonService --> Repositories
+AchievementService --> Repositories
+
+MatchService --> StompTemplate : Notificaciones de estado
+SalmonService --> StompTemplate
+StompTemplate --> MessageBroker : Publicación a tópicos (/topic)
+
+Repositories --> DatabaseStorage : Consultas SQL / JDBC
+
+note bottom of UI
+  Tecnologías de presentación:
+  React 18, React Router 6,
+  Bootstrap 5 y Reactstrap.
+end note
+
+note bottom of MessageBroker
+  Mensajería en tiempo real:
+  STOMP sobre SockJS con
+  seguridad y Rate Limiting a nivel de canal.
+end note
+
+@enduml

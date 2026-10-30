@@ -1,0 +1,56 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Jugador Registrado" as Player
+actor "Anfitrión / Creador" as Host
+actor "Visitante" as Guest
+
+Player <|-- Host
+
+rectangle "Sistema Upstream: Subsistema de Juego" {
+    usecase "Registrarse en la Plataforma" as UC_Register
+    usecase "Autenticarse (Login / Logout)" as UC_Auth
+    usecase "Explorar Partidas (Dashboard)" as UC_BrowseGames
+    usecase "Crear Partida" as UC_CreateGame
+    usecase "Unirse a Sala de Espera (Lobby)" as UC_JoinLobby
+    usecase "Seleccionar Color Exclusivo" as UC_PickColor
+    usecase "Iniciar Partida" as UC_StartGame
+    usecase "Colocar Loseta en el Tablero" as UC_PlaceTile
+    usecase "Rotar Loseta Activa" as UC_RotateTile
+    usecase "Ejecutar Turno de Movimiento" as UC_MoveSalmons
+    usecase "Participar en Chat en Vivo" as UC_Chat
+    usecase "Consultar Logros y Estadísticas" as UC_ViewStats
+    usecase "Consultar Reglas del Juego" as UC_ViewRules
+}
+
+Guest --> UC_Register
+Guest --> UC_Auth
+Guest --> UC_ViewRules
+
+Player --> UC_BrowseGames
+Player --> UC_CreateGame
+Player --> UC_JoinLobby
+Player --> UC_PlaceTile
+Player --> UC_MoveSalmons
+Player --> UC_Chat
+Player --> UC_ViewStats
+
+Host --> UC_StartGame
+
+UC_CreateGame ..> UC_JoinLobby : <<include>>
+UC_JoinLobby ..> UC_PickColor : <<include>>
+UC_RotateTile ..> UC_PlaceTile : <<extend>>
+
+note right of UC_PickColor
+  Garantiza que ningún jugador en la misma partida
+  pueda compartir color (rojo, azul, amarillo, verde, morado).
+end note
+
+note right of UC_MoveSalmons
+  Permite seleccionar y mover salmones
+  gastando los puntos de energía del turno.
+end note
+
+@enduml
